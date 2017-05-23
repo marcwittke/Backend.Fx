@@ -1,0 +1,18 @@
+﻿namespace Backend.Fx.Environment.DateAndTime
+{
+    using System;
+
+    /// <summary>
+    /// Wraps access to DateTime.UtcNow. By means of this interface the current time can be mocked.
+    /// the database should only store universal date and time values, that could be translated into user's time by applying a UtcOffset
+    /// </summary>
+    public interface IClock
+    {
+        DateTime UtcNow { get; }
+
+        DateTime GetLocalNow(int utcOffsetMinutes);
+        DateTime LocalizeUtcDateTime(DateTime utcDateTime, int utcOffsetMinutes);
+        void OverrideUtcNow(DateTime utcNow);
+        DateTime? ToUtcTime(DateTime? localDateTime, int utcOffsetMinutes);
+    }
+}

@@ -1,0 +1,17 @@
+﻿namespace Backend.Fx.Patterns.EventAggregation
+{
+    using System;
+
+    /// <summary>
+    /// Channel events from multiple objects into a single object to simplify registration for clients.
+    /// https://martinfowler.com/eaaDev/EventAggregator.html
+    /// </summary>
+    public interface IEventAggregator
+    {
+        void PublishDomainEvent<TDomainEvent>(TDomainEvent domainEvent) where TDomainEvent : IDomainEvent;
+
+        void PublishIntegrationEvent<TIntegrationEvent>(TIntegrationEvent domainEvent) where TIntegrationEvent : IIntegrationEvent;
+
+        void SubscribeToIntegrationEvent<TIntegrationEvent>(Action<TIntegrationEvent> handler) where TIntegrationEvent : IIntegrationEvent;
+    }
+}

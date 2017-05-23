@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.4</TargetFramework>
+    <AssemblyName>DemoBlog</AssemblyName>
+    <RootNamespace>DemoBlog</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentScheduler" Version="5.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Backend.Fx.Bootstrapping\Backend.Fx.Bootstrapping.csproj" />
+    <ProjectReference Include="..\..\src\Backend.Fx.EfCorePersistence\Backend.Fx.EfCorePersistence.csproj" />
+    <ProjectReference Include="..\..\src\Backend.Fx\Backend.Fx.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Application\" />
+  </ItemGroup>
+
+</Project>

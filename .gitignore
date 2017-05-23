@@ -286,3 +286,7 @@ __pycache__/
 *.btm.cs
 *.odx.cs
 *.xsd.cs
+
+/demo/DemoBlog.Mvc/wwwroot/css/site.min.css
+/demo/DemoBlog.Mvc/wwwroot/js/site.min.js
+/demo/DemoBlog.Mvc/wwwroot/lib
