@@ -4,9 +4,9 @@
 
     public class AnonymousIdentity : IIdentity
     {
-        public string Name { get { return "anonymous"; } }
+        public string Name { get { return "ANONYMOUS"; } }
 
-        public string AuthenticationType { get { return "system internal"; } }
+        public string AuthenticationType { get { return string.Empty; } }
 
         public bool IsAuthenticated { get { return false; } }
     }

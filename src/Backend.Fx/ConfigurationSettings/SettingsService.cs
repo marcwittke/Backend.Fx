@@ -35,6 +35,5 @@ namespace Backend.Fx.ConfigurationSettings
             var serializer = SettingSerializerFactory.GetSerializer<T>();
             setting.SetValue(serializer, value);
         }
-
     }
 }

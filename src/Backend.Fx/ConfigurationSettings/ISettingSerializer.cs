@@ -5,7 +5,7 @@ namespace Backend.Fx.ConfigurationSettings
     using JetBrains.Annotations;
 
     public interface ISettingSerializer
-    {}
+    { }
 
     public interface ISettingSerializer<T> : ISettingSerializer
     {
@@ -46,12 +46,12 @@ namespace Backend.Fx.ConfigurationSettings
     {
         public string Serialize(double? setting)
         {
-            return setting?.ToString("r");
+            return setting?.ToString("r", CultureInfo.InvariantCulture);
         }
 
         public double? Deserialize(string value)
         {
-            return string.IsNullOrWhiteSpace(value) ? (double?)null : double.Parse(value);
+            return string.IsNullOrWhiteSpace(value) ? (double?)null : double.Parse(value, CultureInfo.InvariantCulture);
         }
     }
 
@@ -68,13 +68,13 @@ namespace Backend.Fx.ConfigurationSettings
             return string.IsNullOrWhiteSpace(value) ? (bool?)null : bool.Parse(value);
         }
     }
-    
+
     [UsedImplicitly]
     public class DateTimeSerializer : ISettingSerializer<DateTime?>
     {
         public string Serialize(DateTime? setting)
         {
-            return setting?.ToString("r");
+            return setting?.ToString("r", CultureInfo.InvariantCulture);
         }
 
         public DateTime? Deserialize(string value)

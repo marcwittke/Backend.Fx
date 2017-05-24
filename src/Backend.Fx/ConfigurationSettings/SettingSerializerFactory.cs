@@ -18,7 +18,11 @@ namespace Backend.Fx.ConfigurationSettings
                 .ExportedTypes
                 .Select(t => t.GetTypeInfo())
                 .Where(t => !t.IsAbstract && t.IsClass && typeof(ISettingSerializer).GetTypeInfo().IsAssignableFrom(t))
-                .ToDictionary(t => t.GenericTypeArguments[0], t => (ISettingSerializer) Activator.CreateInstance(t.AsType()));
+                .ToDictionary(
+                    t => t.ImplementedInterfaces
+                            .Single(i => i.GetTypeInfo().IsGenericType && i.GetGenericTypeDefinition() == typeof(ISettingSerializer<>))
+                            .GenericTypeArguments.Single(),
+                    t => (ISettingSerializer) Activator.CreateInstance(t.AsType()));
         }
 
         [NotNull]

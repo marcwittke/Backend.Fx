@@ -7,9 +7,9 @@
     /// </summary>
     public class FrozenClock : Clock
     {
-        public FrozenClock()
+        public FrozenClock(DateTime? utcNow=null)
         {
-            OverrideUtcNow(DateTime.UtcNow);
+            OverrideUtcNow(utcNow ?? DateTime.UtcNow);
         }
     }
 }

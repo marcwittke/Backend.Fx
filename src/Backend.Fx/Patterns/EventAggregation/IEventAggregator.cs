@@ -1,6 +1,8 @@
 ﻿namespace Backend.Fx.Patterns.EventAggregation
 {
     using System;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Channel events from multiple objects into a single object to simplify registration for clients.
@@ -10,7 +12,7 @@
     {
         void PublishDomainEvent<TDomainEvent>(TDomainEvent domainEvent) where TDomainEvent : IDomainEvent;
 
-        void PublishIntegrationEvent<TIntegrationEvent>(TIntegrationEvent domainEvent) where TIntegrationEvent : IIntegrationEvent;
+        IEnumerable<Task> PublishIntegrationEvent<TIntegrationEvent>(TIntegrationEvent domainEvent) where TIntegrationEvent : IIntegrationEvent;
 
         void SubscribeToIntegrationEvent<TIntegrationEvent>(Action<TIntegrationEvent> handler) where TIntegrationEvent : IIntegrationEvent;
     }
