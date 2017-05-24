@@ -13,7 +13,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
         T CompleteCurrentScope_InvokeFunction_BeginNewScope<T>(Func<T> func);
     }
 
-    class NullScopeInterruptor : IScopeInterruptor
+    internal class NullScopeInterruptor : IScopeInterruptor
     {
         public void CompleteCurrentScope_InvokeAction_BeginNewScope(Action action)
         {
