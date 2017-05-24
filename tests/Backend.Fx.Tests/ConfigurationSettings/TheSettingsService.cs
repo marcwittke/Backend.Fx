@@ -17,6 +17,12 @@
                 get { return ReadSetting<int?>(nameof(SmtpPort)) ?? 25; }
                 set { WriteSetting<int?>(nameof(SmtpPort), value); }
             }
+
+            public string SmtpHost
+            {
+                get { return ReadSetting<string>(nameof(SmtpHost)); }
+                set { WriteSetting<string>(nameof(SmtpHost), value); }
+            }
         }
         
         [Fact]
@@ -45,6 +51,27 @@
 
             MySettingsService sut = new MySettingsService(inMemoryRepository);
             Assert.Equal(333, sut.SmtpPort);
+        }
+
+        [Fact]
+        public void ReadsNullSettingFromRepository()
+        {
+            var setting = new Setting("SmtpHost");
+            setting.SetPrivate(set => set.SerializedValue, null);
+
+            var inMemoryRepository = new InMemoryRepository<Setting>();
+            inMemoryRepository.Add(setting);
+
+            MySettingsService sut = new MySettingsService(inMemoryRepository);
+            Assert.Equal(null, sut.SmtpHost);
+        }
+
+        [Fact]
+        public void ReadsNonExistingSettingAsDefaultFromRepository()
+        {
+            var inMemoryRepository = new InMemoryRepository<Setting>();
+            MySettingsService sut = new MySettingsService(inMemoryRepository);
+            Assert.Equal(null, sut.SmtpHost);
         }
     }
 }

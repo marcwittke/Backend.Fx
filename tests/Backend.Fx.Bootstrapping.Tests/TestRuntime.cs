@@ -1,8 +1,11 @@
 namespace Backend.Fx.Bootstrapping.Tests
 {
     using System.Reflection;
+    using Environment.DateAndTime;
     using Environment.MultiTenancy;
     using Environment.Persistence;
+    using Patterns.DependencyInjection;
+    using SimpleInjector;
 
     public class TestRuntime : SimpleInjectorRuntime
     {
@@ -31,12 +34,20 @@ namespace Backend.Fx.Bootstrapping.Tests
 
         protected override void BootApplication()
         {
+            Container.Register(() => new LateResolver<IAmLateResolved>(() => Container.GetInstance<IAmLateResolved>()), Lifestyle.Singleton);
+            Container.Register<IClock, FrozenClock>();
+
             BootApplicationWasCalled = true;
         }
 
         protected override void InitializeJobScheduler()
         {
             InitializeJobSchedulerWasCalled = true;
+        }
+
+        internal Scope GetCurrentScopeForTestsOnly()
+        {
+            return ScopedLifestyle.GetCurrentScope(Container);
         }
     }
 }

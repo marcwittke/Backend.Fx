@@ -19,5 +19,13 @@
             currentIdentityHolder.ReplaceCurrent(new SystemIdentity());
             Assert.Equal("SYSTEM", currentIdentityHolder.Current.Name);
         }
+
+        [Fact]
+        public void FallsBackToInitialValueWhenReplacingWithNull()
+        {
+            var currentIdentityHolder = new CurrentIdentityHolder();
+            currentIdentityHolder.ReplaceCurrent(null);
+            Assert.Equal("ANONYMOUS", currentIdentityHolder.Current.Name);
+        }
     }
 }

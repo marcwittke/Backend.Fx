@@ -10,7 +10,7 @@
         [Fact]
         public void CatchesExceptionInAction()
         {
-            var sut = new UnprocessableExceptionBuilder();
+            var sut = UnprocessableException.UseBuilder();
             sut.CatchPossibleException(() => { throw new InvalidOperationException("hello"); });
             Assert.Throws<UnprocessableException>(() => sut.Dispose());
         }

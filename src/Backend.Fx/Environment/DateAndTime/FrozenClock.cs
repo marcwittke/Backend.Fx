@@ -7,9 +7,17 @@
     /// </summary>
     public class FrozenClock : Clock
     {
-        public FrozenClock(DateTime? utcNow=null)
+        public FrozenClock() : this(DateTime.UtcNow)
+        { }
+
+        private FrozenClock(DateTime utcNow)
         {
-            OverrideUtcNow(utcNow ?? DateTime.UtcNow);
+            OverrideUtcNow(utcNow);
+        }
+
+        public static IClock WithFrozenUtcNow(DateTime utcNow)
+        {
+            return new FrozenClock(utcNow);
         }
     }
 }

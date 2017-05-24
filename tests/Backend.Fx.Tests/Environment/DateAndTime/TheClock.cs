@@ -29,5 +29,23 @@ namespace Backend.Fx.Tests.Environment.DateAndTime
             var localNow = sut.GetLocalNow(BuenosAiresUtcOffset);
             Assert.Equal(new DateTime(2000, 1, 1, 9, 0, 0), localNow);
         }
+
+        [Fact]
+        public void CanLocalizeUtcMoment()
+        {
+            var moment = new DateTime(2000, 1, 1, 12, 0, 0);
+            Clock sut = new WallClock();
+            var localNow = sut.LocalizeUtcDateTime(moment, BuenosAiresUtcOffset);
+            Assert.Equal(new DateTime(2000, 1, 1, 9, 0, 0), localNow);
+        }
+
+        [Fact]
+        public void CanConvertLocalMomentToUtc()
+        {
+            var moment = new DateTime(2000, 1, 1, 12, 0, 0);
+            Clock sut = new WallClock();
+            var utcNow = sut.ToUtcTime(moment, BuenosAiresUtcOffset);
+            Assert.Equal(new DateTime(2000, 1, 1, 15, 0, 0), utcNow);
+        }
     }
 }
