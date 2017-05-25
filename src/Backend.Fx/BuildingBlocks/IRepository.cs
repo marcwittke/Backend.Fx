@@ -15,7 +15,6 @@
         TAggregateRoot Single(int id);
         TAggregateRoot SingleOrDefault(int id);
         TAggregateRoot[] GetAll();
-        void Delete(int id);
         void Delete(TAggregateRoot aggregateRoot);
         void Add(TAggregateRoot aggregateRoot);
         bool Any();
