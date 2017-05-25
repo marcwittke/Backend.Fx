@@ -1,10 +1,12 @@
 namespace Backend.Fx.Bootstrapping.Tests
 {
+    using System;
     using System.Reflection;
     using Environment.DateAndTime;
     using Environment.MultiTenancy;
     using Environment.Persistence;
     using Patterns.DependencyInjection;
+    using Patterns.UnitOfWork;
     using SimpleInjector;
 
     public class TestRuntime : SimpleInjectorRuntime

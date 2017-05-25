@@ -1,5 +1,6 @@
 namespace Backend.Fx.Bootstrapping.Tests
 {
+    using System;
     using System.Linq;
     using System.Security.Principal;
     using System.Threading;
@@ -8,6 +9,7 @@ namespace Backend.Fx.Bootstrapping.Tests
     using Environment.DateAndTime;
     using Environment.MultiTenancy;
     using Environment.Persistence;
+    using Exceptions;
     using FakeItEasy;
     using Patterns.DependencyInjection;
     using Patterns.EventAggregation;
@@ -17,29 +19,40 @@ namespace Backend.Fx.Bootstrapping.Tests
     public class TheSimpleInjectorRuntime
     {
         private readonly TestRuntime sut;
+        private readonly ITenantManager tenantManager;
 
         public TheSimpleInjectorRuntime()
         {
             IDatabaseManager databaseManager = A.Fake<IDatabaseManager>();
 
-            ITenantManager tenantManager = A.Fake<ITenantManager>();
+            tenantManager = A.Fake<ITenantManager>();
             A.CallTo(() => tenantManager.IsActive(A<TenantId>._)).Returns(true);
 
             sut = new TestRuntime(tenantManager, databaseManager);
-            sut.Boot();
+            
         }
 
         [Fact]
         public void CallsAllRelevantMethodsOnBoot()
         {
+            sut.Boot();
             Assert.True(sut.BootApplicationWasCalled);
             Assert.True(sut.BootPersistenceWasCalled);
             Assert.True(sut.InitializeJobSchedulerWasCalled);
         }
 
         [Fact]
+        public void DoesNotAllowBeginningScopeWhenTenantIsDeactivated()
+        {
+            A.CallTo(() => tenantManager.IsActive(A<TenantId>._)).Returns(false);
+            sut.Boot();
+            Assert.Throws<UnprocessableException>(() => sut.BeginScope(new SystemIdentity(), new TenantId(111)));
+        }
+
+        [Fact]
         public void ProvidesAutoRegisteredDomainServices()
         {
+            sut.Boot();
             using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(100)))
             {
                 Assert.IsType<TestDomainService>(scope.GetInstance<ITestDomainService>());
@@ -49,6 +62,7 @@ namespace Backend.Fx.Bootstrapping.Tests
         [Fact]
         public void ProvidesAutoRegisteredApplicationServices()
         {
+            sut.Boot();
             using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(100)))
             {
                 Assert.IsType<TestApplicationService>(scope.GetInstance<ITestApplicationService>());
@@ -58,6 +72,7 @@ namespace Backend.Fx.Bootstrapping.Tests
         [Fact]
         public void MaintainsTenantIdWhenBeginningScopes()
         {
+            sut.Boot();
             Assert.Throws<ActivationException>(() => sut.GetInstance<ICurrentTHolder<TenantId>>());
 
             Enumerable.Range(1, 100).AsParallel().ForAll(i =>
@@ -74,6 +89,7 @@ namespace Backend.Fx.Bootstrapping.Tests
         [Fact]
         public void MaintainsIdentityWhenBeginningScopes()
         {
+            sut.Boot();
             Assert.Throws<ActivationException>(() => sut.GetInstance<ICurrentTHolder<IIdentity>>());
 
             Enumerable.Range(1, 100).AsParallel().ForAll(i =>
@@ -89,6 +105,7 @@ namespace Backend.Fx.Bootstrapping.Tests
         [Fact]
         public void MaintainsScopeInterruptorWhenBeginningScopes()
         {
+            sut.Boot();
             Assert.Throws<ActivationException>(() => sut.GetInstance<ICurrentTHolder<IScopeInterruptor>>());
             
             using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(100)))
@@ -101,6 +118,7 @@ namespace Backend.Fx.Bootstrapping.Tests
         [Fact]
         public void ProvidesScopedInstancesWhenScopeHasBeenStarted()
         {
+            sut.Boot();
             using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(null)))
             {
                 var currentScope = sut.GetCurrentScopeForTestsOnly();
@@ -112,6 +130,7 @@ namespace Backend.Fx.Bootstrapping.Tests
         [Fact]
         public void ProvidesSingletonAndScopedInstancesAccordingly()
         {
+            sut.Boot();
             const int parallelScopeCount = 1000;
             object[] scopedInstances = new object[parallelScopeCount];
             object[] singletonInstances = new object[parallelScopeCount];
@@ -160,6 +179,7 @@ namespace Backend.Fx.Bootstrapping.Tests
         [Fact]
         public void ThrowsWhenScopedInstanceIsRequestedOutsideScope()
         {
+            sut.Boot();
             Assert.Null(sut.GetCurrentScopeForTestsOnly());
             Assert.Throws<ActivationException>(() => sut.GetInstance(typeof(IClock)));
 
@@ -177,6 +197,7 @@ namespace Backend.Fx.Bootstrapping.Tests
         [Fact]
         public void CanInterruptCurrentScope()
         {
+            sut.Boot();
             using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(null)))
             {
                 IClock instance1 = scope.GetInstance<IClock>();
