@@ -36,10 +36,10 @@
 
             if (duration.TotalSeconds < 60)
             {
-                return string.Format("{0} Duration: {1:0.00}s", activity, duration.TotalSeconds);
+                return string.Format("{0} - Duration: {1:0.00}s", activity, duration.TotalSeconds);
             }
 
-            return string.Format("{0} Duration: {1:g}", activity, duration);
+            return string.Format("{0} - Duration: {1:g}", activity, duration);
         }
     }
 }
