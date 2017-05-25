@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Linq.Expressions;
     using Environment.MultiTenancy;
     using Exceptions;
     using Patterns.Authorization;
@@ -101,11 +100,6 @@
                 throw new ArgumentException($"The following {AggregateTypeName} ids could not be resolved: {string.Join(", ", idsToResolve.Except(resolved.Select(agg => agg.Id)))}");
             }
             return resolved;
-        }
-
-        public TAggregateRoot[] Where(Expression<Func<TAggregateRoot, bool>> predicate)
-        {
-            return AggregateQueryable.Where(predicate).ToArray();
         }
 
         protected abstract void AddPersistent(TAggregateRoot aggregateRoot);

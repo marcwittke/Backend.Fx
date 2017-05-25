@@ -1,9 +1,7 @@
 ﻿namespace Backend.Fx.BuildingBlocks
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Linq.Expressions;
 
     /// <summary>
     /// Encapsulates methods for retrieving domain objects 
@@ -18,7 +16,6 @@
         void Delete(TAggregateRoot aggregateRoot);
         void Add(TAggregateRoot aggregateRoot);
         bool Any();
-        TAggregateRoot[] Where(Expression<Func<TAggregateRoot, bool>> predicate);
         TAggregateRoot[] Resolve(IEnumerable<int> ids);
         IQueryable<TAggregateRoot> AggregateQueryable { get; }
     }
