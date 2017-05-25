@@ -20,25 +20,20 @@
             return dt.AddDays(-1 * diff).Date;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="dt"></param>
-        /// <param name="dayOfWeek"></param>
-        /// <returns></returns>
-        public static DateTime GetWeekDay(this DateTime dt, DayOfWeek dayOfWeek)
+        public static DateTime GetWeekDay(this DateTime dt, DayOfWeek dayOfWeek, DayOfWeek startOfWeek = DayOfWeek.Monday)
         {
-            int diff = dt.DayOfWeek - dayOfWeek;
-            if (diff < 0)
+            dt = dt.StartOfWeek(startOfWeek);
+            while(dt.DayOfWeek != dayOfWeek)
             {
-                diff += 7;
+                dt = dt.AddDays(1);
             }
-            return dt.AddDays(diff).Date;
+
+            return dt;
         }
 
-        public static long ToUnixEpochDate(this DateTime date)
+        public static long ToUnixEpochDate(this DateTime utcDate)
         {
-            return (long)Math.Round((date.ToUniversalTime() - new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero)).TotalSeconds);
+            return (long)Math.Round((utcDate - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds);
         }
     }
 }
