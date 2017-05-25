@@ -5,14 +5,14 @@ I am using this class library in three projects now. Obeying the Rule of Three I
 ## What does "opinionated" mean?
 You are getting pretty much vendor locked using this architecture. Although, in my opinion those vendors are well chosen:
 
-- My DDD building blocks and some architecture patterns defined as interfaces
+- My DDD building blocks and some architecture [patterns](https://github.com/marcwittke/Backend.Fx/tree/master/src/Backend.Fx/Patterns) defined as interfaces
   - This means for example to live with int as id value and some ```Entity``` and ```AggregateRoot``` base classes
-- Simple Injector as DI container
-- Entity Framework Core as persitence mechanism
-- ASP.Net Identity as authentication mechamism
+- [Simple Injector](https://github.com/simpleinjector/SimpleInjector) as DI container
+- [Entity Framework Core](https://github.com/aspnet/EntityFramework) as persitence mechanism
+- [ASP.Net Identity](https://github.com/aspnet/Identity) as authentication mechamism
 
 ## Less opinonated, but already provided either as pluggable library or demo implementation
-- NLog logging
+- [NLog](https://github.com/NLog/NLog) logging
 - Application Insights diagnostics
 - ASP.Net Core controller frontend
-- FluentScheduler as background job scheduler
+- [FluentScheduler](https://github.com/fluentscheduler/FluentScheduler) as background job scheduler
