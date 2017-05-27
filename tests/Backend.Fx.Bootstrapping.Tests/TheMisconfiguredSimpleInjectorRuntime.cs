@@ -2,6 +2,7 @@ namespace Backend.Fx.Bootstrapping.Tests
 {
     using System;
     using BuildingBlocks;
+    using DummyImpl;
     using Environment.MultiTenancy;
     using Environment.Persistence;
     using FakeItEasy;

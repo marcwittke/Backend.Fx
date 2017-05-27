@@ -12,7 +12,7 @@
     {
         void PublishDomainEvent<TDomainEvent>(TDomainEvent domainEvent) where TDomainEvent : IDomainEvent;
 
-        IEnumerable<Task> PublishIntegrationEvent<TIntegrationEvent>(TIntegrationEvent domainEvent) where TIntegrationEvent : IIntegrationEvent;
+        IEnumerable<Task> PublishIntegrationEvent<TIntegrationEvent>(TIntegrationEvent integrationEvent) where TIntegrationEvent : IIntegrationEvent;
 
         void SubscribeToIntegrationEvent<TIntegrationEvent>(Action<TIntegrationEvent> handler) where TIntegrationEvent : IIntegrationEvent;
     }

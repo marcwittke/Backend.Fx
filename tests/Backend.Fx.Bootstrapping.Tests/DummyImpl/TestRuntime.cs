@@ -1,16 +1,41 @@
-namespace Backend.Fx.Bootstrapping.Tests
+namespace Backend.Fx.Bootstrapping.Tests.DummyImpl
 {
     using System;
     using System.Reflection;
+    using BuildingBlocks;
     using Environment.DateAndTime;
     using Environment.MultiTenancy;
     using Environment.Persistence;
+    using FakeItEasy;
     using Patterns.DependencyInjection;
     using Patterns.UnitOfWork;
     using SimpleInjector;
+    using Testing;
+
+    public class TestUnitOfWorkFactory
+    {
+        public Func<IUnitOfWork> CreateUnitOfWork()
+        {
+            return () => {
+                       IUnitOfWork unitOfWork = A.Fake<IUnitOfWork>();
+                       return unitOfWork;
+                   };
+        }
+
+        public Func<IReadonlyUnitOfWork> CreateReadonlyUnitOfWork()
+        {
+            return () => {
+                       IReadonlyUnitOfWork unitOfWork = A.Fake<IReadonlyUnitOfWork>();
+                       return unitOfWork;
+                   };
+        }
+
+        
+    }
 
     public class TestRuntime : SimpleInjectorRuntime
     {
+        public TestUnitOfWorkFactory UnitOfWorkFactory { get; } = new TestUnitOfWorkFactory();
         public bool BootPersistenceWasCalled { get; private set; }
         public bool BootApplicationWasCalled { get; private set; }
         public bool InitializeJobSchedulerWasCalled { get; private set; }
@@ -18,9 +43,9 @@ namespace Backend.Fx.Bootstrapping.Tests
         public override ITenantManager TenantManager { get; }
         public override IDatabaseManager DatabaseManager { get; }
 
-        public TestRuntime(ITenantManager tenantManager, IDatabaseManager databaseManager)
+        public TestRuntime(ITenantManager tenantManager = null, IDatabaseManager databaseManager = null)
         {
-            TenantManager = tenantManager;
+            TenantManager = tenantManager ?? new InMemoryTenantManager(this);
             DatabaseManager = databaseManager;
         }
 
@@ -31,6 +56,7 @@ namespace Backend.Fx.Bootstrapping.Tests
 
         protected override void BootPersistence()
         {
+            Container.Register(typeof(IRepository<>), typeof(ThreadLocalInMemoryRepository<>));
             BootPersistenceWasCalled = true;
         }
 
@@ -38,7 +64,8 @@ namespace Backend.Fx.Bootstrapping.Tests
         {
             Container.Register(() => new LateResolver<IAmLateResolved>(() => Container.GetInstance<IAmLateResolved>()), Lifestyle.Singleton);
             Container.Register<IClock, FrozenClock>();
-
+            Container.Register(UnitOfWorkFactory.CreateUnitOfWork());
+            Container.Register(UnitOfWorkFactory.CreateReadonlyUnitOfWork());
             BootApplicationWasCalled = true;
         }
 

@@ -29,7 +29,7 @@
             }
         }
 
-        private readonly IRepository<Setting> settingRepository;
+        private readonly InMemoryRepository<Setting> settingRepository;
 
         public TheSettingsService()
         {

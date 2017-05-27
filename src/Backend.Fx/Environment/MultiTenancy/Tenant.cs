@@ -21,8 +21,8 @@
             IsDemoTenant = isDemoTenant;
         }
 
-        [Key, UsedImplicitly]
-        public int Id { get; private set; }
+        [Key]
+        public int Id { get; set; }
 
         [Required]
         public string Name { get; private set; }

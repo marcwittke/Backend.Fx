@@ -10,11 +10,10 @@
 
     public class InMemoryRepository<T> : Repository<T> where T : AggregateRoot
     {
-        public Dictionary<int, T> Store { get; } = new Dictionary<int, T>();
-        private int nextId = 1;
+        public virtual Dictionary<int, T> Store { get; } = new Dictionary<int, T>();
 
         public InMemoryRepository(ICurrentTHolder<TenantId> tenantIdHolder, IAggregateRootAuthorization<T> aggregateRootAuthorization) : base(tenantIdHolder, aggregateRootAuthorization)
-        { }
+        {}
 
         protected override IQueryable<T> RawAggregateQueryable
         {
@@ -33,7 +32,7 @@
 
         protected override void AddPersistent(T aggregateRoot)
         {
-            aggregateRoot.Id = nextId++;
+            aggregateRoot.Id = Store.Keys.Any() ? Store.Keys.Max() + 1 : 1;
             Store.Add(aggregateRoot.Id, aggregateRoot);
         }
 

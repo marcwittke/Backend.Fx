@@ -4,6 +4,7 @@ namespace Backend.Fx.Bootstrapping
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using System.Security.Cryptography.X509Certificates;
     using System.Security.Principal;
     using System.Threading.Tasks;
     using BuildingBlocks;
@@ -12,6 +13,7 @@ namespace Backend.Fx.Bootstrapping
     using Environment.Persistence;
     using Exceptions;
     using Logging;
+    using Patterns.Authorization;
     using Patterns.DataGeneration;
     using Patterns.DependencyInjection;
     using Patterns.EventAggregation;
@@ -81,23 +83,10 @@ namespace Backend.Fx.Bootstrapping
             Container.Register<ICurrentTHolder<IScopeInterruptor>, ScopeInterruptorHolder>();
             Container.Register<IScopeInterruptor>(() => Container.GetInstance<ICurrentTHolder<IScopeInterruptor>>().Current);
 
-            // domain and application services
-            var autoRegistrations = Assemblies
-                .SelectMany(ass => ass.ExportedTypes)
-                .Where(type => type.GetTypeInfo().IsClass
-                    && !type.GetTypeInfo().IsAbstract
-                    && (typeof(IDomainService).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()) || typeof(IApplicationService).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo())))
-                .Select(type => new
-                {
-                    Service = type.GetTypeInfo().ImplementedInterfaces.Single(i => typeof(IDomainService) != i && typeof(IApplicationService) != i),
-                    Implementation = type
-                });
+            RegisterDomainAndApplicationServices();
 
-            foreach (var reg in autoRegistrations)
-            {
-                Container.Register(reg.Service, reg.Implementation);
-            }
-
+            RegisterAuthorization();
+            
             // domain event subsystem
             Container.RegisterSingleton<IEventAggregator>(eventAggregator);
             Container.RegisterCollection(typeof(IDomainEventHandler<>), Assemblies);
@@ -110,6 +99,40 @@ namespace Backend.Fx.Bootstrapping
 
             // initial data generation subsystem
             Container.RegisterCollection<InitialDataGenerator>(Assemblies);
+        }
+
+        private void RegisterAuthorization()
+        {
+            var aggregateRootAuthorizationTypes = Container.GetTypesToRegister(typeof(IAggregateRootAuthorization<>), Assemblies).ToArray();
+            foreach (var aggregateRootAuthorizationType in aggregateRootAuthorizationTypes)
+            {
+                var serviceTypes = aggregateRootAuthorizationType
+                    .GetTypeInfo()
+                    .ImplementedInterfaces
+                    .Where(impif => impif.GetTypeInfo().IsGenericType
+                                     && impif.GenericTypeArguments.Length == 1
+                                     && typeof(AggregateRoot).GetTypeInfo().IsAssignableFrom(impif.GenericTypeArguments[0].GetTypeInfo()));
+
+                foreach (var serviceType in serviceTypes)
+                {
+                    Container.Register(serviceType, aggregateRootAuthorizationType);
+                }
+            }
+        }
+
+        private void RegisterDomainAndApplicationServices()
+        {
+            var serviceRegistrations = Container
+                    .GetTypesToRegister(typeof(IDomainService), Assemblies)
+                    .Concat(Container.GetTypesToRegister(typeof(IApplicationService), Assemblies))
+                    .Select(type => new {
+                        Service = type.GetTypeInfo().ImplementedInterfaces.Single(i => typeof(IDomainService) != i && typeof(IApplicationService) != i),
+                        Implementation = type
+                    });
+            foreach (var reg in serviceRegistrations)
+            {
+                Container.Register(reg.Service, reg.Implementation);
+            }
         }
 
         protected abstract void BootPersistence();
@@ -270,8 +293,6 @@ namespace Backend.Fx.Bootstrapping
                 if (hasCurrentUnitOfWork)
                 {
                     unitOfWork.Complete();
-                    unitOfWork.Dispose();
-                    unitOfWork = null;
                 }
                 scope.Dispose();
                 scope = null;
@@ -313,8 +334,8 @@ namespace Backend.Fx.Bootstrapping
 
             public void Dispose()
             {
-                unitOfWork?.Dispose();
-                unitOfWork = null;
+                // no need to dispose the encapsulated unit of work, since the container takes care of this when disposing the scope.
+                // this is proven by unit tests
                 scope?.Dispose();
                 scope = null;
             }
