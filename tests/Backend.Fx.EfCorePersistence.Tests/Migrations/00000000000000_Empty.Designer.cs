@@ -6,7 +6,7 @@ using Backend.Fx.EfCorePersistence.Tests.DummyImpl;
 namespace Backend.Fx.EfCorePersistence.Tests.Migrations
 {
     [DbContext(typeof(TestDbContext))]
-    [Migration("00000000000000_Initial")]
+    [Migration("00000000000000_Empty")]
     partial class Empty
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

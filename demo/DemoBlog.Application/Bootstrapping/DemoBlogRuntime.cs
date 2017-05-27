@@ -1,6 +1,5 @@
 ﻿namespace DemoBlog.Bootstrapping
 {
-    using System;
     using System.Linq;
     using System.Reflection;
     using Backend.Fx.EfCorePersistence;
@@ -10,7 +9,6 @@
     using Jobs;
     using Microsoft.EntityFrameworkCore;
     using Persistence;
-    using SimpleInjector;
 
     public class DemoBlogRuntime : SimpleInjectorEfCoreRuntime<BlogDbContext>
     {
@@ -23,7 +21,9 @@
             this.doCreateInitialDemoTenant = doCreateInitialDemoTenant;
             this.dbContextOptions = dbContextOptions;
         }
-        
+
+        public TenantId DefaultTenantId { get; private set; }
+
         protected override Assembly[] Assemblies
         {
             get
@@ -49,10 +49,24 @@
             BootDatabase();
 
             // create some demo data, if required
-            if (doCreateInitialDemoTenant && !TenantManager.GetTenants().Any(t => t.IsDemoTenant && t.Name == Tenant.DemonstrationTenantName))
+            if (doCreateInitialDemoTenant)
             {
-                TenantManager.CreateDemonstrationTenant(Tenant.DemonstrationTenantName, Tenant.DemonstrationTenantDescription);
+                var demoTenant = TenantManager.GetTenants().SingleOrDefault(t => t.IsDemoTenant && t.Name == Tenant.DemonstrationTenantName);
+                if (demoTenant == null)
+                {
+                    TenantManager.CreateDemonstrationTenant(Tenant.DemonstrationTenantName, Tenant.DemonstrationTenantDescription, true);
+                }
+            } else
+            {
+                var defaultTenant = TenantManager.GetTenants().SingleOrDefault(t => t.IsDefault);
+                if (defaultTenant == null)
+                {
+                    TenantManager.CreateProductionTenant("Default", "", true);
+                }
             }
+
+            Tenant[] tenants = TenantManager.GetTenants();
+            DefaultTenantId = new TenantId(tenants.SingleOrDefault(t => t.IsDefault)?.Id);
 
             // subscribe to integration events
             //SubscribeToIntegrationEvent<SmtpMessageQueued>(smq => ExecuteJob<SendMailsJob>(smq.TenantId, 5));

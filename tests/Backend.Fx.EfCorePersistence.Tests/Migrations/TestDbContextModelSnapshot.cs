@@ -108,6 +108,8 @@ namespace Backend.Fx.EfCorePersistence.Tests.Migrations
 
                     b.Property<bool>("IsActive");
 
+                    b.Property<bool>("IsDefault");
+
                     b.Property<bool>("IsDemoTenant");
 
                     b.Property<bool>("IsInitialized");

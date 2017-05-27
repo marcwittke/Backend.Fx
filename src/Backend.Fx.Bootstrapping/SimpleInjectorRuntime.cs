@@ -59,10 +59,9 @@ namespace Backend.Fx.Bootstrapping
             {
                 BootFramework();
                 BootPersistence();
+                bootAction?.Invoke(Container);
                 BootApplication();
                 InitializeJobScheduler();
-
-                bootAction?.Invoke(Container);
             }
 
             Verify();

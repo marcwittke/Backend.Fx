@@ -133,7 +133,7 @@
         }
 
         [Fact]
-        public void ThrowsOnGetWhenTenantIdHolderIsEmpty()
+        public void ReturnsEmptyWhenTenantIdHolderIsEmpty()
         {
             var tenantHolder = A.Fake<ICurrentTHolder<TenantId>>();
             A.CallTo(() => tenantHolder.Current).Returns(new TenantId(null));
@@ -143,12 +143,7 @@
 
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
             A.CallTo(() => authorization.CanCreate()).Returns(true);
-            Assert.Throws<InvalidOperationException>(() => sut.AggregateQueryable.ToArray());
-
-            // even when I don't have permissions
-            A.CallTo(() => authorization.HasAccessExpression).Returns(agg => false);
-            A.CallTo(() => authorization.CanCreate()).Returns(false);
-            Assert.Throws<InvalidOperationException>(() => sut.AggregateQueryable.ToArray());
+            Assert.Empty(sut.AggregateQueryable);
         }
 
         [Fact]

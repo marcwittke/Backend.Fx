@@ -56,6 +56,7 @@ namespace Backend.Fx.EfCorePersistence.Tests.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Description = table.Column<string>(nullable: true),
                     IsActive = table.Column<bool>(nullable: false),
+                    IsDefault = table.Column<bool>(nullable: false),
                     IsDemoTenant = table.Column<bool>(nullable: false),
                     IsInitialized = table.Column<bool>(nullable: false),
                     Name = table.Column<string>(nullable: false)

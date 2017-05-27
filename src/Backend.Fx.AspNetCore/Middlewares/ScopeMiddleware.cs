@@ -1,9 +1,7 @@
 ﻿namespace Backend.Fx.AspNetCore.Middlewares
 {
     using System;
-    using System.Linq;
     using System.Net;
-    using System.Security.Claims;
     using System.Security.Principal;
     using System.Threading.Tasks;
     using Environment.MultiTenancy;
@@ -21,19 +19,18 @@
     ///     The Middleware handles exceptions and is responsible for beginning and completing (or disposing) the unit
     ///     of work for each request.
     /// </summary>
-    public class ScopeMiddleware
+    public abstract class ScopeMiddleware
     {
         private static readonly ILogger Logger = LogManager.Create<ScopeMiddleware>();
         private readonly IHostingEnvironment env;
         private readonly RequestDelegate next;
         private readonly IScopeManager scopeManager;
-        public const string TenantIdClaimType = "urn:metropoliplan:tenantid";
-
+        
         /// <summary>
         ///     This constructor is being called by the framework DI container
         /// </summary>
         [UsedImplicitly]
-        public ScopeMiddleware(RequestDelegate next, IScopeManager scopeManager, IHostingEnvironment env)
+        protected ScopeMiddleware(RequestDelegate next, IScopeManager scopeManager, IHostingEnvironment env)
         {
             this.next = next;
             this.scopeManager = scopeManager;
@@ -101,17 +98,6 @@
             }
         }
 
-        private static TenantId GetTenantId(IIdentity identity)
-        {
-            ClaimsIdentity claimsIdentity = identity as ClaimsIdentity;
-            Claim claim = claimsIdentity?.Claims.SingleOrDefault(cl => cl.Type == TenantIdClaimType);
-            int parsed;
-            if (claim != null && int.TryParse(claim.Value, out parsed))
-            {
-                return new TenantId(parsed);
-            }
-
-            return new TenantId(null);
-        }
+        protected abstract TenantId GetTenantId(IIdentity identity);
     }
 }

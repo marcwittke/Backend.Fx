@@ -1,0 +1,6 @@
+﻿ => Package Manager Conosle
+ => Default Project: demo\DemoBlog.Mvc
+ 
+$> Add-Migration NameOfMigration -OutputDir Data/Application -Context BlogDbContext
+
+

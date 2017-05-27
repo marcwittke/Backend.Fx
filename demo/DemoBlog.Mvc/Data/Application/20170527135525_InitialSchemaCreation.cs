@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace DemoBlog.Mvc.Data.Application.Migrations
+namespace DemoBlog.Mvc.Data.Application
 {
     public partial class InitialSchemaCreation : Migration
     {
@@ -17,6 +17,7 @@ namespace DemoBlog.Mvc.Data.Application.Migrations
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Description = table.Column<string>(nullable: true),
                     IsActive = table.Column<bool>(nullable: false),
+                    IsDefault = table.Column<bool>(nullable: false),
                     IsDemoTenant = table.Column<bool>(nullable: false),
                     IsInitialized = table.Column<bool>(nullable: false),
                     Name = table.Column<string>(nullable: false)

@@ -1,0 +1,11 @@
+﻿@model DemoBlog.Domain.Post[]
+
+@foreach (var post in Model)
+{
+    <div class="panel panel-default">
+        <h2 class="panel-heading">@post.Title</h2>
+        <div class="panel-body">
+            @post.Content
+        </div>
+    </div>
+}

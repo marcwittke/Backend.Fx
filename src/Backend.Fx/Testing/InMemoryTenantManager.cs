@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using Environment.MultiTenancy;
+    using Extensions;
 
     public class InMemoryTenantManager : TenantManager
     {
@@ -38,6 +39,11 @@
             }
 
             store[tenant.Id] = tenant;
+
+            if (tenant.IsDefault)
+            {
+                store.Values.Where(t => t.Id != tenant.Id).ForAll(t => t.IsDefault = false);
+            }
         }
     }
 }

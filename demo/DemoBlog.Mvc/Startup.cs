@@ -2,6 +2,7 @@
 {
     using Backend.Fx.AspNetCore.Integration;
     using Backend.Fx.AspNetCore.Middlewares;
+    using Backend.Fx.Environment.MultiTenancy;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -26,6 +27,7 @@
         private readonly DemoBlogRuntime runtime;
         private readonly RuntimeControllerActivator controllerActivator;
         private readonly RuntimeViewComponentActivator viewComponentActivator;
+        private readonly ICurrentTHolder<TenantId> defaultTenantIdHolder = new CurrentTenantIdHolder();
 
         public Startup(IHostingEnvironment env)
         {
@@ -97,17 +99,21 @@
                 DisplayName = "Google",
                 SignInScheme = "Identity.External",
 
+                // values stolen from Domick Baier, who encourages use of these credentials with localhost:5000 here: 
+                // http://docs.identityserver.io/en/release/quickstarts/4_external_authentication.html#adding-google-support
                 ClientId = "434483408261-55tc8n0cs4ff1fe21ea8df2o443v2iuc.apps.googleusercontent.com",
                 ClientSecret = "3gcoTrEDPPJ0ukn_aYYT6PWo"
             });
 
-            app.UseMiddleware<ScopeMiddleware>();
+            app.UseMiddleware<DemoBlogMiddleware>();
             
             runtime.Boot(container =>
             {
                 container.RegisterMvcViewComponents(app);
                 container.Register(() => app.ApplicationServices.GetService<JavaScriptSnippet>());
             });
+
+            defaultTenantIdHolder.ReplaceCurrent(runtime.DefaultTenantId);
 
             app.UseMvc(routes =>
             {
@@ -135,7 +141,7 @@
             return dbContextOptions;
         }
 
-        private IServiceCollection AddIdentityAsFrameworkService(IServiceCollection services, string connectionString)
+        private void AddIdentityAsFrameworkService(IServiceCollection services, string connectionString)
         {
             services.AddDbContext<BlogIdentityDbContext>(options => options.UseSqlServer(connectionString));
             services.AddIdentity<BlogUser, IdentityRole>()
@@ -145,7 +151,7 @@
             services.AddScoped<ManageController>();
             services.AddTransient<IEmailSender, AuthMessageSender>();
             services.AddTransient<ISmsSender, AuthMessageSender>();
-            return services;
+            services.AddSingleton(defaultTenantIdHolder);
         }
     }
 }

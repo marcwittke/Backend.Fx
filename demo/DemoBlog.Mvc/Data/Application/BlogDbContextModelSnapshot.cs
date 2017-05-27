@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using DemoBlog.Persistence;
 
-namespace DemoBlog.Mvc.Data.Application.Migrations
+namespace DemoBlog.Mvc.Data.Application
 {
     [DbContext(typeof(BlogDbContext))]
     partial class BlogDbContextModelSnapshot : ModelSnapshot
@@ -24,6 +24,8 @@ namespace DemoBlog.Mvc.Data.Application.Migrations
                     b.Property<string>("Description");
 
                     b.Property<bool>("IsActive");
+
+                    b.Property<bool>("IsDefault");
 
                     b.Property<bool>("IsDemoTenant");
 

@@ -20,4 +20,10 @@
     <Folder Include="Application\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="System.Security.Claims">
+      <HintPath>C:\Users\Marc\.nuget\packages\system.security.claims\4.0.1\ref\netstandard1.3\System.Security.Claims.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

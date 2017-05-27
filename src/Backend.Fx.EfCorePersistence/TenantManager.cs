@@ -3,6 +3,7 @@
     using System;
     using System.Linq;
     using Environment.MultiTenancy;
+    using Extensions;
     using Microsoft.EntityFrameworkCore;
 
     public class TenantManager<TDbContext> : TenantManager where TDbContext : DbContext
@@ -59,6 +60,12 @@
                     existingTenant.Name = tenant.Name;
                     existingTenant.Description = tenant.Description;
                 }
+
+                if (tenant.IsDefault)
+                {
+                    dbContext.Set<Tenant>().Where(t => t.Id != tenant.Id).ForAll(t => t.IsDefault = false);
+                }
+
                 dbContext.SaveChanges();
             }
         }

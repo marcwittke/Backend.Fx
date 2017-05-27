@@ -3,10 +3,13 @@
     using System.Linq;
     using System.Security.Claims;
     using System.Threading.Tasks;
+    using Backend.Fx.Environment.MultiTenancy;
+    using Backend.Fx.Patterns.DependencyInjection;
     using Data;
     using Data.Identity;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.Rendering;
     using Microsoft.Extensions.Logging;
@@ -19,6 +22,7 @@
     {
         private readonly UserManager<BlogUser> _userManager;
         private readonly SignInManager<BlogUser> _signInManager;
+        private readonly ICurrentTHolder<TenantId> defaultTenantIdHolder;
         private readonly IEmailSender _emailSender;
         private readonly ISmsSender _smsSender;
         private readonly ILogger _logger;
@@ -28,12 +32,14 @@
             UserManager<BlogUser> userManager,
             SignInManager<BlogUser> signInManager,
             IOptions<IdentityCookieOptions> identityCookieOptions,
+            ICurrentTHolder<TenantId> defaultTenantIdHolder,
             IEmailSender emailSender,
             ISmsSender smsSender,
             ILoggerFactory loggerFactory)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            this.defaultTenantIdHolder = defaultTenantIdHolder;
             _externalCookieScheme = identityCookieOptions.Value.ExternalCookieAuthenticationScheme;
             _emailSender = emailSender;
             _smsSender = smsSender;
@@ -111,7 +117,7 @@
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {
-                var user = new BlogUser { UserName = model.Email, Email = model.Email };
+                var user = new BlogUser(defaultTenantIdHolder.Current.Value) { UserName = model.Email, Email = model.Email };
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
@@ -213,7 +219,7 @@
                 {
                     return View("ExternalLoginFailure");
                 }
-                var user = new BlogUser { UserName = model.Email, Email = model.Email };
+                var user = new BlogUser(defaultTenantIdHolder.Current.Value) { UserName = model.Email, Email = model.Email };
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {

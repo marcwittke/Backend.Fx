@@ -24,7 +24,7 @@
         public void RunsProductiveDataGeneratorsOnTenantInitialization()
         {
             sut.Boot();
-            TenantId tenantId = sut.TenantManager.CreateProductionTenant("prod", "unit test created");
+            TenantId tenantId = sut.TenantManager.CreateProductionTenant("prod", "unit test created", true);
 
             using (var scope = sut.BeginScope(new SystemIdentity(), tenantId))
             {
@@ -39,7 +39,7 @@
         public void RunsProductiveAndDemonstrationDataGeneratorsOnDemoTenantInitialization()
         {
             sut.Boot();
-            TenantId tenantId = sut.TenantManager.CreateDemonstrationTenant("demo", "unit test created");
+            TenantId tenantId = sut.TenantManager.CreateDemonstrationTenant("demo", "unit test created", true);
 
             using (var scope = sut.BeginScope(new SystemIdentity(), tenantId))
             {
@@ -56,7 +56,7 @@
         {
             bool wasHandled = false;
             sut.Boot();
-            TenantId tenantId = sut.TenantManager.CreateDemonstrationTenant("for integration event test", "");
+            TenantId tenantId = sut.TenantManager.CreateDemonstrationTenant("for integration event test", "", true);
 
             sut.SubscribeToIntegrationEvent<TheIntegrationEvent>(evt =>
             {

@@ -39,5 +39,8 @@
     <ProjectReference Include="..\..\src\Backend.Fx.NLogLogging\Backend.Fx.NLogLogging.csproj" />
     <ProjectReference Include="..\DemoBlog.Application\DemoBlog.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Data\Application\Migrations\" />
+  </ItemGroup>
 
 </Project>

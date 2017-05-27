@@ -8,7 +8,7 @@ using Backend.Fx.EfCorePersistence.Tests.DummyImpl;
 namespace Backend.Fx.EfCorePersistence.Tests.Migrations
 {
     [DbContext(typeof(TestDbContext))]
-    [Migration("20170527113029_Initial")]
+    [Migration("20170527140247_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -108,6 +108,8 @@ namespace Backend.Fx.EfCorePersistence.Tests.Migrations
                     b.Property<string>("Description");
 
                     b.Property<bool>("IsActive");
+
+                    b.Property<bool>("IsDefault");
 
                     b.Property<bool>("IsDemoTenant");
 

@@ -10,8 +10,8 @@
         TenantId[] GetTenantIds();
         Tenant[] GetTenants();
         bool IsActive(TenantId tenantId);
-        TenantId CreateDemonstrationTenant(string name, string description);
-        TenantId CreateProductionTenant(string name, string description);
+        TenantId CreateDemonstrationTenant(string name, string description, bool isDefault);
+        TenantId CreateProductionTenant(string name, string description, bool isDefault);
         void EnsureTenantIsInitialized(TenantId tenantId);
     }
 
@@ -26,21 +26,21 @@
             this.tenantInitializer = tenantInitializer;
         }
 
-        public TenantId CreateDemonstrationTenant(string name, string description)
+        public TenantId CreateDemonstrationTenant(string name, string description, bool isDefault)
         {
             lock (syncLock)
             {
                 Logger.Info($"Creating demonstration tenant: {name}");
-                return CreateTenant(name, description, true);
+                return CreateTenant(name, description, true, isDefault);
             }
         }
 
-        public TenantId CreateProductionTenant(string name, string description)
+        public TenantId CreateProductionTenant(string name, string description, bool isDefault)
         {
             Logger.Info($"Creating production tenant: {name}");
             lock (syncLock)
             {
-                return CreateTenant(name, description, false);
+                return CreateTenant(name, description, false, isDefault);
             }
         }
 
@@ -63,14 +63,19 @@
 
         public bool IsActive(TenantId tenantId)
         {
-            Tenant tenant = FindTenant(tenantId);
-
-            if (tenant == null)
+            if (tenantId.HasValue)
             {
-                throw new ArgumentException($"Invalid tenant Id [{tenantId.Value}]", nameof(tenantId));
+                Tenant tenant = FindTenant(tenantId);
+
+                if (tenant == null)
+                {
+                    throw new ArgumentException($"Invalid tenant Id [{tenantId.Value}]", nameof(tenantId));
+                }
+
+                return tenant.IsActive;
             }
 
-            return tenant.IsActive;
+            return true;
         }
 
         public void EnsureTenantIsInitialized(TenantId tenantId)
@@ -90,7 +95,7 @@
 
         protected abstract Tenant FindTenant(TenantId tenantId);
 
-        private TenantId CreateTenant([NotNull] string name, string description, bool isDemo)
+        private TenantId CreateTenant([NotNull] string name, string description, bool isDemo, bool isDefault)
         {
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Value cannot be null or whitespace.", nameof(name));
 
@@ -99,7 +104,7 @@
                 throw new ArgumentException($"There is already a tenant named {name}");
             }
 
-            Tenant tenant = new Tenant(name, description, isDemo) { IsActive = true };
+            Tenant tenant = new Tenant(name, description, isDemo) { IsActive = true, IsDefault = isDefault };
             SaveTenant(tenant);
             InitializeTenant(tenant);
             return new TenantId(tenant.Id);

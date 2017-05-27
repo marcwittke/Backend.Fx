@@ -1,0 +1,8 @@
+﻿@model DemoBlog.Domain.Blog[]
+
+<ul class="nav nav-tabs nav-justified">
+    @foreach (var blog in Model)
+    {
+        <li>@blog.Title</li>
+    }
+</ul>

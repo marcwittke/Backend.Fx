@@ -30,10 +30,15 @@
         {
             get
             {
-                var tenantId = tenantIdHolder.Current.Value;
-                return RawAggregateQueryable
-                        .Where(agg => agg.TenantId == tenantId)
-                        .Where(aggregateRootAuthorization.HasAccessExpression);
+                if (tenantIdHolder.Current.HasValue)
+                {
+                    var tenantId = tenantIdHolder.Current.Value;
+                    return RawAggregateQueryable
+                            .Where(agg => agg.TenantId == tenantId)
+                            .Where(aggregateRootAuthorization.HasAccessExpression);
+                }
+
+                return RawAggregateQueryable.Where(agg => false);
             }
         }
 
