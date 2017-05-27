@@ -7,19 +7,31 @@
     public class Blog : AggregateRoot
     {
         [UsedImplicitly]
-        private Blog()
-        { }
+        private Blog() { }
 
-        public Blog(Blogger blogger, string title, string description)
+        public Blog(string name)
         {
-            Title = title;
-            Description = description;
-            BloggerId = blogger.Id;
+            Name = name;
         }
 
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public int BloggerId { get; set; }
-        public ISet<Subscriber> Subscribers { get; set; }
+        public string Name { get; private set; }
+
+        public ISet<Post> Posts { get; private set; } = new HashSet<Post>();
+
+        public Post AddPost(string name)
+        {
+            var post = new Post(this, name);
+            Posts.Add(post);
+            return post;
+        }
+
+        public void Modify(string modified)
+        {
+            Name = modified;
+            foreach (var post in Posts)
+            {
+                post.SetName(modified);
+            }
+        }
     }
 }

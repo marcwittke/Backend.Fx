@@ -1,25 +1,32 @@
-namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl
+﻿namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl
 {
-    using System.Collections.Generic;
     using BuildingBlocks;
+    using JetBrains.Annotations;
 
-    public class Post : AggregateRoot
+    public class Post : Entity
     {
+        [UsedImplicitly]
         private Post() { }
 
-        public Post(Blog blog, string title, string content)
+        public Post(Blog blog, string name)
         {
+            Blog = blog;
             BlogId = blog.Id;
-            Title = title;
-            Content = content;
+            Name = name;
         }
 
         public int BlogId { get; private set; }
+        public Blog Blog { get; private set; }
+        public string Name { get; private set; }
 
-        public string Title { get; set; }
+        public void SetName(string name)
+        {
+            Name = name;
+        }
 
-        public string Content { get; set; }
-
-        public ISet<Comment> Comments { get; } = new HashSet<Comment>();
+        protected override AggregateRoot FindMyAggregateRoot()
+        {
+            return Blog;
+        }
     }
 }

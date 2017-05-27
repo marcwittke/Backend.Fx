@@ -4,7 +4,6 @@
     using System.Linq;
     using Environment.MultiTenancy;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.ChangeTracking;
 
     public class TenantManager<TDbContext> : TenantManager where TDbContext : DbContext
     {
@@ -50,8 +49,15 @@
                 }
                 else
                 {
-                    EntityEntry<Tenant> entry = dbContext.Attach(tenant);
-                    entry.State = EntityState.Modified;
+                    existingTenant.IsActive = tenant.IsActive;
+                    if (existingTenant.IsDemoTenant && !tenant.IsDemoTenant)
+                    {
+                        throw new InvalidOperationException("It is not possible to convert a demonstration tenant to a productive tenant");
+                    }
+                    existingTenant.IsDemoTenant = tenant.IsDemoTenant;
+                    existingTenant.IsInitialized = tenant.IsInitialized;
+                    existingTenant.Name = tenant.Name;
+                    existingTenant.Description = tenant.Description;
                 }
                 dbContext.SaveChanges();
             }
