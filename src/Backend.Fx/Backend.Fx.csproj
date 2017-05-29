@@ -5,13 +5,13 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>Marc Wittke</Authors>
     <Company>anic GmbH</Company>
-    <Description>Abstractions of Backenbd.Fx and generic base implementations.</Description>
+    <Description>Abstractions of Backend.Fx and generic base implementations.</Description>
     <Copyright>All rights reserved. Distributed under the terms of the MIT License.</Copyright>
     <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/marcwittke/Backend.Fx</PackageProjectUrl>
     <RepositoryUrl>https://github.com/marcwittke/Backend.Fx.git</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
-    <Version>1.0.0-pre</Version>
+    <Version>1.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
