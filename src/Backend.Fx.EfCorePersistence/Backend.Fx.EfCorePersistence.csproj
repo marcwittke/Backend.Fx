@@ -4,7 +4,7 @@
     <TargetFramework>netstandard1.3</TargetFramework>
     <AssemblyName>Backend.Fx.EfCorePersistence</AssemblyName>
     <RootNamespace>Backend.Fx.EfCorePersistence</RootNamespace>
-    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>Marc Wittke</Authors>
     <Version>1.0.0-pre</Version>
     <Company>anic GmbH</Company>

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.3</TargetFramework>
-    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>Marc Wittke</Authors>
     <Company>anic GmbH</Company>
     <Description>Abstractions of Backenbd.Fx and generic base implementations.</Description>
