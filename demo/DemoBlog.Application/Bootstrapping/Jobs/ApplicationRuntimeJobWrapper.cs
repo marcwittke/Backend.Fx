@@ -20,7 +20,7 @@
         [UsedImplicitly]
         public void Execute()
         {
-            jobExecutor.ExecuteJob<TApplicationJob>();
+            jobExecutor.ExecuteJobAsync<TApplicationJob>().RunSynchronously();
         }
     }
 }

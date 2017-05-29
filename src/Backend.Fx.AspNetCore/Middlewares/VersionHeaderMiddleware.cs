@@ -28,7 +28,7 @@ namespace Backend.Fx.AspNetCore.Middlewares
         [UsedImplicitly]
         public async Task Invoke(HttpContext context)
         {
-            context.Response.Headers.Add("blog-version", new StringValues(currentVersion.ToString()));
+            context.Response.Headers.Add("backend-version", new StringValues(currentVersion.ToString()));
             await next.Invoke(context);
         }
     }

@@ -73,10 +73,5 @@ namespace Backend.Fx.Bootstrapping.Tests.DummyImpl
         {
             InitializeJobSchedulerWasCalled = true;
         }
-
-        internal Scope GetCurrentScopeForTestsOnly()
-        {
-            return ScopedLifestyle.GetCurrentScope(Container);
-        }
     }
 }

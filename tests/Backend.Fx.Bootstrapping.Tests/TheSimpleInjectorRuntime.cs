@@ -1,11 +1,11 @@
 namespace Backend.Fx.Bootstrapping.Tests
 {
     using System;
+    using System.Diagnostics;
     using System.Linq;
     using System.Security.Principal;
     using System.Threading;
     using System.Threading.Tasks;
-    using BuildingBlocks;
     using DummyImpl;
     using Environment.Authentication;
     using Environment.DateAndTime;
@@ -15,6 +15,7 @@ namespace Backend.Fx.Bootstrapping.Tests
     using FakeItEasy;
     using Patterns.DependencyInjection;
     using Patterns.EventAggregation;
+    using Patterns.Jobs;
     using Patterns.UnitOfWork;
     using SimpleInjector;
     using Xunit;
@@ -30,6 +31,8 @@ namespace Backend.Fx.Bootstrapping.Tests
 
             tenantManager = A.Fake<ITenantManager>();
             A.CallTo(() => tenantManager.IsActive(A<TenantId>._)).Returns(true);
+            TenantId[] tenantIds = {new TenantId(999)};
+            A.CallTo(() => tenantManager.GetTenantIds()).Returns(tenantIds);
 
             sut = new TestRuntime(tenantManager, databaseManager);
 
@@ -184,16 +187,19 @@ namespace Backend.Fx.Bootstrapping.Tests
         {
             sut.Boot();
             Assert.Null(sut.GetCurrentScopeForTestsOnly());
+            Assert.Throws<ActivationException>(() => sut.GetInstance<IClock>());
             Assert.Throws<ActivationException>(() => sut.GetInstance(typeof(IClock)));
 
 
             using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(null)))
             {
+                Assert.NotNull(sut.GetInstance<IClock>());
                 Assert.NotNull(scope.GetInstance<IClock>());
             }
 
 
             Assert.Null(sut.GetCurrentScopeForTestsOnly());
+            Assert.Throws<ActivationException>(() => sut.GetInstance<IClock>());
             Assert.Throws<ActivationException>(() => sut.GetInstance(typeof(IClock)));
         }
 
@@ -289,8 +295,10 @@ namespace Backend.Fx.Bootstrapping.Tests
                     //scope.CompleteUnitOfWork();
                 }
             }
-            catch
-            { }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
 
             A.CallTo(() => uowFake.Complete()).MustNotHaveHappened();
             A.CallTo(() => uowFake.Dispose()).MustHaveHappened(Repeated.Exactly.Once);
@@ -338,11 +346,53 @@ namespace Backend.Fx.Bootstrapping.Tests
                     //scope.CompleteUnitOfWork();
                 }
             }
-            catch
-            { }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
 
             A.CallTo(() => uowFake.Complete()).MustNotHaveHappened();
             A.CallTo(() => uowFake.Dispose()).MustHaveHappened(Repeated.Exactly.Once);
+        }
+
+        [Fact]
+        public void CanProvideEventHandlers()
+        {
+            sut.Boot();
+
+            using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(1)))
+            {
+                var handlers = sut.GetAllEventHandlers<ADomainEvent>().ToArray();
+                
+                // these three handlers should have been auto registered during boot by scanning the assembly
+                Assert.True(handlers.OfType<ADomainEventHandler1>().Any());
+                Assert.True(handlers.OfType<ADomainEventHandler2>().Any());
+                Assert.True(handlers.OfType<ADomainEventHandler3>().Any());
+            }
+        }
+
+        [Fact]
+        public async void CanExecuteJobs()
+        {
+            var someJob = A.Fake<IJob>();
+            sut.Boot(container =>
+            {
+                container.Register(()=>someJob);
+
+            });
+            await sut.ExecuteJobAsync<IJob>();
+
+            A.CallTo(() => someJob.Execute()).MustHaveHappened(Repeated.Exactly.Once);
+        }
+
+        [Fact]
+        public async void CanExecuteJobsWithDelay()
+        {
+            var someJob = A.Fake<IJob>();
+            sut.Boot(container => container.Register(() => someJob));
+            await sut.ExecuteJobAsync<IJob>(null, 1);
+
+            A.CallTo(() => someJob.Execute()).MustHaveHappened(Repeated.Exactly.Once);
         }
 
         public void Dispose()

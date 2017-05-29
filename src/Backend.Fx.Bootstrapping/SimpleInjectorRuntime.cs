@@ -85,7 +85,7 @@ namespace Backend.Fx.Bootstrapping
             RegisterDomainAndApplicationServices();
 
             RegisterAuthorization();
-            
+
             // domain event subsystem
             Container.RegisterSingleton<IEventAggregator>(eventAggregator);
             Container.RegisterCollection(typeof(IDomainEventHandler<>), Assemblies);
@@ -124,7 +124,8 @@ namespace Backend.Fx.Bootstrapping
             var serviceRegistrations = Container
                     .GetTypesToRegister(typeof(IDomainService), Assemblies)
                     .Concat(Container.GetTypesToRegister(typeof(IApplicationService), Assemblies))
-                    .Select(type => new {
+                    .Select(type => new
+                    {
                         Service = type.GetTypeInfo().ImplementedInterfaces.Single(i => typeof(IDomainService) != i && typeof(IApplicationService) != i),
                         Implementation = type
                     });
@@ -172,38 +173,40 @@ namespace Backend.Fx.Bootstrapping
 
         protected abstract void InitializeJobScheduler();
 
-        public void ExecuteJob<TJob>(int? tenantId = null, int delayInSeconds = 0) where TJob : class, IJob
+        public async Task ExecuteJobAsync<TJob>(int? tenantId = null, int delayInSeconds = 0) where TJob : class, IJob
         {
-            Task.Delay(delayInSeconds * 1000).RunSynchronously();
-
-            TenantId[] tenants = tenantId == null
-                ? TenantManager.GetTenantIds()
-                : new[] { new TenantId(tenantId.Value) };
-
-            string jobName = typeof(TJob).Name;
-            foreach (var tenant in tenants)
+            await Task.Delay(delayInSeconds * 1000);
+            await Task.Run(() =>
             {
-                using (Logger.InfoDuration($"Beginning {jobName} scope", $"{jobName} scope completed"))
+                TenantId[] tenants = tenantId == null
+                                         ? TenantManager.GetTenantIds()
+                                         : new[] { new TenantId(tenantId.Value) };
+
+                string jobName = typeof(TJob).Name;
+                foreach (var tenant in tenants)
                 {
-                    using (IRuntimeScope scope = BeginScope(new SystemIdentity(), tenant))
+                    using (Logger.InfoDuration($"Beginning {jobName} scope", $"{jobName} scope completed"))
                     {
-                        scope.BeginUnitOfWork(false);
-                        try
+                        using (IRuntimeScope scope = BeginScope(new SystemIdentity(), tenant))
                         {
-                            scope.GetInstance<TJob>().Execute();
-                            scope.GetInstance<IUnitOfWork>().Complete();
-                        }
-                        catch (Exception ex)
-                        {
-                            Logger.Error(ex, $"Execution of {jobName} failed: {ex.Message}");
-                        }
-                        finally
-                        {
-                            scope.GetInstance<IUnitOfWork>().Dispose();
+                            scope.BeginUnitOfWork(false);
+                            try
+                            {
+                                scope.GetInstance<TJob>().Execute();
+                                scope.GetInstance<IUnitOfWork>().Complete();
+                            }
+                            catch (Exception ex)
+                            {
+                                Logger.Error(ex, $"Execution of {jobName} failed: {ex.Message}");
+                            }
+                            finally
+                            {
+                                scope.GetInstance<IUnitOfWork>().Dispose();
+                            }
                         }
                     }
                 }
-            }
+            });
         }
         #endregion
 
