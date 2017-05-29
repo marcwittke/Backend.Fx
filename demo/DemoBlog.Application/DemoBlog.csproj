@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="FluentScheduler" Version="5.2.1" />
+    <PackageReference Include="System.Security.Claims" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -18,12 +19,6 @@
 
   <ItemGroup>
     <Folder Include="Application\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="System.Security.Claims">
-      <HintPath>C:\Users\Marc\.nuget\packages\system.security.claims\4.0.1\ref\netstandard1.3\System.Security.Claims.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>
