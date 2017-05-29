@@ -2,6 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.3</TargetFramework>
+    <Version>1.0.0-pre</Version>
+    <Authors>Marc Wittke</Authors>
+    <Company>anic GmbH</Company>
+    <Product>Backend.Fx</Product>
+    <Description>NLog logging implementation for Backend.Fx</Description>
+    <Copyright>All rights reserved. Distributed under the terms of the MIT License.</Copyright>
+    <RepositoryUrl>https://github.com/marcwittke/Backend.Fx.git</RepositoryUrl>
+    <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/marcwittke/Backend.Fx</PackageProjectUrl>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>

@@ -2,6 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.3</TargetFramework>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+    <Version>1.0.0-pre</Version>
+    <Authors>Marc Wittke</Authors>
+    <Company>anic GmbH</Company>
+    <Product>Backend.Fx</Product>
+    <Description>Bootstrapping for Backend.Fx using Simple Injector 4</Description>
+    <Copyright>All rights reserved. Distributed under the terms of the MIT License.</Copyright>
+    <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/marcwittke/Backend.Fx</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/marcwittke/Backend.Fx.git</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
