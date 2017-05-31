@@ -2,9 +2,10 @@
 {
     using BuildingBlocks;
     using Fx.Exceptions;
+    using NLogLogging;
     using Xunit;
 
-    public class TheNotFoundException
+    public class TheNotFoundException : IClassFixture<NLogLoggingFixture>
     {
         [Fact]
         public void FillsNameAndIdProperties()

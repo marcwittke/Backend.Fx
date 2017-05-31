@@ -13,6 +13,7 @@ namespace Backend.Fx.Bootstrapping.Tests
     using Environment.Persistence;
     using Exceptions;
     using FakeItEasy;
+    using NLogLogging;
     using Patterns.DependencyInjection;
     using Patterns.EventAggregation;
     using Patterns.Jobs;
@@ -20,7 +21,7 @@ namespace Backend.Fx.Bootstrapping.Tests
     using SimpleInjector;
     using Xunit;
 
-    public class TheSimpleInjectorRuntime : IDisposable
+    public class TheSimpleInjectorRuntime : IDisposable, IClassFixture<NLogLoggingFixture>
     {
         private readonly TestRuntime sut;
         private readonly ITenantManager tenantManager;

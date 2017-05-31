@@ -2,9 +2,10 @@
 {
     using System;
     using Fx.ConfigurationSettings;
+    using NLogLogging;
     using Xunit;
 
-    public class TheSettingSerializerFactory
+    public class TheSettingSerializerFactory : IClassFixture<NLogLoggingFixture>
     {
         private readonly SettingSerializerFactory sut = new SettingSerializerFactory();
 

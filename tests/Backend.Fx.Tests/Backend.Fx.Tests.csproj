@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Backend.Fx.NLogLogging\Backend.Fx.NLogLogging.csproj" />
     <ProjectReference Include="..\..\src\Backend.Fx\Backend.Fx.csproj" />
   </ItemGroup>
 

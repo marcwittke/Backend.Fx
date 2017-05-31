@@ -5,10 +5,11 @@
     using System.Threading.Tasks;
     using FakeItEasy;
     using Fx.Patterns.EventAggregation;
+    using NLogLogging;
     using Xunit;
 
 
-    public class TheEventAggregator
+    public class TheEventAggregator: IClassFixture<NLogLoggingFixture>
     {
         [Fact]
         public void CallsAllDomainEventHandlers()

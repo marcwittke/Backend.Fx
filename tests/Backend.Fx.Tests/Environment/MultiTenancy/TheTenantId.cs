@@ -2,9 +2,10 @@
 {
     using System;
     using Fx.Environment.MultiTenancy;
+    using NLogLogging;
     using Xunit;
 
-    public class TheTenantId
+    public class TheTenantId : IClassFixture<NLogLoggingFixture>
     {
         [Fact]
         public void HasNoValueWhenInitializedWithNull()

@@ -6,10 +6,11 @@
     using Fx.Environment.MultiTenancy;
     using Fx.Patterns.Authorization;
     using Fx.Patterns.DependencyInjection;
+    using NLogLogging;
     using Testing;
     using Xunit;
 
-    public class TheSettingsService
+    public class TheSettingsService : IClassFixture<NLogLoggingFixture>
     {
         public class MySettingsService : SettingsService
         {

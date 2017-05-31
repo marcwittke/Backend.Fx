@@ -3,11 +3,12 @@ namespace Backend.Fx.EfCorePersistence.Tests
     using System;
     using DummyImpl;
     using Environment.Authentication;
+    using NLogLogging;
     using Patterns.Authorization;
     using Testing;
     using Xunit;
 
-    public class TheRepositoryOfPlainAggregate : TestWithInMemorySqliteDbContext
+    public class TheRepositoryOfPlainAggregate : TestWithInMemorySqliteDbContext, IClassFixture<NLogLoggingFixture>
     {
         public TheRepositoryOfPlainAggregate()
         {

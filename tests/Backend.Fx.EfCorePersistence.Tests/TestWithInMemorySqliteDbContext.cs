@@ -6,12 +6,15 @@ namespace Backend.Fx.EfCorePersistence.Tests
     using DummyImpl;
     using Environment.DateAndTime;
     using Environment.MultiTenancy;
+    using Logging;
     using Microsoft.Data.Sqlite;
     using Microsoft.EntityFrameworkCore;
     using Patterns.DependencyInjection;
+    using ILogger = Logging.ILogger;
 
     public abstract class TestWithInMemorySqliteDbContext : IDisposable
     {
+        private static readonly ILogger Logger = LogManager.Create<TestWithInMemorySqliteDbContext>();
         public SqliteConnection Connection { get; }
         public DbContextOptions DbContextOptions { get; }
         public ICurrentTHolder<TenantId> TenantIdHolder { get; } = new CurrentTenantIdHolder();
@@ -24,6 +27,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
             Connection.Open();
             DbContextOptions = new DbContextOptionsBuilder().UseSqlite(Connection).Options;
         }
+
         protected void CreateDatabase()
         {
             using (var dbContext = new TestDbContext(DbContextOptions))
@@ -32,7 +36,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
             }
         }
 
-protected void ExecuteNonQuery(string cmd)
+        protected void ExecuteNonQuery(string cmd)
         {
             using (var command = Connection.CreateCommand())
             {
@@ -56,7 +60,7 @@ protected void ExecuteNonQuery(string cmd)
             {
                 command.CommandText = cmd;
                 IDataReader reader = command.ExecuteReader();
-                while(reader.NextResult())
+                while (reader.NextResult())
                 {
                     yield return forEachResultFunc(reader);
                 }

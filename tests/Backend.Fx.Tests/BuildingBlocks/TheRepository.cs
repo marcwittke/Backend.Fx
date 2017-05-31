@@ -8,10 +8,11 @@
     using Fx.Exceptions;
     using Fx.Patterns.Authorization;
     using Fx.Patterns.DependencyInjection;
+    using NLogLogging;
     using Testing;
     using Xunit;
 
-    public class TheRepository
+    public class TheRepository : IClassFixture<NLogLoggingFixture>
     {
         [Fact]
         public void ReturnsByIdOnSingle()

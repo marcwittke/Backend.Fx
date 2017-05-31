@@ -3,9 +3,10 @@ namespace Backend.Fx.Tests.Logging
     using System;
     using FakeItEasy;
     using Fx.Logging;
+    using NLogLogging;
     using Xunit;
 
-    public class TheLogger
+    public class TheLogger : IClassFixture<NLogLoggingFixture>
     {
         private readonly ILoggerFactory loggerFactory;
         private readonly InvalidOperationException exception = new InvalidOperationException("whatever");

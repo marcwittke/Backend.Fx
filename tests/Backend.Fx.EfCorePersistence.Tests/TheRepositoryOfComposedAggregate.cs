@@ -8,12 +8,14 @@
     using Environment.DateAndTime;
     using Environment.MultiTenancy;
     using Microsoft.EntityFrameworkCore;
+    using NLogLogging;
     using Patterns.Authorization;
     using Patterns.DependencyInjection;
     using Xunit;
 
-    public class TheRepositoryOfComposedAggregate : TestWithInMemorySqliteDbContext
+    public class TheRepositoryOfComposedAggregate : TestWithInMemorySqliteDbContext, IClassFixture<NLogLoggingFixture>
     {
+
         public TheRepositoryOfComposedAggregate()
         {
             CreateDatabase();

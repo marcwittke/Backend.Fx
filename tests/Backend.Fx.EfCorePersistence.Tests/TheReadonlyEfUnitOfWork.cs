@@ -1,9 +1,10 @@
 ﻿namespace Backend.Fx.EfCorePersistence.Tests
 {
     using DummyImpl;
+    using NLogLogging;
     using Xunit;
 
-    public class TheReadonlyEfUnitOfWork : TestWithInMemorySqliteDbContext
+    public class TheReadonlyEfUnitOfWork : TestWithInMemorySqliteDbContext, IClassFixture<NLogLoggingFixture>
     {
         public TheReadonlyEfUnitOfWork()
         {

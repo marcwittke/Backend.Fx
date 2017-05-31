@@ -1,10 +1,11 @@
 ﻿namespace Backend.Fx.Tests.Patterns.DataGeneration
 {
-    using FakeItEasy;
     using Fx.Patterns.DataGeneration;
+    using NLogLogging;
     using Xunit;
 
-    public class AnInitialDataGenerator : InitialDataGenerator {
+    public class AnInitialDataGenerator : InitialDataGenerator,IClassFixture<NLogLoggingFixture>
+    {
 
         public bool ShouldRunOverride { get; set; }
         public int GenerateCoreCalled { get; private set; }

@@ -25,7 +25,7 @@ namespace DemoBlog.Mvc
             using (logger.InfoDuration("Building web host"))
             {
                 host = new WebHostBuilder()
-                    .UseLoggerFactory(new FrameworkToNLogLoggerFactory())
+                        .UseLoggerFactory(new FrameworkToBackendFxLoggerFactory())
                     .CaptureStartupErrors(true)
                     .UseSetting("detailedErrors", "true")
                     .UseKestrel()
@@ -35,7 +35,7 @@ namespace DemoBlog.Mvc
                     .UseApplicationInsights()
                     .Build();
 
-                host.Services.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>().AddProvider(new NLogLoggerProvider());
+                host.Services.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>().AddProvider(new BackendFxLoggerProvider());
             }
 
             using (logger.InfoDuration(

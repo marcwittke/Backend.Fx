@@ -3,9 +3,10 @@
     using System;
     using System.Threading;
     using Fx.Environment.DateAndTime;
+    using NLogLogging;
     using Xunit;
 
-    public class TheFrozenClock
+    public class TheFrozenClock : IClassFixture<NLogLoggingFixture>
     {
         [Fact]
         public void IsFrozen()

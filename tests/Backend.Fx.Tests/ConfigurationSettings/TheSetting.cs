@@ -3,9 +3,10 @@
     using System;
     using Fx.BuildingBlocks;
     using Fx.ConfigurationSettings;
+    using NLogLogging;
     using Xunit;
 
-    public class TheSetting
+    public class TheSetting : IClassFixture<NLogLoggingFixture>
     {
         public class TestSettingsService : SettingsService
         {

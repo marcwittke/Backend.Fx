@@ -2,9 +2,10 @@
 {
     using Fx.Environment.Authentication;
     using Fx.Environment.DateAndTime;
+    using NLogLogging;
     using Xunit;
 
-    public class TheUnitOfWork
+    public class TheUnitOfWork : IClassFixture<NLogLoggingFixture>
     {
         [Fact]
         public void CommitsBackOnComplete()

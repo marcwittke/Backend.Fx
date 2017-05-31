@@ -8,10 +8,11 @@
     using Environment.MultiTenancy;
     using Environment.Persistence;
     using FakeItEasy;
+    using NLogLogging;
     using Patterns.EventAggregation;
     using Xunit;
 
-    public class TheSimpleInjectorRuntimeWithTenantManagement
+    public class TheSimpleInjectorRuntimeWithTenantManagement : IClassFixture<NLogLoggingFixture>
     {
         private readonly TestRuntime sut;
 

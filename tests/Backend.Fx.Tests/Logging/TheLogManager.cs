@@ -4,9 +4,10 @@
     using System.Security;
     using FakeItEasy;
     using Fx.Logging;
+    using NLogLogging;
     using Xunit;
 
-    public class TheLogManager
+    public class TheLogManager : IClassFixture<NLogLoggingFixture>
     {
         private readonly ILoggerFactory loggerFactory;
 
