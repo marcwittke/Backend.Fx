@@ -12,6 +12,10 @@ namespace Backend.Fx.EfCorePersistence.Tests
     using Patterns.DependencyInjection;
     using ILogger = Logging.ILogger;
 
+
+
+
+
     public abstract class TestWithInMemorySqliteDbContext : IDisposable
     {
         private static readonly ILogger Logger = LogManager.Create<TestWithInMemorySqliteDbContext>();
