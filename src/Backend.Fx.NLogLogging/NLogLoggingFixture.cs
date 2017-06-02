@@ -38,8 +38,7 @@
                 MaxArchiveFiles = 1,
             };
             config.AddTarget("file", fileTarget);
-            config.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, fileTarget));
-            config.LoggingRules.Add(new LoggingRule("Microsoft.*", LogLevel.Info, fileTarget));
+            config.LoggingRules.Add(new LoggingRule("*", LogLevel.Info, fileTarget));
 
             NLog.LogManager.Configuration = config;
 
