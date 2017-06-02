@@ -1,6 +1,5 @@
 ﻿namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl
 {
-    using System;
     using System.Reflection;
     using Environment.DateAndTime;
     using Microsoft.EntityFrameworkCore;
@@ -9,7 +8,8 @@
     {
         private readonly DbContextOptions dbContextOptions;
 
-        public TestRuntime(DbContextOptions dbContextOptions) : base(() => new TestDbContext(dbContextOptions))
+        public TestRuntime(DbContextOptions dbContextOptions)
+            : base(new DatabaseManager<TestDbContext>(() => new TestDbContext(dbContextOptions)), () => new TestDbContext(dbContextOptions))
         {
             this.dbContextOptions = dbContextOptions;
         }

@@ -12,7 +12,7 @@
     /// </summary>
     public class NLogLoggingFixture
     {
-        static NLogLoggingFixture()
+        public NLogLoggingFixture()
         {
             ConfigureNLogForTests();
         }

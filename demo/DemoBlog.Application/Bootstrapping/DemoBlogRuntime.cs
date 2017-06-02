@@ -16,7 +16,7 @@
         private readonly DbContextOptions dbContextOptions;
 
         public DemoBlogRuntime(bool doCreateInitialDemoTenant, DbContextOptions dbContextOptions)
-            : base(() => new BlogDbContext(dbContextOptions))
+            : base(new DatabaseManager<BlogDbContext>(() => new BlogDbContext(dbContextOptions)), () => new BlogDbContext(dbContextOptions))
         {
             this.doCreateInitialDemoTenant = doCreateInitialDemoTenant;
             this.dbContextOptions = dbContextOptions;
@@ -56,7 +56,8 @@
                 {
                     TenantManager.CreateDemonstrationTenant(Tenant.DemonstrationTenantName, Tenant.DemonstrationTenantDescription, true);
                 }
-            } else
+            }
+            else
             {
                 var defaultTenant = TenantManager.GetTenants().SingleOrDefault(t => t.IsDefault);
                 if (defaultTenant == null)

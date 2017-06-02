@@ -11,9 +11,9 @@
 
     public abstract class SimpleInjectorEfCoreRuntime<TDbContext> : SimpleInjectorRuntime where TDbContext : DbContext
     {
-        protected SimpleInjectorEfCoreRuntime(Func<TDbContext> frameworkDbContextFactory)
+        protected SimpleInjectorEfCoreRuntime(IDatabaseManager databaseManager, Func<TDbContext> frameworkDbContextFactory)
         {
-            DatabaseManager = new DatabaseManager<TDbContext>(frameworkDbContextFactory);
+            DatabaseManager = databaseManager;
             TenantManager = new TenantManager<TDbContext>(this, frameworkDbContextFactory);
         }
 
