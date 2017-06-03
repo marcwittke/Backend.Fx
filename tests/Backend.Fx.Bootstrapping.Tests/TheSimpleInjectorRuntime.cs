@@ -128,7 +128,7 @@ namespace Backend.Fx.Bootstrapping.Tests
             sut.Boot();
             using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(null)))
             {
-                var currentScope = sut.GetCurrentScopeForTestsOnly();
+                var currentScope = sut.GetCurrentScope();
                 Assert.NotNull(currentScope);
                 Assert.NotNull(scope.GetInstance<IClock>());
             }
@@ -187,7 +187,7 @@ namespace Backend.Fx.Bootstrapping.Tests
         public void ThrowsWhenScopedInstanceIsRequestedOutsideScope()
         {
             sut.Boot();
-            Assert.Null(sut.GetCurrentScopeForTestsOnly());
+            Assert.Null(sut.GetCurrentScope());
             Assert.Throws<ActivationException>(() => sut.GetInstance<IClock>());
             Assert.Throws<ActivationException>(() => sut.GetInstance(typeof(IClock)));
 
@@ -199,7 +199,7 @@ namespace Backend.Fx.Bootstrapping.Tests
             }
 
 
-            Assert.Null(sut.GetCurrentScopeForTestsOnly());
+            Assert.Null(sut.GetCurrentScope());
             Assert.Throws<ActivationException>(() => sut.GetInstance<IClock>());
             Assert.Throws<ActivationException>(() => sut.GetInstance(typeof(IClock)));
         }
@@ -216,7 +216,7 @@ namespace Backend.Fx.Bootstrapping.Tests
 
                 scope.CompleteCurrentScope_InvokeAction_BeginNewScope(() =>
                 {
-                    Assert.Null(sut.GetCurrentScopeForTestsOnly());
+                    Assert.Null(sut.GetCurrentScope());
                     Assert.Throws<ActivationException>(() => sut.GetInstance(typeof(IClock)));
                 });
 
@@ -240,7 +240,7 @@ namespace Backend.Fx.Bootstrapping.Tests
 
                 int i = scope.CompleteCurrentScope_InvokeFunction_BeginNewScope(() =>
                                                                       {
-                                                                          Assert.Null(sut.GetCurrentScopeForTestsOnly());
+                                                                          Assert.Null(sut.GetCurrentScope());
                                                                           Assert.Throws<ActivationException>(() => sut.GetInstance(typeof(IClock)));
                                                                           return 42;
                                                                       });
@@ -361,7 +361,7 @@ namespace Backend.Fx.Bootstrapping.Tests
         {
             sut.Boot();
 
-            using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(1)))
+            using (sut.BeginScope(new SystemIdentity(), new TenantId(1)))
             {
                 var handlers = sut.GetAllEventHandlers<ADomainEvent>().ToArray();
                 

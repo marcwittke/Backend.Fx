@@ -48,6 +48,11 @@ namespace Backend.Fx.Bootstrapping.Tests.DummyImpl
             DatabaseManager = databaseManager;
         }
 
+        public Scope GetCurrentScope()
+        {
+            return GetCurrentScopeForTestsOnly();
+        }
+
         protected override Assembly[] Assemblies
         {
             get { return new[] {GetType().GetTypeInfo().Assembly}; }

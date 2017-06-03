@@ -243,7 +243,7 @@ namespace Backend.Fx.Bootstrapping
         /// <summary>
         /// This should never be used in production code
         /// </summary>
-        internal Scope GetCurrentScopeForTestsOnly()
+        protected Scope GetCurrentScopeForTestsOnly()
         {
             return ScopedLifestyle.GetCurrentScope(Container);
         }

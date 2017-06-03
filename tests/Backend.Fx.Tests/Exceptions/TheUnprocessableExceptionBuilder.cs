@@ -19,7 +19,7 @@
         [Fact]
         public void CatchesExceptionInFunc()
         {
-            var sut = new UnprocessableExceptionBuilder();
+            var sut = UnprocessableException.UseBuilder();
             sut.CatchPossibleException<int>(() => { throw new InvalidOperationException("hello"); });
             Assert.Throws<UnprocessableException>(() => sut.Dispose());
         }
@@ -27,7 +27,7 @@
         [Fact]
         public void AddsExceptionWhenAggregateIsNull()
         {
-            var sut = new UnprocessableExceptionBuilder();
+            var sut = UnprocessableException.UseBuilder();
             sut.AddNotFoundWhenNull<TheAggregateRoot.TestAggregateRoot>(1111, null);
             Assert.Throws<UnprocessableException>(() => sut.Dispose());
         }
@@ -35,7 +35,7 @@
         [Fact]
         public void AddsNoExceptionWhenAggregateIsNotNull()
         {
-            var sut = new UnprocessableExceptionBuilder();
+            var sut = UnprocessableException.UseBuilder();
             sut.AddNotFoundWhenNull(1111, new TheAggregateRoot.TestAggregateRoot("gaga"));
             sut.Dispose();
         }
@@ -43,7 +43,7 @@
         [Fact]
         public void AddsExceptionWhenAddingError()
         {
-            var sut = new UnprocessableExceptionBuilder();
+            var sut = UnprocessableException.UseBuilder();
             sut.Add("something is broken");
             Assert.Throws<UnprocessableException>(() => sut.Dispose());
         }
@@ -51,7 +51,7 @@
         [Fact]
         public void AddsExceptionWhenAddingConditionalError()
         {
-            var sut = new UnprocessableExceptionBuilder();
+            var sut = UnprocessableException.UseBuilder();
             sut.AddIf(true, "something is broken");
             Assert.Throws<UnprocessableException>(() => sut.Dispose());
         }
@@ -59,7 +59,7 @@
         [Fact]
         public void AddsExceptionWhenNotAddingConditionalError()
         {
-            var sut = new UnprocessableExceptionBuilder();
+            var sut = UnprocessableException.UseBuilder();
             sut.AddIf(false, "something is broken");
             sut.Dispose();
         }

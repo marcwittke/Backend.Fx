@@ -40,7 +40,7 @@
             var settingAuthorization = A.Fake<IAggregateRootAuthorization<Setting>>();
             A.CallTo(() => settingAuthorization.HasAccessExpression).Returns(setting => true);
             A.CallTo(() => settingAuthorization.CanCreate()).Returns(true);
-            settingRepository = new InMemoryRepository<Setting>(tenantHolder, settingAuthorization);
+            settingRepository = new InMemoryRepository<Setting>(new InMemoryStore<Setting>(), tenantHolder, settingAuthorization);
         }
 
         [Fact]
