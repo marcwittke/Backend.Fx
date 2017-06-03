@@ -2,16 +2,19 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.3</TargetFramework>
+    <AssemblyName>Backend.Fx</AssemblyName>
+    <RootNamespace>Backend.Fx</RootNamespace>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <Authors>Marc Wittke</Authors>
     <Company>anic GmbH</Company>
+	<VersionPrefix>1.0.0</VersionPrefix>
+    <Product>Backend.Fx</Product>
     <Description>Abstractions of Backend.Fx and generic base implementations.</Description>
     <Copyright>All rights reserved. Distributed under the terms of the MIT License.</Copyright>
     <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/marcwittke/Backend.Fx</PackageProjectUrl>
     <RepositoryUrl>https://github.com/marcwittke/Backend.Fx.git</RepositoryUrl>
-    <RepositoryType>Git</RepositoryType>
-    <VersionPrefix>1.0.0</VersionPrefix>
+    <RepositoryType>Git</RepositoryType>    
   </PropertyGroup>
 
   <ItemGroup>

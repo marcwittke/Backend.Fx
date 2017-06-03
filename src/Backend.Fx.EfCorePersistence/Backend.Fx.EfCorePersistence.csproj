@@ -4,10 +4,10 @@
     <TargetFramework>netstandard1.3</TargetFramework>
     <AssemblyName>Backend.Fx.EfCorePersistence</AssemblyName>
     <RootNamespace>Backend.Fx.EfCorePersistence</RootNamespace>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <Authors>Marc Wittke</Authors>
-    <VersionPrefix>1.0.0</VersionPrefix>
     <Company>anic GmbH</Company>
+    <VersionPrefix>1.0.0</VersionPrefix>
     <Product>Backend.Fx</Product>
     <Description>Persistence implementation for Backend.Fx using Entity Framework Core 1.1</Description>
     <Copyright>All rights reserved. Distributed under the terms of the MIT License.</Copyright>
