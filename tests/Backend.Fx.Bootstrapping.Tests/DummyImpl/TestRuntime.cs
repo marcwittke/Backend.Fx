@@ -1,6 +1,7 @@
 namespace Backend.Fx.Bootstrapping.Tests.DummyImpl
 {
     using System;
+    using System.Collections.Generic;
     using System.Reflection;
     using BuildingBlocks;
     using Environment.DateAndTime;
@@ -29,8 +30,6 @@ namespace Backend.Fx.Bootstrapping.Tests.DummyImpl
                        return unitOfWork;
                    };
         }
-
-        
     }
 
     public class TestRuntime : SimpleInjectorRuntime
@@ -56,7 +55,10 @@ namespace Backend.Fx.Bootstrapping.Tests.DummyImpl
 
         protected override void BootPersistence()
         {
-            Container.Register(typeof(IRepository<>), typeof(ThreadLocalInMemoryRepository<>));
+            Container.Register(typeof(IRepository<>), typeof(InMemoryRepository<>));
+
+            // this emulates persistent collections of aggregate roots e.g. database tables
+            Container.RegisterSingleton(typeof(IInMemoryStore<>), typeof(InMemoryStore<>));
             BootPersistenceWasCalled = true;
         }
 

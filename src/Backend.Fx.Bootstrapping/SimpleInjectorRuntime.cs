@@ -4,7 +4,6 @@ namespace Backend.Fx.Bootstrapping
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using System.Security.Cryptography.X509Certificates;
     using System.Security.Principal;
     using System.Threading.Tasks;
     using BuildingBlocks;
@@ -249,11 +248,7 @@ namespace Backend.Fx.Bootstrapping
             return ScopedLifestyle.GetCurrentScope(Container);
         }
 
-        public void Dispose()
-        {
-            Container?.Dispose();
-        }
-
+        
         private class RuntimeScope : IRuntimeScope
         {
             private readonly SimpleInjectorRuntime runtime;
@@ -386,6 +381,20 @@ namespace Backend.Fx.Bootstrapping
                     scope.CompleteUnitOfWork();
                 }
             }
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Container?.Dispose();
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

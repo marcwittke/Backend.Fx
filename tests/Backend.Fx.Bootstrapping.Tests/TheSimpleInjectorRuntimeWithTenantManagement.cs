@@ -22,10 +22,25 @@
         }
 
         [Fact]
+        public void RunsNoDataGeneratorsOnTenantCreation()
+        {
+            sut.Boot();
+            TenantId tenantId = sut.TenantManager.CreateProductionTenant("prod", "unit test created", true);
+
+            using (var scope = sut.BeginScope(new SystemIdentity(), tenantId))
+            {
+                IRepository<AnAggregate> repository = scope.GetInstance<IRepository<AnAggregate>>();
+                AnAggregate[] allAggregates = repository.GetAll();
+                Assert.Equal(0, allAggregates.Length);
+            }
+        }
+
+        [Fact]
         public void RunsProductiveDataGeneratorsOnTenantInitialization()
         {
             sut.Boot();
             TenantId tenantId = sut.TenantManager.CreateProductionTenant("prod", "unit test created", true);
+            sut.TenantManager.EnsureTenantIsInitialized(tenantId);
 
             using (var scope = sut.BeginScope(new SystemIdentity(), tenantId))
             {
@@ -41,6 +56,7 @@
         {
             sut.Boot();
             TenantId tenantId = sut.TenantManager.CreateDemonstrationTenant("demo", "unit test created", true);
+            sut.TenantManager.EnsureTenantIsInitialized(tenantId);
 
             using (var scope = sut.BeginScope(new SystemIdentity(), tenantId))
             {

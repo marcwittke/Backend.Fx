@@ -1,6 +1,5 @@
 ﻿namespace Backend.Fx.Testing
 {
-    using System.Collections.Generic;
     using System.Linq;
     using BuildingBlocks;
     using Environment.MultiTenancy;
@@ -10,10 +9,12 @@
 
     public class InMemoryRepository<T> : Repository<T> where T : AggregateRoot
     {
-        public virtual Dictionary<int, T> Store { get; } = new Dictionary<int, T>();
+        public virtual IInMemoryStore<T> Store { get; }
 
-        public InMemoryRepository(ICurrentTHolder<TenantId> tenantIdHolder, IAggregateRootAuthorization<T> aggregateRootAuthorization) : base(tenantIdHolder, aggregateRootAuthorization)
-        {}
+        public InMemoryRepository(IInMemoryStore<T> store, ICurrentTHolder<TenantId> tenantIdHolder, IAggregateRootAuthorization<T> aggregateRootAuthorization) : base(tenantIdHolder, aggregateRootAuthorization)
+        {
+            Store = store;
+        }
 
         protected override IQueryable<T> RawAggregateQueryable
         {

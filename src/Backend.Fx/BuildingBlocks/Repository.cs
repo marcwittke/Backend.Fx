@@ -5,11 +5,13 @@
     using System.Linq;
     using Environment.MultiTenancy;
     using Exceptions;
+    using Logging;
     using Patterns.Authorization;
     using Patterns.DependencyInjection;
 
     public abstract class Repository<TAggregateRoot> : IRepository<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
+        private static readonly ILogger Logger = LogManager.Create<Repository<TAggregateRoot>>();
         private readonly IAggregateRootAuthorization<TAggregateRoot> aggregateRootAuthorization;
         private readonly ICurrentTHolder<TenantId> tenantIdHolder;
 
@@ -44,6 +46,7 @@
 
         public TAggregateRoot Single(int id)
         {
+            Logger.Debug($"Removing {AggregateTypeName}[{id}]");
             var aggregateRoot = AggregateQueryable.SingleOrDefault(aggr => aggr.Id.Equals(id));
             if (aggregateRoot == null)
             {

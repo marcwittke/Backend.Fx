@@ -1,6 +1,5 @@
 ﻿namespace Backend.Fx.Testing
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using Environment.MultiTenancy;
@@ -8,13 +7,10 @@
 
     public class InMemoryTenantManager : TenantManager
     {
-        [ThreadStatic]
-        private static Dictionary<int, Tenant> store;
-        
+        private readonly Dictionary<int, Tenant> store = new Dictionary<int, Tenant>();
+
         public InMemoryTenantManager(ITenantInitializer tenantInitializer) : base(tenantInitializer)
-        {
-            store = store ?? new Dictionary<int, Tenant>();
-        }
+        {}
 
         public override TenantId[] GetTenantIds()
         {

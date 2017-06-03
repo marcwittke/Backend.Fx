@@ -7,6 +7,7 @@ namespace Backend.Fx.Bootstrapping.Tests
     using Environment.Persistence;
     using FakeItEasy;
     using NLogLogging;
+    using Testing;
     using Xunit;
 
     public class TheMisconfiguredSimpleInjectorRuntime : IClassFixture<NLogLoggingFixture>

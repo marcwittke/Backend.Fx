@@ -3,6 +3,7 @@
     using System.Linq;
     using BuildingBlocks;
     using Environment.MultiTenancy;
+    using Logging;
     using Microsoft.EntityFrameworkCore;
     using Patterns.Authorization;
     using Patterns.DependencyInjection;
@@ -10,7 +11,7 @@
 
     public class EfRepository<TAggregateRoot> : Repository<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
-    
+        private static readonly ILogger Logger = LogManager.Create<EfRepository<TAggregateRoot>>();
         private readonly ICanFlush canFlush;
         private readonly DbContext dbContext;
         private readonly IAggregateRootMapping<TAggregateRoot> aggregateRootMapping;
@@ -26,6 +27,7 @@
         
         protected override void AddPersistent(TAggregateRoot aggregateRoot)
         {
+            Logger.Debug($"Persistently adding new {AggregateTypeName}");
             dbContext.Set<TAggregateRoot>().Add(aggregateRoot);
             // to enforce early id generation. We're inside a transaction, therefore it isn't dangerous to call Flush
             canFlush.Flush();
@@ -33,6 +35,7 @@
 
         protected override void DeletePersistent(TAggregateRoot aggregateRoot)
         {
+            Logger.Debug($"Persistently removing {aggregateRoot.DebuggerDisplay}");
             dbContext.Set<TAggregateRoot>().Remove(aggregateRoot);
         }
 

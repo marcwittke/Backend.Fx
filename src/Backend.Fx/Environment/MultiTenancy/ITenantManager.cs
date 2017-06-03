@@ -106,7 +106,6 @@
 
             Tenant tenant = new Tenant(name, description, isDemo) { IsActive = true, IsDefault = isDefault };
             SaveTenant(tenant);
-            InitializeTenant(tenant);
             return new TenantId(tenant.Id);
         }
 
