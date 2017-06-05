@@ -11,7 +11,7 @@ namespace Backend.Fx.AspNetCore.Middlewares
     public class VersionHeaderMiddleware
     {
         private readonly RequestDelegate next;
-        private readonly Version currentVersion = typeof(VersionHeaderMiddleware).GetTypeInfo().Assembly.GetName().Version;
+        private readonly Version currentVersion = Assembly.GetEntryAssembly().GetName().Version;
 
         /// <summary>
         ///     This constructor is being called by the framework DI container

@@ -33,11 +33,11 @@
             }
         }
 
-        public IEnumerable<Task> PublishIntegrationEvent<TIntegrationEvent>(TIntegrationEvent integrationEvent) where TIntegrationEvent : IIntegrationEvent
+        public Task PublishIntegrationEvent<TIntegrationEvent>(TIntegrationEvent integrationEvent) where TIntegrationEvent : IIntegrationEvent
         {
-            foreach (var subscribedHandler in subscribedEventHandlers.OfType<Action<TIntegrationEvent>>())
+            return Task.Factory.StartNew(() =>
             {
-                yield return Task.Factory.StartNew(() =>
+                foreach (var subscribedHandler in subscribedEventHandlers.OfType<Action<TIntegrationEvent>>().ToArray())
                 {
                     try
                     {
@@ -47,8 +47,9 @@
                     {
                         Logger.Error(ex, $"Handling of integration event {typeof(TIntegrationEvent).Name} by a subscribed handler failed.");
                     }
-                });
-            }
+
+                }
+            });
         }
 
         public void SubscribeToIntegrationEvent<TIntegrationEvent>(Action<TIntegrationEvent> handler) where TIntegrationEvent : IIntegrationEvent

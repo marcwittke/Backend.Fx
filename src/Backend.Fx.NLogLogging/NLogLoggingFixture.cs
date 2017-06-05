@@ -12,9 +12,17 @@
     /// </summary>
     public class NLogLoggingFixture
     {
+        private static bool isConfigured;
         public NLogLoggingFixture()
         {
-            ConfigureNLogForTests();
+            lock (this)
+            {
+                if (!isConfigured)
+                {
+                    ConfigureNLogForTests();
+                    isConfigured = true;
+                }
+            }
         }
 
         public static void ConfigureNLogForTests()

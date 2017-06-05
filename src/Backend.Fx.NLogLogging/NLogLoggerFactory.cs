@@ -19,8 +19,7 @@
 
         public void BeginActivity(int activityIndex)
         {
-            //TODO should use MappedDiagnosticsLogicalContext, when released: https://github.com/NLog/NLog/issues/1729
-            NLog.MappedDiagnosticsContext.Set("Activity", activityIndex);
+            NLog.MappedDiagnosticsLogicalContext.Set("Activity", activityIndex);
         }
     }
 }

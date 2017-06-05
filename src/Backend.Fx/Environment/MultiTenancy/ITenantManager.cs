@@ -1,6 +1,7 @@
 ﻿namespace Backend.Fx.Environment.MultiTenancy
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using JetBrains.Annotations;
     using Logging;
@@ -20,6 +21,7 @@
         private static readonly ILogger Logger = LogManager.Create<TenantManager>();
         private readonly ITenantInitializer tenantInitializer;
         private readonly object syncLock = new object();
+        private readonly HashSet<int> initializedTenants = new HashSet<int>();
 
         protected TenantManager(ITenantInitializer tenantInitializer)
         {
@@ -55,6 +57,7 @@
             {
                 tenantInitializer.RunDemoInitialDataGenerators(tenantId);
             }
+            tenant.IsInitialized = true;
         }
 
         public abstract TenantId[] GetTenantIds();
@@ -80,6 +83,11 @@
 
         public void EnsureTenantIsInitialized(TenantId tenantId)
         {
+            if (initializedTenants.Contains(tenantId.Value))
+            {
+                return;
+            }
+
             Tenant tenant = FindTenant(tenantId);
 
             if (tenant == null)
@@ -88,9 +96,8 @@
             }
 
             InitializeTenant(tenant);
-
-            tenant.IsInitialized = true;
             SaveTenant(tenant);
+            initializedTenants.Add(tenantId.Value);
         }
 
         protected abstract Tenant FindTenant(TenantId tenantId);
