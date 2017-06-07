@@ -3,10 +3,9 @@
     using System.Collections.Generic;
     using System.Linq;
     using Fx.Extensions;
-    using NLogLogging;
     using Xunit;
 
-    public class TheEnumerableEx : IClassFixture<NLogLoggingFixture>
+    public class TheEnumerableEx
     {
         private class Item
         {

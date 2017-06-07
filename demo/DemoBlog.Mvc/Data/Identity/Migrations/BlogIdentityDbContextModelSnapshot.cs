@@ -2,8 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
-using DemoBlog.Mvc.Data.Identity;
 
 namespace DemoBlog.Mvc.Data.Identity.Migrations
 {

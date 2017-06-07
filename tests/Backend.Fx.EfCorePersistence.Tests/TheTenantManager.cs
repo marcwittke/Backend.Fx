@@ -5,10 +5,9 @@
     using DummyImpl;
     using Environment.MultiTenancy;
     using FakeItEasy;
-    using NLogLogging;
     using Xunit;
 
-    public class TheTenantManager : TestWithInMemorySqliteDbContext, IClassFixture<NLogLoggingFixture>
+    public class TheTenantManager : TestWithInMemorySqliteDbContext
     {
         private readonly MyTenantManager sut;
 

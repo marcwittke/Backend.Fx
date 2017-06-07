@@ -4,11 +4,10 @@
     using System.Collections.Generic;
     using System.Threading;
     using Fx.Environment.DateAndTime;
-    using NLogLogging;
     using Testing;
     using Xunit;
 
-    public class TheWallClock : IClassFixture<NLogLoggingFixture>
+    public class TheWallClock
     {
         private readonly IEqualityComparer<DateTime?> tolerantDateTimeComparer = new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(10));
 

@@ -7,7 +7,7 @@
     using Backend.Fx.Environment.Authentication;
     using Backend.Fx.Patterns.Authorization;
 
-    public class BlogAuthorization : IAggregateRootAuthorization<Blog>
+    public class BlogAuthorization : IAggregateAuthorization<Blog>
     {
         private readonly IIdentity identity;
 
@@ -20,8 +20,8 @@
         {
             get { return blog => true; }
         }
-
-        public bool CanCreate()
+        
+        public bool CanCreate(Blog blog)
         {
             if (identity is SystemIdentity)
             {

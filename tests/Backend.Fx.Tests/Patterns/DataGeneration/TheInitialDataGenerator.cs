@@ -1,10 +1,9 @@
 ﻿namespace Backend.Fx.Tests.Patterns.DataGeneration
 {
     using Fx.Patterns.DataGeneration;
-    using NLogLogging;
     using Xunit;
 
-    public class AnInitialDataGenerator : InitialDataGenerator,IClassFixture<NLogLoggingFixture>
+    public class AnInitialDataGenerator : InitialDataGenerator
     {
 
         public bool ShouldRunOverride { get; set; }

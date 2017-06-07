@@ -75,7 +75,7 @@
 
         public void Add(TAggregateRoot aggregateRoot)
         {
-            if (aggregateAuthorization.CanCreate() && aggregateAuthorization.CanCreate(aggregateRoot))
+            if (aggregateAuthorization.CanCreate(aggregateRoot))
             {
                 aggregateRoot.TenantId = tenantId.Value;
                 AddPersistent(aggregateRoot);

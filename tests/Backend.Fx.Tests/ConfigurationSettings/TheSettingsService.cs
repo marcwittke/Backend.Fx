@@ -5,12 +5,11 @@
     using Fx.ConfigurationSettings;
     using Fx.Environment.MultiTenancy;
     using Fx.Patterns.Authorization;
-    using Fx.Patterns.DependencyInjection;
-    using NLogLogging;
     using Testing;
+    using Testing.InMemoryPersistence;
     using Xunit;
 
-    public class TheSettingsService : IClassFixture<NLogLoggingFixture>
+    public class TheSettingsService
     {
         public class MySettingsService : SettingsService
         {
@@ -34,20 +33,16 @@
 
         public TheSettingsService()
         {
-            var tenantHolder = A.Fake<ICurrentTHolder<TenantId>>();
-            A.CallTo(() => tenantHolder.Current).Returns(new TenantId(999));
-
-            var settingAuthorization = A.Fake<IAggregateRootAuthorization<Setting>>();
+            var settingAuthorization = A.Fake<IAggregateAuthorization<Setting>>();
             A.CallTo(() => settingAuthorization.HasAccessExpression).Returns(setting => true);
-            A.CallTo(() => settingAuthorization.CanCreate()).Returns(true);
-            settingRepository = new InMemoryRepository<Setting>(new InMemoryStore<Setting>(), tenantHolder, settingAuthorization);
+            A.CallTo(() => settingAuthorization.CanCreate(A<Setting>._)).Returns(true);
+            settingRepository = new InMemoryRepository<Setting>(new InMemoryStore<Setting>(), new TenantId(999), settingAuthorization);
         }
 
         [Fact]
         public void StoresSettingsInRepository()
         {
-            MySettingsService sut = new MySettingsService(settingRepository);
-            sut.SmtpPort = 333;
+            MySettingsService sut = new MySettingsService(settingRepository) {SmtpPort = 333};
             Assert.Equal(333, sut.SmtpPort);
 
             Setting[] settings = settingRepository.GetAll();

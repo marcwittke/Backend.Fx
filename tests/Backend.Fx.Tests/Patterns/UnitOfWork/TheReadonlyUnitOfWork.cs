@@ -1,9 +1,8 @@
 ﻿namespace Backend.Fx.Tests.Patterns.UnitOfWork
 {
-    using NLogLogging;
     using Xunit;
 
-    public class TheReadonlyUnitOfWork: IClassFixture<NLogLoggingFixture>
+    public class TheReadonlyUnitOfWork
     {
         [Fact]
         public void RollsBackOnComplete()

@@ -5,11 +5,9 @@
     using System.Threading.Tasks;
     using Backend.Fx.Environment.MultiTenancy;
     using Backend.Fx.Patterns.DependencyInjection;
-    using Data;
     using Data.Identity;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.Rendering;
     using Microsoft.Extensions.Logging;

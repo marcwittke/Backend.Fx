@@ -2,10 +2,9 @@
 {
     using System;
     using Fx.Extensions;
-    using NLogLogging;
     using Xunit;
 
-    public class TheDateTimeEx : IClassFixture<NLogLoggingFixture>
+    public class TheDateTimeEx
     {
         [Fact]
         public void CanConvertToUnixEpochDate()

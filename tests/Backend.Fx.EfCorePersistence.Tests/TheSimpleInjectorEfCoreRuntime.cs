@@ -7,10 +7,9 @@
     using DummyImpl;
     using Environment.MultiTenancy;
     using Microsoft.EntityFrameworkCore;
-    using NLogLogging;
     using Xunit;
 
-    public class TheSimpleInjectorEfCoreRuntime : IClassFixture<NLogLoggingFixture>
+    public class TheSimpleInjectorEfCoreRuntime
     {
         private readonly SimpleInjectorRuntime sut;
         private readonly DbContextOptions dbContextOptions;

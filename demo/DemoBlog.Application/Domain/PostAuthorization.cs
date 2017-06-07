@@ -7,7 +7,7 @@ namespace DemoBlog.Domain
     using Backend.Fx.Environment.Authentication;
     using Backend.Fx.Patterns.Authorization;
 
-    public class PostAuthorization : IAggregateRootAuthorization<Post>
+    public class PostAuthorization : IAggregateAuthorization<Post>
     {
         private readonly IIdentity identity;
 
@@ -21,7 +21,7 @@ namespace DemoBlog.Domain
             get { return blogger => true; }
         }
 
-        public bool CanCreate()
+        public bool CanCreate(Post post)
         {
             if (identity is SystemIdentity)
             {

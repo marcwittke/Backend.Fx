@@ -2,7 +2,6 @@
 {
     using System;
     using Fx.Extensions;
-    using NLogLogging;
     using Xunit;
 
     public enum AnEnum
@@ -12,7 +11,7 @@
         Three
     }
 
-    public class TheStringEnumUtil : IClassFixture<NLogLoggingFixture>
+    public class TheStringEnumUtil
     {
         [Theory]
         [InlineData("One")]

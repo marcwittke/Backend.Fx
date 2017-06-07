@@ -4,11 +4,10 @@
     using System.Collections.Generic;
     using System.Linq;
     using Fx.BuildingBlocks;
-    using NLogLogging;
     using RandomData;
     using Xunit;
 
-    public class TheAggregateRoot : IClassFixture<NLogLoggingFixture>
+    public class TheAggregateRoot
     {
         public class TestAggregateRoot : AggregateRoot
         {

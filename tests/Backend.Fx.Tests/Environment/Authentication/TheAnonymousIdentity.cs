@@ -1,10 +1,9 @@
 ﻿namespace Backend.Fx.Tests.Environment.Authentication
 {
     using Fx.Environment.Authentication;
-    using NLogLogging;
     using Xunit;
 
-    public class TheAnonymousIdentity : IClassFixture<NLogLoggingFixture>
+    public class TheAnonymousIdentity
     {
         [Fact]
         public void IsNotAuthenticated()

@@ -1,7 +1,6 @@
 namespace Backend.Fx.Bootstrapping.Tests.DummyImpl
 {
     using System;
-    using System.Collections.Generic;
     using System.Reflection;
     using BuildingBlocks;
     using Environment.DateAndTime;
@@ -11,7 +10,7 @@ namespace Backend.Fx.Bootstrapping.Tests.DummyImpl
     using Patterns.DependencyInjection;
     using Patterns.UnitOfWork;
     using SimpleInjector;
-    using Testing;
+    using Testing.InMemoryPersistence;
 
     public class TestUnitOfWorkFactory
     {

@@ -1,10 +1,9 @@
 ﻿namespace Backend.Fx.Tests.Environment.MultiTenancy
 {
     using Fx.Environment.MultiTenancy;
-    using NLogLogging;
     using Xunit;
 
-    public class TheCurrentTenantIdHolder : IClassFixture<NLogLoggingFixture>
+    public class TheCurrentTenantIdHolder
     {
         [Fact]
         public void InitializesWithNullTenantIdIdentity()

@@ -1,10 +1,9 @@
 ﻿namespace Backend.Fx.Tests.Environment.Authentication
 {
     using Fx.Environment.Authentication;
-    using NLogLogging;
     using Xunit;
 
-    public class TheSystemIdentity : IClassFixture<NLogLoggingFixture>
+    public class TheSystemIdentity
     {
         [Fact]
         public void IsAuthenticated()

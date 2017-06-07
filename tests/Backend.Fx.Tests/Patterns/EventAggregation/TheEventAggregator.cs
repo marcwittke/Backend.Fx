@@ -1,15 +1,12 @@
 ﻿namespace Backend.Fx.Tests.Patterns.EventAggregation
 {
     using System;
-    using System.Linq;
-    using System.Threading.Tasks;
     using FakeItEasy;
     using Fx.Patterns.EventAggregation;
-    using NLogLogging;
     using Xunit;
 
 
-    public class TheEventAggregator: IClassFixture<NLogLoggingFixture>
+    public class TheEventAggregator
     {
         [Fact]
         public void CallsAllDomainEventHandlers()
@@ -46,7 +43,7 @@
             sut.SubscribeToIntegrationEvent<TestIntegrationEvent>(evt => forwardedEvent1 = evt);
             sut.SubscribeToIntegrationEvent<TestIntegrationEvent>(evt => forwardedEvent2 = evt);
 
-            Task.WaitAll(sut.PublishIntegrationEvent(new TestIntegrationEvent(4711, 22)).ToArray());
+            sut.PublishIntegrationEvent(new TestIntegrationEvent(4711, 22)).Wait();
 
             Assert.NotNull(forwardedEvent1);
             Assert.Equal(4711, forwardedEvent1.Id);
@@ -82,7 +79,7 @@
                 throw new NotSupportedException("boum");
             });
 
-            Task.WaitAll(sut.PublishIntegrationEvent(new TestIntegrationEvent(4711, 22)).ToArray());
+            sut.PublishIntegrationEvent(new TestIntegrationEvent(4711, 22)).Wait();
 
             Assert.True(itHappened);
         }

@@ -3,10 +3,9 @@
     using DummyImpl;
     using Environment.Authentication;
     using Environment.DateAndTime;
-    using NLogLogging;
     using Xunit;
 
-    public class TheEfUnitOfWork : TestWithInMemorySqliteDbContext, IClassFixture<NLogLoggingFixture>
+    public class TheEfUnitOfWork : TestWithInMemorySqliteDbContext
     {
     
         public TheEfUnitOfWork()

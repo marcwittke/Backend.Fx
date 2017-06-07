@@ -7,24 +7,19 @@
     using Fx.Environment.MultiTenancy;
     using Fx.Exceptions;
     using Fx.Patterns.Authorization;
-    using Fx.Patterns.DependencyInjection;
-    using NLogLogging;
-    using Testing;
+    using Testing.InMemoryPersistence;
     using Xunit;
 
-    public class TheRepository : IClassFixture<NLogLoggingFixture>
+    public class TheRepository
     {
         [Fact]
         public void ReturnsByIdOnSingle()
         {
-            var tenantHolder = A.Fake<ICurrentTHolder<TenantId>>();
-            A.CallTo(() => tenantHolder.Current).Returns(new TenantId(234));
-
-            var authorization = A.Fake<IAggregateRootAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
-            A.CallTo(() => authorization.CanCreate()).Returns(false);
+            A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(false);
 
-            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), tenantHolder, authorization);
+            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
             var agg1 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 23, TenantId = 234 };
             var agg2 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 24, TenantId = 234 };
             var agg3 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 25, TenantId = 234 };
@@ -45,14 +40,11 @@
         [Fact]
         public void ReturnsByIdOnSingleOrDefault()
         {
-            var tenantHolder = A.Fake<ICurrentTHolder<TenantId>>();
-            A.CallTo(() => tenantHolder.Current).Returns(new TenantId(234));
-
-            var authorization = A.Fake<IAggregateRootAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
-            A.CallTo(() => authorization.CanCreate()).Returns(false);
+            A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(false);
 
-            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), tenantHolder, authorization);
+            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
             var agg1 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 23, TenantId = 234 };
             var agg2 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 24, TenantId = 234 };
             var agg3 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 25, TenantId = 234 };
@@ -73,14 +65,11 @@
         [Fact]
         public void ProvidesCorrectAny()
         {
-            var tenantHolder = A.Fake<ICurrentTHolder<TenantId>>();
-            A.CallTo(() => tenantHolder.Current).Returns(new TenantId(234));
-
-            var authorization = A.Fake<IAggregateRootAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
-            A.CallTo(() => authorization.CanCreate()).Returns(false);
+            A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(false);
 
-            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), tenantHolder, authorization);
+            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
             Assert.False(sut.Any());
 
             var agg1 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 23, TenantId = 234 };
@@ -97,128 +86,110 @@
         }
 
         [Fact]
-        public void ThrowsOnAddWhenTenantIdHolderIsEmpty()
+        public void ThrowsOnAddWhenTenantIdIsEmpty()
         {
-            var tenantHolder = A.Fake<ICurrentTHolder<TenantId>>();
-            A.CallTo(() => tenantHolder.Current).Returns(new TenantId(null));
-
-            var authorization = A.Fake<IAggregateRootAuthorization<TheAggregateRoot.TestAggregateRoot>>();
-            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), tenantHolder, authorization);
+            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(null), authorization);
 
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
-            A.CallTo(() => authorization.CanCreate()).Returns(true);
+            A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
             Assert.Throws<InvalidOperationException>(() => sut.Add(new TheAggregateRoot.TestAggregateRoot("whatever")));
 
             // even when I don't have permissions
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => false);
-            A.CallTo(() => authorization.CanCreate()).Returns(false);
-            Assert.Throws<InvalidOperationException>(() => sut.Add(new TheAggregateRoot.TestAggregateRoot("whatever")));
+            A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(false);
+            Assert.Throws<SecurityException>(() => sut.Add(new TheAggregateRoot.TestAggregateRoot("whatever")));
         }
 
         [Fact]
         public void ThrowsOnDeleteWhenTenantIdHolderIsEmpty()
         {
-            var tenantHolder = A.Fake<ICurrentTHolder<TenantId>>();
-
-            var authorization = A.Fake<IAggregateRootAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
-            A.CallTo(() => authorization.CanCreate()).Returns(true);
+            A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
 
-            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), tenantHolder, authorization);
+            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(null), authorization);
 
             var agg1 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 12123123, TenantId = 234 };
             sut.Store.Add(agg1.Id, agg1);
 
-            A.CallTo(() => tenantHolder.Current).Returns(new TenantId(null));
             Assert.Throws<InvalidOperationException>(() => sut.Delete(agg1));
         }
 
         [Fact]
         public void ReturnsEmptyWhenTenantIdHolderIsEmpty()
         {
-            var tenantHolder = A.Fake<ICurrentTHolder<TenantId>>();
-            A.CallTo(() => tenantHolder.Current).Returns(new TenantId(null));
-
-            var authorization = A.Fake<IAggregateRootAuthorization<TheAggregateRoot.TestAggregateRoot>>();
-            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), tenantHolder, authorization);
+            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(null), authorization);
 
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
-            A.CallTo(() => authorization.CanCreate()).Returns(true);
+            A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
             Assert.Empty(sut.AggregateQueryable);
         }
 
         [Fact]
         public void MaintainsTenantIdOnAdd()
         {
-            var authorization = A.Fake<IAggregateRootAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
-            A.CallTo(() => authorization.CanCreate()).Returns(true);
+            A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
 
-            var tenantHolder = A.Fake<ICurrentTHolder<TenantId>>();
-            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), tenantHolder, authorization);
+            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
 
-            A.CallTo(() => tenantHolder.Current).Returns(new TenantId(234));
             var agg1 = new TheAggregateRoot.TestAggregateRoot("1");
             sut.Add(agg1);
             Assert.Equal(234, agg1.TenantId);
-
-            A.CallTo(() => tenantHolder.Current).Returns(new TenantId(235));
-            var agg2 = new TheAggregateRoot.TestAggregateRoot("2");
-            sut.Add(agg2);
-            Assert.Equal(235, agg2.TenantId);
         }
 
         [Fact]
         public void DoesNotReturnItemsFromOtherTenants()
         {
-            var authorization = A.Fake<IAggregateRootAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
-            A.CallTo(() => authorization.CanCreate()).Returns(true);
+            A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
 
-            var tenantHolder = A.Fake<ICurrentTHolder<TenantId>>();
-            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), tenantHolder, authorization);
+            var store = new InMemoryStore<TheAggregateRoot.TestAggregateRoot>();
+            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(store, new TenantId(234), authorization);
 
-            A.CallTo(() => tenantHolder.Current).Returns(new TenantId(234));
             sut.Add(new TheAggregateRoot.TestAggregateRoot("1"));
             sut.Add(new TheAggregateRoot.TestAggregateRoot("2"));
             sut.Add(new TheAggregateRoot.TestAggregateRoot("3"));
 
             // now I am in another tenant
-            A.CallTo(() => tenantHolder.Current).Returns(new TenantId(233));
+            sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(store, new TenantId(233), authorization);
             Assert.Empty(sut.AggregateQueryable);
         }
 
         [Fact]
         public void ReturnsOnlyItemsFromMyTenant()
         {
-            var tenantHolder = A.Fake<ICurrentTHolder<TenantId>>();
-            var authorization = A.Fake<IAggregateRootAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
-            A.CallTo(() => authorization.CanCreate()).Returns(true);
+            A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
 
-            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), tenantHolder, authorization);
             var agg1 = new TheAggregateRoot.TestAggregateRoot("1");
             var agg2 = new TheAggregateRoot.TestAggregateRoot("2");
             var agg3 = new TheAggregateRoot.TestAggregateRoot("3");
             var agg4 = new TheAggregateRoot.TestAggregateRoot("4");
             var agg5 = new TheAggregateRoot.TestAggregateRoot("5");
 
-            A.CallTo(() => tenantHolder.Current).Returns(new TenantId(234));
+            var store = new InMemoryStore<TheAggregateRoot.TestAggregateRoot>();
+            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(store, new TenantId(234), authorization);
             sut.Add(agg1);
             sut.Add(agg2);
             sut.Add(agg3);
 
-            A.CallTo(() => tenantHolder.Current).Returns(new TenantId(567));
+            sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(store, new TenantId(567), authorization);
             sut.Add(agg4);
             sut.Add(agg5);
 
-            A.CallTo(() => tenantHolder.Current).Returns(new TenantId(234));
+            sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(store, new TenantId(234), authorization);
             Assert.Equal(3, sut.AggregateQueryable.Count());
             Assert.Contains(agg1, sut.AggregateQueryable);
             Assert.Contains(agg2, sut.AggregateQueryable);
             Assert.Contains(agg3, sut.AggregateQueryable);
 
-            A.CallTo(() => tenantHolder.Current).Returns(new TenantId(567));
+            sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(store, new TenantId(567), authorization);
             Assert.Equal(2, sut.AggregateQueryable.Count());
             Assert.Contains(agg4, sut.AggregateQueryable);
             Assert.Contains(agg5, sut.AggregateQueryable);
@@ -227,18 +198,16 @@
         [Fact]
         public void DeletesItemFromMyTenant()
         {
-            var tenantHolder = A.Fake<ICurrentTHolder<TenantId>>();
 
-            var authorization = A.Fake<IAggregateRootAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
-            A.CallTo(() => authorization.CanCreate()).Returns(true);
+            A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
 
-            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), tenantHolder, authorization);
+            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
 
             var agg1 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 12123123, TenantId = 234 };
             sut.Store.Add(agg1.Id, agg1);
 
-            A.CallTo(() => tenantHolder.Current).Returns(new TenantId(234));
             sut.Delete(agg1);
 
             Assert.Empty(sut.Store);
@@ -247,14 +216,11 @@
         [Fact]
         public void ReturnsAll()
         {
-            var tenantHolder = A.Fake<ICurrentTHolder<TenantId>>();
-            A.CallTo(() => tenantHolder.Current).Returns(new TenantId(234));
-
-            var authorization = A.Fake<IAggregateRootAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
-            A.CallTo(() => authorization.CanCreate()).Returns(true);
+            A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
 
-            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), tenantHolder, authorization);
+            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
             var agg1 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 12123123, TenantId = 234 };
             var agg2 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 12123124, TenantId = 234 };
             var agg3 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 12123125, TenantId = 234 };
@@ -275,14 +241,11 @@
         [Fact]
         public void CanResolveListOfIds()
         {
-            var tenantHolder = A.Fake<ICurrentTHolder<TenantId>>();
-            A.CallTo(() => tenantHolder.Current).Returns(new TenantId(234));
-
-            var authorization = A.Fake<IAggregateRootAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
-            A.CallTo(() => authorization.CanCreate()).Returns(true);
+            A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
 
-            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), tenantHolder, authorization);
+            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
             var agg1 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 23, TenantId = 234 };
             var agg2 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 24, TenantId = 234 };
             var agg3 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 25, TenantId = 234 };
@@ -304,14 +267,11 @@
         [Fact]
         public void ThrowsOnResolveWhenTenantDoesNotMatch()
         {
-            var tenantHolder = A.Fake<ICurrentTHolder<TenantId>>();
-            A.CallTo(() => tenantHolder.Current).Returns(new TenantId(234));
-
-            var authorization = A.Fake<IAggregateRootAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
-            A.CallTo(() => authorization.CanCreate()).Returns(true);
+            A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
 
-            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), tenantHolder, authorization);
+            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
             var agg1 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 23, TenantId = 234 };
             var agg2 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 24, TenantId = 234 };
             var agg3 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 25, TenantId = 234 };
@@ -328,14 +288,11 @@
         [Fact]
         public void ThrowsOnDeleteWhenTenantDoesNotMatch()
         {
-            var tenantHolder = A.Fake<ICurrentTHolder<TenantId>>();
-            A.CallTo(() => tenantHolder.Current).Returns(new TenantId(234));
-
-            var authorization = A.Fake<IAggregateRootAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
-            A.CallTo(() => authorization.CanCreate()).Returns(true);
+            A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
 
-            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), tenantHolder, authorization);
+            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
             var agg1 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 23, TenantId = 234 };
             var agg2 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 24, TenantId = 234 };
             var agg3 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 25, TenantId = 234 };
@@ -352,28 +309,22 @@
         [Fact]
         public void ThrowsOnAddWhenUnauthorized()
         {
-            var tenantHolder = A.Fake<ICurrentTHolder<TenantId>>();
-            A.CallTo(() => tenantHolder.Current).Returns(new TenantId(234));
-
-            var authorization = A.Fake<IAggregateRootAuthorization<TheAggregateRoot.TestAggregateRoot>>();
-            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), tenantHolder, authorization);
+            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
 
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
-            A.CallTo(() => authorization.CanCreate()).Returns(false);
+            A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(false);
             Assert.Throws<SecurityException>(() => sut.Add(new TheAggregateRoot.TestAggregateRoot("whatever")));
         }
 
         [Fact]
         public void ReturnsOnlyAuthorizedRecords()
         {
-            var tenantHolder = A.Fake<ICurrentTHolder<TenantId>>();
-            A.CallTo(() => tenantHolder.Current).Returns(new TenantId(234));
-
-            var authorization = A.Fake<IAggregateRootAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => agg.Id == 25 || agg.Id == 26);
-            A.CallTo(() => authorization.CanCreate()).Returns(false);
+            A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(false);
 
-            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), tenantHolder, authorization);
+            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
             var agg1 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 23, TenantId = 234 };
             var agg2 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 24, TenantId = 234 };
             var agg3 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 25, TenantId = 234 };
@@ -395,14 +346,11 @@
         [Fact]
         public void AcceptsNullArrayToResolve()
         {
-            var tenantHolder = A.Fake<ICurrentTHolder<TenantId>>();
-            A.CallTo(() => tenantHolder.Current).Returns(new TenantId(234));
-
-            var authorization = A.Fake<IAggregateRootAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
-            A.CallTo(() => authorization.CanCreate()).Returns(true);
+            A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
 
-            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), tenantHolder, authorization);
+            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
             Assert.Empty(sut.Resolve(null));
         }
     }

@@ -15,6 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Backend.Fx.Bootstrapping\Backend.Fx.Bootstrapping.csproj" />
     <ProjectReference Include="..\..\src\Backend.Fx.NLogLogging\Backend.Fx.NLogLogging.csproj" />
+    <ProjectReference Include="..\..\src\Backend.Fx.Testing\Backend.Fx.Testing.csproj" />
   </ItemGroup>
 
   <ItemGroup>

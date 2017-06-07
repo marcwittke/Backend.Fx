@@ -7,7 +7,7 @@
     using Backend.Fx.Environment.Authentication;
     using Backend.Fx.Patterns.Authorization;
 
-    public class BloggerAuthorization : IAggregateRootAuthorization<Blogger>
+    public class BloggerAuthorization : IAggregateAuthorization<Blogger>
     {
         private readonly IIdentity identity;
 
@@ -21,7 +21,7 @@
             get { return blogger => true; }
         }
 
-        public bool CanCreate()
+        public bool CanCreate(Blogger t)
         {
             if (identity is SystemIdentity)
             {

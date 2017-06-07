@@ -3,10 +3,9 @@
     using System;
     using BuildingBlocks;
     using Fx.Exceptions;
-    using NLogLogging;
     using Xunit;
 
-    public class TheUnprocessableExceptionBuilder : IClassFixture<NLogLoggingFixture>
+    public class TheUnprocessableExceptionBuilder
     {
         [Fact]
         public void CatchesExceptionInAction()

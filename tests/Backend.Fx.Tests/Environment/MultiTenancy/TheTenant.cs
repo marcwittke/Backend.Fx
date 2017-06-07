@@ -2,10 +2,9 @@
 {
     using System;
     using Fx.Environment.MultiTenancy;
-    using NLogLogging;
     using Xunit;
 
-    public class TheTenant : IClassFixture<NLogLoggingFixture>
+    public class TheTenant
     {
         [Fact]
         public void InitializesCorrectly()

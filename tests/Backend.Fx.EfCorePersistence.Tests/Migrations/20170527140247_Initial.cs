@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Backend.Fx.EfCorePersistence.Tests.Migrations

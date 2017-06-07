@@ -8,12 +8,7 @@
         {
             get { return agg => true; }
         }
-
-        public bool CanCreate()
-        {
-            return true;
-        }
-
+        
         public bool CanCreate(TAggregateRoot t)
         {
             return true;

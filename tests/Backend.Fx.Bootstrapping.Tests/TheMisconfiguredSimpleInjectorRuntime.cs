@@ -6,11 +6,9 @@ namespace Backend.Fx.Bootstrapping.Tests
     using Environment.MultiTenancy;
     using Environment.Persistence;
     using FakeItEasy;
-    using NLogLogging;
-    using Testing;
     using Xunit;
 
-    public class TheMisconfiguredSimpleInjectorRuntime : IClassFixture<NLogLoggingFixture>
+    public class TheMisconfiguredSimpleInjectorRuntime
     {
         [Fact]
         public void ThrowsOnValidation()

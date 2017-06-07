@@ -3,10 +3,9 @@ namespace Backend.Fx.Tests.Environment.DateAndTime
     using System;
     using System.Threading;
     using Fx.Environment.DateAndTime;
-    using NLogLogging;
     using Xunit;
 
-    public class TheClock : IClassFixture<NLogLoggingFixture>
+    public class TheClock
     {
         private const int BuenosAiresUtcOffset = -180;
         [Fact]

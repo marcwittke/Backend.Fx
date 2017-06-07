@@ -6,10 +6,9 @@
     using Environment.Persistence;
     using Microsoft.Data.Sqlite;
     using Microsoft.EntityFrameworkCore;
-    using NLogLogging;
     using Xunit;
 
-    public class TheDatabaseManager : IClassFixture<NLogLoggingFixture>
+    public class TheDatabaseManager
     {
         private readonly IDatabaseManager sut;
         private readonly DbContextOptions dbContextOptions;

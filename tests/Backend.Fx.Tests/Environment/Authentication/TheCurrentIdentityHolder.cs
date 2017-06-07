@@ -1,10 +1,9 @@
 ﻿namespace Backend.Fx.Tests.Environment.Authentication
 {
     using Fx.Environment.Authentication;
-    using NLogLogging;
     using Xunit;
 
-    public class TheCurrentIdentityHolder : IClassFixture<NLogLoggingFixture>
+    public class TheCurrentIdentityHolder
     {
         [Fact]
         public void InitializesWithAnonymousIdentity()

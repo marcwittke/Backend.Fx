@@ -1,18 +1,15 @@
 ﻿namespace Backend.Fx.Bootstrapping.Tests
 {
-    using System.Linq;
-    using System.Threading.Tasks;
     using BuildingBlocks;
     using DummyImpl;
     using Environment.Authentication;
     using Environment.MultiTenancy;
     using Environment.Persistence;
     using FakeItEasy;
-    using NLogLogging;
     using Patterns.EventAggregation;
     using Xunit;
 
-    public class TheSimpleInjectorRuntimeWithTenantManagement : IClassFixture<NLogLoggingFixture>
+    public class TheSimpleInjectorRuntimeWithTenantManagement
     {
         private readonly TestRuntime sut;
 
@@ -82,7 +79,7 @@
                 wasHandled = true;
             });
 
-            Task.WaitAll(sut.GetInstance<IEventAggregator>().PublishIntegrationEvent(new TheIntegrationEvent(tenantId.Value, 42)).ToArray());
+            sut.GetInstance<IEventAggregator>().PublishIntegrationEvent(new TheIntegrationEvent(tenantId.Value, 42)).Wait();
             Assert.True(wasHandled);
         }
     }
