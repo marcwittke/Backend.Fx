@@ -2,7 +2,7 @@
 {
     using BuildingBlocks;
 
-    public class AllowAll<TAggregateRoot> : IAggregateRootAuthorization<TAggregateRoot> where TAggregateRoot : AggregateRoot
+    public class AllowAll<TAggregateRoot> : IAggregateAuthorization<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
         public System.Linq.Expressions.Expression<System.Func<TAggregateRoot, bool>> HasAccessExpression
         {
@@ -10,6 +10,11 @@
         }
 
         public bool CanCreate()
+        {
+            return true;
+        }
+
+        public bool CanCreate(TAggregateRoot t)
         {
             return true;
         }

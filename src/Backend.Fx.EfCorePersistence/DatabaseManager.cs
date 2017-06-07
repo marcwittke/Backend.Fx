@@ -11,7 +11,7 @@
 
         public DatabaseManager(Func<TDbContext> dbContextFactory)
         {
-            this.DbContextFactory = dbContextFactory;
+            DbContextFactory = dbContextFactory;
         }
 
         public bool DatabaseExists { get; protected set; }

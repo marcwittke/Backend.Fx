@@ -17,6 +17,12 @@
             this.eventHandlerProvider = eventHandlerProvider;
         }
 
+        /// <summary>
+        /// Publish a domain event that is handled by all handlers synchronously in the same scope/transaction.
+        /// Possible exceptions are not caught, so that your action might fail due to a failing evennt handler.
+        /// </summary>
+        /// <typeparam name="TDomainEvent"></typeparam>
+        /// <param name="domainEvent"></param>
         public void PublishDomainEvent<TDomainEvent>(TDomainEvent domainEvent) where TDomainEvent : IDomainEvent
         {
             foreach (var injectedHandler in eventHandlerProvider.GetAllEventHandlers<TDomainEvent>())
@@ -33,6 +39,13 @@
             }
         }
 
+        /// <summary>
+        /// Publish an integration event that is handled asynchronously in a specific scope/transaction.
+        /// Possible exceptions are caught, logged and swallowed. Manual recovery is required.
+        /// </summary>
+        /// <typeparam name="TIntegrationEvent"></typeparam>
+        /// <param name="integrationEvent"></param>
+        /// <returns></returns>
         public Task PublishIntegrationEvent<TIntegrationEvent>(TIntegrationEvent integrationEvent) where TIntegrationEvent : IIntegrationEvent
         {
             return Task.Factory.StartNew(() =>
@@ -47,11 +60,15 @@
                     {
                         Logger.Error(ex, $"Handling of integration event {typeof(TIntegrationEvent).Name} by a subscribed handler failed.");
                     }
-
                 }
             });
         }
 
+        /// <summary>
+        /// Register a delegate that should be called asynchronously in a specific scope/transaction when the specific integration event is published.
+        /// </summary>
+        /// <typeparam name="TIntegrationEvent"></typeparam>
+        /// <param name="handler"></param>
         public void SubscribeToIntegrationEvent<TIntegrationEvent>(Action<TIntegrationEvent> handler) where TIntegrationEvent : IIntegrationEvent
         {
             subscribedEventHandlers.Add(handler);

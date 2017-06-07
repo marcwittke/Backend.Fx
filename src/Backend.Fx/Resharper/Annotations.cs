@@ -526,7 +526,6 @@ namespace JetBrains.Annotations
 
     /// <summary>
     ///     Indicates that a method does not make any observable state changes.
-    ///     The same as <see cref="System.Diagnostics.Contracts.PureAttribute" />
     /// </summary>
     /// <example>
     ///     <code>

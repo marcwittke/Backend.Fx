@@ -6,7 +6,6 @@
     using Logging;
     using Microsoft.EntityFrameworkCore;
     using Patterns.Authorization;
-    using Patterns.DependencyInjection;
     using Patterns.UnitOfWork;
 
     public class EfRepository<TAggregateRoot> : Repository<TAggregateRoot> where TAggregateRoot : AggregateRoot
@@ -17,8 +16,8 @@
         private readonly IAggregateRootMapping<TAggregateRoot> aggregateRootMapping;
     
         public EfRepository(ICanFlush canFlush, DbContext dbContext, IAggregateRootMapping<TAggregateRoot> aggregateRootMapping,
-            ICurrentTHolder<TenantId> tenantIdHolder, IAggregateRootAuthorization<TAggregateRoot> aggregateRootAuthorization)
-            : base(tenantIdHolder, aggregateRootAuthorization)
+            TenantId tenantId, IAggregateAuthorization<TAggregateRoot> aggregateAuthorization)
+            : base(tenantId, aggregateAuthorization)
         {
             this.canFlush = canFlush;
             this.dbContext = dbContext;
