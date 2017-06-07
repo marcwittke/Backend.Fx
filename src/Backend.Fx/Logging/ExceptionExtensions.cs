@@ -2,8 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
 
+    [DebuggerStepThrough]
     public static class ExceptionExtensions
     {
         public static Exception GetInnerException(this Exception exception)

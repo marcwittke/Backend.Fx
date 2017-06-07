@@ -71,15 +71,15 @@ namespace Backend.Fx.Bootstrapping
         {
             // the current IIdentity is resolved using the CurrentIdentityHolder that is maintained when opening a scope
             Container.Register<ICurrentTHolder<IIdentity>, CurrentIdentityHolder>();
-            Container.Register<IIdentity>(() => Container.GetInstance<ICurrentTHolder<IIdentity>>().Current);
+            Container.Register(() => Container.GetInstance<ICurrentTHolder<IIdentity>>().Current);
 
             // same for the current tenant id
             Container.Register<ICurrentTHolder<TenantId>, CurrentTenantIdHolder>();
-            Container.Register<TenantId>(() => Container.GetInstance<ICurrentTHolder<TenantId>>().Current);
+            Container.Register(() => Container.GetInstance<ICurrentTHolder<TenantId>>().Current);
 
-            // scope interruption (use with care, described in detail here: https://codereview.stackexchange.com/questions/158534)
+            // same for scope interruption (use with care, described in detail here: https://codereview.stackexchange.com/questions/158534)
             Container.Register<ICurrentTHolder<IScopeInterruptor>, ScopeInterruptorHolder>();
-            Container.Register<IScopeInterruptor>(() => Container.GetInstance<ICurrentTHolder<IScopeInterruptor>>().Current);
+            Container.Register(() => Container.GetInstance<ICurrentTHolder<IScopeInterruptor>>().Current);
 
             RegisterDomainAndApplicationServices();
 
@@ -99,9 +99,12 @@ namespace Backend.Fx.Bootstrapping
             Container.RegisterCollection<InitialDataGenerator>(Assemblies);
         }
 
+        /// <summary>
+        /// Auto registering all aggregate authorization classes
+        /// </summary>
         private void RegisterAuthorization()
         {
-            var aggregateRootAuthorizationTypes = Container.GetTypesToRegister(typeof(IAggregateRootAuthorization<>), Assemblies).ToArray();
+            var aggregateRootAuthorizationTypes = Container.GetTypesToRegister(typeof(IAggregateAuthorization<>), Assemblies).ToArray();
             foreach (var aggregateRootAuthorizationType in aggregateRootAuthorizationTypes)
             {
                 var serviceTypes = aggregateRootAuthorizationType
@@ -118,6 +121,9 @@ namespace Backend.Fx.Bootstrapping
             }
         }
 
+        /// <summary>
+        /// Auto registering all implementors of <see cref="IApplicationService"/> and <see cref="IDomainService"/> with their implementations as scoped instances
+        /// </summary>
         private void RegisterDomainAndApplicationServices()
         {
             var serviceRegistrations = Container
@@ -134,6 +140,9 @@ namespace Backend.Fx.Bootstrapping
             }
         }
 
+        /// <summary>
+        /// wire the persistence services here. Also suitable for database creation/migration.
+        /// </summary>
         protected abstract void BootPersistence();
 
         /// <summary>
@@ -157,6 +166,10 @@ namespace Backend.Fx.Bootstrapping
         #endregion
 
         #region event subsystem
+        /// <summary>
+        /// Register a delegate that should be called asynchronously in a specific scope/transaction when the specific integration event is published.
+        /// </summary>
+        /// <param name="handler"></param>
         public void SubscribeToIntegrationEvent<T>(Action<T> handler) where T : IIntegrationEvent
         {
             eventAggregator.SubscribeToIntegrationEvent(handler);

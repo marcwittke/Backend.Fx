@@ -3,6 +3,7 @@
     using System;
     using System.Diagnostics;
 
+    [DebuggerStepThrough]
     public class DurationLogger : IDisposable
     {
         private readonly string endMessage;

@@ -9,7 +9,7 @@
     public class FrameworkToBackendFxLogger : NetFxILogger
     {
         private readonly ILogger logger;
-
+        
         public FrameworkToBackendFxLogger(ILogger logger)
         {
             this.logger = logger;
@@ -37,9 +37,7 @@
                 case NetFxLogLevel.Warning:
                     logger.Warn(exception, formatter(state, exception));
                     return;
-                //case Microsoft.Extensions.Logging.LogLevel.None: 
                 default:
-                    logger.Trace(exception, formatter(state, exception));
                     return;
             }
         }

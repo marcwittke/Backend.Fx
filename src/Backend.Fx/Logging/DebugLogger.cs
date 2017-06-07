@@ -1,7 +1,9 @@
 ﻿namespace Backend.Fx.Logging
 {
     using System;
+    using System.Diagnostics;
 
+    [DebuggerStepThrough]
     public class DebugLogger : ILogger
     {
         private readonly string type;

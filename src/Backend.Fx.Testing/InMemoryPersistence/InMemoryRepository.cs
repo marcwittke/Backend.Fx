@@ -1,17 +1,17 @@
-﻿namespace Backend.Fx.Testing
+﻿namespace Backend.Fx.Testing.InMemoryPersistence
 {
     using System.Linq;
     using BuildingBlocks;
     using Environment.MultiTenancy;
     using Patterns.Authorization;
-    using Patterns.DependencyInjection;
     using RandomData;
 
     public class InMemoryRepository<T> : Repository<T> where T : AggregateRoot
     {
         public virtual IInMemoryStore<T> Store { get; }
 
-        public InMemoryRepository(IInMemoryStore<T> store, ICurrentTHolder<TenantId> tenantIdHolder, IAggregateRootAuthorization<T> aggregateRootAuthorization) : base(tenantIdHolder, aggregateRootAuthorization)
+        public InMemoryRepository(IInMemoryStore<T> store, TenantId tenantId, IAggregateAuthorization<T> aggregateAuthorization) 
+            : base(tenantId, aggregateAuthorization)
         {
             Store = store;
         }

@@ -7,18 +7,17 @@
     using Exceptions;
     using Logging;
     using Patterns.Authorization;
-    using Patterns.DependencyInjection;
 
     public abstract class Repository<TAggregateRoot> : IRepository<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
         private static readonly ILogger Logger = LogManager.Create<Repository<TAggregateRoot>>();
-        private readonly IAggregateRootAuthorization<TAggregateRoot> aggregateRootAuthorization;
-        private readonly ICurrentTHolder<TenantId> tenantIdHolder;
+        private readonly IAggregateAuthorization<TAggregateRoot> aggregateAuthorization;
+        private readonly TenantId tenantId;
 
-        protected Repository(ICurrentTHolder<TenantId> tenantIdHolder, IAggregateRootAuthorization<TAggregateRoot> aggregateRootAuthorization)
+        protected Repository(TenantId tenantId, IAggregateAuthorization<TAggregateRoot> aggregateAuthorization)
         {
-            this.tenantIdHolder = tenantIdHolder;
-            this.aggregateRootAuthorization = aggregateRootAuthorization;
+            this.tenantId = tenantId;
+            this.aggregateAuthorization = aggregateAuthorization;
         }
 
         protected static string AggregateTypeName
@@ -32,12 +31,11 @@
         {
             get
             {
-                if (tenantIdHolder.Current.HasValue)
+                if (tenantId.HasValue)
                 {
-                    var tenantId = tenantIdHolder.Current.Value;
                     return RawAggregateQueryable
-                            .Where(agg => agg.TenantId == tenantId)
-                            .Where(aggregateRootAuthorization.HasAccessExpression);
+                            .Where(agg => agg.TenantId == tenantId.Value)
+                            .Where(aggregateAuthorization.HasAccessExpression);
                 }
 
                 return RawAggregateQueryable.Where(agg => false);
@@ -68,7 +66,7 @@
 
         public void Delete(TAggregateRoot aggregateRoot)
         {
-            if (aggregateRoot.TenantId != tenantIdHolder.Current.Value)
+            if (aggregateRoot.TenantId != tenantId.Value)
             {
                 throw new System.Security.SecurityException($"You are not allowed to delete {typeof(TAggregateRoot).Name}[{aggregateRoot.Id}]");
             }
@@ -77,10 +75,9 @@
 
         public void Add(TAggregateRoot aggregateRoot)
         {
-            var tenantId = tenantIdHolder.Current.Value;
-            if (aggregateRootAuthorization.CanCreate())
+            if (aggregateAuthorization.CanCreate() && aggregateAuthorization.CanCreate(aggregateRoot))
             {
-                aggregateRoot.TenantId = tenantId;
+                aggregateRoot.TenantId = tenantId.Value;
                 AddPersistent(aggregateRoot);
             }
             else
