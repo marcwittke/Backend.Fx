@@ -63,6 +63,13 @@
                         var responseContent = JsonConvert.SerializeObject(new { uex.Message });
                         await context.Response.WriteAsync(responseContent);
                     }
+                    catch (NotFoundException nfex)
+                    {
+                        Logger.Warn(nfex);
+                        context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                        var responseContent = JsonConvert.SerializeObject(new { nfex.Message });
+                        await context.Response.WriteAsync(responseContent);
+                    }
                     catch (ClientException cex)
                     {
                         Logger.Warn(cex);
