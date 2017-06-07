@@ -50,7 +50,6 @@
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // enable the framework container to resolve the identity DbContext. Only ASP.Net Identity will use it.
             // tell the framework container to use our runtime to resolve mvc stuff
             services.AddSingleton<IControllerActivator>(controllerActivator);
             services.AddSingleton<IViewComponentActivator>(viewComponentActivator);
