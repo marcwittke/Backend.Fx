@@ -61,7 +61,24 @@ namespace Backend.Fx.Bootstrapping.Tests
             sut.Boot();
             using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(100)))
             {
-                Assert.IsType<TestDomainService>(scope.GetInstance<ITestDomainService>());
+                var testDomainService = scope.GetInstance<ITestDomainService>();
+                Assert.IsType<TestDomainService>(testDomainService);
+            }
+        }
+
+        [Fact]
+        public void ProvidesAutoRegisteredDomainServicesThatImplementTwoInterfaces()
+        {
+            sut.Boot();
+            using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(100)))
+            {
+                var testDomainService = scope.GetInstance<ITestDomainService>();
+                Assert.IsType<TestDomainService>(testDomainService);
+
+                var anotherTestDomainService = scope.GetInstance<IAnotherTestDomainService>();
+                Assert.IsType<TestDomainService>(anotherTestDomainService);
+
+                Assert.True(Equals(testDomainService, anotherTestDomainService));
             }
         }
 

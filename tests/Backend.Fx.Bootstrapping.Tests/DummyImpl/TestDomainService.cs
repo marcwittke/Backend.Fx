@@ -5,6 +5,9 @@
     public interface ITestDomainService : IDomainService
     { }
 
-    public class TestDomainService : ITestDomainService
+    public interface IAnotherTestDomainService : IDomainService
+    { }
+
+    public class TestDomainService : ITestDomainService, IAnotherTestDomainService
     { }
 }

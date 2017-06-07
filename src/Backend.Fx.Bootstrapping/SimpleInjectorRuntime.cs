@@ -129,11 +129,15 @@ namespace Backend.Fx.Bootstrapping
             var serviceRegistrations = Container
                     .GetTypesToRegister(typeof(IDomainService), Assemblies)
                     .Concat(Container.GetTypesToRegister(typeof(IApplicationService), Assemblies))
-                    .Select(type => new
-                    {
-                        Service = type.GetTypeInfo().ImplementedInterfaces.Single(i => typeof(IDomainService) != i && typeof(IApplicationService) != i),
-                        Implementation = type
-                    });
+                    .SelectMany(type =>
+                                    type.GetTypeInfo()
+                                        .ImplementedInterfaces
+                                        .Where(i => typeof(IDomainService) != i && typeof(IApplicationService) != i)
+                                        .Select(service => new {
+                                            Service = service,
+                                            Implementation = type
+                                        })
+                    );
             foreach (var reg in serviceRegistrations)
             {
                 Container.Register(reg.Service, reg.Implementation);
