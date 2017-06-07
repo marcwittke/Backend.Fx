@@ -1,4 +1,4 @@
-﻿namespace Backend.Fx.Testing
+﻿namespace Backend.Fx.Testing.InMemoryPersistence
 {
     using System.Collections.Generic;
     using System.Linq;

@@ -1,5 +1,8 @@
 ﻿namespace Backend.Fx.Logging
 {
+    using System.Diagnostics;
+
+    [DebuggerStepThrough]
     public class DebugLoggerFactory : ILoggerFactory
     {
         public ILogger Create(string s)
@@ -11,5 +14,8 @@
         {
             System.Diagnostics.Debug.WriteLine($"Beginning activity {activityIndex}");
         }
+
+        public void Shutdown()
+        {}
     }
 }

@@ -1,8 +1,10 @@
 ﻿namespace Backend.Fx.Logging
 {
     using System;
+    using System.Diagnostics;
     using System.Threading;
 
+    [DebuggerStepThrough]
     public abstract class LogManager
     {
         private static int activityIndex=1;
@@ -32,6 +34,11 @@
         {
             Interlocked.Increment(ref activityIndex);
             factory.BeginActivity(activityIndex);
+        }
+
+        public static void Shutdown()
+        {
+            factory.Shutdown();
         }
     }
 }

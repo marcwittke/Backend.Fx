@@ -4,5 +4,6 @@
     {
         ILogger Create(string s);
         void BeginActivity(int activityIndex);
+        void Shutdown();
     }
 }

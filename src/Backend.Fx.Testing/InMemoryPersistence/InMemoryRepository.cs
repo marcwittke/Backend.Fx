@@ -1,4 +1,4 @@
-﻿namespace Backend.Fx.Testing
+﻿namespace Backend.Fx.Testing.InMemoryPersistence
 {
     using System.Linq;
     using BuildingBlocks;
