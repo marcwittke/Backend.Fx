@@ -30,6 +30,7 @@
                 };
                 config.AddTarget("console", consoleTarget);
                 config.LoggingRules.Add(new LoggingRule("*", LogLevel.Warn, consoleTarget));
+                config.LoggingRules.Add(new LoggingRule("Xunit.*", LogLevel.Info, consoleTarget));
 
                 var fileTarget = new FileTarget
                 {
@@ -41,6 +42,7 @@
                 };
                 config.AddTarget("file", fileTarget);
                 config.LoggingRules.Add(new LoggingRule(appRootNamespace + ".*", LogLevel.Debug, fileTarget));
+                config.LoggingRules.Add(new LoggingRule("Xunit.*", LogLevel.Info, fileTarget));
                 config.LoggingRules.Add(new LoggingRule("Microsoft.*", LogLevel.Warn, fileTarget));
                 config.LoggingRules.Add(new LoggingRule("Microsoft.AspNetCore.Hosting.Internal.WebHost", LogLevel.Info, fileTarget));
                 config.LoggingRules.Add(new LoggingRule("Backend.*", LogLevel.Info, fileTarget));

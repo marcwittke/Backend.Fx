@@ -6,12 +6,12 @@ namespace Backend.Fx.Testing.AssemblyFixtures
     using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
-    using global::Xunit.Abstractions;
-    using global::Xunit.Sdk;
+    using Xunit.Abstractions;
+    using Xunit.Sdk;
 
     public class XunitTestAssemblyRunnerWithAssemblyFixture : XunitTestAssemblyRunner
     {
-        readonly Dictionary<Type, object> assemblyFixtureMappings = new Dictionary<Type, object>();
+        private readonly Dictionary<Type, object> assemblyFixtureMappings = new Dictionary<Type, object>();
 
         public XunitTestAssemblyRunnerWithAssemblyFixture(ITestAssembly testAssembly,
                                                           IEnumerable<IXunitTestCase> testCases,
@@ -27,23 +27,26 @@ namespace Backend.Fx.Testing.AssemblyFixtures
             await base.AfterTestAssemblyStartingAsync();
 
             // Go find all the AssemblyFixtureAttributes adorned on the test assembly
-            Aggregator.Run(() =>
-                           {
-                               var fixturesAttrs = ((IReflectionAssemblyInfo)TestAssembly.Assembly).Assembly
-                                                                                                   .GetCustomAttributes<AssemblyFixtureAttribute>()
-                                                                                                   .ToList();
+            Aggregator.Run(() => {
+                               var fixturesAttrs = ((IReflectionAssemblyInfo) TestAssembly.Assembly).Assembly
+                                                                                                    .GetCustomAttributes<AssemblyFixtureAttribute>()
+                                                                                                    .ToList();
 
                                // Instantiate all the fixtures
                                foreach (var fixtureAttr in fixturesAttrs)
+                               {
                                    assemblyFixtureMappings[fixtureAttr.FixtureType] = Activator.CreateInstance(fixtureAttr.FixtureType);
+                               }
                            });
         }
 
         protected override Task BeforeTestAssemblyFinishedAsync()
         {
             // Make sure we clean up everybody who is disposable, and use Aggregator.Run to isolate Dispose failures
-            foreach (var disposable in Enumerable.OfType<IDisposable>(assemblyFixtureMappings.Values))
+            foreach (var disposable in assemblyFixtureMappings.Values.OfType<IDisposable>())
+            {
                 Aggregator.Run(disposable.Dispose);
+            }
 
             return base.BeforeTestAssemblyFinishedAsync();
         }
@@ -52,6 +55,8 @@ namespace Backend.Fx.Testing.AssemblyFixtures
                                                                    ITestCollection testCollection,
                                                                    IEnumerable<IXunitTestCase> testCases,
                                                                    CancellationTokenSource cancellationTokenSource)
-            => new XunitTestCollectionRunnerWithAssemblyFixture(assemblyFixtureMappings, testCollection, testCases, DiagnosticMessageSink, messageBus, TestCaseOrderer, new ExceptionAggregator(Aggregator), cancellationTokenSource).RunAsync();
+        {
+            return new XunitTestCollectionRunnerWithAssemblyFixture(assemblyFixtureMappings, testCollection, testCases, DiagnosticMessageSink, messageBus, TestCaseOrderer, new ExceptionAggregator(Aggregator), cancellationTokenSource).RunAsync();
+        }
     }
 }

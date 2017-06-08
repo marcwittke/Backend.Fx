@@ -4,13 +4,15 @@ namespace Backend.Fx.Testing.AssemblyFixtures
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using global::Xunit.Abstractions;
-    using global::Xunit.Sdk;
+    using Fx.Logging;
+    using Xunit.Abstractions;
+    using Xunit.Sdk;
 
     public class XunitTestCollectionRunnerWithAssemblyFixture : XunitTestCollectionRunner
     {
-        readonly Dictionary<Type, object> assemblyFixtureMappings;
-        readonly IMessageSink diagnosticMessageSink;
+        private static readonly ILogger Logger = LogManager.Create("Xunit.Runner");
+        private readonly Dictionary<Type, object> assemblyFixtureMappings;
+        private readonly IMessageSink diagnosticMessageSink;
 
         public XunitTestCollectionRunnerWithAssemblyFixture(Dictionary<Type, object> assemblyFixtureMappings,
                                                             ITestCollection testCollection,
@@ -32,10 +34,18 @@ namespace Backend.Fx.Testing.AssemblyFixtures
             // so instead we'll just let collection fixtures override assembly fixtures.
             var combinedFixtures = new Dictionary<Type, object>(assemblyFixtureMappings);
             foreach (var kvp in CollectionFixtureMappings)
+            {
                 combinedFixtures[kvp.Key] = kvp.Value;
-
-            // We've done everything we need, so let the built-in types do the rest of the heavy lifting
-            return new XunitTestClassRunner(testClass, @class, testCases, diagnosticMessageSink, MessageBus, TestCaseOrderer, new ExceptionAggregator(Aggregator), CancellationTokenSource, combinedFixtures).RunAsync();
+            }
+            
+            return Task.Run(() =>
+            {
+                using (Logger.InfoDuration($"Running Test Class {testClass.Class.Name}"))
+                {
+                    var xunitTestClassRunner = new XunitTestClassRunner(testClass, @class, testCases, diagnosticMessageSink, MessageBus, TestCaseOrderer, new ExceptionAggregator(Aggregator), CancellationTokenSource, combinedFixtures);
+                    return xunitTestClassRunner.RunAsync();
+                }
+            });
         }
     }
 }
