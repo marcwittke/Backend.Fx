@@ -15,8 +15,10 @@
         TAggregateRoot[] GetAll();
         void Delete(TAggregateRoot aggregateRoot);
         void Add(TAggregateRoot aggregateRoot);
+        void AddRange(TAggregateRoot[] aggregateRoots);
         bool Any();
         TAggregateRoot[] Resolve(IEnumerable<int> ids);
         IQueryable<TAggregateRoot> AggregateQueryable { get; }
+        
     }
 }

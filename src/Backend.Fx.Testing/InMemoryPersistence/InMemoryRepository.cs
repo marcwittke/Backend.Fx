@@ -3,6 +3,7 @@
     using System.Linq;
     using BuildingBlocks;
     using Environment.MultiTenancy;
+    using Extensions;
     using Patterns.Authorization;
     using RandomData;
 
@@ -35,6 +36,11 @@
         {
             aggregateRoot.Id = Store.Keys.Any() ? Store.Keys.Max() + 1 : 1;
             Store.Add(aggregateRoot.Id, aggregateRoot);
+        }
+
+        protected override void AddRangePersistent(T[] aggregateRoots)
+        {
+            aggregateRoots.ForAll(AddPersistent);
         }
 
         protected override void DeletePersistent(T aggregateRoot)

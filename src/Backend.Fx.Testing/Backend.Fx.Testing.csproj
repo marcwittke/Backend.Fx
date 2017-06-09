@@ -1,17 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.3</TargetFramework>
+    <TargetFramework>netstandard1.6</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FakeItEasy" Version="3.3.2" />
     <PackageReference Include="NLog" Version="5.0.0-beta07" />
+    <PackageReference Include="SimpleInjector" Version="4.0.8" />
     <PackageReference Include="xunit" Version="2.2.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Backend.Fx.Bootstrapping\Backend.Fx.Bootstrapping.csproj" />
     <ProjectReference Include="..\Backend.Fx.NLogLogging\Backend.Fx.NLogLogging.csproj" />
     <ProjectReference Include="..\Backend.Fx\Backend.Fx.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="TestData\" />
   </ItemGroup>
 
 </Project>

@@ -5,6 +5,7 @@
     using System.Linq;
     using Environment.MultiTenancy;
     using Exceptions;
+    using Extensions;
     using Logging;
     using Patterns.Authorization;
 
@@ -86,6 +87,20 @@
             }
         }
 
+        public void AddRange(TAggregateRoot[] aggregateRoots)
+        {
+            aggregateRoots.ForAll(agg =>
+            {
+                if (!aggregateAuthorization.CanCreate(agg))
+                {
+                    throw new System.Security.SecurityException($"You are not allowed to create records of type {typeof(TAggregateRoot).Name}");
+                }
+            });
+            aggregateRoots.ForAll(agg => agg.TenantId = tenantId.Value);
+
+            AddRangePersistent(aggregateRoots);
+        }
+
         public bool Any()
         {
             return AggregateQueryable.Any();
@@ -108,6 +123,8 @@
         }
 
         protected abstract void AddPersistent(TAggregateRoot aggregateRoot);
+
+        protected abstract void AddRangePersistent(TAggregateRoot[] aggregateRoots);
 
         protected abstract void DeletePersistent(TAggregateRoot aggregateRoot);
     }

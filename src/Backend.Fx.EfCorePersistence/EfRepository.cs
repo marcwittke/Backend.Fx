@@ -5,6 +5,7 @@
     using Environment.MultiTenancy;
     using Logging;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Infrastructure;
     using Patterns.Authorization;
     using Patterns.UnitOfWork;
 
@@ -28,6 +29,14 @@
         {
             Logger.Debug($"Persistently adding new {AggregateTypeName}");
             dbContext.Set<TAggregateRoot>().Add(aggregateRoot);
+            // to enforce early id generation. We're inside a transaction, therefore it isn't dangerous to call Flush
+            canFlush.Flush();
+        }
+
+        protected override void AddRangePersistent(TAggregateRoot[] aggregateRoots)
+        {
+            Logger.Debug($"Persistently adding {aggregateRoots.Length} item(s) of type {AggregateTypeName}");
+            dbContext.Set<TAggregateRoot>().AddRange(aggregateRoots);
             // to enforce early id generation. We're inside a transaction, therefore it isn't dangerous to call Flush
             canFlush.Flush();
         }
