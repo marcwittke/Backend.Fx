@@ -31,8 +31,6 @@
         [StringLength(100)]
         public string ChangedBy { get; protected set; }
 
-        public int Version { get; protected set; }
-
         public void SetCreatedProperties([NotNull] string createdBy, DateTime createdOn)
         {
             if (createdBy == null)
@@ -45,7 +43,6 @@
             }
             CreatedBy = createdBy.Length > 100 ? createdBy.Substring(0, 99) + "…" : createdBy;
             CreatedOn = createdOn;
-            Version = 1;
         }
 
         public void SetModifiedProperties([NotNull] string changedBy, DateTime changedOn)
@@ -60,7 +57,6 @@
             }
             ChangedBy = changedBy.Length > 100 ? changedBy.Substring(0, 99) + "…" : changedBy;
             ChangedOn = changedOn;
-            Version++;
 
             // Modifying me results implicitly in a modification of the aggregate root, too.
             AggregateRoot myAggregateRoot = FindMyAggregateRoot();

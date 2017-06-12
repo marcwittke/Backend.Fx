@@ -264,7 +264,6 @@ namespace Backend.Fx.Bootstrapping
         {
             return ScopedLifestyle.GetCurrentScope(Container);
         }
-
         
         private class RuntimeScope : IRuntimeScope
         {
@@ -367,6 +366,7 @@ namespace Backend.Fx.Bootstrapping
         }
         #endregion
 
+        #region initial data generation
         public void RunProductiveInitialDataGenerators(TenantId tenantId)
         {
             Logger.Info("Loading productive data into database");
@@ -399,7 +399,9 @@ namespace Backend.Fx.Bootstrapping
                 }
             }
         }
+        #endregion
 
+        #region IDisposable implementation
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
@@ -413,5 +415,6 @@ namespace Backend.Fx.Bootstrapping
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+        #endregion
     }
 }

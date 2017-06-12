@@ -15,6 +15,16 @@
     {
         private static readonly ILogger Logger = LogManager.Create(typeof(DbContextExtensions));
 
+        public static void RegisterRowVersionProperty(this ModelBuilder modelBuilder)
+        {
+            modelBuilder.Model
+                        .GetEntityTypes()
+                        .Where(mt => typeof(Entity).GetTypeInfo().IsAssignableFrom(mt.ClrType.GetTypeInfo()))
+                        .ForAll(mt => {
+                                    modelBuilder.Entity(mt.ClrType).Property<byte[]>("RowVersion").IsRowVersion();
+                                });
+        }
+
         public static void ApplyAggregateRootMappings(this DbContext dbContext, ModelBuilder modelBuilder)
         {
             //CAVE: IAggregateRootMapping implementations must reside in the same assembly as the Applications DbContext-type
@@ -115,6 +125,11 @@
                     Logger.Warn(ex, "Change tracker state could not be dumped");
                 }
             }
+        }
+
+        public static TDbContext CreateDbContext<TDbContext>(this DbContextOptions options) where TDbContext : DbContext
+        {
+            return (TDbContext) Activator.CreateInstance(typeof(TDbContext), options);
         }
 
         private static string GetPrimaryKeyValue(EntityEntry entry)

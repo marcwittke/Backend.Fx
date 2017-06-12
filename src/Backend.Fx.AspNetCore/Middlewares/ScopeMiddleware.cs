@@ -2,6 +2,7 @@
 {
     using System;
     using System.Net;
+    using System.Security;
     using System.Security.Principal;
     using System.Threading.Tasks;
     using Environment.MultiTenancy;
@@ -10,6 +11,7 @@
     using Logging;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
     using Newtonsoft.Json;
     using Patterns.DependencyInjection;
 
@@ -77,7 +79,14 @@
                         var responseContent = JsonConvert.SerializeObject(new { cex.Message });
                         await context.Response.WriteAsync(responseContent);
                     }
-                    catch (System.Security.SecurityException secex)
+                    catch (DbUpdateConcurrencyException concEx)
+                    {
+                        Logger.Warn(concEx);
+                        context.Response.StatusCode = (int)HttpStatusCode.Conflict;
+                        var responseContent = JsonConvert.SerializeObject(new { concEx.Message });
+                        await context.Response.WriteAsync(responseContent);
+                    }
+                    catch (SecurityException secex)
                     {
                         Logger.Warn(secex);
                         context.Response.StatusCode = (int)HttpStatusCode.Forbidden;

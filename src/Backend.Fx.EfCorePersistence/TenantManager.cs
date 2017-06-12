@@ -8,16 +8,16 @@
 
     public class TenantManager<TDbContext> : TenantManager where TDbContext : DbContext
     {
-        private readonly Func<TDbContext> dbContextFactory;
+        private readonly DbContextOptions dbContextOptions;
 
-        public TenantManager(ITenantInitializer tenantInitializer, Func<TDbContext> dbContextFactory) : base(tenantInitializer)
+        public TenantManager(ITenantInitializer tenantInitializer, DbContextOptions dbContextOptions) : base(tenantInitializer)
         {
-            this.dbContextFactory = dbContextFactory;
+            this.dbContextOptions = dbContextOptions;
         }
 
         public override TenantId[] GetTenantIds()
         {
-            using (var dbContext = dbContextFactory.Invoke())
+            using (var dbContext = dbContextOptions.CreateDbContext<TDbContext>())
             {
                 return dbContext.Set<Tenant>().Select(t => new TenantId(t.Id)).ToArray();
             }
@@ -25,7 +25,7 @@
 
         public override Tenant[] GetTenants()
         {
-            using (var dbContext = dbContextFactory.Invoke())
+            using (var dbContext = dbContextOptions.CreateDbContext<TDbContext>())
             {
                 return dbContext.Set<Tenant>().ToArray();
             }
@@ -33,7 +33,7 @@
         
         protected override Tenant FindTenant(TenantId tenantId)
         {
-            using (var dbContext = dbContextFactory.Invoke())
+            using (var dbContext = dbContextOptions.CreateDbContext<TDbContext>())
             {
                 return dbContext.Set<Tenant>().Find(tenantId.Value);
             }
@@ -41,7 +41,7 @@
 
         protected override void SaveTenant(Tenant tenant)
         {
-            using (var dbContext = dbContextFactory.Invoke())
+            using (var dbContext = dbContextOptions.CreateDbContext<TDbContext>())
             {
                 var existingTenant = dbContext.Set<Tenant>().Find(tenant.Id);
                 if (existingTenant == null)

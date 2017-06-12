@@ -1,6 +1,5 @@
 ﻿namespace Backend.Fx.EfCorePersistence
 {
-    using System;
     using System.Reflection;
     using Bootstrapping;
     using BuildingBlocks;
@@ -11,10 +10,10 @@
 
     public abstract class SimpleInjectorEfCoreRuntime<TDbContext> : SimpleInjectorRuntime where TDbContext : DbContext
     {
-        protected SimpleInjectorEfCoreRuntime(IDatabaseManager databaseManager, Func<TDbContext> frameworkDbContextFactory)
+        protected SimpleInjectorEfCoreRuntime(IDatabaseManager databaseManager, DbContextOptions dbContextOptions)
         {
             DatabaseManager = databaseManager;
-            TenantManager = new TenantManager<TDbContext>(this, frameworkDbContextFactory);
+            TenantManager = new TenantManager<TDbContext>(this, dbContextOptions);
         }
 
         public override IDatabaseManager DatabaseManager { get; }
