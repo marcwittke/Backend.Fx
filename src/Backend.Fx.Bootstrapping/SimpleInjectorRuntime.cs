@@ -132,7 +132,7 @@ namespace Backend.Fx.Bootstrapping
                     .SelectMany(type =>
                                     type.GetTypeInfo()
                                         .ImplementedInterfaces
-                                        .Where(i => typeof(IDomainService) != i && typeof(IApplicationService) != i)
+                                        .Where(i => typeof(IDomainService) != i && typeof(IApplicationService) != i && (i.Namespace.StartsWith("Backend") || Assemblies.Contains(i.GetTypeInfo().Assembly)))
                                         .Select(service => new {
                                             Service = service,
                                             Implementation = type
