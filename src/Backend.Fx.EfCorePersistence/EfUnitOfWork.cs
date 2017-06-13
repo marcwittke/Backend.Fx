@@ -11,15 +11,16 @@
     public class EfUnitOfWork : UnitOfWork
     {
         private static readonly ILogger Logger = LogManager.Create<EfUnitOfWork>();
-        private readonly DbContext dbContext;
         private IDisposable transactionLifetimeLogger;
         private IDbContextTransaction currentTransaction;
 
         public EfUnitOfWork(IClock clock, IIdentity identity, DbContext dbContext)
             : base(clock, identity)
         {
-            this.dbContext = dbContext;
+            this.DbContext = dbContext;
         }
+
+        public DbContext DbContext { get; }
 
         public override void Begin()
         {
@@ -30,12 +31,12 @@
         public override void Flush()
         {
             base.Flush();
-            dbContext.SaveChanges();
+            DbContext.SaveChanges();
         }
 
         protected override void UpdateTrackingProperties(string userId, DateTime utcNow)
         {
-            dbContext.UpdateTrackingProperties(userId, utcNow);
+            DbContext.UpdateTrackingProperties(userId, utcNow);
         }
 
         protected override void Commit()
@@ -67,7 +68,7 @@
 
         private void BeginTransaction()
         {
-            currentTransaction = dbContext.Database.BeginTransaction();
+            currentTransaction = DbContext.Database.BeginTransaction();
             transactionLifetimeLogger = Logger.DebugDuration("Transaction open");
         }
     }

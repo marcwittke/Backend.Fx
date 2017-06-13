@@ -20,9 +20,15 @@
             modelBuilder.Model
                         .GetEntityTypes()
                         .Where(mt => typeof(Entity).GetTypeInfo().IsAssignableFrom(mt.ClrType.GetTypeInfo()))
-                        .ForAll(mt => {
-                                    modelBuilder.Entity(mt.ClrType).Property<byte[]>("RowVersion").IsRowVersion();
-                                });
+                        .ForAll(mt => modelBuilder.Entity(mt.ClrType).Property<byte[]>("RowVersion").IsRowVersion());
+        }
+
+        public static void RegisterEntityIdAsNeverGenerated(this ModelBuilder modelBuilder)
+        {
+            modelBuilder.Model
+                        .GetEntityTypes()
+                        .Where(mt => typeof(Entity).GetTypeInfo().IsAssignableFrom(mt.ClrType.GetTypeInfo()))
+                        .ForAll(mt => modelBuilder.Entity(mt.ClrType).Property(nameof(Entity.Id)).ValueGeneratedNever());
         }
 
         public static void ApplyAggregateRootMappings(this DbContext dbContext, ModelBuilder modelBuilder)
@@ -34,11 +40,11 @@
                 .Assembly
                 .ExportedTypes
                 .Select(t => t.GetTypeInfo())
-                .Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericType && typeof(IAggregateDefinition).GetTypeInfo().IsAssignableFrom(t));
+                .Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericType && typeof(IAggregateRootMapping).GetTypeInfo().IsAssignableFrom(t));
             foreach (var typeInfo in aggregateDefinitionTypeInfos)
             {
-                IAggregateDefinition aggregateDefinition = (IAggregateDefinition)Activator.CreateInstance(typeInfo.AsType());
-                aggregateDefinition.ApplyEfMapping(modelBuilder);
+                IAggregateRootMapping aggregateRootMapping = (IAggregateRootMapping)Activator.CreateInstance(typeInfo.AsType());
+                aggregateRootMapping.ApplyEfMapping(modelBuilder);
             }
         }
 

@@ -10,8 +10,8 @@
     using Patterns.IdGeneration;
     using Patterns.UnitOfWork;
     using RandomData;
-
-    public abstract class InMemoryPersistenceFixture : IIdGenerator
+    
+    public abstract class InMemoryPersistenceFixture : IEntityIdGenerator
     {
         private readonly Dictionary<Type, object> stores;
         private int nextId;
@@ -20,7 +20,7 @@
         {
             using (var dataGenerationRuntime = new DataGenerationRuntime(domainAssembly))
             {
-                dataGenerationRuntime.Boot(container => container.RegisterSingleton<IIdGenerator>(this));
+                dataGenerationRuntime.Boot(container => container.RegisterSingleton<IEntityIdGenerator>(this));
                 TenantId = withDemoData
                                ? dataGenerationRuntime.TenantManager.CreateDemonstrationTenant("test", "", false)
                                : dataGenerationRuntime.TenantManager.CreateProductionTenant("test", "", false);
