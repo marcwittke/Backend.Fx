@@ -11,6 +11,8 @@ namespace Backend.Fx.Patterns.DependencyInjection
         void CompleteCurrentScope_InvokeAction_BeginNewScope(Action action);
 
         T CompleteCurrentScope_InvokeFunction_BeginNewScope<T>(Func<T> func);
+
+        void CompleteCurrentScope_BeginNewScope();
     }
 
     internal class NullScopeInterruptor : IScopeInterruptor
@@ -21,6 +23,11 @@ namespace Backend.Fx.Patterns.DependencyInjection
         }
 
         public T CompleteCurrentScope_InvokeFunction_BeginNewScope<T>(Func<T> func)
+        {
+            throw new InvalidOperationException("You are not inside a scope that could be interrupted");
+        }
+
+        public void CompleteCurrentScope_BeginNewScope()
         {
             throw new InvalidOperationException("You are not inside a scope that could be interrupted");
         }

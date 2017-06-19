@@ -121,6 +121,11 @@ namespace Backend.Fx.Bootstrapping
             }
         }
 
+        protected void RegisterLateResolved<T>() where T : class
+        {
+            Container.RegisterSingleton(() => new LateResolver<T>(() => Container.GetInstance<T>()));
+        }
+
         /// <summary>
         /// Auto registering all implementors of <see cref="IApplicationService"/> and <see cref="IDomainService"/> with their implementations as scoped instances
         /// </summary>
@@ -338,6 +343,11 @@ namespace Backend.Fx.Bootstrapping
                     result = func.Invoke();
                 });
                 return result;
+            }
+
+            public void CompleteCurrentScope_BeginNewScope()
+            {
+                CompleteCurrentScope_InvokeAction_BeginNewScope(() => { });
             }
 
             public void CompleteUnitOfWork()

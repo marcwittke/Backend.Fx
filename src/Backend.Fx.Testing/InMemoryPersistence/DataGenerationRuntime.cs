@@ -12,16 +12,19 @@
     using Environment.MultiTenancy;
     using Environment.Persistence;
     using FakeItEasy;
+    using JetBrains.Annotations;
     using Patterns.UnitOfWork;
     using SimpleInjector;
 
     public class DataGenerationRuntime : SimpleInjectorRuntime
     {
         private readonly Assembly domainAssembly;
+        private readonly Action<Container> additionalContainerConfig;
 
-        public DataGenerationRuntime(Assembly domainAssembly)
+        public DataGenerationRuntime(Assembly domainAssembly, [CanBeNull] Action<Container> additionalContainerConfig)
         {
             this.domainAssembly = domainAssembly;
+            this.additionalContainerConfig = additionalContainerConfig;
             TenantManager = new InMemoryTenantManager(this);
             DatabaseManager = A.Fake<IDatabaseManager>();
             
@@ -74,6 +77,7 @@
         protected override void BootApplication()
         {
             Container.Register<IClock, FrozenClock>();
+            additionalContainerConfig?.Invoke(Container);
         }
 
         protected override void InitializeJobScheduler()

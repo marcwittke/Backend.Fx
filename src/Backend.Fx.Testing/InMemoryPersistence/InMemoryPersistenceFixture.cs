@@ -6,19 +6,21 @@
     using BuildingBlocks;
     using Environment.DateAndTime;
     using Environment.MultiTenancy;
+    using JetBrains.Annotations;
     using Patterns.Authorization;
     using Patterns.IdGeneration;
     using Patterns.UnitOfWork;
     using RandomData;
-    
+    using SimpleInjector;
+
     public abstract class InMemoryPersistenceFixture : IEntityIdGenerator
     {
         private readonly Dictionary<Type, object> stores;
         private int nextId;
 
-        protected InMemoryPersistenceFixture(bool withDemoData, Assembly domainAssembly)
+        protected InMemoryPersistenceFixture(bool withDemoData, Assembly domainAssembly, [CanBeNull] Action<Container> additionalContainerConfig)
         {
-            using (var dataGenerationRuntime = new DataGenerationRuntime(domainAssembly))
+            using (var dataGenerationRuntime = new DataGenerationRuntime(domainAssembly, additionalContainerConfig))
             {
                 dataGenerationRuntime.Boot(container => container.RegisterSingleton<IEntityIdGenerator>(this));
                 TenantId = withDemoData
