@@ -1,14 +1,17 @@
 ﻿namespace Backend.Fx.EfCorePersistence
 {
+    using System;
+    using System.Linq;
+    using System.Reflection;
     using Environment.Persistence;
     using Logging;
     using Microsoft.EntityFrameworkCore;
 
-    public class DatabaseManager<TDbContext> : IDatabaseManager where TDbContext : DbContext
+    public abstract class DatabaseManager<TDbContext> : IDatabaseManager where TDbContext : DbContext
     {
         private static readonly ILogger Logger = LogManager.Create<DatabaseManager<TDbContext>>();
 
-        public DatabaseManager(DbContextOptions dbContextOptions)
+        protected DatabaseManager(DbContextOptions dbContextOptions)
         {
             DbContextOptions = dbContextOptions;
         }
@@ -17,17 +20,30 @@
 
         protected DbContextOptions DbContextOptions { get; }
 
-
-        public virtual void EnsureDatabaseExistence()
+        public void EnsureDatabaseExistence()
         {
             using (var dbContext = DbContextOptions.CreateDbContext<TDbContext>())
             {
-                Logger.Info("Database is being created, if not present already");
-                dbContext.Database.Migrate();
+                ExecuteCreationStrategy(dbContext);
+            }
+
+            var sqlSequenceHiLoIdGeneratorTypes = typeof(TDbContext)
+                    .GetTypeInfo()
+                    .Assembly
+                    .ExportedTypes
+                    .Select(t => t.GetTypeInfo())
+                    .Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericType && typeof(SqlSequenceHiLoIdGenerator).GetTypeInfo().IsAssignableFrom(t));
+
+            foreach (var sqlSequenceHiLoIdGeneratorType in sqlSequenceHiLoIdGeneratorTypes)
+            {
+                SqlSequenceHiLoIdGenerator sqlSequenceHiLoIdGenerator = (SqlSequenceHiLoIdGenerator)Activator.CreateInstance(sqlSequenceHiLoIdGeneratorType.AsType(), DbContextOptions);
+                sqlSequenceHiLoIdGenerator.EnsureSqlSequenceExistence();
             }
 
             DatabaseExists = true;
         }
+
+        protected abstract void ExecuteCreationStrategy(DbContext dbContext);
 
         public virtual void DeleteDatabase()
         {
