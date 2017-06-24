@@ -1,22 +1,20 @@
-﻿namespace DemoBlog.Mvc
+﻿namespace DemoBlog.Mvc.Infrastructure
 {
-    using Backend.Fx.AspNetCore.Integration;
-    using Backend.Fx.AspNetCore.Middlewares;
     using Backend.Fx.Environment.MultiTenancy;
-    using Microsoft.AspNetCore.Builder;
-    using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-    using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Logging;
     using Backend.Fx.Patterns.DependencyInjection;
     using Bootstrapping;
     using Controllers;
     using Data.Identity;
     using Microsoft.ApplicationInsights.AspNetCore;
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.AspNetCore.Mvc.Controllers;
     using Microsoft.AspNetCore.Mvc.ViewComponents;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
     using Persistence;
     using Services;
     using SimpleInjector;
@@ -87,8 +85,6 @@
             controllerActivator.RegisterFrameworkOnlyService(() => app.ApplicationServices.GetService<AccountController>());
             controllerActivator.RegisterFrameworkOnlyService(() => app.ApplicationServices.GetService<ManageController>());
 
-            app.UseMiddleware<NukeMiddleware>();
-            app.UseMiddleware<VersionHeaderMiddleware>();
             app.UseIdentity();
 
             // Add external authentication middleware below. To configure them please see https://go.microsoft.com/fwlink/?LinkID=532715

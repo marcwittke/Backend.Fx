@@ -35,7 +35,7 @@
             {
                 var sut = new EfUnitOfWork(new FrozenClock(), new SystemIdentity(), dbContext);
                 sut.Begin();
-                dbContext.Add(new Blogger("Bratislav", "Metulsky"));
+                dbContext.Add(new Blogger(333, "Bratislav", "Metulsky"));
                 sut.Dispose();
                 Assert.Null(dbContext.Database.CurrentTransaction);
                 Assert.Empty(dbContext.Bloggers);

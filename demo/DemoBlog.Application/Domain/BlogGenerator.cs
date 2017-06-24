@@ -2,15 +2,18 @@
 {
     using Backend.Fx.BuildingBlocks;
     using Backend.Fx.Patterns.DataGeneration;
+    using Backend.Fx.Patterns.IdGeneration;
     using Backend.Fx.RandomData;
 
     public class BlogGenerator : InitialDataGenerator, IDemoDataGenerator
     {
+        private readonly IEntityIdGenerator idGenerator;
         private readonly IRepository<Blogger> bloggerRepository;
         private readonly IRepository<Blog> blogRepository;
 
-        public BlogGenerator(IRepository<Blogger> bloggerRepository, IRepository<Blog> blogRepository)
+        public BlogGenerator(IEntityIdGenerator idGenerator, IRepository<Blogger> bloggerRepository, IRepository<Blog> blogRepository)
         {
+            this.idGenerator = idGenerator;
             this.bloggerRepository = bloggerRepository;
             this.blogRepository = blogRepository;
         }
@@ -26,7 +29,7 @@
             {
                 string title = LoremIpsum.Generate(3, 8, false);
                 string description = LoremIpsum.Generate(40, 60, true);
-                blogRepository.Add(new Blog(bloggerRepository.AggregateQueryable.Random(), title, description));
+                blogRepository.Add(new Blog(idGenerator.NextId(), bloggerRepository.AggregateQueryable.Random(), title, description));
             }
         }
 

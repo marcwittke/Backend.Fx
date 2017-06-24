@@ -5,7 +5,6 @@
     using Environment.MultiTenancy;
     using Logging;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Infrastructure;
     using Patterns.Authorization;
     using Patterns.UnitOfWork;
 

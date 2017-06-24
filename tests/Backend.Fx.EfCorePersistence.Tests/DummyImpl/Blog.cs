@@ -3,24 +3,26 @@
     using System.Collections.Generic;
     using BuildingBlocks;
     using JetBrains.Annotations;
+    using Patterns.IdGeneration;
 
     public class Blog : AggregateRoot
     {
         [UsedImplicitly]
         private Blog() { }
 
-        public Blog(string name)
+        public Blog(int id, string name)
         {
+            Id = id;
             Name = name;
         }
 
         public string Name { get; private set; }
 
-        public ISet<Post> Posts { get; private set; } = new HashSet<Post>();
+        public ISet<Post> Posts { get; } = new HashSet<Post>();
 
-        public Post AddPost(string name)
+        public Post AddPost(IEntityIdGenerator idGenerator, string name)
         {
-            var post = new Post(this, name);
+            var post = new Post(idGenerator.NextId(), this, name);
             Posts.Add(post);
             return post;
         }

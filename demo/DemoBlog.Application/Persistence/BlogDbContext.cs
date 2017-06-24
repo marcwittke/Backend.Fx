@@ -31,6 +31,8 @@
         {
             base.OnModelCreating(builder);
             this.ApplyAggregateRootMappings(builder);
+            builder.RegisterRowVersionProperty();
+            builder.RegisterEntityIdAsNeverGenerated();
         }
 
         public override int SaveChanges()

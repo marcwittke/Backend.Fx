@@ -9,7 +9,7 @@
         private readonly DbContextOptions dbContextOptions;
 
         public TestRuntime(DbContextOptions dbContextOptions)
-            : base(new DatabaseManager<TestDbContext>(() => new TestDbContext(dbContextOptions)), () => new TestDbContext(dbContextOptions))
+            : base(new DatabaseManagerWithoutMigration<TestDbContext>(dbContextOptions), dbContextOptions)
         {
             this.dbContextOptions = dbContextOptions;
         }

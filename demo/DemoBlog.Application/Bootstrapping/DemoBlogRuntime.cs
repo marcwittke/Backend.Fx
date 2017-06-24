@@ -16,7 +16,7 @@
         private readonly DbContextOptions dbContextOptions;
 
         public DemoBlogRuntime(bool doCreateInitialDemoTenant, DbContextOptions dbContextOptions)
-            : base(new DatabaseManager<BlogDbContext>(() => new BlogDbContext(dbContextOptions)), () => new BlogDbContext(dbContextOptions))
+            : base(new DatabaseManagerWithMigration<BlogDbContext>(dbContextOptions), dbContextOptions)
         {
             this.doCreateInitialDemoTenant = doCreateInitialDemoTenant;
             this.dbContextOptions = dbContextOptions;

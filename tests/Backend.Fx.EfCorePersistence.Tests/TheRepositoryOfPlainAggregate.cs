@@ -23,7 +23,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 {
                     uow.Begin();
                     var repo = new EfRepository<Blogger>(uow, dbContext, new BloggerMapping(), TenantId, new AllowAll<Blogger>());
-                    repo.Add(new Blogger("Metulsky", "Bratislav"));
+                    repo.Add(new Blogger(345, "Metulsky", "Bratislav"));
                     uow.Complete();
                 }
             }
@@ -43,8 +43,8 @@ namespace Backend.Fx.EfCorePersistence.Tests
         public void CanRead()
         {
             var cmd = Connection.CreateCommand();
-            cmd.CommandText = "INSERT INTO Bloggers (TenantId, CreatedOn, CreatedBy, Version, FirstName, LastName, Bio) " +
-                              "VALUES (12, '2012-05-12 23:12:09', 'the test', '1', 'Bratislav', 'Metulsky', 'whatever')";
+            cmd.CommandText = "INSERT INTO Bloggers (Id, TenantId, CreatedOn, CreatedBy, FirstName, LastName, Bio) " +
+                              "VALUES (444, 12, '2012-05-12 23:12:09', 'the test', 'Bratislav', 'Metulsky', 'whatever')";
             cmd.ExecuteNonQuery();
             
             using (var dbContext = new TestDbContext(DbContextOptions))
@@ -53,7 +53,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 {
                     uow.Begin();
                     var repo = new EfRepository<Blogger>(uow, dbContext, new BloggerMapping(), TenantId, new AllowAll<Blogger>());
-                    Blogger bratislavMetulsky = repo.Single(1);
+                    Blogger bratislavMetulsky = repo.Single(444);
                     Assert.Equal(12, bratislavMetulsky.TenantId);
                     Assert.Equal("the test", bratislavMetulsky.CreatedBy);
                     Assert.Equal(new DateTime(2012,05,12,23,12,09), bratislavMetulsky.CreatedOn);
@@ -69,8 +69,8 @@ namespace Backend.Fx.EfCorePersistence.Tests
         public void CanDelete()
         {
             var cmd = Connection.CreateCommand();
-            cmd.CommandText = "INSERT INTO Bloggers (TenantId, CreatedOn, CreatedBy, Version, FirstName, LastName, Bio) " +
-                              "VALUES (12, '2012-05-12 23:12:09', 'the test', '1', 'Bratislav', 'Metulsky', 'whatever')";
+            cmd.CommandText = "INSERT INTO Bloggers (Id, TenantId, CreatedOn, CreatedBy, FirstName, LastName, Bio) " +
+                              "VALUES (555, 12, '2012-05-12 23:12:09', 'the test', 'Bratislav', 'Metulsky', 'whatever')";
             cmd.ExecuteNonQuery();
 
             using (var dbContext = new TestDbContext(DbContextOptions))
@@ -79,7 +79,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 {
                     uow.Begin();
                     var repo = new EfRepository<Blogger>(uow, dbContext, new BloggerMapping(), TenantId, new AllowAll<Blogger>());
-                    Blogger bratislavMetulsky = repo.Single(1);
+                    Blogger bratislavMetulsky = repo.Single(555);
                     repo.Delete(bratislavMetulsky);
                     uow.Complete();
                 }
@@ -95,8 +95,8 @@ namespace Backend.Fx.EfCorePersistence.Tests
         public void CanUpdate()
         {
             var cmd = Connection.CreateCommand();
-            cmd.CommandText = "INSERT INTO Bloggers (TenantId, CreatedOn, CreatedBy, Version, FirstName, LastName, Bio) " +
-                              "VALUES (12, '2012-05-12 23:12:09', 'the test', '1', 'Bratislav', 'Metulsky', 'whatever')";
+            cmd.CommandText = "INSERT INTO Bloggers (Id, TenantId, CreatedOn, CreatedBy, FirstName, LastName, Bio) " +
+                              "VALUES (456, 12, '2012-05-12 23:12:09', 'the test', 'Bratislav', 'Metulsky', 'whatever')";
             cmd.ExecuteNonQuery();
 
             using (var dbContext = new TestDbContext(DbContextOptions))
@@ -105,7 +105,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 {
                     uow.Begin();
                     var repo = new EfRepository<Blogger>(uow, dbContext, new BloggerMapping(), TenantId, new AllowAll<Blogger>());
-                    Blogger bratislavMetulsky = repo.Single(1);
+                    Blogger bratislavMetulsky = repo.Single(456);
                     bratislavMetulsky.FirstName = "Johnny";
                     bratislavMetulsky.LastName = "Flash";
                     bratislavMetulsky.Bio = "Der lustige Clown";
@@ -124,7 +124,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 {
                     uow.Begin();
                     var repo = new EfRepository<Blogger>(uow, dbContext, new BloggerMapping(), TenantId, new AllowAll<Blogger>());
-                    Blogger johnnyFlash = repo.Single(1);
+                    Blogger johnnyFlash = repo.Single(456);
                     Assert.Equal(Clock.UtcNow, johnnyFlash.ChangedOn, new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(1000)));
                     Assert.Equal(new SystemIdentity().Name, johnnyFlash.ChangedBy);
                     Assert.Equal("Johnny", johnnyFlash.FirstName);

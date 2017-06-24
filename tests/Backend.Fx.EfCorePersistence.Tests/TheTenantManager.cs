@@ -1,10 +1,10 @@
 ﻿namespace Backend.Fx.EfCorePersistence.Tests
 {
-    using System;
     using System.Linq;
     using DummyImpl;
     using Environment.MultiTenancy;
     using FakeItEasy;
+    using Microsoft.EntityFrameworkCore;
     using Xunit;
 
     public class TheTenantManager : TestWithInMemorySqliteDbContext
@@ -14,7 +14,7 @@
         public TheTenantManager()
         {
             CreateDatabase();
-            sut = new MyTenantManager(A.Fake<ITenantInitializer>(), () => new TestDbContext(DbContextOptions));
+            sut = new MyTenantManager(A.Fake<ITenantInitializer>(), DbContextOptions);
         }
 
         [Fact]
@@ -83,7 +83,7 @@
 
         private class MyTenantManager : TenantManager<TestDbContext>
         {
-            public MyTenantManager(ITenantInitializer tenantInitializer, Func<TestDbContext> dbContextFactory) : base(tenantInitializer, dbContextFactory)
+            public MyTenantManager(ITenantInitializer tenantInitializer, DbContextOptions dbContextOptions) : base(tenantInitializer, dbContextOptions)
             { }
 
             public Tenant FindTenantX(TenantId tenantId)

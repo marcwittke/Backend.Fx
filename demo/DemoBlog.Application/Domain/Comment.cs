@@ -1,9 +1,23 @@
 namespace DemoBlog.Domain
 {
     using Backend.Fx.BuildingBlocks;
+    using JetBrains.Annotations;
 
     public class Comment : Entity
     {
+        [UsedImplicitly]
+        private Comment()
+        {}
+
+        public Comment(int id, Post post, string author, string content)
+        {
+            Id = id;
+            Post = post;
+            PostId = post.Id;
+            Author = author;
+            Content = content;
+        }
+
         public int PostId { get; set; }
         public Post Post { get; private set; }
 

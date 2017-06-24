@@ -1,15 +1,15 @@
-﻿namespace Backend.Fx.AspNetCore.Integration
+﻿namespace DemoBlog.Mvc.Infrastructure
 {
-    using Logging;
+    using Backend.Fx.Logging;
+    using Backend.Fx.Patterns.DependencyInjection;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.Controllers;
-    using Patterns.DependencyInjection;
 
     public class RuntimeControllerActivator : RuntimeActivator, IControllerActivator
     {
         private static readonly ILogger Logger = LogManager.Create<RuntimeControllerActivator>();
         public RuntimeControllerActivator(IRuntime runtime) : base(runtime)
-        {}
+        { }
 
         public virtual object Create(ControllerContext c)
         {

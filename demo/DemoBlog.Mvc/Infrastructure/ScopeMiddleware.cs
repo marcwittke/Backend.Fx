@@ -1,19 +1,19 @@
-﻿namespace Backend.Fx.AspNetCore.Middlewares
+﻿namespace DemoBlog.Mvc.Infrastructure
 {
     using System;
     using System.Net;
     using System.Security;
     using System.Security.Principal;
     using System.Threading.Tasks;
-    using Environment.MultiTenancy;
-    using Exceptions;
+    using Backend.Fx.Environment.MultiTenancy;
+    using Backend.Fx.Exceptions;
+    using Backend.Fx.Logging;
+    using Backend.Fx.Patterns.DependencyInjection;
     using JetBrains.Annotations;
-    using Logging;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
     using Newtonsoft.Json;
-    using Patterns.DependencyInjection;
 
     /// <summary>
     ///     This middleware enables use of an application runtime for each request. It makes sure that every request
@@ -27,7 +27,7 @@
         private readonly IHostingEnvironment env;
         private readonly RequestDelegate next;
         private readonly IScopeManager scopeManager;
-        
+
         /// <summary>
         ///     This constructor is being called by the framework DI container
         /// </summary>
@@ -48,7 +48,7 @@
             try
             {
                 TenantId tenantId = GetTenantId(context.User.Identity);
-                
+
                 var asReadonly = context.Request.Method.ToUpperInvariant() == "GET";
                 using (var scope = scopeManager.BeginScope(context.User.Identity, tenantId))
                 {
@@ -96,9 +96,9 @@
                     {
                         Logger.Error(ex);
                         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                        var responseContent = env.IsDevelopment()
-                            ? JsonConvert.SerializeObject(new { ex.Message, ex.StackTrace })
-                            : JsonConvert.SerializeObject(new { Message = "An internal error occured" });
+                        var responseContent = HostingEnvironmentExtensions.IsDevelopment(env)
+                                                  ? JsonConvert.SerializeObject(new { ex.Message, ex.StackTrace })
+                                                  : JsonConvert.SerializeObject(new { Message = "An internal error occured" });
                         await context.Response.WriteAsync(responseContent);
                     }
                 }
@@ -107,9 +107,9 @@
             {
                 Logger.Fatal(ex);
                 context.Response.StatusCode = (int)HttpStatusCode.ServiceUnavailable;
-                var responseContent = env.IsDevelopment()
-                    ? JsonConvert.SerializeObject(new { ex.Message, ex.StackTrace })
-                    : JsonConvert.SerializeObject(new { Message = "An internal error occured" });
+                var responseContent = HostingEnvironmentExtensions.IsDevelopment(env)
+                                          ? JsonConvert.SerializeObject(new { ex.Message, ex.StackTrace })
+                                          : JsonConvert.SerializeObject(new { Message = "An internal error occured" });
                 await context.Response.WriteAsync(responseContent);
             }
         }
