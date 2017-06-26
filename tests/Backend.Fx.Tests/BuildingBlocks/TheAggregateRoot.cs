@@ -112,25 +112,6 @@
         }
 
         [Fact]
-        public void SetCreatedInitializesVersionWithOne()
-        {
-            DateTime now = DateTime.Now;
-            var sut = new TestAggregateRoot("gaga");
-            sut.SetCreatedProperties("me", now);
-            Assert.Equal(1, sut.Version);
-        }
-
-        [Fact]
-        public void SetModifiedIncreasesVersion()
-        {
-            DateTime now = DateTime.Now;
-            var sut = new TestAggregateRoot("gaga");
-            sut.SetCreatedProperties("me", now);
-            sut.SetModifiedProperties("metoo", now.AddMinutes(5));
-            Assert.Equal(2, sut.Version);
-        }
-
-        [Fact]
         public void ThrowsGivenNullCreatedBy()
         {
             var sut = new TestAggregateRoot("gaga");

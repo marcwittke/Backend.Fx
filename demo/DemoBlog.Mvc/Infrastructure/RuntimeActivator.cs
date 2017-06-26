@@ -1,8 +1,8 @@
-﻿namespace Backend.Fx.AspNetCore.Integration
+﻿namespace DemoBlog.Mvc.Infrastructure
 {
     using System;
     using System.Collections.Generic;
-    using Patterns.DependencyInjection;
+    using Backend.Fx.Patterns.DependencyInjection;
 
     public abstract class RuntimeActivator
     {

@@ -32,7 +32,7 @@
             {
                 var sut = new ReadonlyEfUnitOfWork(dbContext);
                 sut.Begin();
-                dbContext.Add(new Blogger("Bratislav", "Metulsky"));
+                dbContext.Add(new Blogger(334, "Bratislav", "Metulsky"));
                 sut.Complete();
                 Assert.Null(dbContext.Database.CurrentTransaction);
                 Assert.Empty(dbContext.Bloggers);
@@ -46,7 +46,7 @@
             {
                 var sut = new ReadonlyEfUnitOfWork(dbContext);
                 sut.Begin();
-                dbContext.Add(new Blogger("Bratislav", "Metulsky"));
+                dbContext.Add(new Blogger(335, "Bratislav", "Metulsky"));
                 sut.Dispose();
                 Assert.Null(dbContext.Database.CurrentTransaction);
                 Assert.Empty(dbContext.Bloggers);

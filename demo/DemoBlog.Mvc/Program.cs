@@ -5,6 +5,7 @@ namespace DemoBlog.Mvc
     using Backend.Fx.Logging;
     using Microsoft.AspNetCore.Hosting;
     using Backend.Fx.NLogLogging;
+    using Infrastructure;
     using Microsoft.Extensions.DependencyInjection;
     using NLog.Config;
 

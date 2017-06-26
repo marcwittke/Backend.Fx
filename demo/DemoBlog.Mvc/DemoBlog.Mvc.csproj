@@ -35,7 +35,6 @@
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="1.0.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Backend.Fx.AspNetCore\Backend.Fx.AspNetCore.csproj" />
     <ProjectReference Include="..\..\src\Backend.Fx.NLogLogging\Backend.Fx.NLogLogging.csproj" />
     <ProjectReference Include="..\DemoBlog.Application\DemoBlog.csproj" />
   </ItemGroup>

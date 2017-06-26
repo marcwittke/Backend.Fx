@@ -20,6 +20,8 @@
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             this.ApplyAggregateRootMappings(modelBuilder);
+            modelBuilder.RegisterRowVersionProperty();
+            modelBuilder.RegisterEntityIdAsNeverGenerated();
         }
         
         public DbSet<Blogger> Bloggers { get; set; }

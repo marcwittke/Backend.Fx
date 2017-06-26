@@ -1,9 +1,8 @@
-﻿namespace DemoBlog.Mvc
+﻿namespace DemoBlog.Mvc.Infrastructure
 {
     using System.Linq;
     using System.Security.Claims;
     using System.Security.Principal;
-    using Backend.Fx.AspNetCore.Middlewares;
     using Backend.Fx.Environment.MultiTenancy;
     using Backend.Fx.Patterns.DependencyInjection;
     using Data.Identity;

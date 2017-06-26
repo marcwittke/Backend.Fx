@@ -18,7 +18,7 @@
         {
             dbFilePath = Path.GetTempFileName();
             dbContextOptions = new DbContextOptionsBuilder().UseSqlite("Data Source=" + dbFilePath).Options;
-            sut = new DatabaseManager<TestDbContext>(() => new TestDbContext(dbContextOptions));
+            sut = new DatabaseManagerWithoutMigration<TestDbContext>(dbContextOptions);
         }
 
         [Fact]

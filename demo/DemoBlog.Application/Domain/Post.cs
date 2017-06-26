@@ -7,8 +7,9 @@ namespace DemoBlog.Domain
     {
         private Post() {}
 
-        public Post(Blog blog, string title, string content)
+        public Post(int id, Blog blog, string title, string content)
         {
+            Id = id;
             BlogId = blog.Id;
             Title = title;
             Content = content;

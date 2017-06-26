@@ -7,16 +7,21 @@
     using Environment.Authentication;
     using Environment.DateAndTime;
     using Environment.MultiTenancy;
+    using FakeItEasy;
     using Microsoft.EntityFrameworkCore;
     using Patterns.Authorization;
+    using Patterns.IdGeneration;
     using Xunit;
 
     public class TheRepositoryOfComposedAggregate : TestWithInMemorySqliteDbContext
     {
+        private readonly IEntityIdGenerator idGenerator = A.Fake<IEntityIdGenerator>();
+        private int nextId = 1;
 
         public TheRepositoryOfComposedAggregate()
         {
             CreateDatabase();
+            A.CallTo(() => idGenerator.NextId()).ReturnsLazily(() => nextId++);
         }
 
         [Fact]
@@ -30,9 +35,10 @@
 
             using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantId))
             {
-                var blog = new Blog("my blog");
-                blog.AddPost("my post");
-                sut.Repository.Add(blog);
+                var repository = sut.Repository;
+                var blog = new Blog(123, "my blog");
+                blog.AddPost(idGenerator, "my post");
+                repository.Add(blog);
             }
 
             count = ExecuteScalar<long>("SELECT count(*) FROM Blogs");
@@ -130,7 +136,7 @@
             using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantId))
             {
                 var blog = sut.Repository.Single(id);
-                blog.Posts.Add(new Post(blog, "added"));
+                blog.Posts.Add(new Post(idGenerator.NextId(), blog, "added"));
             }
 
 
@@ -146,11 +152,11 @@
             {
                 var blog = sut.Repository.Single(id);
                 blog.Posts.Clear();
-                blog.Posts.Add(new Post(blog, "new name 1"));
-                blog.Posts.Add(new Post(blog, "new name 2"));
-                blog.Posts.Add(new Post(blog, "new name 3"));
-                blog.Posts.Add(new Post(blog, "new name 4"));
-                blog.Posts.Add(new Post(blog, "new name 5"));
+                blog.Posts.Add(new Post(idGenerator.NextId(), blog, "new name 1"));
+                blog.Posts.Add(new Post(idGenerator.NextId(), blog, "new name 2"));
+                blog.Posts.Add(new Post(idGenerator.NextId(), blog, "new name 3"));
+                blog.Posts.Add(new Post(idGenerator.NextId(), blog, "new name 4"));
+                blog.Posts.Add(new Post(idGenerator.NextId(), blog, "new name 5"));
             }
 
             long count = ExecuteScalar<long>("SELECT count(*) FROM Post");
@@ -159,14 +165,14 @@
 
         private int CreateBlogWithPost(int postCount = 1)
         {
-            ExecuteNonQuery($"INSERT INTO Blogs (TenantId, Name, CreatedOn, CreatedBy, Version) VALUES ({TenantId.Value}, 'my blog', CURRENT_TIMESTAMP, 'persistence test', 1)");
+            long blogId = nextId++;
+            ExecuteNonQuery($"INSERT INTO Blogs (Id, TenantId, Name, CreatedOn, CreatedBy) VALUES ({blogId}, {TenantId.Value}, 'my blog', CURRENT_TIMESTAMP, 'persistence test')");
             long count = ExecuteScalar<long>("SELECT count(*) FROM Blogs");
             Assert.Equal(1, count);
-            long blogId = ExecuteScalar<long>("SELECT Id FROM Blogs LIMIT 1");
-
+            
             for (int i = 0; i < postCount; i++)
             {
-                ExecuteNonQuery($"INSERT INTO Post (BlogId, Name, CreatedOn, CreatedBy, Version) VALUES ({blogId}, 'my post {i:00}', CURRENT_TIMESTAMP, 'persistence test', 1)");
+                ExecuteNonQuery($"INSERT INTO Post (Id, BlogId, Name, CreatedOn, CreatedBy) VALUES ({nextId++}, {blogId}, 'my post {i:00}', CURRENT_TIMESTAMP, 'persistence test')");
             }
 
             return (int)blogId;

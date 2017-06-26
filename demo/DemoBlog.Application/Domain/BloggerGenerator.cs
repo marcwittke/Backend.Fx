@@ -2,14 +2,17 @@ namespace DemoBlog.Domain
 {
     using Backend.Fx.BuildingBlocks;
     using Backend.Fx.Patterns.DataGeneration;
+    using Backend.Fx.Patterns.IdGeneration;
     using Backend.Fx.RandomData;
 
     public class BloggerGenerator : InitialDataGenerator, IDemoDataGenerator
     {
+        private readonly IEntityIdGenerator idGenerator;
         private readonly IRepository<Blogger> bloggerRepository;
 
-        public BloggerGenerator(IRepository<Blogger> bloggerRepository)
+        public BloggerGenerator(IEntityIdGenerator idGenerator, IRepository<Blogger> bloggerRepository)
         {
+            this.idGenerator = idGenerator;
             this.bloggerRepository = bloggerRepository;
         }
 
@@ -22,7 +25,7 @@ namespace DemoBlog.Domain
         {
             foreach (var testPerson in new TestPersonGenerator { GenerateCount = 10 }.GenerateTestPersons())
             {
-                bloggerRepository.Add(new Blogger(testPerson.LastName, testPerson.FirstName));
+                bloggerRepository.Add(new Blogger(idGenerator.NextId(), testPerson.LastName, testPerson.FirstName));
             }
         }
 
