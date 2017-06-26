@@ -10,9 +10,6 @@
     {
         DateTime UtcNow { get; }
 
-        DateTime GetLocalNow(int utcOffsetMinutes);
-        DateTime LocalizeUtcDateTime(DateTime utcDateTime, int utcOffsetMinutes);
         void OverrideUtcNow(DateTime utcNow);
-        DateTime? ToUtcTime(DateTime? localDateTime, int utcOffsetMinutes);
     }
 }
