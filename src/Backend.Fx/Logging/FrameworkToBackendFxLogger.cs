@@ -59,7 +59,8 @@
 
         public IDisposable BeginScope<TState>(TState state)
         {
-            return logger.DebugDuration(state.ToString());
+            LogManager.BeginActivity();
+            return logger.InfoDuration(state.ToString());
         }
     }
 }

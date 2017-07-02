@@ -19,7 +19,7 @@
 
         public void BeginActivity(int activityIndex)
         {
-            NLog.MappedDiagnosticsContext.Set("Activity", activityIndex);
+            NLog.MappedDiagnosticsLogicalContext.Set("app-Activity", activityIndex);
         }
 
         public void Shutdown()
