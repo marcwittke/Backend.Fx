@@ -46,7 +46,7 @@
         public TAggregateRoot Single(int id)
         {
             Logger.Debug($"Removing {AggregateTypeName}[{id}]");
-            var aggregateRoot = AggregateQueryable.SingleOrDefault(aggr => aggr.Id.Equals(id));
+            var aggregateRoot = AggregateQueryable.FirstOrDefault(aggr => aggr.Id.Equals(id));
             if (aggregateRoot == null)
             {
                 throw new NotFoundException<TAggregateRoot>(id);
@@ -57,7 +57,7 @@
 
         public TAggregateRoot SingleOrDefault(int id)
         {
-            return AggregateQueryable.SingleOrDefault(aggr => aggr.Id.Equals(id));
+            return AggregateQueryable.FirstOrDefault(aggr => aggr.Id.Equals(id));
         }
 
         public TAggregateRoot[] GetAll()
