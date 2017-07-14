@@ -5,7 +5,7 @@
 
     public static class TestRandom
     {
-        public static Random Instance { get; } = new Random(429756);
+        public static Random Instance { get; set; } = new Random(429756);
 
         public static IEnumerable<int> Next(int amount, Func<int> generate)
         {
