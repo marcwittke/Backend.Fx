@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.6
+VisualStudioVersion = 15.0.26430.15
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6B64354E-D95B-4711-BAF6-B32049C90CD9}"
 	ProjectSection(SolutionItems) = preProject
@@ -12,19 +12,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{53D4501E-953
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C7885592-A4B8-4BA8-8D3A-1EDA4025D17A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend.Fx", "src\Backend.Fx\Backend.Fx.csproj", "{0BBA42D0-0ED7-4AA6-A665-1FBBAF913306}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx", "src\Backend.Fx\Backend.Fx.csproj", "{0BBA42D0-0ED7-4AA6-A665-1FBBAF913306}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend.Fx.NLogLogging", "src\Backend.Fx.NLogLogging\Backend.Fx.NLogLogging.csproj", "{80F4951E-56E4-442F-96BC-53EB9BE70928}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.NLogLogging", "src\Backend.Fx.NLogLogging\Backend.Fx.NLogLogging.csproj", "{80F4951E-56E4-442F-96BC-53EB9BE70928}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend.Fx.Bootstrapping", "src\Backend.Fx.Bootstrapping\Backend.Fx.Bootstrapping.csproj", "{4B32B982-EB4B-42F4-969A-9D2D8EA23451}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.Bootstrapping", "src\Backend.Fx.Bootstrapping\Backend.Fx.Bootstrapping.csproj", "{4B32B982-EB4B-42F4-969A-9D2D8EA23451}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend.Fx.EfCorePersistence", "src\Backend.Fx.EfCorePersistence\Backend.Fx.EfCorePersistence.csproj", "{16D81037-F0D0-4647-BA4E-CA5518F6846D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.EfCorePersistence", "src\Backend.Fx.EfCorePersistence\Backend.Fx.EfCorePersistence.csproj", "{16D81037-F0D0-4647-BA4E-CA5518F6846D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend.Fx.AspNetCore", "src\Backend.Fx.AspNetCore\Backend.Fx.AspNetCore.csproj", "{25883CDD-CF76-4DCB-AF9F-69C33BD043A4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.Tests", "tests\Backend.Fx.Tests\Backend.Fx.Tests.csproj", "{3706F748-43F6-41BD-8875-81FA679220C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend.Fx.Tests", "tests\Backend.Fx.Tests\Backend.Fx.Tests.csproj", "{3706F748-43F6-41BD-8875-81FA679220C7}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend.Fx.Bootstrapping.Tests", "tests\Backend.Fx.Bootstrapping.Tests\Backend.Fx.Bootstrapping.Tests.csproj", "{C348AD1C-E928-4B11-8A88-EFCA70667B1D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.Bootstrapping.Tests", "tests\Backend.Fx.Bootstrapping.Tests\Backend.Fx.Bootstrapping.Tests.csproj", "{C348AD1C-E928-4B11-8A88-EFCA70667B1D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,14 +30,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{3A60CB72-4B1F-44E6-9B63-A51589CADE01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3A60CB72-4B1F-44E6-9B63-A51589CADE01}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3A60CB72-4B1F-44E6-9B63-A51589CADE01}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3A60CB72-4B1F-44E6-9B63-A51589CADE01}.Release|Any CPU.Build.0 = Release|Any CPU
-		{786BE0E2-9DB0-44EF-AA96-51770FDE35DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{786BE0E2-9DB0-44EF-AA96-51770FDE35DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{786BE0E2-9DB0-44EF-AA96-51770FDE35DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{786BE0E2-9DB0-44EF-AA96-51770FDE35DB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0BBA42D0-0ED7-4AA6-A665-1FBBAF913306}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0BBA42D0-0ED7-4AA6-A665-1FBBAF913306}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0BBA42D0-0ED7-4AA6-A665-1FBBAF913306}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -56,10 +46,6 @@ Global
 		{16D81037-F0D0-4647-BA4E-CA5518F6846D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{16D81037-F0D0-4647-BA4E-CA5518F6846D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{16D81037-F0D0-4647-BA4E-CA5518F6846D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{25883CDD-CF76-4DCB-AF9F-69C33BD043A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{25883CDD-CF76-4DCB-AF9F-69C33BD043A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{25883CDD-CF76-4DCB-AF9F-69C33BD043A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{25883CDD-CF76-4DCB-AF9F-69C33BD043A4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3706F748-43F6-41BD-8875-81FA679220C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3706F748-43F6-41BD-8875-81FA679220C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3706F748-43F6-41BD-8875-81FA679220C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -73,13 +59,10 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{3A60CB72-4B1F-44E6-9B63-A51589CADE01} = {B2783441-6760-4018-B87E-9F5180C0FAD8}
-		{786BE0E2-9DB0-44EF-AA96-51770FDE35DB} = {B2783441-6760-4018-B87E-9F5180C0FAD8}
 		{0BBA42D0-0ED7-4AA6-A665-1FBBAF913306} = {53D4501E-953C-4A7C-97C4-1F9DE04BD092}
 		{80F4951E-56E4-442F-96BC-53EB9BE70928} = {53D4501E-953C-4A7C-97C4-1F9DE04BD092}
 		{4B32B982-EB4B-42F4-969A-9D2D8EA23451} = {53D4501E-953C-4A7C-97C4-1F9DE04BD092}
 		{16D81037-F0D0-4647-BA4E-CA5518F6846D} = {53D4501E-953C-4A7C-97C4-1F9DE04BD092}
-		{25883CDD-CF76-4DCB-AF9F-69C33BD043A4} = {53D4501E-953C-4A7C-97C4-1F9DE04BD092}
 		{3706F748-43F6-41BD-8875-81FA679220C7} = {C7885592-A4B8-4BA8-8D3A-1EDA4025D17A}
 		{C348AD1C-E928-4B11-8A88-EFCA70667B1D} = {C7885592-A4B8-4BA8-8D3A-1EDA4025D17A}
 	EndGlobalSection
