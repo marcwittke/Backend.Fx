@@ -27,7 +27,7 @@
         }
 
         [Key]
-        public int Id { get; set; }
+        public int Id { get; private set; }
 
         public DateTime CreatedOn { get; protected set; }
 

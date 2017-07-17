@@ -34,7 +34,6 @@
 
         protected override void AddPersistent(T aggregateRoot)
         {
-            aggregateRoot.Id = Store.Keys.Any() ? Store.Keys.Max() + 1 : 1;
             Store.Add(aggregateRoot.Id, aggregateRoot);
         }
 

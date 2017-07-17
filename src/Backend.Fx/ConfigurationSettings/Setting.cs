@@ -8,9 +8,8 @@ namespace Backend.Fx.ConfigurationSettings
         [UsedImplicitly]
         private Setting() { }
 
-        public Setting(int id, string key)
+        public Setting(int id, string key) : base(id)
         {
-            Id = id;
             Key = key;
         }
 
