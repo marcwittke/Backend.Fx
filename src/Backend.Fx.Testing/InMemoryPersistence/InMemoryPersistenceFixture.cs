@@ -6,6 +6,7 @@
     using BuildingBlocks;
     using Environment.DateAndTime;
     using Environment.MultiTenancy;
+    using FakeItEasy;
     using JetBrains.Annotations;
     using Patterns.Authorization;
     using Patterns.IdGeneration;
@@ -17,9 +18,12 @@
     {
         private readonly Dictionary<Type, object> stores;
         private int nextId;
-
+        
         protected InMemoryPersistenceFixture(bool withDemoData, Assembly domainAssembly, [CanBeNull] Action<Container> additionalContainerConfig)
         {
+            EntityIdGenerator = A.Fake<IEntityIdGenerator>();
+            A.CallTo(() => EntityIdGenerator.NextId()).ReturnsLazily(() => nextId++);
+
             using (var dataGenerationRuntime = new DataGenerationRuntime(domainAssembly, additionalContainerConfig))
             {
                 dataGenerationRuntime.Boot(container => container.RegisterSingleton<IEntityIdGenerator>(this));
@@ -36,6 +40,8 @@
         public ICanFlush CanFlush { get; } = new DummyCanFlush();
 
         public TenantId TenantId { get; }
+
+        public IEntityIdGenerator EntityIdGenerator { get; }
 
         public TAggregateRoot GetRandom<TAggregateRoot>() where TAggregateRoot : AggregateRoot
         {

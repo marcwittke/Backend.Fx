@@ -12,6 +12,14 @@
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
     public abstract class Entity : IEquatable<Entity>
     {
+        protected Entity()
+        { }
+
+        protected Entity(int id)
+        {
+            Id = id;
+        }
+
         [UsedImplicitly]
         public string DebuggerDisplay
         {
