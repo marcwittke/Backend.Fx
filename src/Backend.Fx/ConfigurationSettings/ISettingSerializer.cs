@@ -32,12 +32,12 @@ namespace Backend.Fx.ConfigurationSettings
     {
         public string Serialize(int? setting)
         {
-            return setting?.ToString();
+            return setting?.ToString(CultureInfo.InvariantCulture);
         }
 
         public int? Deserialize(string value)
         {
-            return string.IsNullOrWhiteSpace(value) ? (int?)null : int.Parse(value);
+            return string.IsNullOrWhiteSpace(value) ? (int?)null : int.Parse(value, CultureInfo.InvariantCulture);
         }
     }
 
@@ -74,7 +74,7 @@ namespace Backend.Fx.ConfigurationSettings
     {
         public string Serialize(DateTime? setting)
         {
-            return setting?.ToString("r", CultureInfo.InvariantCulture);
+            return setting?.ToString("O", CultureInfo.InvariantCulture);
         }
 
         public DateTime? Deserialize(string value)
