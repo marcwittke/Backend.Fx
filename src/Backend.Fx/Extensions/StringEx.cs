@@ -23,5 +23,10 @@
         {
             return Regex.Replace(s, @"\r\n?", "\n");
         }
+
+        public static string ToMacintoshLineEnding(this string s)
+        {
+            return Regex.Replace(s, @"\r?\n", "\r");
+        }
     }
 }
