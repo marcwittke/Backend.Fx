@@ -6,6 +6,11 @@
 
     public class AnAggregate : AggregateRoot
     {
+        public AnAggregate(int id, string name) : base(id)
+        {
+            Name = name;
+        }
+
         public string Name { get; set; }
     }
 
@@ -21,7 +26,7 @@
 
         protected override void GenerateCore()
         {
-            repository.Add(new AnAggregate { Name = "Productive record" });
+            repository.Add(new AnAggregate(234, "Productive record"));
         }
 
         protected override void Initialize()
@@ -32,7 +37,7 @@
             return true;
         }
     }
-    
+
     public class AnAggregateAuthorization : AllowAll<AnAggregate> { }
 
     public class DemonstrationGenerator : InitialDataGenerator, IDemoDataGenerator
@@ -47,7 +52,7 @@
 
         protected override void GenerateCore()
         {
-            repository.Add(new AnAggregate { Name = "Demo record" });
+            repository.Add(new AnAggregate(456, "Demo record"));
         }
 
         protected override void Initialize()

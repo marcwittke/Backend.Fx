@@ -20,10 +20,10 @@
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(false);
 
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
-            var agg1 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 23, TenantId = 234 };
-            var agg2 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 24, TenantId = 234 };
-            var agg3 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 25, TenantId = 234 };
-            var agg4 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 26, TenantId = 234 };
+            var agg1 = new TheAggregateRoot.TestAggregateRoot(23, "whatever") { TenantId = 234 };
+            var agg2 = new TheAggregateRoot.TestAggregateRoot(24, "whatever") { TenantId = 234 };
+            var agg3 = new TheAggregateRoot.TestAggregateRoot(25, "whatever") { TenantId = 234 };
+            var agg4 = new TheAggregateRoot.TestAggregateRoot(26, "whatever") { TenantId = 234 };
 
             sut.Store.Add(agg1.Id, agg1);
             sut.Store.Add(agg2.Id, agg2);
@@ -45,10 +45,10 @@
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(false);
 
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
-            var agg1 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 23, TenantId = 234 };
-            var agg2 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 24, TenantId = 234 };
-            var agg3 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 25, TenantId = 234 };
-            var agg4 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 26, TenantId = 234 };
+            var agg1 = new TheAggregateRoot.TestAggregateRoot(23, "whatever") { TenantId = 234 };
+            var agg2 = new TheAggregateRoot.TestAggregateRoot(24, "whatever") { TenantId = 234 };
+            var agg3 = new TheAggregateRoot.TestAggregateRoot(25, "whatever") { TenantId = 234 };
+            var agg4 = new TheAggregateRoot.TestAggregateRoot(26, "whatever") { TenantId = 234 };
 
             sut.Store.Add(agg1.Id, agg1);
             sut.Store.Add(agg2.Id, agg2);
@@ -72,10 +72,10 @@
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
             Assert.False(sut.Any());
 
-            var agg1 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 23, TenantId = 234 };
-            var agg2 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 24, TenantId = 234 };
-            var agg3 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 25, TenantId = 234 };
-            var agg4 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 26, TenantId = 234 };
+            var agg1 = new TheAggregateRoot.TestAggregateRoot(23, "whatever") { TenantId = 234 };
+            var agg2 = new TheAggregateRoot.TestAggregateRoot(24, "whatever") { TenantId = 234 };
+            var agg3 = new TheAggregateRoot.TestAggregateRoot(25, "whatever") { TenantId = 234 };
+            var agg4 = new TheAggregateRoot.TestAggregateRoot(26, "whatever") { TenantId = 234 };
 
             sut.Store.Add(agg1.Id, agg1);
             sut.Store.Add(agg2.Id, agg2);
@@ -93,12 +93,12 @@
 
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
-            Assert.Throws<InvalidOperationException>(() => sut.Add(new TheAggregateRoot.TestAggregateRoot("whatever")));
+            Assert.Throws<InvalidOperationException>(() => sut.Add(new TheAggregateRoot.TestAggregateRoot(77, "whatever")));
 
             // even when I don't have permissions
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => false);
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(false);
-            Assert.Throws<SecurityException>(() => sut.Add(new TheAggregateRoot.TestAggregateRoot("whatever")));
+            Assert.Throws<SecurityException>(() => sut.Add(new TheAggregateRoot.TestAggregateRoot(78, "whatever")));
         }
 
         [Fact]
@@ -110,7 +110,7 @@
 
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(null), authorization);
 
-            var agg1 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 12123123, TenantId = 234 };
+            var agg1 = new TheAggregateRoot.TestAggregateRoot(12123123, "whatever") { TenantId = 234 };
             sut.Store.Add(agg1.Id, agg1);
 
             Assert.Throws<InvalidOperationException>(() => sut.Delete(agg1));
@@ -136,7 +136,7 @@
 
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
 
-            var agg1 = new TheAggregateRoot.TestAggregateRoot("1");
+            var agg1 = new TheAggregateRoot.TestAggregateRoot(22,"1");
             sut.Add(agg1);
             Assert.Equal(234, agg1.TenantId);
         }
@@ -151,9 +151,9 @@
             var store = new InMemoryStore<TheAggregateRoot.TestAggregateRoot>();
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(store, new TenantId(234), authorization);
 
-            sut.Add(new TheAggregateRoot.TestAggregateRoot("1"));
-            sut.Add(new TheAggregateRoot.TestAggregateRoot("2"));
-            sut.Add(new TheAggregateRoot.TestAggregateRoot("3"));
+            sut.Add(new TheAggregateRoot.TestAggregateRoot(22, "1"));
+            sut.Add(new TheAggregateRoot.TestAggregateRoot(23, "2"));
+            sut.Add(new TheAggregateRoot.TestAggregateRoot(24, "3"));
 
             // now I am in another tenant
             sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(store, new TenantId(233), authorization);
@@ -167,11 +167,11 @@
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
 
-            var agg1 = new TheAggregateRoot.TestAggregateRoot("1");
-            var agg2 = new TheAggregateRoot.TestAggregateRoot("2");
-            var agg3 = new TheAggregateRoot.TestAggregateRoot("3");
-            var agg4 = new TheAggregateRoot.TestAggregateRoot("4");
-            var agg5 = new TheAggregateRoot.TestAggregateRoot("5");
+            var agg1 = new TheAggregateRoot.TestAggregateRoot(11, "1");
+            var agg2 = new TheAggregateRoot.TestAggregateRoot(12, "2");
+            var agg3 = new TheAggregateRoot.TestAggregateRoot(13, "3");
+            var agg4 = new TheAggregateRoot.TestAggregateRoot(14, "4");
+            var agg5 = new TheAggregateRoot.TestAggregateRoot(15, "5");
 
             var store = new InMemoryStore<TheAggregateRoot.TestAggregateRoot>();
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(store, new TenantId(234), authorization);
@@ -205,7 +205,7 @@
 
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
 
-            var agg1 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 12123123, TenantId = 234 };
+            var agg1 = new TheAggregateRoot.TestAggregateRoot(12123123, "whatever") { TenantId = 234 };
             sut.Store.Add(agg1.Id, agg1);
 
             sut.Delete(agg1);
@@ -221,10 +221,10 @@
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
 
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
-            var agg1 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 12123123, TenantId = 234 };
-            var agg2 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 12123124, TenantId = 234 };
-            var agg3 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 12123125, TenantId = 234 };
-            var agg4 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 12123126, TenantId = 234 };
+            var agg1 = new TheAggregateRoot.TestAggregateRoot(12123123, "whatever") { TenantId = 234 };
+            var agg2 = new TheAggregateRoot.TestAggregateRoot(12123124, "whatever") { TenantId = 234 };
+            var agg3 = new TheAggregateRoot.TestAggregateRoot(12123125, "whatever") { TenantId = 234 };
+            var agg4 = new TheAggregateRoot.TestAggregateRoot(12123126, "whatever") { TenantId = 234 };
 
             sut.Add(agg1);
             sut.Add(agg2);
@@ -246,10 +246,10 @@
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
 
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
-            var agg1 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 23, TenantId = 234 };
-            var agg2 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 24, TenantId = 234 };
-            var agg3 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 25, TenantId = 234 };
-            var agg4 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 26, TenantId = 234 };
+            var agg1 = new TheAggregateRoot.TestAggregateRoot(23, "whatever") { TenantId = 234 };
+            var agg2 = new TheAggregateRoot.TestAggregateRoot(24, "whatever") { TenantId = 234 };
+            var agg3 = new TheAggregateRoot.TestAggregateRoot(25, "whatever") { TenantId = 234 };
+            var agg4 = new TheAggregateRoot.TestAggregateRoot(26, "whatever") { TenantId = 234 };
 
             sut.Store.Add(agg1.Id, agg1);
             sut.Store.Add(agg2.Id, agg2);
@@ -272,10 +272,10 @@
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
 
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
-            var agg1 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 23, TenantId = 234 };
-            var agg2 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 24, TenantId = 234 };
-            var agg3 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 25, TenantId = 234 };
-            var agg4 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 26, TenantId = 999 };
+            var agg1 = new TheAggregateRoot.TestAggregateRoot(23, "whatever") { TenantId = 234 };
+            var agg2 = new TheAggregateRoot.TestAggregateRoot(24, "whatever") { TenantId = 234 };
+            var agg3 = new TheAggregateRoot.TestAggregateRoot(25, "whatever") { TenantId = 234 };
+            var agg4 = new TheAggregateRoot.TestAggregateRoot(26, "whatever") { TenantId = 999 };
 
             sut.Store.Add(agg1.Id, agg1);
             sut.Store.Add(agg2.Id, agg2);
@@ -293,10 +293,10 @@
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
 
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
-            var agg1 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 23, TenantId = 234 };
-            var agg2 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 24, TenantId = 234 };
-            var agg3 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 25, TenantId = 234 };
-            var agg4 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 26, TenantId = 999 };
+            var agg1 = new TheAggregateRoot.TestAggregateRoot(23, "whatever") { TenantId = 234 };
+            var agg2 = new TheAggregateRoot.TestAggregateRoot(24, "whatever") { TenantId = 234 };
+            var agg3 = new TheAggregateRoot.TestAggregateRoot(25, "whatever") { TenantId = 234 };
+            var agg4 = new TheAggregateRoot.TestAggregateRoot(26, "whatever") { TenantId = 999 };
 
             sut.Store.Add(agg1.Id, agg1);
             sut.Store.Add(agg2.Id, agg2);
@@ -314,7 +314,7 @@
 
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(false);
-            Assert.Throws<SecurityException>(() => sut.Add(new TheAggregateRoot.TestAggregateRoot("whatever")));
+            Assert.Throws<SecurityException>(() => sut.Add(new TheAggregateRoot.TestAggregateRoot(44, "whatever")));
         }
 
         [Fact]
@@ -325,10 +325,10 @@
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(false);
 
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
-            var agg1 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 23, TenantId = 234 };
-            var agg2 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 24, TenantId = 234 };
-            var agg3 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 25, TenantId = 234 };
-            var agg4 = new TheAggregateRoot.TestAggregateRoot("whatever") { Id = 26, TenantId = 234 };
+            var agg1 = new TheAggregateRoot.TestAggregateRoot(23, "whatever") { TenantId = 234 };
+            var agg2 = new TheAggregateRoot.TestAggregateRoot(24, "whatever") { TenantId = 234 };
+            var agg3 = new TheAggregateRoot.TestAggregateRoot(25, "whatever") { TenantId = 234 };
+            var agg4 = new TheAggregateRoot.TestAggregateRoot(26, "whatever") { TenantId = 234 };
 
             sut.Store.Add(agg1.Id, agg1);
             sut.Store.Add(agg2.Id, agg2);

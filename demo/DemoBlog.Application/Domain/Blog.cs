@@ -10,9 +10,8 @@
         private Blog()
         {}
          
-        public Blog(int id, Blogger blogger, string title, string description)
+        public Blog(int id, Blogger blogger, string title, string description) : base(id)
         {
-            Id = id;
             Title = title;
             Description = description;
             BloggerId = blogger.Id;

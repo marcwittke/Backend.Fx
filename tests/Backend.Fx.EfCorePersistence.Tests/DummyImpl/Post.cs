@@ -8,9 +8,8 @@
         [UsedImplicitly]
         private Post() { }
 
-        public Post(int id, Blog blog, string name)
+        public Post(int id, Blog blog, string name) : base(id)
         {
-            Id = id;
             Blog = blog;
             BlogId = blog.Id;
             Name = name;

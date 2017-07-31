@@ -9,9 +9,8 @@
         private Blogger()
         {}
 
-        public Blogger(int id, string lastName, string firstName)
+        public Blogger(int id, string lastName, string firstName) : base(id)
         {
-            Id = id;
             LastName = lastName;
             FirstName = firstName;
         }

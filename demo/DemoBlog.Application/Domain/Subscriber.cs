@@ -8,9 +8,8 @@
         [UsedImplicitly]
         public Subscriber() { }
 
-        public Subscriber(int id, string name, string email, Blog blog)
+        public Subscriber(int id, string name, string email, Blog blog) : base(id)
         {
-            Id = id;
             Name = name;
             Email = email;
             Blog = blog;

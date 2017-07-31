@@ -10,9 +10,8 @@
         [UsedImplicitly]
         private Blog() { }
 
-        public Blog(int id, string name)
+        public Blog(int id, string name) : base(id)
         {
-            Id = id;
             Name = name;
         }
 

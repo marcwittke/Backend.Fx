@@ -35,7 +35,7 @@
         public void AddsNoExceptionWhenAggregateIsNotNull()
         {
             var sut = UnprocessableException.UseBuilder();
-            sut.AddNotFoundWhenNull(1111, new TheAggregateRoot.TestAggregateRoot("gaga"));
+            sut.AddNotFoundWhenNull(1111, new TheAggregateRoot.TestAggregateRoot(12345, "gaga"));
             sut.Dispose();
         }
 

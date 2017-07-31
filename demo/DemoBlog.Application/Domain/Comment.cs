@@ -9,9 +9,8 @@ namespace DemoBlog.Domain
         private Comment()
         {}
 
-        public Comment(int id, Post post, string author, string content)
+        public Comment(int id, Post post, string author, string content) : base(id)
         {
-            Id = id;
             Post = post;
             PostId = post.Id;
             Author = author;
