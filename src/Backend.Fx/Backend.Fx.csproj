@@ -14,7 +14,8 @@
     <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/marcwittke/Backend.Fx</PackageProjectUrl>
     <RepositoryUrl>https://github.com/marcwittke/Backend.Fx.git</RepositoryUrl>
-    <RepositoryType>Git</RepositoryType>    
+    <RepositoryType>Git</RepositoryType>
+    <Version>1.2.0</Version>    
   </PropertyGroup>
 
   <ItemGroup>
