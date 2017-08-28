@@ -13,5 +13,10 @@
         {
             return true;
         }
+
+        public bool CanModify(TAggregateRoot t)
+        {
+            return true;
+        }
     }
 }

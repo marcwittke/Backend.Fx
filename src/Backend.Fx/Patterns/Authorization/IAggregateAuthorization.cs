@@ -16,5 +16,7 @@
         /// Both overloads must return <code>true</code> to be considered as permission alloewance.
         /// </summary>
         bool CanCreate(TAggregateRoot t);
+
+        bool CanModify(TAggregateRoot t);
     }
 }

@@ -31,5 +31,10 @@ namespace DemoBlog.Domain
             var claimsIdentity = identity as ClaimsIdentity;
             return claimsIdentity != null && claimsIdentity.HasClaim(claim => claim.Type == "urn:demoblog:blogadmin" && claim.Value == "blogId");
         }
+
+        public bool CanModify(Post t)
+        {
+            return CanCreate(t);
+        }
     }
 }

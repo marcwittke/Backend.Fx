@@ -30,5 +30,10 @@
             var claimsIdentity = identity as ClaimsIdentity;
             return claimsIdentity != null && claimsIdentity.HasClaim(claim => claim.Type == claimsIdentity.RoleClaimType && claim.Value == "Admin");
         }
+
+        public bool CanModify(Blogger t)
+        {
+            return CanCreate(t);
+        }
     }
 }
