@@ -17,6 +17,7 @@
         {
             this.dbContext = dbContext;
             this.dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
+            this.dbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
         public override void Begin()

@@ -6,8 +6,7 @@
     using Logging;
     using Microsoft.EntityFrameworkCore;
     using Patterns.Authorization;
-    using Patterns.UnitOfWork;
-
+    
     public class EfRepository<TAggregateRoot> : Repository<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
         private static readonly ILogger Logger = LogManager.Create<EfRepository<TAggregateRoot>>();
@@ -52,7 +51,7 @@
                         queryable = queryable.Include(include);
                     }
                 }
-                return dbContext.ChangeTracker.AutoDetectChangesEnabled ? queryable : queryable.AsNoTracking();
+                return queryable;
             }
         }
     }
