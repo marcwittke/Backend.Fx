@@ -11,15 +11,13 @@
     public class EfRepository<TAggregateRoot> : Repository<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
         private static readonly ILogger Logger = LogManager.Create<EfRepository<TAggregateRoot>>();
-        private readonly ICanFlush canFlush;
         private readonly DbContext dbContext;
         private readonly IAggregateRootMapping<TAggregateRoot> aggregateRootMapping;
     
-        public EfRepository(ICanFlush canFlush, DbContext dbContext, IAggregateRootMapping<TAggregateRoot> aggregateRootMapping,
+        public EfRepository(DbContext dbContext, IAggregateRootMapping<TAggregateRoot> aggregateRootMapping,
             TenantId tenantId, IAggregateAuthorization<TAggregateRoot> aggregateAuthorization)
             : base(tenantId, aggregateAuthorization)
         {
-            this.canFlush = canFlush;
             this.dbContext = dbContext;
             this.aggregateRootMapping = aggregateRootMapping;
         }
@@ -28,16 +26,12 @@
         {
             Logger.Debug($"Persistently adding new {AggregateTypeName}");
             dbContext.Set<TAggregateRoot>().Add(aggregateRoot);
-            // to enforce early id generation. We're inside a transaction, therefore it isn't dangerous to call Flush
-            canFlush.Flush();
         }
 
         protected override void AddRangePersistent(TAggregateRoot[] aggregateRoots)
         {
             Logger.Debug($"Persistently adding {aggregateRoots.Length} item(s) of type {AggregateTypeName}");
             dbContext.Set<TAggregateRoot>().AddRange(aggregateRoots);
-            // to enforce early id generation. We're inside a transaction, therefore it isn't dangerous to call Flush
-            canFlush.Flush();
         }
 
         protected override void DeletePersistent(TAggregateRoot aggregateRoot)

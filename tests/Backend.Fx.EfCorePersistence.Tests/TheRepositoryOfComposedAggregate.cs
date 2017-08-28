@@ -189,7 +189,7 @@
                 DbContext = new TestDbContext(dbContextOptions);
                 UnitOfWork = new EfUnitOfWork(clock, new SystemIdentity(), DbContext);
                 UnitOfWork.Begin();
-                Repository = new EfRepository<Blog>(UnitOfWork, DbContext, new BlogMapping(), tenantId, new AllowAll<Blog>());
+                Repository = new EfRepository<Blog>(DbContext, new BlogMapping(), tenantId, new AllowAll<Blog>());
             }
 
             public void Dispose()
