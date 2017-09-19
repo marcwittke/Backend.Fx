@@ -4,11 +4,11 @@ I am using this set of class libraries in three projects now. Obeying the Rule o
 
 Library | NuGet
 --- | --- 
-Backend.Fx | [![NuGet](https://img.shields.io/nuget/v/Backend.Fx.svg)]()
-Backend.Fx.Bootstrapping | [![NuGet](https://img.shields.io/nuget/v/Backend.Fx.Bootstrapping.svg)]()
-Backend.Fx.EfCorePersistence | [![NuGet](https://img.shields.io/nuget/v/Backend.Fx.EfCorePersistence.svg)]()
-Backend.Fx.NLogLogging | [![NuGet](https://img.shields.io/nuget/v/Backend.Fx.NLogLogging.svg)]()
-Backend.Fx.Testing | [![NuGet](https://img.shields.io/nuget/v/Backend.Fx.Testing.svg)]()
+Backend.Fx | [![NuGet](https://img.shields.io/nuget/v/Backend.Fx.svg)](https://www.nuget.org/packages/Backend.Fx)
+Backend.Fx.Bootstrapping | [![NuGet](https://img.shields.io/nuget/v/Backend.Fx.Bootstrapping.svg)](https://www.nuget.org/packages/Backend.Fx.Bootstrapping)
+Backend.Fx.EfCorePersistence | [![NuGet](https://img.shields.io/nuget/v/Backend.Fx.EfCorePersistence.svg)](https://www.nuget.org/packages/Backend.Fx.EfCorePersistence)
+Backend.Fx.NLogLogging | [![NuGet](https://img.shields.io/nuget/v/Backend.Fx.NLogLogging.svg)](https://www.nuget.org/packages/Backend.Fx.NLogLogging)
+Backend.Fx.Testing | [![NuGet](https://img.shields.io/nuget/v/Backend.Fx.Testing.svg)](https://www.nuget.org/packages/Backend.Fx.Testing)
  
 
 ## What does "opinionated" mean?
