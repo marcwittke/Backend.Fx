@@ -55,7 +55,7 @@
             int count = 0;
             dbContext.ChangeTracker
                 .Entries<Entity>()
-                .Where(entry => entry.State == EntityState.Added || entry.State == EntityState.Modified)
+                .Where(entry => entry.State == EntityState.Added || entry.State == EntityState.Modified || entry.State == EntityState.Deleted)
                 .ForAll(entry =>
                 {
                     try
@@ -71,13 +71,21 @@
                             }
                             entity.SetCreatedProperties(userId, utcNow);
                         }
-                        else
+                        else if (entry.State == EntityState.Modified)
                         {
                             if (isTraceEnabled)
                             {
                                 Logger.Trace("tracking that {0}[{1}] was modified by {2} at {3:T} UTC", entity.GetType().Name, entity.Id, userId, utcNow);
                             }
                             entity.SetModifiedProperties(userId, utcNow);
+                        }
+                        else if (entry.State == EntityState.Deleted)
+                        {
+                            if (isTraceEnabled)
+                            {
+                                Logger.Trace("tracking that {0}[{1}] was deleted by {2} at {3:T} UTC", entity.GetType().Name, entity.Id, userId, utcNow);
+                            }
+                            entity.SetDeleted(userId, utcNow);
                         }
                     }
                     catch (Exception ex)

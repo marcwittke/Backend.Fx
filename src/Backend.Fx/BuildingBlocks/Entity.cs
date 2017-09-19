@@ -74,6 +74,25 @@
             }
         }
 
+        public void SetDeleted([NotNull] string changedBy, DateTime changedOn)
+        {
+            if (changedBy == null)
+            {
+                throw new ArgumentNullException(nameof(changedBy));
+            }
+            if (changedBy == string.Empty)
+            {
+                throw new ArgumentException(nameof(changedBy));
+            }
+            
+            // Deleting me results implicitly in a modification of the aggregate root.
+            AggregateRoot myAggregateRoot = FindMyAggregateRoot();
+            if (myAggregateRoot != this)
+            {
+                myAggregateRoot?.SetModifiedProperties(changedBy, changedOn);
+            }
+        }
+
         protected abstract AggregateRoot FindMyAggregateRoot();
 
         public bool Equals(Entity other)
