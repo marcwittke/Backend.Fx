@@ -34,9 +34,8 @@
             {
                 if (tenantId.HasValue)
                 {
-                    return RawAggregateQueryable
-                            .Where(agg => agg.TenantId == tenantId.Value)
-                            .Where(aggregateAuthorization.HasAccessExpression);
+                    return aggregateAuthorization.Filter(RawAggregateQueryable
+                            .Where(agg => agg.TenantId == tenantId.Value));
                 }
 
                 return RawAggregateQueryable.Where(agg => false);

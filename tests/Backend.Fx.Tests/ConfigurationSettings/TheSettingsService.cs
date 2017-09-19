@@ -1,5 +1,6 @@
 ﻿namespace Backend.Fx.Tests.ConfigurationSettings
 {
+    using System.Linq;
     using FakeItEasy;
     using Fx.BuildingBlocks;
     using Fx.ConfigurationSettings;
@@ -37,6 +38,7 @@
         {
             var settingAuthorization = A.Fake<IAggregateAuthorization<Setting>>();
             A.CallTo(() => settingAuthorization.HasAccessExpression).Returns(setting => true);
+            A.CallTo(() => settingAuthorization.Filter(A<IQueryable<Setting>>._)).ReturnsLazily((IQueryable<Setting> q) => q);
             A.CallTo(() => settingAuthorization.CanCreate(A<Setting>._)).Returns(true);
 
             idGenerator = A.Fake<IEntityIdGenerator>();

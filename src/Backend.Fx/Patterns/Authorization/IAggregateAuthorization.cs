@@ -1,5 +1,6 @@
 ﻿namespace Backend.Fx.Patterns.Authorization
 {
+    using System.Linq;
     using System.Linq.Expressions;
     using BuildingBlocks;
 
@@ -11,12 +12,20 @@
         Expression<System.Func<TAggregateRoot, bool>> HasAccessExpression { get; }
 
         /// <summary>
+        /// Only if the filter expression is not sufficient, you can override this method to apply the filtering to the querable directly.
+        /// </summary>
+        IQueryable<TAggregateRoot> Filter(IQueryable<TAggregateRoot> queryable);
+
+        /// <summary>
         /// Implement a guard that might disallow adding to the repository.
         /// This overload is called directly before adding an instance, so that you can use the instance's state for deciding.
-        /// Both overloads must return <code>true</code> to be considered as permission alloewance.
         /// </summary>
         bool CanCreate(TAggregateRoot t);
 
+        /// <summary>
+        /// Implement a guard that might disallow modifying an existing aggregate.
+        /// This overload is called directly before saving modification of an instance, so that you can use the instance's state for deciding.
+        /// </summary>
         bool CanModify(TAggregateRoot t);
     }
 }

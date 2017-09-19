@@ -17,6 +17,7 @@
         {
             var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
+            A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._)).ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(false);
 
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
@@ -42,6 +43,7 @@
         {
             var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
+            A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._)).ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(false);
 
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
@@ -67,6 +69,7 @@
         {
             var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
+            A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._)).ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(false);
 
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
@@ -93,6 +96,7 @@
 
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
+            A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._)).ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
             Assert.Throws<InvalidOperationException>(() => sut.Add(new TheAggregateRoot.TestAggregateRoot(77, "whatever")));
 
             // even when I don't have permissions
@@ -106,6 +110,7 @@
         {
             var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
+            A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._)).ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
 
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(null), authorization);
@@ -123,6 +128,7 @@
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(null), authorization);
 
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
+            A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._)).ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
             Assert.Empty(sut.AggregateQueryable);
         }
@@ -132,6 +138,7 @@
         {
             var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
+            A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._)).ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
 
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
@@ -146,6 +153,7 @@
         {
             var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
+            A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._)).ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
 
             var store = new InMemoryStore<TheAggregateRoot.TestAggregateRoot>();
@@ -165,6 +173,7 @@
         {
             var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
+            A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._)).ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
 
             var agg1 = new TheAggregateRoot.TestAggregateRoot(11, "1");
@@ -201,6 +210,7 @@
 
             var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
+            A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._)).ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
 
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
@@ -218,6 +228,7 @@
         {
             var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
+            A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._)).ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
 
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
@@ -243,6 +254,7 @@
         {
             var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
+            A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._)).ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
 
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
@@ -269,6 +281,7 @@
         {
             var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
+            A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._)).ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
 
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
@@ -290,6 +303,7 @@
         {
             var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
+            A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._)).ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
 
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
@@ -313,6 +327,7 @@
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
 
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
+            A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._)).ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(false);
             Assert.Throws<SecurityException>(() => sut.Add(new TheAggregateRoot.TestAggregateRoot(44, "whatever")));
         }
@@ -321,7 +336,8 @@
         public void ReturnsOnlyAuthorizedRecords()
         {
             var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
-            A.CallTo(() => authorization.HasAccessExpression).Returns(agg => agg.Id == 25 || agg.Id == 26);
+            A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
+            A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._)).ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q.Where(agg => agg.Id == 25 || agg.Id == 26));
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(false);
 
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
@@ -348,6 +364,7 @@
         {
             var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
+            A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._)).ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
 
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), new TenantId(234), authorization);
