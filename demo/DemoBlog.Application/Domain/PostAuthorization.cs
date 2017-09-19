@@ -7,7 +7,7 @@ namespace DemoBlog.Domain
     using Backend.Fx.Environment.Authentication;
     using Backend.Fx.Patterns.Authorization;
 
-    public class PostAuthorization : IAggregateAuthorization<Post>
+    public class PostAuthorization : AggregateAuthorization<Post>
     {
         private readonly IIdentity identity;
 
@@ -16,12 +16,12 @@ namespace DemoBlog.Domain
             this.identity = identity;
         }
 
-        public Expression<Func<Post, bool>> HasAccessExpression
+        public override Expression<Func<Post, bool>> HasAccessExpression
         {
             get { return blogger => true; }
         }
 
-        public bool CanCreate(Post post)
+        public override bool CanCreate(Post post)
         {
             if (identity is SystemIdentity)
             {
@@ -32,7 +32,7 @@ namespace DemoBlog.Domain
             return claimsIdentity != null && claimsIdentity.HasClaim(claim => claim.Type == "urn:demoblog:blogadmin" && claim.Value == "blogId");
         }
 
-        public bool CanModify(Post t)
+        public override bool CanModify(Post t)
         {
             return CanCreate(t);
         }

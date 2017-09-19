@@ -7,7 +7,7 @@
     using Backend.Fx.Environment.Authentication;
     using Backend.Fx.Patterns.Authorization;
 
-    public class BlogAuthorization : IAggregateAuthorization<Blog>
+    public class BlogAuthorization : AggregateAuthorization<Blog>
     {
         private readonly IIdentity identity;
 
@@ -16,12 +16,12 @@
             this.identity = identity;
         }
 
-        public Expression<Func<Blog, bool>> HasAccessExpression
+        public override Expression<Func<Blog, bool>> HasAccessExpression
         {
             get { return blog => true; }
         }
         
-        public bool CanCreate(Blog blog)
+        public override bool CanCreate(Blog blog)
         {
             if (identity is SystemIdentity)
             {
@@ -31,7 +31,7 @@
             return claimsIdentity != null && claimsIdentity.HasClaim(claim => claim.Type == claimsIdentity.RoleClaimType && claim.Value == "Admin");
         }
 
-        public bool CanModify(Blog t)
+        public override bool CanModify(Blog t)
         {
             return CanCreate(t);
         }
