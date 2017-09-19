@@ -41,7 +41,7 @@
 
         protected override void Commit()
         {
-            Flush();
+            DbContext.SaveChanges();
             currentTransaction.Commit();
             currentTransaction.Dispose();
             currentTransaction = null;

@@ -12,10 +12,5 @@
         protected AggregateRoot(int id) : base(id) { }
 
         public int TenantId { get; set; }
-
-        protected override AggregateRoot FindMyAggregateRoot()
-        {
-            return this;
-        }
     }
 }

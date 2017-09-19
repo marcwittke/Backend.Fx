@@ -4,6 +4,7 @@
     using System.ComponentModel.DataAnnotations;
     using System.Diagnostics;
     using JetBrains.Annotations;
+    using Logging;
 
     /// <summary>
     /// An object that is not defined by its attributes, but rather by a thread of continuity and its identity.
@@ -12,6 +13,8 @@
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
     public abstract class Entity : IEquatable<Entity>
     {
+        private static readonly ILogger Logger = LogManager.Create<Entity>();
+
         protected Entity()
         { }
 
@@ -27,7 +30,7 @@
         }
 
         [Key]
-        public int Id { get; private set; }
+        public int Id { get; [UsedImplicitly] private set; }
 
         public DateTime CreatedOn { get; protected set; }
 
@@ -65,35 +68,13 @@
             }
             ChangedBy = changedBy.Length > 100 ? changedBy.Substring(0, 99) + "…" : changedBy;
             ChangedOn = changedOn;
-
-            // Modifying me results implicitly in a modification of the aggregate root, too.
-            AggregateRoot myAggregateRoot = FindMyAggregateRoot();
-            if (myAggregateRoot != this)
-            {
-                myAggregateRoot?.SetModifiedProperties(changedBy, changedOn);
-            }
         }
 
-        public void SetDeleted([NotNull] string changedBy, DateTime changedOn)
+        [Obsolete("Not used any more")]
+        protected virtual AggregateRoot FindMyAggregateRoot()
         {
-            if (changedBy == null)
-            {
-                throw new ArgumentNullException(nameof(changedBy));
-            }
-            if (changedBy == string.Empty)
-            {
-                throw new ArgumentException(nameof(changedBy));
-            }
-            
-            // Deleting me results implicitly in a modification of the aggregate root.
-            AggregateRoot myAggregateRoot = FindMyAggregateRoot();
-            if (myAggregateRoot != this)
-            {
-                myAggregateRoot?.SetModifiedProperties(changedBy, changedOn);
-            }
+            return null;
         }
-
-        protected abstract AggregateRoot FindMyAggregateRoot();
 
         public bool Equals(Entity other)
         {
@@ -136,10 +117,13 @@
         /// </returns>
         public override int GetHashCode()
         {
-            // ReSharper disable once NonReadonlyMemberInGetHashCode
             // id is practically readonly, only for framework reasons it can be set (because of EF, mostly)
+
+            // ReSharper disable once BaseObjectGetHashCodeCallInGetHashCode
+            // ReSharper disable once NonReadonlyMemberInGetHashCode
             return Id == default(int)
                 ? base.GetHashCode()
+                // ReSharper disable once NonReadonlyMemberInGetHashCode
                 : Id.GetHashCode();
         }
 

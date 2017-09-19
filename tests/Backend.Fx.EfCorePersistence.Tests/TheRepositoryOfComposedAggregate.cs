@@ -1,6 +1,7 @@
 ﻿namespace Backend.Fx.EfCorePersistence.Tests
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using BuildingBlocks;
     using DummyImpl;
@@ -11,10 +12,12 @@
     using Microsoft.EntityFrameworkCore;
     using Patterns.Authorization;
     using Patterns.IdGeneration;
+    using Testing;
     using Xunit;
 
     public class TheRepositoryOfComposedAggregate : TestWithInMemorySqliteDbContext
     {
+        private readonly IEqualityComparer<DateTime?> tolerantDateTimeComparer = new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(500));
         private readonly IEntityIdGenerator idGenerator = A.Fake<IEntityIdGenerator>();
         private int nextId = 1;
 
@@ -161,6 +164,30 @@
 
             long count = ExecuteScalar<long>("SELECT count(*) FROM Post");
             Assert.Equal(5, count);
+        }
+
+        [Fact]
+        public void UpdatesAggregateTrackingPropertiesOnDeleteOfDependant()
+        {
+            int id = CreateBlogWithPost(10);
+
+            var expectedModifiedOn = Clock.UtcNow.AddHours(1);
+            Clock.OverrideUtcNow(expectedModifiedOn);
+
+            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantId))
+            {
+                var blog = sut.Repository.Single(id);
+                blog.Posts.Remove(blog.Posts.First());
+            }
+
+            Clock.OverrideUtcNow(Clock.UtcNow.AddHours(1));
+
+            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantId))
+            {
+                var blog = sut.DbContext.Blogs.Find(id);
+                Assert.NotNull(blog.ChangedOn);
+                Assert.Equal(expectedModifiedOn, blog.ChangedOn.Value, tolerantDateTimeComparer);
+            }
         }
 
         private int CreateBlogWithPost(int postCount = 1)

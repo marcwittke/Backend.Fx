@@ -10,6 +10,7 @@
     using Logging;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.ChangeTracking;
+    using Microsoft.EntityFrameworkCore.Metadata;
 
     public static class DbContextExtensions
     {
@@ -53,9 +54,24 @@
             userId = userId ?? "anonymous";
             var isTraceEnabled = Logger.IsTraceEnabled();
             int count = 0;
+
+            // Modifying an entity (also removing an entity from an aggregate) should leave the aggregate root as modified
+            dbContext.ChangeTracker
+                     .Entries<Entity>()
+                     .Where(entry => entry.State == EntityState.Added || entry.State == EntityState.Modified || entry.State == EntityState.Deleted)
+                     .Where(entry => !(entry.Entity is AggregateRoot))
+                     .ForAll(entry =>
+                     {
+                         EntityEntry aggregateRootEntry = FindAggregateRootEntry(dbContext.ChangeTracker, entry);
+                         if (aggregateRootEntry.State == EntityState.Unchanged)
+                         {
+                             aggregateRootEntry.State = EntityState.Modified;
+                         }
+                     });
+
             dbContext.ChangeTracker
                 .Entries<Entity>()
-                .Where(entry => entry.State == EntityState.Added || entry.State == EntityState.Modified || entry.State == EntityState.Deleted)
+                .Where(entry => entry.State == EntityState.Added || entry.State == EntityState.Modified)
                 .ForAll(entry =>
                 {
                     try
@@ -79,14 +95,6 @@
                             }
                             entity.SetModifiedProperties(userId, utcNow);
                         }
-                        else if (entry.State == EntityState.Deleted)
-                        {
-                            if (isTraceEnabled)
-                            {
-                                Logger.Trace("tracking that {0}[{1}] was deleted by {2} at {3:T} UTC", entity.GetType().Name, entity.Id, userId, utcNow);
-                            }
-                            entity.SetDeleted(userId, utcNow);
-                        }
                     }
                     catch (Exception ex)
                     {
@@ -98,6 +106,54 @@
             {
                 Logger.Debug($"Tracked {count} entities as created/changed on {utcNow:u} by {userId}");
             }
+        }
+
+        /// <summary>
+        /// This method finds the EntityEntry&lt;AggregateRoot&gt; of an EntityEntry&lt;Entity&gt;
+        /// assuming it has been loaded and is being tracked by the change tracker.
+        /// </summary>
+        private static EntityEntry FindAggregateRootEntry(ChangeTracker changeTracker, EntityEntry entry)
+        {
+            foreach (var navigation in entry.Navigations)
+            {
+                var navTargetTypeInfo = navigation.Metadata.GetTargetType().ClrType.GetTypeInfo();
+                int navigationTargetForeignKeyValue;
+
+                if (navigation.CurrentValue == null)
+                {
+                    // orphaned entity, original value contains the foreign key value
+                    if (navigation.Metadata.ForeignKey.Properties.Count > 1)
+                    {
+                        throw new InvalidOperationException("Foreign Keys with multiple properties are not supported.");
+                    }
+
+                    IProperty property = navigation.Metadata.ForeignKey.Properties[0];
+                    navigationTargetForeignKeyValue = (int)entry.OriginalValues[property];
+                }
+                else
+                {
+                    // added or modified entity, current value contains the foreign key value
+                    navigationTargetForeignKeyValue = ((Entity)navigation.CurrentValue).Id;
+                }
+
+                // assumption: an entity cannot be loaded on its own. Everything on the navigation path starting from the 
+                // aggregate root must have been loaded before, therefore we can find it using the change tracker
+                EntityEntry<Entity> navigationTargetEntry = changeTracker
+                        .Entries<Entity>()
+                        .Single(ent => Equals(ent.Entity.GetType().GetTypeInfo(), navTargetTypeInfo)
+                                       && ent.Property(nameof(Entity.Id)).CurrentValue.Equals(navigationTargetForeignKeyValue));
+
+                // if the target is AggregateRoot, no (further) recursion is needed
+                if (typeof(AggregateRoot).GetTypeInfo().IsAssignableFrom(navTargetTypeInfo))
+                {
+                    return navigationTargetEntry;
+                }
+
+                // recurse in case of "Entity -> Entity -> AggregateRoot"
+                return FindAggregateRootEntry(changeTracker, navigationTargetEntry);
+            }
+
+            return null;
         }
 
         public static void TraceChangeTrackerState(this DbContext dbContext)
@@ -143,7 +199,7 @@
 
         public static TDbContext CreateDbContext<TDbContext>(this DbContextOptions options) where TDbContext : DbContext
         {
-            return (TDbContext) Activator.CreateInstance(typeof(TDbContext), options);
+            return (TDbContext)Activator.CreateInstance(typeof(TDbContext), options);
         }
 
         private static string GetPrimaryKeyValue(EntityEntry entry)

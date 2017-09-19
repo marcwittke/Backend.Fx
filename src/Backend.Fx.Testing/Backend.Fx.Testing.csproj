@@ -6,6 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="TestData\**" />
+    <EmbeddedResource Remove="TestData\**" />
+    <None Remove="TestData\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FakeItEasy" Version="3.3.2" />
     <PackageReference Include="NLog" Version="5.0.0-beta09" />
     <PackageReference Include="SimpleInjector" Version="4.0.8" />
@@ -16,10 +22,6 @@
     <ProjectReference Include="..\Backend.Fx.Bootstrapping\Backend.Fx.Bootstrapping.csproj" />
     <ProjectReference Include="..\Backend.Fx.NLogLogging\Backend.Fx.NLogLogging.csproj" />
     <ProjectReference Include="..\Backend.Fx\Backend.Fx.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="TestData\" />
   </ItemGroup>
 
 </Project>
