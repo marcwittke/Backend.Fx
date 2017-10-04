@@ -43,10 +43,13 @@
                     .Select(t => t.GetTypeInfo())
                     .Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericType && typeof(IFullTextSearchIndex).GetTypeInfo().IsAssignableFrom(t));
 
-            foreach (var fullTextSearchIndexType in fullTextSearchIndexTypes)
+            using (var dbContext = DbContextOptions.CreateDbContext<TDbContext>())
             {
-                IFullTextSearchIndex fullTextSearchIndex = (IFullTextSearchIndex)Activator.CreateInstance(fullTextSearchIndexType.AsType());
-                fullTextSearchIndex.EnsureIndex(DbContextOptions);
+                foreach (var fullTextSearchIndexType in fullTextSearchIndexTypes)
+                {
+                    IFullTextSearchIndex fullTextSearchIndex = (IFullTextSearchIndex)Activator.CreateInstance(fullTextSearchIndexType.AsType());
+                    fullTextSearchIndex.EnsureIndex(dbContext);
+                }
             }
         }
 

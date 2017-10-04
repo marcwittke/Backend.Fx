@@ -15,33 +15,30 @@
 
         public abstract Expression<Func<TAggregateRoot, object>>[] IndexedProperties { get; }
 
-        public void EnsureIndex(DbContextOptions dbContextOptions)
+        public void EnsureIndex(DbContext dbContext)
         {
-            using (var dbContext = new DbContext(dbContextOptions))
-            {
-                var entityType = dbContext.Model.FindEntityType(typeof(TAggregateRoot));
-                var relationalEntityTypeAnnotations = entityType.Relational();
-                string schema = relationalEntityTypeAnnotations.Schema ?? "dbo";
-                string table = relationalEntityTypeAnnotations.TableName;
+            var entityType = dbContext.Model.FindEntityType(typeof(TAggregateRoot));
+            var relationalEntityTypeAnnotations = entityType.Relational();
+            string schema = relationalEntityTypeAnnotations.Schema ?? "dbo";
+            string table = relationalEntityTypeAnnotations.TableName;
 
-                IEnumerable<string> indexedColumnDefinitions = IndexedProperties
-                        .Select(prop => entityType.FindProperty(GetMemberName(prop)).Relational().ColumnName)
-                        .Select(col => $"{col} Language {mssqlLocaleId}");
+            IEnumerable<string> indexedColumnDefinitions = IndexedProperties
+                    .Select(prop => entityType.FindProperty(GetMemberName(prop)).Relational().ColumnName)
+                    .Select(col => $"{col} Language {mssqlLocaleId}");
 
-                //var primaryKey = entityType.FindPrimaryKey();
-                //var mutableIndex = entityType.FindIndex(primaryKey.Properties);
-                //string primaryKeyIndexName = mutableIndex.Relational().Name;
-                string primaryKeyIndexName = $"PK_{table}";
+            //var primaryKey = entityType.FindPrimaryKey();
+            //var mutableIndex = entityType.FindIndex(primaryKey.Properties);
+            //string primaryKeyIndexName = mutableIndex.Relational().Name;
+            string primaryKeyIndexName = $"PK_{table}";
 
-                string indexedColumnsSqlFragment = string.Join(", ", indexedColumnDefinitions);
+            string indexedColumnsSqlFragment = string.Join(", ", indexedColumnDefinitions);
 
-                dbContext.Database.ExecuteSqlCommand(
-                        $"IF ((SELECT count(*) FROM sys.fulltext_catalogs WHERE name = '{FullTextCatalogName}') = 0) CREATE FULLTEXT CATALOG {FullTextCatalogName}");
+            dbContext.Database.ExecuteSqlCommand(
+                    $"IF ((SELECT count(*) FROM sys.fulltext_catalogs WHERE name = '{FullTextCatalogName}') = 0) CREATE FULLTEXT CATALOG {FullTextCatalogName}");
 
-                dbContext.Database.ExecuteSqlCommand(
-                        $"IF ((SELECT count(*) FROM sys.fulltext_indexes i INNER JOIN sys.tables t ON t.object_id = i.object_id WHERE t.name = '{table}') = 0) " +
-                        $" CREATE FULLTEXT INDEX ON [{schema}].[{table}] ({indexedColumnsSqlFragment}) KEY INDEX {primaryKeyIndexName} ON {FullTextCatalogName}");
-            }
+            dbContext.Database.ExecuteSqlCommand(
+                    $"IF ((SELECT count(*) FROM sys.fulltext_indexes i INNER JOIN sys.tables t ON t.object_id = i.object_id WHERE t.name = '{table}') = 0) " +
+                    $" CREATE FULLTEXT INDEX ON [{schema}].[{table}] ({indexedColumnsSqlFragment}) KEY INDEX {primaryKeyIndexName} ON {FullTextCatalogName}");
         }
 
         private static string GetMemberName(Expression<Func<TAggregateRoot, object>> exp)

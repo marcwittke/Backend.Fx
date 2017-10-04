@@ -4,6 +4,6 @@
 
     public interface IFullTextSearchIndex
     {
-        void EnsureIndex(DbContextOptions dbContextOptions);
+        void EnsureIndex(DbContext dbContext);
     }
 }
