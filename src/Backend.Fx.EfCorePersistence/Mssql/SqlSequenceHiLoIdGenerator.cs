@@ -1,4 +1,4 @@
-﻿namespace Backend.Fx.EfCorePersistence
+﻿namespace Backend.Fx.EfCorePersistence.Mssql
 {
     using System;
     using Logging;

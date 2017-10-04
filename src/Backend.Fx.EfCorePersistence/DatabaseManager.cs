@@ -6,6 +6,7 @@
     using Environment.Persistence;
     using Logging;
     using Microsoft.EntityFrameworkCore;
+    using Mssql;
 
     public abstract class DatabaseManager<TDbContext> : IDatabaseManager where TDbContext : DbContext
     {
@@ -27,6 +28,30 @@
                 ExecuteCreationStrategy(dbContext);
             }
 
+            EnsureSequenceExistence();
+            EnsureSearchIndexExistence();
+
+            DatabaseExists = true;
+        }
+
+        private void EnsureSearchIndexExistence()
+        {
+            var fullTextSearchIndexTypes = typeof(TDbContext)
+                    .GetTypeInfo()
+                    .Assembly
+                    .ExportedTypes
+                    .Select(t => t.GetTypeInfo())
+                    .Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericType && typeof(IFullTextSearchIndex).GetTypeInfo().IsAssignableFrom(t));
+
+            foreach (var fullTextSearchIndexType in fullTextSearchIndexTypes)
+            {
+                IFullTextSearchIndex fullTextSearchIndex = (IFullTextSearchIndex)Activator.CreateInstance(fullTextSearchIndexType.AsType());
+                fullTextSearchIndex.EnsureIndex(DbContextOptions);
+            }
+        }
+
+        private void EnsureSequenceExistence()
+        {
             var sqlSequenceHiLoIdGeneratorTypes = typeof(TDbContext)
                     .GetTypeInfo()
                     .Assembly
@@ -36,11 +61,9 @@
 
             foreach (var sqlSequenceHiLoIdGeneratorType in sqlSequenceHiLoIdGeneratorTypes)
             {
-                SqlSequenceHiLoIdGenerator sqlSequenceHiLoIdGenerator = (SqlSequenceHiLoIdGenerator)Activator.CreateInstance(sqlSequenceHiLoIdGeneratorType.AsType(), DbContextOptions);
+                SqlSequenceHiLoIdGenerator sqlSequenceHiLoIdGenerator = (SqlSequenceHiLoIdGenerator) Activator.CreateInstance(sqlSequenceHiLoIdGeneratorType.AsType(), DbContextOptions);
                 sqlSequenceHiLoIdGenerator.EnsureSqlSequenceExistence();
             }
-
-            DatabaseExists = true;
         }
 
         protected abstract void ExecuteCreationStrategy(DbContext dbContext);

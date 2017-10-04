@@ -23,10 +23,5 @@
         {
             Name = name;
         }
-
-        protected override AggregateRoot FindMyAggregateRoot()
-        {
-            return Blog;
-        }
     }
 }

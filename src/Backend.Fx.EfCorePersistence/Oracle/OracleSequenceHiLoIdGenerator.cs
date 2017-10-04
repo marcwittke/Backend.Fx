@@ -1,10 +1,10 @@
-﻿namespace Backend.Fx.EfCorePersistence
+﻿namespace Backend.Fx.EfCorePersistence.Oracle
 {
     using System;
     using System.Data.Common;
-    using Backend.Fx.Logging;
-    using Backend.Fx.Patterns.IdGeneration;
+    using Logging;
     using Microsoft.EntityFrameworkCore;
+    using Patterns.IdGeneration;
 
     public abstract class OracleSequenceHiLoIdGenerator : HiLoIdGenerator
     {
