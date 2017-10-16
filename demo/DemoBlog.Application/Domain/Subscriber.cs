@@ -20,9 +20,5 @@
         public string Email { get; set; }
         public Blog Blog { get; set; }
         public int BlogId { get; set; }
-        protected override AggregateRoot FindMyAggregateRoot()
-        {
-            return Blog;
-        }
     }
 }
