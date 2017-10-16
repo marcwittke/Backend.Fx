@@ -25,10 +25,5 @@ namespace DemoBlog.Domain
         public string Author { get; set; }
 
         public string Content { get; set; }
-
-        protected override AggregateRoot FindMyAggregateRoot()
-        {
-            return Post;
-        }
     }
 }

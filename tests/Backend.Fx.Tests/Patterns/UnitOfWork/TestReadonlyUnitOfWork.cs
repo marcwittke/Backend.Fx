@@ -1,5 +1,6 @@
 ﻿namespace Backend.Fx.Tests.Patterns.UnitOfWork
 {
+    using Fx.Environment.Authentication;
     using Fx.Patterns.UnitOfWork;
 
     public class TestReadonlyUnitOfWork : ReadonlyUnitOfWork
@@ -10,5 +11,8 @@
         {
             RollbackCount++;
         }
+
+        public TestReadonlyUnitOfWork() : base(new SystemIdentity())
+        { }
     }
 }

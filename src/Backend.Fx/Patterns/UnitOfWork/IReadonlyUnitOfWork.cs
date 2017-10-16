@@ -1,6 +1,7 @@
 ﻿namespace Backend.Fx.Patterns.UnitOfWork
 {
     using System;
+    using System.Security.Principal;
     using Logging;
 
     /// <summary>
@@ -17,6 +18,13 @@
         private readonly int instanceId = index++;
         private bool? isCompleted;
         private IDisposable lifetimeLogger;
+
+        protected ReadonlyUnitOfWork(IIdentity identity)
+        {
+            Identity = identity;
+        }
+
+        public IIdentity Identity { get; }
 
         public virtual void Begin()
         {

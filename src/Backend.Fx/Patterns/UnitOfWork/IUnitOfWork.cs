@@ -12,6 +12,7 @@
     {
         void Begin();
         void Complete();
+        IIdentity Identity { get; }
     }
 
     public abstract class UnitOfWork : IUnitOfWork, ICanFlush
@@ -20,20 +21,21 @@
         private static int index;
         private readonly int instanceId = index++;
         private readonly IClock clock;
-        private readonly IIdentity identity;
         private bool? isCompleted;
         private IDisposable lifetimeLogger;
 
         protected UnitOfWork(IClock clock, IIdentity identity)
         {
             this.clock = clock;
-            this.identity = identity;
+            this.Identity = identity;
         }
+
+        public IIdentity Identity { get; }
 
         public virtual void Flush()
         {
             Logger.Debug("Flushing unit of work #" + instanceId);
-            UpdateTrackingProperties(identity.Name, clock.UtcNow);
+            UpdateTrackingProperties(Identity.Name, clock.UtcNow);
         }
         
         public virtual void Begin()
@@ -45,7 +47,7 @@
         public void Complete()
         {
             Logger.Debug("Completing unit of work #" + instanceId);
-            UpdateTrackingProperties(identity.Name, clock.UtcNow);
+            UpdateTrackingProperties(Identity.Name, clock.UtcNow);
             Commit();
             isCompleted = true;
         }

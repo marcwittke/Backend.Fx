@@ -1,6 +1,7 @@
 ﻿namespace Backend.Fx.EfCorePersistence
 {
     using System;
+    using System.Security.Principal;
     using Logging;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Storage;
@@ -13,7 +14,7 @@
         private IDisposable transactionLifetimeLogger;
         private IDbContextTransaction currentTransaction;
 
-        public ReadonlyEfUnitOfWork(DbContext dbContext)
+        public ReadonlyEfUnitOfWork(DbContext dbContext, IIdentity identity) : base(identity)
         {
             this.dbContext = dbContext;
             this.dbContext.ChangeTracker.AutoDetectChangesEnabled = false;

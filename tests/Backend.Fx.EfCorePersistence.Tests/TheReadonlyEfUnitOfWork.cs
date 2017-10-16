@@ -1,6 +1,7 @@
 ﻿namespace Backend.Fx.EfCorePersistence.Tests
 {
     using DummyImpl;
+    using Environment.Authentication;
     using Xunit;
 
     public class TheReadonlyEfUnitOfWork : TestWithInMemorySqliteDbContext
@@ -15,7 +16,7 @@
         {
             using(var dbContext = new TestDbContext(DbContextOptions))
             {
-                var sut = new ReadonlyEfUnitOfWork(dbContext);
+                var sut = new ReadonlyEfUnitOfWork(dbContext, new SystemIdentity());
                 
                 Assert.Null(dbContext.Database.CurrentTransaction);
                 sut.Begin();
@@ -30,7 +31,7 @@
         {
             using (var dbContext = new TestDbContext(DbContextOptions))
             {
-                var sut = new ReadonlyEfUnitOfWork(dbContext);
+                var sut = new ReadonlyEfUnitOfWork(dbContext, new SystemIdentity());
                 sut.Begin();
                 dbContext.Add(new Blogger(334, "Bratislav", "Metulsky"));
                 sut.Complete();
@@ -44,7 +45,7 @@
         {
             using (var dbContext = new TestDbContext(DbContextOptions))
             {
-                var sut = new ReadonlyEfUnitOfWork(dbContext);
+                var sut = new ReadonlyEfUnitOfWork(dbContext, new SystemIdentity());
                 sut.Begin();
                 dbContext.Add(new Blogger(335, "Bratislav", "Metulsky"));
                 sut.Dispose();
