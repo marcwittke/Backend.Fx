@@ -25,5 +25,7 @@
         T GetInstance<T>() where T : class;
 
         void Verify();
+
+        void RegisterModules(params IModule[] modules);
     }
 }

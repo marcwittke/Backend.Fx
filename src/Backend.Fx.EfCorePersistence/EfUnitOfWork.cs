@@ -66,6 +66,7 @@
             transactionLifetimeLogger = null;
         }
 
+        /// <inheritdoc />
         public void CompleteCurrentTransaction_InvokeAction_BeginNewTransaction(Action action)
         {
             Commit();
@@ -73,6 +74,7 @@
             BeginTransaction();
         }
 
+        /// <inheritdoc />
         public T CompleteCurrentTransaction_InvokeFunction_BeginNewTransaction<T>(Func<T> func)
         {
             Commit();
@@ -81,6 +83,7 @@
             return result;
         }
 
+        /// <inheritdoc />
         public void CompleteCurrentTransaction_BeginNewTransaction()
         {
             Commit();
