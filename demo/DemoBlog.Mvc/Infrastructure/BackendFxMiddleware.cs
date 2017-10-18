@@ -1,15 +1,17 @@
 ﻿namespace DemoBlog.Mvc.Infrastructure
 {
     using System;
+    using System.Linq;
     using System.Net;
     using System.Security;
+    using System.Security.Claims;
     using System.Security.Principal;
     using System.Threading.Tasks;
-    using Backend.Fx;
-    using Backend.Fx.Environment;
+    using Backend.Fx.Bootstrapping;
     using Backend.Fx.Environment.MultiTenancy;
     using Backend.Fx.Exceptions;
     using Backend.Fx.Logging;
+    using Data.Identity;
     using JetBrains.Annotations;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
@@ -22,18 +24,18 @@
     ///     The Middleware handles exceptions and is responsible for beginning and completing (or disposing) the unit
     ///     of work for each request.
     /// </summary>
-    public abstract class ScopeMiddleware
+    public class BackendFxMiddleware
     {
-        private static readonly ILogger Logger = LogManager.Create<ScopeMiddleware>();
-        private readonly IHostingEnvironment env;
+        private static readonly ILogger Logger = LogManager.Create<BackendFxMiddleware>();
         private readonly RequestDelegate next;
-        private readonly IBackendFxApplication backendFxApplication;
+        private readonly IHostingEnvironment env;
+        private readonly BackendFxApplication backendFxApplication;
 
         /// <summary>
         ///     This constructor is being called by the framework DI container
         /// </summary>
         [UsedImplicitly]
-        protected ScopeMiddleware(RequestDelegate next, IBackendFxApplication backendFxApplication, IHostingEnvironment env)
+        public BackendFxMiddleware(RequestDelegate next, BackendFxApplication backendFxApplication, IHostingEnvironment env)
         {
             this.next = next;
             this.backendFxApplication = backendFxApplication;
@@ -117,6 +119,16 @@
             }
         }
 
-        protected abstract TenantId GetTenantId(IIdentity identity);
+        private TenantId GetTenantId(IIdentity identity)
+        {
+            ClaimsIdentity claimsIdentity = identity as ClaimsIdentity;
+            Claim claim = claimsIdentity?.Claims.SingleOrDefault(cl => cl.Type == BlogUser.TenantIdClaimType);
+            if (claim != null && int.TryParse(claim.Value, out var parsed))
+            {
+                return new TenantId(parsed);
+            }
+
+            return backendFxApplication.DefaultTenantId;
+        }
     }
 }

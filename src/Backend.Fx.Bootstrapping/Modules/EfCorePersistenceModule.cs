@@ -9,13 +9,12 @@
     using Patterns.UnitOfWork;
     using SimpleInjector;
 
-    public class EfCorePersistenceModule<TDbContext, TDbContextOptions> : SimpleInjectorModule 
+    public class EfCorePersistenceModule<TDbContext> : SimpleInjectorModule 
         where TDbContext : DbContext
-        where TDbContextOptions : DbContextOptions<TDbContext>
     {
-        private readonly TDbContextOptions dbContextOptions;
+        private readonly DbContextOptions<TDbContext> dbContextOptions;
 
-        public EfCorePersistenceModule(SimpleInjectorCompositionRoot compositionRoot, TDbContextOptions dbContextOptions) : base(compositionRoot)
+        public EfCorePersistenceModule(SimpleInjectorCompositionRoot compositionRoot, DbContextOptions<TDbContext> dbContextOptions) : base(compositionRoot)
         {
             this.dbContextOptions = dbContextOptions;
         }

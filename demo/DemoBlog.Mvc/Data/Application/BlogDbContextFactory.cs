@@ -11,7 +11,7 @@ namespace DemoBlog.Mvc.Data.Application
     {
         public BlogDbContext Create(DbContextFactoryOptions options)
         {
-            var dbContextOptions = new DbContextOptionsBuilder()
+            var dbContextOptions = new DbContextOptionsBuilder<BlogDbContext>()
                 .UseSqlServer(
                     "Server=(localdb)\\mssqllocaldb;Database=blogDbContext-0982f2f2193841bea9fcdd617788f737;Trusted_Connection=True;",
                     bld => bld.MigrationsAssembly("DemoBlog.Mvc"))

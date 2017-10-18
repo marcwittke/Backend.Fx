@@ -19,7 +19,7 @@
 
         public bool DatabaseExists { get; protected set; }
 
-        protected DbContextOptions<TDbContext> DbContextOptions { get; }
+        public DbContextOptions<TDbContext> DbContextOptions { get; }
 
         public void EnsureDatabaseExistence()
         {
@@ -60,12 +60,12 @@
                     .Assembly
                     .ExportedTypes
                     .Select(t => t.GetTypeInfo())
-                    .Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericType && typeof(SqlSequenceHiLoIdGenerator).GetTypeInfo().IsAssignableFrom(t));
+                    .Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericType && typeof(MsSqlSequenceHiLoIdGenerator).GetTypeInfo().IsAssignableFrom(t));
 
             foreach (var sqlSequenceHiLoIdGeneratorType in sqlSequenceHiLoIdGeneratorTypes)
             {
-                SqlSequenceHiLoIdGenerator sqlSequenceHiLoIdGenerator = (SqlSequenceHiLoIdGenerator) Activator.CreateInstance(sqlSequenceHiLoIdGeneratorType.AsType(), DbContextOptions);
-                sqlSequenceHiLoIdGenerator.EnsureSqlSequenceExistence();
+                MsSqlSequenceHiLoIdGenerator msSqlSequenceHiLoIdGenerator = (MsSqlSequenceHiLoIdGenerator) Activator.CreateInstance(sqlSequenceHiLoIdGeneratorType.AsType(), DbContextOptions);
+                msSqlSequenceHiLoIdGenerator.EnsureSqlSequenceExistence();
             }
         }
 

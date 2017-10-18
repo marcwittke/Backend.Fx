@@ -1,31 +1,21 @@
 ﻿namespace DemoBlog.Mvc.Infrastructure
 {
-    using Backend.Fx.Environment.MultiTenancy;
-    using Backend.Fx.Patterns.DependencyInjection;
-    using Bootstrapping;
+    using Backend.Fx.EfCorePersistence;
+    using Backend.Fx.Environment.Persistence;
     using Controllers;
     using Data.Identity;
-    using Microsoft.ApplicationInsights.AspNetCore;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-    using Microsoft.AspNetCore.Mvc.Controllers;
-    using Microsoft.AspNetCore.Mvc.ViewComponents;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
-    using Persistence;
     using Services;
-    using SimpleInjector;
 
     public class Startup
     {
         protected IConfigurationRoot Configuration;
-        private readonly DemoBlogCompositionRoot compositionRoot;
-        private readonly RuntimeControllerActivator controllerActivator;
-        private readonly RuntimeViewComponentActivator viewComponentActivator;
-        private readonly ICurrentTHolder<TenantId> defaultTenantIdHolder = new CurrentTenantIdHolder();
 
         public Startup(IHostingEnvironment env)
         {
@@ -36,29 +26,31 @@
                 .AddEnvironmentVariables();
 
             Configuration = builder.Build();
-
-            DbContextOptions dbContextOptions = InitializeDatabase(Configuration);
-
-            compositionRoot = new DemoBlogCompositionRoot(env.IsDevelopment(), dbContextOptions);
-            controllerActivator = new RuntimeControllerActivator(compositionRoot);
-            viewComponentActivator = new RuntimeViewComponentActivator(compositionRoot);
         }
-
-
+        
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // tell the framework container to use our runtime to resolve mvc stuff
-            services.AddSingleton<IControllerActivator>(controllerActivator);
-            services.AddSingleton<IViewComponentActivator>(viewComponentActivator);
+            var connectionString = Configuration.GetConnectionString("BlogDbConnection");
+            
+            // identity database initialization
+            DbContextOptions<BlogIdentityDbContext> identityDbContextOptions = new DbContextOptionsBuilder<BlogIdentityDbContext>()
+                    .UseSqlServer(connectionString, bld => bld.MigrationsAssembly("DemoBlog.Mvc"))
+                    .Options;
+            IDatabaseManager identityDatabaseManager = new DatabaseManagerWithMigration<BlogIdentityDbContext>(identityDbContextOptions);
+            identityDatabaseManager.EnsureDatabaseExistence();
 
-            // put the singleton runtime into the framework controller, so that the scope middleware can be resolved
-            services.AddSingleton<IScopeManager>(compositionRoot);
-
-            // this is required for the NukeMiddleware
-            services.AddSingleton(compositionRoot.DatabaseManager);
-
-            AddIdentityAsFrameworkService(services, Configuration.GetConnectionString("BlogDbConnection"));
+            // initialize identity as framework service
+            services.AddDbContext<BlogIdentityDbContext>(optionsBuilder => optionsBuilder.UseSqlServer(connectionString));
+            services.AddIdentity<BlogUser, IdentityRole>()
+                    .AddEntityFrameworkStores<BlogIdentityDbContext>()
+                    .AddDefaultTokenProviders();
+            services.AddScoped<AccountController>();
+            services.AddScoped<ManageController>();
+            services.AddTransient<IEmailSender, AuthMessageSender>();
+            services.AddTransient<ISmsSender, AuthMessageSender>();
+            
+            services.AddBackendFx(connectionString);
 
             services.AddMvc();
         }
@@ -79,12 +71,6 @@
 
             app.UseStaticFiles();
 
-            app.ApplicationServices.GetRequiredService<IApplicationLifetime>().ApplicationStopping.Register(() => compositionRoot.Dispose());
-
-            // controllers that use ASP.NET Identity are not resolved using the application container, but the framework container
-            controllerActivator.RegisterFrameworkOnlyService(() => app.ApplicationServices.GetService<AccountController>());
-            controllerActivator.RegisterFrameworkOnlyService(() => app.ApplicationServices.GetService<ManageController>());
-
             app.UseIdentity();
 
             // Add external authentication middleware below. To configure them please see https://go.microsoft.com/fwlink/?LinkID=532715
@@ -100,15 +86,7 @@
                 ClientSecret = "3gcoTrEDPPJ0ukn_aYYT6PWo"
             });
 
-            app.UseMiddleware<DemoBlogMiddleware>();
-            
-            compositionRoot.Boot(container =>
-            {
-                container.RegisterMvcViewComponents(app);
-                container.Register(() => app.ApplicationServices.GetService<JavaScriptSnippet>());
-            });
-
-            defaultTenantIdHolder.ReplaceCurrent(compositionRoot.DefaultTenantId);
+            app.UseBackendFx();
 
             app.UseMvc(routes =>
             {
@@ -116,37 +94,6 @@
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
-        }
-
-        private static DbContextOptions InitializeDatabase(IConfigurationRoot configuration)
-        {
-            var dbContextOptions = new DbContextOptionsBuilder()
-                .UseSqlServer(configuration.GetConnectionString("BlogDbConnection"), bld => bld.MigrationsAssembly("DemoBlog.Mvc"))
-                .Options;
-
-            using (var blogDbContext = new BlogDbContext(dbContextOptions))
-            {
-                blogDbContext.Database.Migrate();
-            }
-
-            using (var blogIdentityDbContext = new BlogIdentityDbContext(dbContextOptions))
-            {
-                blogIdentityDbContext.Database.Migrate();
-            }
-            return dbContextOptions;
-        }
-
-        private void AddIdentityAsFrameworkService(IServiceCollection services, string connectionString)
-        {
-            services.AddDbContext<BlogIdentityDbContext>(options => options.UseSqlServer(connectionString));
-            services.AddIdentity<BlogUser, IdentityRole>()
-                .AddEntityFrameworkStores<BlogIdentityDbContext>()
-                .AddDefaultTokenProviders();
-            services.AddScoped<AccountController>();
-            services.AddScoped<ManageController>();
-            services.AddTransient<IEmailSender, AuthMessageSender>();
-            services.AddTransient<ISmsSender, AuthMessageSender>();
-            services.AddSingleton(defaultTenantIdHolder);
         }
     }
 }

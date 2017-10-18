@@ -5,10 +5,10 @@
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.Controllers;
 
-    public class RuntimeControllerActivator : RuntimeActivator, IControllerActivator
+    public class CompositionRootControllerActivator : CompositionRootActivator, IControllerActivator
     {
-        private static readonly ILogger Logger = LogManager.Create<RuntimeControllerActivator>();
-        public RuntimeControllerActivator(ICompositionRoot runtime) : base(runtime)
+        private static readonly ILogger Logger = LogManager.Create<CompositionRootControllerActivator>();
+        public CompositionRootControllerActivator(ICompositionRoot compositionRoot) : base(compositionRoot)
         { }
 
         public virtual object Create(ControllerContext c)

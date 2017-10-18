@@ -1,6 +1,7 @@
 ﻿namespace Backend.Fx.Bootstrapping
 {
     using System;
+    using System.Linq;
     using Environment.MultiTenancy;
     using Environment.Persistence;
     using Patterns.DependencyInjection;
@@ -10,7 +11,7 @@
     /// </summary>
     public class BackendFxApplication : IDisposable
     {
-        private readonly ICompositionRoot compositionRoot;
+        private TenantId defaultTenantId;
 
         /// <summary>
         /// Initializes the application's runtime instance
@@ -25,7 +26,7 @@
                           ITenantManager tenantManager,
                           IScopeManager scopeManager)
         {
-            this.compositionRoot = compositionRoot;
+            CompositionRoot = compositionRoot;
             DatabaseManager = databaseManager;
             TenantManager = tenantManager;
             ScopeManager = scopeManager;
@@ -46,10 +47,35 @@
         /// In case of web applications, this refers to a single HTTP request, for example.
         /// </summary>
         public IScopeManager ScopeManager { get; }
-        
+
+        public ICompositionRoot CompositionRoot { get; }
+
+        public TenantId DefaultTenantId
+        {
+            get
+            {
+                if (defaultTenantId == null)
+                {
+                    throw new InvalidOperationException("Default tenant id is only available after calling Boot()");
+                }
+
+                return defaultTenantId;
+            }
+        }
+        public void Boot()
+        {
+            CompositionRoot.Verify();
+            DatabaseManager.EnsureDatabaseExistence();
+            var tenants = TenantManager.GetTenants();
+            Tenant defaultTenant = tenants.SingleOrDefault(t => t.IsDefault);
+            defaultTenantId = defaultTenant == null
+                ? TenantManager.CreateProductionTenant("Default", "The default production tenant", true) 
+                : new TenantId(defaultTenant.Id);
+        }
+
         public void Dispose()
         {
-            compositionRoot?.Dispose();
+            CompositionRoot?.Dispose();
         }
     }
 }

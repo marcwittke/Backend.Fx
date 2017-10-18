@@ -27,7 +27,7 @@
             sut = new SimpleInjectorCompositionRoot();
             sut.RegisterModules(
                 new DomainModule(sut, typeof(Blog).GetTypeInfo().Assembly),
-                new EfCorePersistenceModule<TestDbContext, DbContextOptions<TestDbContext>>(sut, dbContextOptions),
+                new EfCorePersistenceModule<TestDbContext>(sut, dbContextOptions),
                 new ClockModule<FrozenClock>(sut));
             sut.Verify();
         }

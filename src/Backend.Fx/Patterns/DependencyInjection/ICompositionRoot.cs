@@ -23,5 +23,7 @@
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         T GetInstance<T>() where T : class;
+
+        void Verify();
     }
 }

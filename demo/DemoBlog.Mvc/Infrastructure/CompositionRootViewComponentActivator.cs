@@ -3,9 +3,9 @@
     using Backend.Fx.Patterns.DependencyInjection;
     using Microsoft.AspNetCore.Mvc.ViewComponents;
 
-    public class RuntimeViewComponentActivator : RuntimeActivator, IViewComponentActivator
+    public class CompositionRootViewComponentActivator : CompositionRootActivator, IViewComponentActivator
     {
-        public RuntimeViewComponentActivator(ICompositionRoot runtime) : base(runtime)
+        public CompositionRootViewComponentActivator(ICompositionRoot compositionRoot) : base(compositionRoot)
         { }
 
         public object Create(ViewComponentContext context)

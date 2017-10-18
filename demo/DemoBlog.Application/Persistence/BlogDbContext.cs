@@ -8,9 +8,7 @@
     using Backend.Fx.Logging;
     using Domain;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Infrastructure;
-    using Microsoft.Extensions.DependencyInjection;
-
+    
     public class BlogDbContext : DbContext
     {
         private static readonly ILogger Logger = LogManager.Create<BlogDbContext>();
@@ -20,12 +18,8 @@
         public DbSet<Blog> Blogs { get; set; }
         public DbSet<Post> Posts { get; set; }
 
-        public BlogDbContext(DbContextOptions options) : base(options)
-        {
-            IServiceProvider serviceProvider = this.GetInfrastructure<IServiceProvider>();
-            var loggerFactory = serviceProvider.GetService<Microsoft.Extensions.Logging.ILoggerFactory>();
-            loggerFactory.AddProvider(new BackendFxLoggerProvider());
-        }
+        public BlogDbContext(DbContextOptions<BlogDbContext> options) : base(options)
+        {}
         
         protected override void OnModelCreating(ModelBuilder builder)
         {

@@ -4,14 +4,14 @@
     using System.Collections.Generic;
     using Backend.Fx.Patterns.DependencyInjection;
 
-    public abstract class RuntimeActivator
+    public abstract class CompositionRootActivator
     {
-        private readonly ICompositionRoot runtime;
+        private readonly ICompositionRoot compositionRoot;
         private readonly Dictionary<Type, Func<object>> frameworkOnlyFactories = new Dictionary<Type, Func<object>>();
 
-        protected RuntimeActivator(ICompositionRoot runtime)
+        protected CompositionRootActivator(ICompositionRoot compositionRoot)
         {
-            this.runtime = runtime;
+            this.compositionRoot = compositionRoot;
         }
 
         public object GetInstance(Type t)
@@ -21,7 +21,7 @@
                 return frameworkOnlyFactories[t].Invoke();
             }
 
-            return runtime.GetInstance(t);
+            return compositionRoot.GetInstance(t);
         }
 
         public void RegisterFrameworkOnlyService<T>(Func<T> factory)

@@ -5,13 +5,13 @@
     using Microsoft.EntityFrameworkCore;
     using Patterns.IdGeneration;
 
-    public abstract class SqlSequenceHiLoIdGenerator : HiLoIdGenerator
+    public abstract class MsSqlSequenceHiLoIdGenerator : HiLoIdGenerator
     {
         private readonly DbContextOptions dbContextOptions;
-        private static readonly ILogger Logger = LogManager.Create<SqlSequenceHiLoIdGenerator>();
+        private static readonly ILogger Logger = LogManager.Create<MsSqlSequenceHiLoIdGenerator>();
         private readonly string sequenceName;
 
-        protected SqlSequenceHiLoIdGenerator(DbContextOptions dbContextOptions, string sequenceName)
+        protected MsSqlSequenceHiLoIdGenerator(DbContextOptions dbContextOptions, string sequenceName)
         {
             this.dbContextOptions = dbContextOptions;
             this.sequenceName = sequenceName;
