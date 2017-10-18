@@ -11,13 +11,13 @@
     public class TheDatabaseManager
     {
         private readonly IDatabaseManager sut;
-        private readonly DbContextOptions dbContextOptions;
+        private readonly DbContextOptions<TestDbContext> dbContextOptions;
         private readonly string dbFilePath;
 
         public TheDatabaseManager()
         {
             dbFilePath = Path.GetTempFileName();
-            dbContextOptions = new DbContextOptionsBuilder().UseSqlite("Data Source=" + dbFilePath).Options;
+            dbContextOptions = new DbContextOptionsBuilder<TestDbContext>().UseSqlite("Data Source=" + dbFilePath).Options;
             sut = new DatabaseManagerWithoutMigration<TestDbContext>(dbContextOptions);
         }
 
@@ -25,9 +25,7 @@
         public void CreatesDatabase()
         {
             Assert.Throws<SqliteException>(()=>new TestDbContext(dbContextOptions).Tenants.ToArray());
-            Assert.False(sut.DatabaseExists);
             sut.EnsureDatabaseExistence();
-            Assert.True(sut.DatabaseExists);
             Assert.Empty(new TestDbContext(dbContextOptions).Tenants);
         }
 
@@ -40,7 +38,6 @@
             Assert.True(File.Exists(dbFilePath));
 
             sut.DeleteDatabase();
-            Assert.False(sut.DatabaseExists);
             Assert.False(File.Exists(dbFilePath));
         }
     }

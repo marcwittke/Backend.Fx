@@ -83,7 +83,7 @@
 
         private class MyTenantManager : TenantManager<TestDbContext>
         {
-            public MyTenantManager(ITenantInitializer tenantInitializer, DbContextOptions dbContextOptions) : base(tenantInitializer, dbContextOptions)
+            public MyTenantManager(ITenantInitializer tenantInitializer, DbContextOptions<TestDbContext> dbContextOptions) : base(tenantInitializer, dbContextOptions)
             { }
 
             public Tenant FindTenantX(TenantId tenantId)

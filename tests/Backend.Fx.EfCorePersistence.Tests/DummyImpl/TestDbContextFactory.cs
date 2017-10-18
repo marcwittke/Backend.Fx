@@ -9,7 +9,7 @@
     {
         public TestDbContext Create(DbContextFactoryOptions options)
         {
-            return new TestDbContext(new DbContextOptionsBuilder().UseSqlite("DataSource=:memory:").Options);
+            return new TestDbContext(new DbContextOptionsBuilder<TestDbContext>().UseSqlite("DataSource=:memory:").Options);
         }
     }
 }

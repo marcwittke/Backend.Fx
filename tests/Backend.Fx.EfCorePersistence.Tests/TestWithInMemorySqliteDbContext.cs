@@ -14,7 +14,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
     {
         private static readonly ILogger Logger = LogManager.Create<TestWithInMemorySqliteDbContext>();
         public SqliteConnection Connection { get; }
-        public DbContextOptions DbContextOptions { get; }
+        public DbContextOptions<TestDbContext> DbContextOptions { get; }
         public TenantId TenantId { get; }
         public IClock Clock { get; } = new FrozenClock();
 
@@ -23,7 +23,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
             TenantId = new TenantId(12);
             Connection = new SqliteConnection("DataSource=:memory:");
             Connection.Open();
-            DbContextOptions = new DbContextOptionsBuilder().UseSqlite(Connection).Options;
+            DbContextOptions = new DbContextOptionsBuilder<TestDbContext>().UseSqlite(Connection).Options;
         }
 
         protected void CreateDatabase()

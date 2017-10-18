@@ -8,7 +8,7 @@
     using Microsoft.EntityFrameworkCore.Storage;
     using Patterns.UnitOfWork;
 
-    public class EfUnitOfWork : UnitOfWork
+    public class EfUnitOfWork : UnitOfWork, ICanInterruptTransaction
     {
         private static readonly ILogger Logger = LogManager.Create<EfUnitOfWork>();
         private IDisposable transactionLifetimeLogger;
@@ -17,7 +17,7 @@
         public EfUnitOfWork(IClock clock, IIdentity identity, DbContext dbContext)
             : base(clock, identity)
         {
-            this.DbContext = dbContext;
+            DbContext = dbContext;
         }
 
         public DbContext DbContext { get; }
@@ -64,6 +64,27 @@
             }
             transactionLifetimeLogger?.Dispose();
             transactionLifetimeLogger = null;
+        }
+
+        public void CompleteCurrentTransaction_InvokeAction_BeginNewTransaction(Action action)
+        {
+            Commit();
+            action.Invoke();
+            BeginTransaction();
+        }
+
+        public T CompleteCurrentTransaction_InvokeFunction_BeginNewTransaction<T>(Func<T> func)
+        {
+            Commit();
+            T result = func.Invoke();
+            BeginTransaction();
+            return result;
+        }
+
+        public void CompleteCurrentTransaction_BeginNewTransaction()
+        {
+            Commit();
+            BeginTransaction();
         }
 
         private void BeginTransaction()

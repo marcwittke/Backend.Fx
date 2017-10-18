@@ -6,10 +6,10 @@
 
     public abstract class RuntimeActivator
     {
-        private readonly IRuntime runtime;
+        private readonly ICompositionRoot runtime;
         private readonly Dictionary<Type, Func<object>> frameworkOnlyFactories = new Dictionary<Type, Func<object>>();
 
-        protected RuntimeActivator(IRuntime runtime)
+        protected RuntimeActivator(ICompositionRoot runtime)
         {
             this.runtime = runtime;
         }

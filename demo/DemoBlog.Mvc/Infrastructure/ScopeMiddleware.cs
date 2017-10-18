@@ -5,10 +5,11 @@
     using System.Security;
     using System.Security.Principal;
     using System.Threading.Tasks;
+    using Backend.Fx;
+    using Backend.Fx.Environment;
     using Backend.Fx.Environment.MultiTenancy;
     using Backend.Fx.Exceptions;
     using Backend.Fx.Logging;
-    using Backend.Fx.Patterns.DependencyInjection;
     using JetBrains.Annotations;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
@@ -26,16 +27,16 @@
         private static readonly ILogger Logger = LogManager.Create<ScopeMiddleware>();
         private readonly IHostingEnvironment env;
         private readonly RequestDelegate next;
-        private readonly IScopeManager scopeManager;
+        private readonly IBackendFxApplication backendFxApplication;
 
         /// <summary>
         ///     This constructor is being called by the framework DI container
         /// </summary>
         [UsedImplicitly]
-        protected ScopeMiddleware(RequestDelegate next, IScopeManager scopeManager, IHostingEnvironment env)
+        protected ScopeMiddleware(RequestDelegate next, IBackendFxApplication backendFxApplication, IHostingEnvironment env)
         {
             this.next = next;
-            this.scopeManager = scopeManager;
+            this.backendFxApplication = backendFxApplication;
             this.env = env;
         }
 
@@ -49,14 +50,16 @@
             {
                 TenantId tenantId = GetTenantId(context.User.Identity);
 
-                var asReadonly = context.Request.Method.ToUpperInvariant() == "GET";
-                using (var scope = scopeManager.BeginScope(context.User.Identity, tenantId))
+                using (var scope = backendFxApplication.ScopeManager.BeginScope(context.User.Identity, tenantId))
                 {
-                    scope.BeginUnitOfWork(asReadonly);
                     try
                     {
-                        await next.Invoke(context);
-                        scope.CompleteUnitOfWork();
+                        var asReadonly = context.Request.Method.ToUpperInvariant() == "GET";
+                        using (var unitOfWork = scope.BeginUnitOfWork(asReadonly))
+                        {
+                            await next.Invoke(context);
+                            unitOfWork.Complete();
+                        }
                     }
                     catch (UnprocessableException uex)
                     {

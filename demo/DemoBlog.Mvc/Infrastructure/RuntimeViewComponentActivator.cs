@@ -5,7 +5,7 @@
 
     public class RuntimeViewComponentActivator : RuntimeActivator, IViewComponentActivator
     {
-        public RuntimeViewComponentActivator(IRuntime runtime) : base(runtime)
+        public RuntimeViewComponentActivator(ICompositionRoot runtime) : base(runtime)
         { }
 
         public object Create(ViewComponentContext context)

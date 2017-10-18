@@ -4,7 +4,7 @@
 
     public class DatabaseManagerWithoutMigration<TDbContext> : DatabaseManager<TDbContext> where TDbContext : DbContext
     {
-        public DatabaseManagerWithoutMigration(DbContextOptions options) : base(options)
+        public DatabaseManagerWithoutMigration(DbContextOptions<TDbContext> options) : base(options)
         { }
 
         protected override void ExecuteCreationStrategy(DbContext dbContext)

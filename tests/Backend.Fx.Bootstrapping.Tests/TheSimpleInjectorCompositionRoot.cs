@@ -3,6 +3,7 @@ namespace Backend.Fx.Bootstrapping.Tests
     using System;
     using System.Diagnostics;
     using System.Linq;
+    using System.Reflection;
     using System.Security.Principal;
     using System.Threading;
     using System.Threading.Tasks;
@@ -10,55 +11,35 @@ namespace Backend.Fx.Bootstrapping.Tests
     using Environment.Authentication;
     using Environment.DateAndTime;
     using Environment.MultiTenancy;
-    using Environment.Persistence;
-    using Exceptions;
     using FakeItEasy;
+    using Modules;
     using Patterns.DependencyInjection;
-    using Patterns.EventAggregation;
-    using Patterns.Jobs;
+    using Patterns.IdGeneration;
     using Patterns.UnitOfWork;
     using SimpleInjector;
+    using Testing.InMemoryPersistence;
     using Xunit;
 
-    public class TheSimpleInjectorRuntime : IDisposable
+    public class TheSimpleInjectorCompositionRoot : IDisposable
     {
-        private readonly TestRuntime sut;
-        private readonly ITenantManager tenantManager;
-
-        public TheSimpleInjectorRuntime()
+        private readonly SimpleInjectorCompositionRoot sut;
+        
+        public TheSimpleInjectorCompositionRoot()
         {
-            IDatabaseManager databaseManager = A.Fake<IDatabaseManager>();
-
-            tenantManager = A.Fake<ITenantManager>();
-            A.CallTo(() => tenantManager.IsActive(A<TenantId>._)).Returns(true);
-            TenantId[] tenantIds = {new TenantId(999)};
-            A.CallTo(() => tenantManager.GetTenantIds()).Returns(tenantIds);
-
-            sut = new TestRuntime(tenantManager, databaseManager);
-
-        }
-
-        [Fact]
-        public void CallsAllRelevantMethodsOnBoot()
-        {
-            sut.Boot();
-            Assert.True(sut.BootApplicationWasCalled);
-            Assert.True(sut.BootPersistenceWasCalled);
-            Assert.True(sut.InitializeJobSchedulerWasCalled);
-        }
-
-        [Fact]
-        public void DoesNotAllowBeginningScopeWhenTenantIsDeactivated()
-        {
-            A.CallTo(() => tenantManager.IsActive(A<TenantId>._)).Returns(false);
-            sut.Boot();
-            Assert.Throws<UnprocessableException>(() => sut.BeginScope(new SystemIdentity(), new TenantId(111)));
+            sut = new SimpleInjectorCompositionRoot();
+            var domainAssembly = typeof(AnAggregate).GetTypeInfo().Assembly;
+            sut.RegisterModules(
+                new ClockModule<FrozenClock>(sut),
+                new DomainModule(sut, domainAssembly),
+                new InMemoryIdGeneratorsModule(sut),
+                new InMemoryPersistenceModule(sut, domainAssembly));
+            
+            sut.Verify();
         }
 
         [Fact]
         public void ProvidesAutoRegisteredDomainServices()
         {
-            sut.Boot();
             using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(100)))
             {
                 var testDomainService = scope.GetInstance<ITestDomainService>();
@@ -69,7 +50,6 @@ namespace Backend.Fx.Bootstrapping.Tests
         [Fact]
         public void ProvidesAutoRegisteredDomainServicesThatImplementTwoInterfaces()
         {
-            sut.Boot();
             using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(100)))
             {
                 var testDomainService = scope.GetInstance<ITestDomainService>();
@@ -85,7 +65,6 @@ namespace Backend.Fx.Bootstrapping.Tests
         [Fact]
         public void ProvidesAutoRegisteredApplicationServices()
         {
-            sut.Boot();
             using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(100)))
             {
                 Assert.IsType<TestApplicationService>(scope.GetInstance<ITestApplicationService>());
@@ -95,9 +74,6 @@ namespace Backend.Fx.Bootstrapping.Tests
         [Fact]
         public void MaintainsTenantIdWhenBeginningScopes()
         {
-            sut.Boot();
-            Assert.Throws<ActivationException>(() => sut.GetInstance<ICurrentTHolder<TenantId>>());
-
             Enumerable.Range(1, 100).AsParallel().ForAll(i =>
             {
                 using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(i)))
@@ -112,9 +88,6 @@ namespace Backend.Fx.Bootstrapping.Tests
         [Fact]
         public void MaintainsIdentityWhenBeginningScopes()
         {
-            sut.Boot();
-            Assert.Throws<ActivationException>(() => sut.GetInstance<ICurrentTHolder<IIdentity>>());
-
             Enumerable.Range(1, 100).AsParallel().ForAll(i =>
             {
                 using (var scope = sut.BeginScope(new GenericIdentity(i.ToString()), new TenantId(100)))
@@ -126,34 +99,30 @@ namespace Backend.Fx.Bootstrapping.Tests
         }
 
         [Fact]
-        public void MaintainsScopeInterruptorWhenBeginningScopes()
-        {
-            sut.Boot();
-            Assert.Throws<ActivationException>(() => sut.GetInstance<ICurrentTHolder<IScopeInterruptor>>());
-
-            using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(100)))
-            {
-                IScopeInterruptor insideScopeInterruptor = scope.GetInstance<ICurrentTHolder<IScopeInterruptor>>().Current;
-                Assert.Equal(scope, insideScopeInterruptor);
-            }
-        }
-
-        [Fact]
         public void ProvidesScopedInstancesWhenScopeHasBeenStarted()
         {
-            sut.Boot();
+            IClock scope1Clock;
+            IClock scope2Clock;
+
             using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(null)))
             {
-                var currentScope = sut.GetCurrentScope();
-                Assert.NotNull(currentScope);
-                Assert.NotNull(scope.GetInstance<IClock>());
+                scope1Clock = scope.GetInstance<IClock>();
+                Assert.NotNull(scope1Clock);
             }
+
+            using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(null)))
+            {
+                scope2Clock = scope.GetInstance<IClock>();
+                Assert.NotNull(scope2Clock);
+            }
+
+            Assert.NotEqual(scope1Clock, scope2Clock);
         }
 
         [Fact]
         public void ProvidesSingletonAndScopedInstancesAccordingly()
         {
-            sut.Boot();
+            
             const int parallelScopeCount = 1000;
             object[] scopedInstances = new object[parallelScopeCount];
             object[] singletonInstances = new object[parallelScopeCount];
@@ -172,7 +141,7 @@ namespace Backend.Fx.Bootstrapping.Tests
                     using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(null)))
                     {
                         scopedInstances[indexClosure] = scope.GetInstance<IClock>();
-                        singletonInstances[indexClosure] = scope.GetInstance<IEventAggregator>();
+                        singletonInstances[indexClosure] = scope.GetInstance<IEntityIdGenerator>();
                     }
                 });
             }
@@ -202,78 +171,29 @@ namespace Backend.Fx.Bootstrapping.Tests
         [Fact]
         public void ThrowsWhenScopedInstanceIsRequestedOutsideScope()
         {
-            sut.Boot();
-            Assert.Null(sut.GetCurrentScope());
             Assert.Throws<ActivationException>(() => sut.GetInstance<IClock>());
             Assert.Throws<ActivationException>(() => sut.GetInstance(typeof(IClock)));
-
+            Assert.Null(sut.GetCurrentScopeForTestsOnly());
 
             using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(null)))
             {
-                Assert.NotNull(sut.GetInstance<IClock>());
-                Assert.NotNull(scope.GetInstance<IClock>());
+                var sutClock = sut.GetInstance<IClock>();
+                var scopeClock = scope.GetInstance<IClock>();
+                Assert.NotNull(sutClock);
+                Assert.NotNull(scopeClock);
+                Assert.Equal(sutClock, scopeClock);
             }
 
 
-            Assert.Null(sut.GetCurrentScope());
+            Assert.Null(sut.GetCurrentScopeForTestsOnly());
             Assert.Throws<ActivationException>(() => sut.GetInstance<IClock>());
             Assert.Throws<ActivationException>(() => sut.GetInstance(typeof(IClock)));
         }
 
         [Fact]
-        public void CanInterruptCurrentScopeWithAction()
+        public void BeginsReadonlyUnitOfWork()
         {
-            sut.Boot();
-            using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(null)))
-            {
-                IClock instance1 = scope.GetInstance<IClock>();
-                LateResolver<IAmLateResolved> lateResolver = scope.GetInstance<LateResolver<IAmLateResolved>>();
-                IAmLateResolved lateResolvedInstance1 = lateResolver.Resolve();
-
-                scope.CompleteCurrentScope_InvokeAction_BeginNewScope(() =>
-                {
-                    Assert.Null(sut.GetCurrentScope());
-                    Assert.Throws<ActivationException>(() => sut.GetInstance(typeof(IClock)));
-                });
-
-                IClock instance2 = scope.GetInstance<IClock>();
-                Assert.NotEqual(instance1, instance2);
-
-                IAmLateResolved lateResolvedInstance2 = lateResolver.Resolve();
-                Assert.NotEqual(lateResolvedInstance1, lateResolvedInstance2);
-            }
-        }
-
-        [Fact]
-        public void CanInterruptCurrentScopeWithFunc()
-        {
-            sut.Boot();
-            using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(null)))
-            {
-                IClock instance1 = scope.GetInstance<IClock>();
-                LateResolver<IAmLateResolved> lateResolver = scope.GetInstance<LateResolver<IAmLateResolved>>();
-                IAmLateResolved lateResolvedInstance1 = lateResolver.Resolve();
-
-                int i = scope.CompleteCurrentScope_InvokeFunction_BeginNewScope(() =>
-                                                                      {
-                                                                          Assert.Null(sut.GetCurrentScope());
-                                                                          Assert.Throws<ActivationException>(() => sut.GetInstance(typeof(IClock)));
-                                                                          return 42;
-                                                                      });
-
-                Assert.Equal(42, i);
-                IClock instance2 = scope.GetInstance<IClock>();
-                Assert.NotEqual(instance1, instance2);
-
-                IAmLateResolved lateResolvedInstance2 = lateResolver.Resolve();
-                Assert.NotEqual(lateResolvedInstance1, lateResolvedInstance2);
-            }
-        }
-
-        [Fact]
-        public void BeginsAndCompletesReadonlyUnitOfWork()
-        {
-            sut.Boot();
+            
             Assert.Throws<ActivationException>(() => sut.GetInstance<IUnitOfWork>());
             Assert.Throws<ActivationException>(() => sut.GetInstance<IReadonlyUnitOfWork>());
 
@@ -281,22 +201,23 @@ namespace Backend.Fx.Bootstrapping.Tests
 
             scope.BeginUnitOfWork(true);
 
-            var uowFake = sut.GetInstance<IReadonlyUnitOfWork>();
-            Assert.NotNull(uowFake);
-            A.CallTo(() => uowFake.Begin()).MustHaveHappened(Repeated.Exactly.Once);
+            using (var uowFake = sut.GetInstance<IReadonlyUnitOfWork>())
+            {
+                Assert.NotNull(uowFake);
+                A.CallTo(() => uowFake.Begin()).MustHaveHappened(Repeated.Exactly.Once);
 
-            scope.CompleteUnitOfWork();
+                uowFake.Complete();
 
-            A.CallTo(() => uowFake.Complete()).MustHaveHappened(Repeated.Exactly.Once);
+                A.CallTo(() => uowFake.Complete()).MustHaveHappened(Repeated.Exactly.Once);
 
-            scope.Dispose();
-            A.CallTo(() => uowFake.Dispose()).MustHaveHappened(Repeated.Exactly.Once);
+                scope.Dispose();
+                A.CallTo(() => uowFake.Dispose()).MustHaveHappened(Repeated.Exactly.Once);
+            }
         }
 
         [Fact]
         public void BeginsButDoesNotCompleteReadonlyUnitOfWorkOnFailure()
         {
-            sut.Boot();
             Assert.Throws<ActivationException>(() => sut.GetInstance<IUnitOfWork>());
             Assert.Throws<ActivationException>(() => sut.GetInstance<IReadonlyUnitOfWork>());
 
@@ -309,7 +230,6 @@ namespace Backend.Fx.Bootstrapping.Tests
                     uowFake = sut.GetInstance<IReadonlyUnitOfWork>();
 
                     throw new InvalidOperationException("This is the siumulation of an error inside the business transaction");
-                    //scope.CompleteUnitOfWork();
                 }
             }
             catch (Exception ex)
@@ -324,7 +244,7 @@ namespace Backend.Fx.Bootstrapping.Tests
         [Fact]
         public void BeginsAndCompletesUnitOfWork()
         {
-            sut.Boot();
+            
             Assert.Throws<ActivationException>(() => sut.GetInstance<IUnitOfWork>());
             Assert.Throws<ActivationException>(() => sut.GetInstance<IReadonlyUnitOfWork>());
 
@@ -332,22 +252,24 @@ namespace Backend.Fx.Bootstrapping.Tests
 
             scope.BeginUnitOfWork(false);
 
-            var uowFake = sut.GetInstance<IUnitOfWork>();
-            Assert.NotNull(uowFake);
-            A.CallTo(() => uowFake.Begin()).MustHaveHappened(Repeated.Exactly.Once);
+            using (var uowFake = sut.GetInstance<IUnitOfWork>())
+            {
+                Assert.NotNull(uowFake);
+                A.CallTo(() => uowFake.Begin()).MustHaveHappened(Repeated.Exactly.Once);
 
-            scope.CompleteUnitOfWork();
+                uowFake.Complete();
 
-            A.CallTo(() => uowFake.Complete()).MustHaveHappened(Repeated.Exactly.Once);
+                A.CallTo(() => uowFake.Complete()).MustHaveHappened(Repeated.Exactly.Once);
 
-            scope.Dispose();
-            A.CallTo(() => uowFake.Dispose()).MustHaveHappened(Repeated.Exactly.Once);
+                scope.Dispose();
+                A.CallTo(() => uowFake.Dispose()).MustHaveHappened(Repeated.Exactly.Once);
+            }
         }
 
         [Fact]
         public void BeginsButDoesNotCompleteUnitOfWorkOnFailure()
         {
-            sut.Boot();
+            
             Assert.Throws<ActivationException>(() => sut.GetInstance<IUnitOfWork>());
             Assert.Throws<ActivationException>(() => sut.GetInstance<IReadonlyUnitOfWork>());
 
@@ -375,7 +297,7 @@ namespace Backend.Fx.Bootstrapping.Tests
         [Fact]
         public void CanProvideEventHandlers()
         {
-            sut.Boot();
+            
 
             using (sut.BeginScope(new SystemIdentity(), new TenantId(1)))
             {
@@ -388,29 +310,7 @@ namespace Backend.Fx.Bootstrapping.Tests
             }
         }
 
-        [Fact]
-        public async void CanExecuteJobs()
-        {
-            var someJob = A.Fake<IJob>();
-            sut.Boot(container =>
-            {
-                container.Register(()=>someJob);
-
-            });
-            await sut.ExecuteJobAsync<IJob>();
-
-            A.CallTo(() => someJob.Execute()).MustHaveHappened(Repeated.Exactly.Once);
-        }
-
-        [Fact]
-        public async void CanExecuteJobsWithDelay()
-        {
-            var someJob = A.Fake<IJob>();
-            sut.Boot(container => container.Register(() => someJob));
-            await sut.ExecuteJobAsync<IJob>(null, 1);
-
-            A.CallTo(() => someJob.Execute()).MustHaveHappened(Repeated.Exactly.Once);
-        }
+       
 
         public void Dispose()
         {

@@ -10,12 +10,12 @@
     using Microsoft.EntityFrameworkCore;
     using Persistence;
 
-    public class DemoBlogRuntime : SimpleInjectorEfCoreRuntime<BlogDbContext>
+    public class DemoBlogCompositionRoot : EfCorePersistenceModule<BlogDbContext>
     {
         private readonly bool doCreateInitialDemoTenant;
         private readonly DbContextOptions dbContextOptions;
 
-        public DemoBlogRuntime(bool doCreateInitialDemoTenant, DbContextOptions dbContextOptions)
+        public DemoBlogCompositionRoot(bool doCreateInitialDemoTenant, DbContextOptions dbContextOptions)
             : base(new DatabaseManagerWithMigration<BlogDbContext>(dbContextOptions), dbContextOptions)
         {
             this.doCreateInitialDemoTenant = doCreateInitialDemoTenant;

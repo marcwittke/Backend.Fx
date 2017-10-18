@@ -211,7 +211,7 @@
             public EfUnitOfWork UnitOfWork { get; }
             public IRepository<Blog> Repository { get; }
 
-            public SystemUnderTest(DbContextOptions dbContextOptions, IClock clock, TenantId tenantId)
+            public SystemUnderTest(DbContextOptions<TestDbContext> dbContextOptions, IClock clock, TenantId tenantId)
             {
                 DbContext = new TestDbContext(dbContextOptions);
                 UnitOfWork = new EfUnitOfWork(clock, new SystemIdentity(), DbContext);

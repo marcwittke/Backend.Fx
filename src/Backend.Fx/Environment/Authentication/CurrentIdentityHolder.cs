@@ -5,7 +5,7 @@
 
     public class CurrentIdentityHolder : CurrentTHolder<IIdentity>
     {
-        public override IIdentity ProvideInitialInstance()
+        public override IIdentity ProvideInstance()
         {
             return new AnonymousIdentity();
         }

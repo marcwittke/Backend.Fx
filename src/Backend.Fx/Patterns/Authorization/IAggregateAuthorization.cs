@@ -12,7 +12,7 @@
         Expression<System.Func<TAggregateRoot, bool>> HasAccessExpression { get; }
 
         /// <summary>
-        /// Only if the filter expression is not sufficient, you can override this method to apply the filtering to the querable directly.
+        /// Only if the filter expression is not sufficient, you can override this method to apply the filtering to the queryable directly.
         /// </summary>
         IQueryable<TAggregateRoot> Filter(IQueryable<TAggregateRoot> queryable);
 

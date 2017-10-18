@@ -4,8 +4,7 @@
     using System.ComponentModel.DataAnnotations;
     using System.Diagnostics;
     using JetBrains.Annotations;
-    using Logging;
-
+    
     /// <summary>
     /// An object that is not defined by its attributes, but rather by a thread of continuity and its identity.
     /// https://en.wikipedia.org/wiki/Domain-driven_design#Building_blocks
@@ -13,8 +12,6 @@
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
     public abstract class Entity : IEquatable<Entity>
     {
-        private static readonly ILogger Logger = LogManager.Create<Entity>();
-
         protected Entity()
         { }
 

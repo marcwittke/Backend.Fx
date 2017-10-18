@@ -12,7 +12,7 @@
 
         void ReplaceCurrent(T newCurrentInstance);
 
-        T ProvideInitialInstance();
+        T ProvideInstance();
     }
 
     public abstract class CurrentTHolder<T> : ICurrentTHolder<T> where T : class
@@ -27,7 +27,7 @@
                 if (current == null)
                 {
                     Logger.Debug($"Providing initial {typeof(T).Name} instance");
-                    current = ProvideInitialInstance();
+                    current = ProvideInstance();
                     Logger.Debug($"Initial instance of {typeof(T).Name} is: {Describe(current)}");
                 }
                 return current;
@@ -42,7 +42,7 @@
             current = newCurrentInstance;
         }
 
-        public abstract T ProvideInitialInstance();
+        public abstract T ProvideInstance();
 
         protected abstract string Describe(T instance);
     }

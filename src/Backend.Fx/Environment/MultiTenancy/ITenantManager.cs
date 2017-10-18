@@ -6,14 +6,20 @@
     using JetBrains.Annotations;
     using Logging;
 
+    /// <summary>
+    /// Encapsulates the management of tenants
+    /// Note that this should not use repositories and other building blocks, but access the persistence layer directly
+    /// </summary>
     public interface ITenantManager
     {
         TenantId[] GetTenantIds();
         Tenant[] GetTenants();
         bool IsActive(TenantId tenantId);
+        void EnsureTenantIsInitialized(TenantId tenantId);
+        Tenant FindTenant(TenantId tenantId);
         TenantId CreateDemonstrationTenant(string name, string description, bool isDefault);
         TenantId CreateProductionTenant(string name, string description, bool isDefault);
-        void EnsureTenantIsInitialized(TenantId tenantId);
+
     }
 
     public abstract class TenantManager : ITenantManager
@@ -100,7 +106,7 @@
             initializedTenants.Add(tenantId.Value);
         }
 
-        protected abstract Tenant FindTenant(TenantId tenantId);
+        public abstract Tenant FindTenant(TenantId tenantId);
 
         private TenantId CreateTenant([NotNull] string name, string description, bool isDemo, bool isDefault)
         {

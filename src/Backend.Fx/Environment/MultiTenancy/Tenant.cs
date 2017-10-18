@@ -4,6 +4,9 @@
     using System.ComponentModel.DataAnnotations;
     using JetBrains.Annotations;
 
+    /// <summary>
+    /// Represents a tenant in the application
+    /// </summary>
     public class Tenant
     {
         public const string DemonstrationTenantName = "Demonstration";
@@ -34,6 +37,7 @@
         public bool IsInitialized { get; set; }
 
         public bool IsActive { get; set; }
+
         public bool IsDefault { get; set; }
     }
 }

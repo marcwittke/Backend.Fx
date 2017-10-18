@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Backend.Fx.EfCorePersistence\Backend.Fx.EfCorePersistence.csproj" />
     <ProjectReference Include="..\Backend.Fx\Backend.Fx.csproj" />
   </ItemGroup>
 

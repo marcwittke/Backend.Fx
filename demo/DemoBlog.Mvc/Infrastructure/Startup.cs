@@ -22,7 +22,7 @@
     public class Startup
     {
         protected IConfigurationRoot Configuration;
-        private readonly DemoBlogRuntime runtime;
+        private readonly DemoBlogCompositionRoot compositionRoot;
         private readonly RuntimeControllerActivator controllerActivator;
         private readonly RuntimeViewComponentActivator viewComponentActivator;
         private readonly ICurrentTHolder<TenantId> defaultTenantIdHolder = new CurrentTenantIdHolder();
@@ -39,9 +39,9 @@
 
             DbContextOptions dbContextOptions = InitializeDatabase(Configuration);
 
-            runtime = new DemoBlogRuntime(env.IsDevelopment(), dbContextOptions);
-            controllerActivator = new RuntimeControllerActivator(runtime);
-            viewComponentActivator = new RuntimeViewComponentActivator(runtime);
+            compositionRoot = new DemoBlogCompositionRoot(env.IsDevelopment(), dbContextOptions);
+            controllerActivator = new RuntimeControllerActivator(compositionRoot);
+            viewComponentActivator = new RuntimeViewComponentActivator(compositionRoot);
         }
 
 
@@ -53,10 +53,10 @@
             services.AddSingleton<IViewComponentActivator>(viewComponentActivator);
 
             // put the singleton runtime into the framework controller, so that the scope middleware can be resolved
-            services.AddSingleton<IScopeManager>(runtime);
+            services.AddSingleton<IScopeManager>(compositionRoot);
 
             // this is required for the NukeMiddleware
-            services.AddSingleton(runtime.DatabaseManager);
+            services.AddSingleton(compositionRoot.DatabaseManager);
 
             AddIdentityAsFrameworkService(services, Configuration.GetConnectionString("BlogDbConnection"));
 
@@ -79,7 +79,7 @@
 
             app.UseStaticFiles();
 
-            app.ApplicationServices.GetRequiredService<IApplicationLifetime>().ApplicationStopping.Register(() => runtime.Dispose());
+            app.ApplicationServices.GetRequiredService<IApplicationLifetime>().ApplicationStopping.Register(() => compositionRoot.Dispose());
 
             // controllers that use ASP.NET Identity are not resolved using the application container, but the framework container
             controllerActivator.RegisterFrameworkOnlyService(() => app.ApplicationServices.GetService<AccountController>());
@@ -102,13 +102,13 @@
 
             app.UseMiddleware<DemoBlogMiddleware>();
             
-            runtime.Boot(container =>
+            compositionRoot.Boot(container =>
             {
                 container.RegisterMvcViewComponents(app);
                 container.Register(() => app.ApplicationServices.GetService<JavaScriptSnippet>());
             });
 
-            defaultTenantIdHolder.ReplaceCurrent(runtime.DefaultTenantId);
+            defaultTenantIdHolder.ReplaceCurrent(compositionRoot.DefaultTenantId);
 
             app.UseMvc(routes =>
             {

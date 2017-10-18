@@ -8,7 +8,7 @@
     public class RuntimeControllerActivator : RuntimeActivator, IControllerActivator
     {
         private static readonly ILogger Logger = LogManager.Create<RuntimeControllerActivator>();
-        public RuntimeControllerActivator(IRuntime runtime) : base(runtime)
+        public RuntimeControllerActivator(ICompositionRoot runtime) : base(runtime)
         { }
 
         public virtual object Create(ControllerContext c)
