@@ -252,17 +252,13 @@ namespace Backend.Fx.Bootstrapping.Tests
 
             scope.BeginUnitOfWork(false);
 
-            using (var uowFake = sut.GetInstance<IUnitOfWork>())
+            using (var unitOfWork = sut.GetInstance<IUnitOfWork>())
             {
-                Assert.NotNull(uowFake);
-                A.CallTo(() => uowFake.Begin()).MustHaveHappened(Repeated.Exactly.Once);
-
-                uowFake.Complete();
-
-                A.CallTo(() => uowFake.Complete()).MustHaveHappened(Repeated.Exactly.Once);
-
-                scope.Dispose();
-                A.CallTo(() => uowFake.Dispose()).MustHaveHappened(Repeated.Exactly.Once);
+                Assert.NotNull(unitOfWork);
+                
+                unitOfWork.Complete();
+                Assert.Equal(1, ((InMemoryUnitOfWork)unitOfWork).CommitCalls);
+                Assert.Equal(0, ((InMemoryUnitOfWork)unitOfWork).RollbackCalls);
             }
         }
 
@@ -273,14 +269,12 @@ namespace Backend.Fx.Bootstrapping.Tests
             Assert.Throws<ActivationException>(() => sut.GetInstance<IUnitOfWork>());
             Assert.Throws<ActivationException>(() => sut.GetInstance<IReadonlyUnitOfWork>());
 
-            IUnitOfWork uowFake = null;
+            IUnitOfWork unitOfWork = null;
             try
             {
                 using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(111)))
                 {
-                    scope.BeginUnitOfWork(true);
-                    uowFake = sut.GetInstance<IUnitOfWork>();
-
+                    unitOfWork = scope.BeginUnitOfWork(false);
                     throw new InvalidOperationException("This is the siumulation of an error inside the business transaction");
                     //scope.CompleteUnitOfWork();
                 }
@@ -290,8 +284,10 @@ namespace Backend.Fx.Bootstrapping.Tests
                 Debug.WriteLine(ex);
             }
 
-            A.CallTo(() => uowFake.Complete()).MustNotHaveHappened();
-            A.CallTo(() => uowFake.Dispose()).MustHaveHappened(Repeated.Exactly.Once);
+            // ReSharper disable once PossibleNullReferenceException
+            Assert.Equal(0, ((InMemoryUnitOfWork)unitOfWork).CommitCalls);
+            // ReSharper disable once PossibleNullReferenceException
+            Assert.Equal(1, ((InMemoryUnitOfWork)unitOfWork).RollbackCalls);
         }
 
         [Fact]

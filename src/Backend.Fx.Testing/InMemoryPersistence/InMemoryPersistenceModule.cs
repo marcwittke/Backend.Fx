@@ -48,6 +48,7 @@
             container.AddRegistration(typeof(IUnitOfWork), uowRegistration);
             container.AddRegistration(typeof(ICanFlush), uowRegistration);
             container.Register(A.Fake<IReadonlyUnitOfWork>);
+            container.Register(A.Fake<ICanInterruptTransaction>);
         }
 
         public Dictionary<Type, TAggregateRoot> GetStore<TAggregateRoot>() where TAggregateRoot : AggregateRoot
