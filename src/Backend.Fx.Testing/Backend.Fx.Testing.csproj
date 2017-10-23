@@ -3,6 +3,19 @@
   <PropertyGroup>
     <TargetFramework>netstandard1.6</TargetFramework>
     <Version>2.0.0-beta1</Version>
+    <Authors>Marc Wittke</Authors>
+    <Company>anic GmbH</Company>
+    <Product>Backend.Fx</Product>
+    <Description>Provides some utilities to test a Backen.Fx based application:
+- In memory persistence layer
+- test data generation
+- xunit logging</Description>
+    <Copyright>All rights reserved. Distributed under the terms of the MIT License.</Copyright>
+    <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/marcwittke/Backend.Fx</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/marcwittke/Backend.Fx.git</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>

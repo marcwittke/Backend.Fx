@@ -3,7 +3,7 @@
     using Microsoft.EntityFrameworkCore;
     using Patterns.IdGeneration;
 
-    public class MsSqlSequenceEntityIdGenerator<TDbContext> : MsSqlSequenceHiLoIdGenerator, IEntityIdGenerator where TDbContext : DbContext
+    public class MsSqlSequenceEntityIdGenerator<TDbContext> : MsSqlSequenceHiLoIdGenerator<TDbContext>, IEntityIdGenerator where TDbContext : DbContext
     {
         public MsSqlSequenceEntityIdGenerator(DbContextOptions<TDbContext> dbContextOptions) : base(dbContextOptions, "EntityId")
         { }

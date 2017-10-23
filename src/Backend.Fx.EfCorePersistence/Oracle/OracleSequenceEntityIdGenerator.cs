@@ -3,7 +3,7 @@
     using Microsoft.EntityFrameworkCore;
     using Patterns.IdGeneration;
 
-    public class OracleSequenceEntityIdGenerator<TDbContext> : OracleSequenceHiLoIdGenerator, IEntityIdGenerator where TDbContext : DbContext
+    public class OracleSequenceEntityIdGenerator<TDbContext> : OracleSequenceHiLoIdGenerator<TDbContext>, IEntityIdGenerator where TDbContext : DbContext
     {
         public OracleSequenceEntityIdGenerator(DbContextOptions<TDbContext> dbContextOptions) : base(dbContextOptions, "SEQ_ENTITY_ID")
         { }

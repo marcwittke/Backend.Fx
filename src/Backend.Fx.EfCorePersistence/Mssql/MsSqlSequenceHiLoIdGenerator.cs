@@ -5,13 +5,13 @@
     using Microsoft.EntityFrameworkCore;
     using Patterns.IdGeneration;
 
-    public abstract class MsSqlSequenceHiLoIdGenerator : HiLoIdGenerator
+    public abstract class MsSqlSequenceHiLoIdGenerator<TDbContext> : SequenceHiLoIdGenerator where TDbContext : DbContext
     {
-        private readonly DbContextOptions dbContextOptions;
-        private static readonly ILogger Logger = LogManager.Create<MsSqlSequenceHiLoIdGenerator>();
+        private readonly DbContextOptions<TDbContext> dbContextOptions;
+        private static readonly ILogger Logger = LogManager.Create<MsSqlSequenceHiLoIdGenerator<TDbContext>>();
         private readonly string sequenceName;
 
-        protected MsSqlSequenceHiLoIdGenerator(DbContextOptions dbContextOptions, string sequenceName)
+        protected MsSqlSequenceHiLoIdGenerator(DbContextOptions<TDbContext> dbContextOptions, string sequenceName)
         {
             this.dbContextOptions = dbContextOptions;
             this.sequenceName = sequenceName;
@@ -36,7 +36,7 @@
             }
         }
 
-        public void EnsureSqlSequenceExistence()
+        public override void EnsureSqlSequenceExistence()
         {
             using (var dbContext = new DbContext(dbContextOptions))
             {

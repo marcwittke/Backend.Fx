@@ -55,6 +55,12 @@
             return GetRepository<TAggregateRoot>().AggregateQueryable.Random();
         }
 
+        public InMemoryQueryable<TAggregateRoot> GetQueryable<TAggregateRoot>() where TAggregateRoot : AggregateRoot
+        {
+            IInMemoryStore<TAggregateRoot> store = (IInMemoryStore<TAggregateRoot>) stores[typeof(TAggregateRoot)];
+            return new InMemoryQueryable<TAggregateRoot>(store);
+        } 
+
         public InMemoryRepository<TAggregateRoot> GetRepository<TAggregateRoot>() where TAggregateRoot : AggregateRoot
         {
             return new InMemoryRepository<TAggregateRoot>((IInMemoryStore<TAggregateRoot>)stores[typeof(TAggregateRoot)], TenantId, new AllowAll<TAggregateRoot>());

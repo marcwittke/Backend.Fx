@@ -6,8 +6,7 @@
     using Environment.Persistence;
     using Logging;
     using Microsoft.EntityFrameworkCore;
-    using Mssql;
-
+    
     public abstract class DatabaseManager<TDbContext> : IDatabaseManager where TDbContext : DbContext
     {
         private static readonly ILogger Logger = LogManager.Create<DatabaseManager<TDbContext>>();
@@ -55,16 +54,16 @@
 
         private void EnsureSequenceExistence()
         {
-            var sqlSequenceHiLoIdGeneratorTypes = typeof(TDbContext)
+            var sequenceHiLoIdGeneratorTypes = typeof(TDbContext)
                     .GetTypeInfo()
                     .Assembly
                     .ExportedTypes
                     .Select(t => t.GetTypeInfo())
-                    .Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericType && typeof(MsSqlSequenceHiLoIdGenerator).GetTypeInfo().IsAssignableFrom(t));
+                    .Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericType && typeof(SequenceHiLoIdGenerator).GetTypeInfo().IsAssignableFrom(t));
 
-            foreach (var sqlSequenceHiLoIdGeneratorType in sqlSequenceHiLoIdGeneratorTypes)
+            foreach (var sequenceHiLoIdGeneratorType in sequenceHiLoIdGeneratorTypes)
             {
-                MsSqlSequenceHiLoIdGenerator msSqlSequenceHiLoIdGenerator = (MsSqlSequenceHiLoIdGenerator) Activator.CreateInstance(sqlSequenceHiLoIdGeneratorType.AsType(), DbContextOptions);
+                SequenceHiLoIdGenerator msSqlSequenceHiLoIdGenerator = (SequenceHiLoIdGenerator) Activator.CreateInstance(sequenceHiLoIdGeneratorType.AsType(), DbContextOptions);
                 msSqlSequenceHiLoIdGenerator.EnsureSqlSequenceExistence();
             }
         }
