@@ -1,6 +1,7 @@
 ﻿namespace Backend.Fx.Patterns.DependencyInjection
 {
     using System;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Encapsulates the injection framework of choice. The implementation follows the Register/Resolve/Release pattern.
@@ -23,6 +24,8 @@
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         T GetInstance<T>() where T : class;
+
+        IEnumerable<T> GetInstances<T>() where T : class;
 
         void Verify();
 

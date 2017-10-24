@@ -8,7 +8,7 @@
         private readonly Container container;
         private readonly ScopedLifestyle scopedLifestyle;
 
-        public SimpleInjectorModule(SimpleInjectorCompositionRoot compositionRoot)
+        protected SimpleInjectorModule(SimpleInjectorCompositionRoot compositionRoot)
         {
             container = compositionRoot.Container;
             scopedLifestyle = compositionRoot.ScopedLifestyle;

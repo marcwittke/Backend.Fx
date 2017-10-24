@@ -3,8 +3,10 @@
     using System;
     using Logging;
     using Microsoft.EntityFrameworkCore;
+    using Patterns.DependencyInjection;
+    using Patterns.IdGeneration;
 
-    public abstract class MsSqlSequenceHiLoIdGenerator<TDbContext> : SequenceHiLoIdGenerator where TDbContext : DbContext
+    public abstract class MsSqlSequenceHiLoIdGenerator<TDbContext> : HiLoIdGenerator, IInitializable where TDbContext : DbContext
     {
         private readonly DbContextOptions<TDbContext> dbContextOptions;
         private static readonly ILogger Logger = LogManager.Create<MsSqlSequenceHiLoIdGenerator<TDbContext>>();
@@ -35,7 +37,7 @@
             }
         }
 
-        public override void EnsureSqlSequenceExistence()
+        public void Initialize()
         {
             Logger.Info($"Ensuring existence of ms sql sequence {sequenceName}");
             using (var dbContext = new DbContext(dbContextOptions))

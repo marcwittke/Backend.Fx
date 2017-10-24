@@ -4,8 +4,10 @@
     using System.Data.Common;
     using Logging;
     using Microsoft.EntityFrameworkCore;
+    using Patterns.DependencyInjection;
+    using Patterns.IdGeneration;
 
-    public abstract class OracleSequenceHiLoIdGenerator<TDbContext> : SequenceHiLoIdGenerator where TDbContext : DbContext
+    public abstract class OracleSequenceHiLoIdGenerator<TDbContext> : HiLoIdGenerator, IInitializable where TDbContext : DbContext
     {
         private static readonly ILogger Logger = LogManager.Create<OracleSequenceHiLoIdGenerator<TDbContext>>();
         private readonly DbContextOptions<TDbContext> dbContextOptions;
@@ -36,7 +38,7 @@
             }
         }
 
-        public override void EnsureSqlSequenceExistence()
+        public void Initialize()
         {
             Logger.Info($"Ensuring existence of oracle sequence {sequenceName}");
             using (DbContext dbContext = new DbContext(dbContextOptions))

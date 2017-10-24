@@ -63,6 +63,11 @@ namespace Backend.Fx.Bootstrapping
         {
             return Container.GetInstance<T>();
         }
+
+        public IEnumerable<T> GetInstances<T>() where T : class
+        {
+            return Container.GetAllInstances<T>();
+        }
         #endregion
 
         #region IScopeManager implementation
