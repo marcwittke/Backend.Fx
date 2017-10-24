@@ -3,7 +3,6 @@
     using System;
     using Logging;
     using Microsoft.EntityFrameworkCore;
-    using Patterns.IdGeneration;
 
     public abstract class MsSqlSequenceHiLoIdGenerator<TDbContext> : SequenceHiLoIdGenerator where TDbContext : DbContext
     {
@@ -19,7 +18,7 @@
 
         protected override int GetNextBlockStart()
         {
-            using (var dbContext = new DbContext(dbContextOptions))
+            using (DbContext dbContext = dbContextOptions.CreateDbContext())
             {
                 using (var dbConnection = dbContext.Database.GetDbConnection())
                 {
@@ -38,6 +37,7 @@
 
         public override void EnsureSqlSequenceExistence()
         {
+            Logger.Info($"Ensuring existence of ms sql sequence {sequenceName}");
             using (var dbContext = new DbContext(dbContextOptions))
             {
                 using (var dbConnection = dbContext.Database.GetDbConnection())
@@ -51,12 +51,18 @@
                         sequenceExists = (int)cmd.ExecuteScalar() == 1;
                     }
 
-                    if (!sequenceExists)
+                    if (sequenceExists)
                     {
+                        Logger.Info($"Sequence {sequenceName} exists");
+                    }
+                    else
+                    {
+                        Logger.Info($"Sequence {sequenceName} does not exist yet and will be created now");
                         using (var cmd = dbConnection.CreateCommand())
                         {
                             cmd.CommandText = $"CREATE SEQUENCE {sequenceName} START WITH 1 INCREMENT BY {Increment}";
                             cmd.ExecuteNonQuery();
+                            Logger.Info($"Sequence {sequenceName} created");
                         }
                     }
                 }

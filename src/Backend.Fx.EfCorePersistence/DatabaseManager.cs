@@ -22,6 +22,7 @@
 
         public void EnsureDatabaseExistence()
         {
+            Logger.Info("Ensuring database existence");
             using (var dbContext = DbContextOptions.CreateDbContext())
             {
                 ExecuteCreationStrategy(dbContext);
@@ -35,6 +36,7 @@
 
         private void EnsureSearchIndexExistence()
         {
+            Logger.Info("Ensuring existence of full text search indizes");
             var fullTextSearchIndexTypes = typeof(TDbContext)
                     .GetTypeInfo()
                     .Assembly
@@ -54,17 +56,27 @@
 
         private void EnsureSequenceExistence()
         {
+            Logger.Info("Ensuring existence of sequences");
             var sequenceHiLoIdGeneratorTypes = typeof(TDbContext)
                     .GetTypeInfo()
                     .Assembly
                     .ExportedTypes
                     .Select(t => t.GetTypeInfo())
-                    .Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericType && typeof(SequenceHiLoIdGenerator).GetTypeInfo().IsAssignableFrom(t));
+                    .Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericType && typeof(SequenceHiLoIdGenerator).GetTypeInfo().IsAssignableFrom(t))
+                    .ToArray();
 
-            foreach (var sequenceHiLoIdGeneratorType in sequenceHiLoIdGeneratorTypes)
+            if (sequenceHiLoIdGeneratorTypes.Length > 0)
             {
-                SequenceHiLoIdGenerator msSqlSequenceHiLoIdGenerator = (SequenceHiLoIdGenerator) Activator.CreateInstance(sequenceHiLoIdGeneratorType.AsType(), DbContextOptions);
-                msSqlSequenceHiLoIdGenerator.EnsureSqlSequenceExistence();
+                Logger.Info($"{sequenceHiLoIdGeneratorTypes.Length} sequences found");
+                foreach (var sequenceHiLoIdGeneratorType in sequenceHiLoIdGeneratorTypes)
+                {
+                    SequenceHiLoIdGenerator sequenceHiLoIdGenerator = (SequenceHiLoIdGenerator)Activator.CreateInstance(sequenceHiLoIdGeneratorType.AsType(), DbContextOptions);
+                    sequenceHiLoIdGenerator.EnsureSqlSequenceExistence();
+                }
+            }
+            else
+            {
+                Logger.Info("No sequences found");
             }
         }
 

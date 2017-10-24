@@ -19,7 +19,7 @@
 
         protected override int GetNextBlockStart()
         {
-            using (DbContext dbContext = new DbContext(dbContextOptions))
+            using (DbContext dbContext = dbContextOptions.CreateDbContext())
             {
                 using (DbConnection dbConnection = dbContext.Database.GetDbConnection())
                 {
@@ -38,6 +38,7 @@
 
         public override void EnsureSqlSequenceExistence()
         {
+            Logger.Info($"Ensuring existence of oracle sequence {sequenceName}");
             using (DbContext dbContext = new DbContext(dbContextOptions))
             {
                 using (DbConnection dbConnection = dbContext.Database.GetDbConnection())
@@ -49,12 +50,18 @@
                         command.CommandText = $"SELECT count(*) FROM user_sequences WHERE sequence_name = '{sequenceName}'";
                         sequenceExists = (decimal)command.ExecuteScalar() == 1;
                     }
-                    if (!sequenceExists)
+                    if (sequenceExists)
                     {
-                        using (DbCommand command = dbConnection.CreateCommand())
+                        Logger.Info($"Sequence {sequenceName} exists");
+                    }
+                    else
+                    {
+                        Logger.Info($"Sequence {sequenceName} does not exist yet and will be created now");
+                        using (var cmd = dbConnection.CreateCommand())
                         {
-                            command.CommandText = $"CREATE SEQUENCE {sequenceName} START WITH 1 INCREMENT BY {Increment}";
-                            command.ExecuteNonQuery();
+                            cmd.CommandText = $"CREATE SEQUENCE {sequenceName} START WITH 1 INCREMENT BY {Increment}";
+                            cmd.ExecuteNonQuery();
+                            Logger.Info($"Sequence {sequenceName} created");
                         }
                     }
                 }

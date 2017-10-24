@@ -9,6 +9,7 @@
     using Environment.DateAndTime;
     using Environment.MultiTenancy;
     using Patterns.Authorization;
+    using Patterns.DependencyInjection;
     using Patterns.IdGeneration;
     using RandomData;
 
@@ -16,7 +17,11 @@
     {
         private readonly Dictionary<Type, object> stores;
 
-        protected InMemoryPersistenceFixture(bool withDemoData, params Assembly[] domainAssemblies)
+        protected InMemoryPersistenceFixture(bool withDemoData, Assembly domainAssembly, params IModule[] modules)
+            : this(withDemoData, new[] { domainAssembly }, modules)
+        {}
+
+        protected InMemoryPersistenceFixture(bool withDemoData, Assembly[] domainAssemblies, params IModule[] modules)
         {
             using (SimpleInjectorCompositionRoot compositionRoot = new SimpleInjectorCompositionRoot())
             {
@@ -27,6 +32,7 @@
                     new ClockModule<FrozenClock>(compositionRoot),
                     inMemoryIdGeneratorsModule,
                     inMemoryPersistenceModule);
+                compositionRoot.RegisterModules(modules);
                 compositionRoot.Verify();
 
                 ITenantInitializer tenantInitializer = new TenantInitializer(compositionRoot);

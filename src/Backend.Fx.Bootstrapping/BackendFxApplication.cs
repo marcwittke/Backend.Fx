@@ -4,6 +4,7 @@
     using System.Linq;
     using Environment.MultiTenancy;
     using Environment.Persistence;
+    using Logging;
     using Patterns.DependencyInjection;
 
     /// <summary>
@@ -11,6 +12,7 @@
     /// </summary>
     public class BackendFxApplication : IDisposable
     {
+        private static readonly ILogger Logger = LogManager.Create<BackendFxApplication>();
         private TenantId defaultTenantId;
 
         /// <summary>
@@ -64,6 +66,7 @@
         }
         public void Boot()
         {
+            Logger.Info("Booting application");
             CompositionRoot.Verify();
             DatabaseManager.EnsureDatabaseExistence();
             var tenants = TenantManager.GetTenants();
@@ -75,6 +78,7 @@
 
         public void Dispose()
         {
+            Logger.Info("Application shut down initialized");
             CompositionRoot?.Dispose();
         }
     }

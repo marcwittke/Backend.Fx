@@ -20,6 +20,7 @@ namespace Backend.Fx.Bootstrapping
 
         public SimpleInjectorCompositionRoot()
         {
+            Logger.Info("Initializing SimpleInjector");
             Container.Options.LifestyleSelectionBehavior = new ScopedLifestyleBehavior();
             Container.Options.DefaultScopedLifestyle = ScopedLifestyle;
         }
@@ -31,6 +32,7 @@ namespace Backend.Fx.Bootstrapping
         {
             foreach (var module in modules)
             {
+                Logger.Info($"Registering {module.GetType().Name}");
                 module.Register();
             }
         }
