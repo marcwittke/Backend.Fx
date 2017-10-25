@@ -3,10 +3,9 @@
     using System;
     using Logging;
     using Microsoft.EntityFrameworkCore;
-    using Patterns.DependencyInjection;
     using Patterns.IdGeneration;
 
-    public abstract class MsSqlSequenceHiLoIdGenerator<TDbContext> : HiLoIdGenerator, IInitializable where TDbContext : DbContext
+    public abstract class MsSqlSequenceHiLoIdGenerator<TDbContext> : HiLoIdGenerator where TDbContext : DbContext
     {
         private readonly DbContextOptions<TDbContext> dbContextOptions;
         private static readonly ILogger Logger = LogManager.Create<MsSqlSequenceHiLoIdGenerator<TDbContext>>();

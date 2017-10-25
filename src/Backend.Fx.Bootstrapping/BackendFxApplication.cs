@@ -74,12 +74,6 @@
             defaultTenantId = defaultTenant == null
                 ? TenantManager.CreateProductionTenant("Default", "The default production tenant", true) 
                 : new TenantId(defaultTenant.Id);
-
-            foreach (var initializable in CompositionRoot.GetInstances<IInitializable>())
-            {
-                Logger.Info($"Initializing {initializable.GetType().Name}");
-                initializable.Initialize();
-            }
         }
 
         public void Dispose()

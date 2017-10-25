@@ -31,7 +31,7 @@
                 new DomainModule(compositionRoot, typeof(Blog).GetTypeInfo().Assembly),
                 new ClockModule<FrozenClock>(compositionRoot),
                 new EfCorePersistenceModule<BlogDbContext>(compositionRoot, blogDbContextOptions),
-                new MsSqlServicesModule<BlogDbContext>(compositionRoot, blogDbContextOptions));
+                new DemoBlogModule(compositionRoot));
 
             // application start
             var backendFxApplication = new BackendFxApplication(

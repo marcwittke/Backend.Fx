@@ -4,10 +4,9 @@
     using System.Data.Common;
     using Logging;
     using Microsoft.EntityFrameworkCore;
-    using Patterns.DependencyInjection;
     using Patterns.IdGeneration;
 
-    public abstract class OracleSequenceHiLoIdGenerator<TDbContext> : HiLoIdGenerator, IInitializable where TDbContext : DbContext
+    public abstract class OracleSequenceHiLoIdGenerator<TDbContext> : HiLoIdGenerator where TDbContext : DbContext
     {
         private static readonly ILogger Logger = LogManager.Create<OracleSequenceHiLoIdGenerator<TDbContext>>();
         private readonly DbContextOptions<TDbContext> dbContextOptions;

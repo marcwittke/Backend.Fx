@@ -13,7 +13,7 @@
     <PackageProjectUrl>https://github.com/marcwittke/Backend.Fx</PackageProjectUrl>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <RepositoryType>Git</RepositoryType>
-    <Version>2.0.0-beta4</Version>
+    <Version>2.0.0-beta5</Version>
   </PropertyGroup>
 
   <ItemGroup>
