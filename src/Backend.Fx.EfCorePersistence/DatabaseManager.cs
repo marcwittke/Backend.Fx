@@ -29,6 +29,7 @@
             }
 
             EnsureSearchIndexExistence();
+            EnsureSequenceExistence();
 
             DatabaseExists = true;
         }
@@ -52,7 +53,28 @@
                 }
             }
         }
-        
+
+        private void EnsureSequenceExistence()
+        {
+            Logger.Info("Ensuring existence of sequences");
+            var sequenceTypes = typeof(TDbContext)
+                    .GetTypeInfo()
+                    .Assembly
+                    .ExportedTypes
+                    .Select(t => t.GetTypeInfo())
+                    .Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericType && typeof(ISequence).GetTypeInfo().IsAssignableFrom(t));
+
+            using (var dbContext = DbContextOptions.CreateDbContext())
+            {
+                foreach (var sequenceType in sequenceTypes)
+                {
+                    ISequence sequence = (ISequence)Activator.CreateInstance(sequenceType.AsType());
+                    sequence.EnsureSequence(dbContext);
+                }
+            }
+            
+        }
+
         protected abstract void ExecuteCreationStrategy(DbContext dbContext);
 
         public virtual void DeleteDatabase()

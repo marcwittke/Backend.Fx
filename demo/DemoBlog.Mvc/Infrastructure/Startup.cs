@@ -1,12 +1,18 @@
 ﻿namespace DemoBlog.Mvc.Infrastructure
 {
+    using Backend.Fx.Bootstrapping;
     using Backend.Fx.EfCorePersistence;
+    using Backend.Fx.Environment.MultiTenancy;
     using Backend.Fx.Environment.Persistence;
+    using Backend.Fx.Patterns.DependencyInjection;
+    using Bootstrapping;
     using Controllers;
     using Data.Identity;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+    using Microsoft.AspNetCore.Mvc.Controllers;
+    using Microsoft.AspNetCore.Mvc.ViewComponents;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +21,7 @@
 
     public class Startup
     {
+        private readonly BlogBootstrapper blogBootstrapper = new BlogBootstrapper();
         protected IConfigurationRoot Configuration;
 
         public Startup(IHostingEnvironment env)
@@ -49,8 +56,17 @@
             services.AddScoped<ManageController>();
             services.AddTransient<IEmailSender, AuthMessageSender>();
             services.AddTransient<ISmsSender, AuthMessageSender>();
-            
-            services.AddBackendFx(connectionString);
+
+            var backendFxApplication = blogBootstrapper.BuildApplication(connectionString, options => options.MigrationsAssembly("DemoBlog.Mvc"));
+            backendFxApplication.Boot();
+
+            // tell the framework container to use our composition root to resolve mvc stuff
+            services.AddSingleton<IControllerActivator>(new CompositionRootControllerActivator(backendFxApplication.CompositionRoot));
+            services.AddSingleton<IViewComponentActivator>(new CompositionRootViewComponentActivator(backendFxApplication.CompositionRoot));
+
+            // put the singleton application into the framework controller, so that the application middleware can be resolved
+            services.AddSingleton(backendFxApplication);
+            services.AddScoped(_ => backendFxApplication.CompositionRoot.GetInstance<ICurrentTHolder<TenantId>>());
 
             services.AddMvc();
         }
@@ -86,7 +102,15 @@
                 ClientSecret = "3gcoTrEDPPJ0ukn_aYYT6PWo"
             });
 
-            app.UseBackendFx();
+            // backendFxApplication should be gracefully disposed on shutdown
+            app.ApplicationServices.GetRequiredService<IApplicationLifetime>().ApplicationStopping.Register(() => app.ApplicationServices.GetRequiredService<BackendFxApplication>().Dispose());
+
+            // controllers that use ASP.NET Identity are not resolved using the application container, but the framework container
+            var compositionRootControllerActivator = (CompositionRootControllerActivator)app.ApplicationServices.GetRequiredService<IControllerActivator>();
+            compositionRootControllerActivator.RegisterFrameworkOnlyService(() => app.ApplicationServices.GetService<AccountController>());
+            compositionRootControllerActivator.RegisterFrameworkOnlyService(() => app.ApplicationServices.GetService<ManageController>());
+
+            app.UseMiddleware<BackendFxMiddleware>();
 
             app.UseMvc(routes =>
             {

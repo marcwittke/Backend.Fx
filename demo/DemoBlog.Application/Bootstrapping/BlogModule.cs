@@ -1,4 +1,4 @@
-﻿namespace DemoBlog.Mvc.Infrastructure
+﻿namespace DemoBlog.Bootstrapping
 {
     using Backend.Fx.Bootstrapping;
     using Backend.Fx.Bootstrapping.Modules;
@@ -6,9 +6,9 @@
     using Persistence;
     using SimpleInjector;
 
-    public class DemoBlogModule : SimpleInjectorModule
+    public class BlogModule : SimpleInjectorModule
     {
-        public DemoBlogModule(SimpleInjectorCompositionRoot compositionRoot) : base(compositionRoot)
+        public BlogModule(SimpleInjectorCompositionRoot compositionRoot) : base(compositionRoot)
         { }
 
         protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
