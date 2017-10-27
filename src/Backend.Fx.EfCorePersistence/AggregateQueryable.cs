@@ -47,7 +47,11 @@
 
         private IQueryable<TAggregateRoot> InnerQueryable
         {
-            get { return dbContext.Set<TAggregateRoot>().Where(agg => agg.TenantId == tenantId.Value); }
+            get
+            {
+                int tenantIdValue = tenantId.Value;
+                return dbContext.Set<TAggregateRoot>().Where(agg => agg.TenantId == tenantIdValue);
+            }
         }
     }
 }
