@@ -10,18 +10,18 @@
     {
         private readonly EasyFts easyFts = new EasyFts();
         private readonly DbContext dbContext;
-        private readonly IAggregateRootMapping<TAggregateRoot> aggregateRootMapping;
+        private readonly IAggregateMapping<TAggregateRoot> aggregateMapping;
         private readonly IAggregateAuthorization<TAggregateRoot> aggregateAuthorization;
         private readonly string schema;
         private readonly string table;
         
         public MsSqlFullTextSearchService(
             DbContext dbContext, 
-            IAggregateRootMapping<TAggregateRoot> aggregateRootMapping, 
+            IAggregateMapping<TAggregateRoot> aggregateMapping, 
             IAggregateAuthorization<TAggregateRoot> aggregateAuthorization)
         {
             this.dbContext = dbContext;
-            this.aggregateRootMapping = aggregateRootMapping;
+            this.aggregateMapping = aggregateMapping;
             this.aggregateAuthorization = aggregateAuthorization;
 
             var entityTypeRelational = dbContext.Model.FindEntityType(typeof(TAggregateRoot)).Relational();
@@ -45,7 +45,7 @@
                 queryable = aggregateAuthorization.Filter(dbContext.Set<TAggregateRoot>().FromSql(sql));
             }
 
-            foreach (var includeDefinition in aggregateRootMapping.IncludeDefinitions)
+            foreach (var includeDefinition in aggregateMapping.IncludeDefinitions)
             {
                 queryable = queryable.Include(includeDefinition);
             }

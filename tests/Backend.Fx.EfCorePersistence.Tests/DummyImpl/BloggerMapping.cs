@@ -1,5 +1,5 @@
 namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl
 {
-    public class BloggerMapping : PlainAggregateRootMapping<Blogger>
+    public class BloggerMapping : PlainAggregateMapping<Blogger>
     { }
 }

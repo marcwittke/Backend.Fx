@@ -14,15 +14,15 @@
     {
         private static readonly ILogger Logger = LogManager.Create<EfRepository<TAggregateRoot>>();
         private readonly DbContext dbContext;
-        private readonly IAggregateRootMapping<TAggregateRoot> aggregateRootMapping;
+        private readonly IAggregateMapping<TAggregateRoot> aggregateMapping;
         private readonly IAggregateAuthorization<TAggregateRoot> aggregateAuthorization;
 
-        public EfRepository(DbContext dbContext, IAggregateRootMapping<TAggregateRoot> aggregateRootMapping,
+        public EfRepository(DbContext dbContext, IAggregateMapping<TAggregateRoot> aggregateMapping,
             TenantId tenantId, IAggregateAuthorization<TAggregateRoot> aggregateAuthorization)
             : base(tenantId, aggregateAuthorization)
         {
             this.dbContext = dbContext;
-            this.aggregateRootMapping = aggregateRootMapping;
+            this.aggregateMapping = aggregateMapping;
             this.aggregateAuthorization = aggregateAuthorization;
 
             // somewhat hacky: using the internal EF Core services against advice
@@ -76,9 +76,9 @@
             get
             {
                 IQueryable<TAggregateRoot> queryable = dbContext.Set<TAggregateRoot>();
-                if (aggregateRootMapping.IncludeDefinitions != null)
+                if (aggregateMapping.IncludeDefinitions != null)
                 {
-                    foreach (var include in aggregateRootMapping.IncludeDefinitions)
+                    foreach (var include in aggregateMapping.IncludeDefinitions)
                     {
                         queryable = queryable.Include(include);
                     }

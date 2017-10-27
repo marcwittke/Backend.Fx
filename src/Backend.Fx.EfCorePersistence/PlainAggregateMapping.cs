@@ -6,7 +6,7 @@
     using BuildingBlocks;
     using Microsoft.EntityFrameworkCore;
 
-    public class PlainAggregateRootMapping<TAggregateRoot> : AggregateRootMapping<TAggregateRoot>
+    public class PlainAggregateMapping<TAggregateRoot> : AggregateMapping<TAggregateRoot>
         where TAggregateRoot : AggregateRoot
     {
         public override void ApplyEfMapping(ModelBuilder modelBuilder)

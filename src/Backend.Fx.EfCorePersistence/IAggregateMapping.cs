@@ -6,12 +6,12 @@
     using BuildingBlocks;
     using Microsoft.EntityFrameworkCore;
 
-    public interface IAggregateRootMapping
+    public interface IAggregateMapping
     {
         void ApplyEfMapping(ModelBuilder modelBuilder);
     }
 
-    public interface IAggregateRootMapping<T> : IAggregateRootMapping where T : AggregateRoot
+    public interface IAggregateMapping<T> : IAggregateMapping where T : AggregateRoot
     {
          IEnumerable<Expression<Func<T, object>>> IncludeDefinitions { get; }
     }

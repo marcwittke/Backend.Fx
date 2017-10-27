@@ -26,7 +26,7 @@
 
             // EF Repositories
             container.Register(typeof(IRepository<>), typeof(EfRepository<>));
-            container.Register(typeof(IAggregateRootMapping<>), new[] { typeof(TDbContext).GetTypeInfo().Assembly });
+            container.Register(typeof(IAggregateMapping<>), new[] { typeof(TDbContext).GetTypeInfo().Assembly });
 
             // IQueryable for framework use only, since it bypasses authorization
             container.Register(typeof(IQueryable<>), typeof(AggregateQueryable<>));

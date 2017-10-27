@@ -7,7 +7,7 @@
     using Domain;
     using Microsoft.EntityFrameworkCore;
 
-    public class BlogMapping : AggregateRootMapping<Blog>
+    public class BlogMapping : AggregateMapping<Blog>
     {
         public override IEnumerable<Expression<Func<Blog, object>>> IncludeDefinitions
         {

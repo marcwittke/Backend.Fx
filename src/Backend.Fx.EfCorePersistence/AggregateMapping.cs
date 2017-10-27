@@ -6,7 +6,7 @@
     using BuildingBlocks;
     using Microsoft.EntityFrameworkCore;
 
-    public abstract class AggregateRootMapping<T> : IAggregateRootMapping<T> where T : AggregateRoot
+    public abstract class AggregateMapping<T> : IAggregateMapping<T> where T : AggregateRoot
     {
         public abstract IEnumerable<Expression<Func<T, object>>> IncludeDefinitions { get; }
 
