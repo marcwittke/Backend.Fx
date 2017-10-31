@@ -9,6 +9,11 @@
     using Patterns.UnitOfWork;
     using SimpleInjector;
 
+    /// <summary>
+    /// Wires all EF Core persistence services together: The concrete <see cref="DbContext"/>, all <see cref="IRepository{TAggregateRoot}"/>s, 
+    /// <see cref="IAggregateMapping{T}"/>s, <see cref="IQueryable{T}"/> and the various forms of <see cref="IUnitOfWork"/>
+    /// </summary>
+    /// <typeparam name="TDbContext"></typeparam>
     public class EfCorePersistenceModule<TDbContext> : SimpleInjectorModule 
         where TDbContext : DbContext
     {

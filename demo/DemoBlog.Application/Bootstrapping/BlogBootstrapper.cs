@@ -7,7 +7,6 @@
     using Backend.Fx.Bootstrapping;
     using Backend.Fx.Bootstrapping.Modules;
     using Backend.Fx.EfCorePersistence;
-    using Backend.Fx.Environment.DateAndTime;
     using Backend.Fx.Environment.MultiTenancy;
     using Domain;
     using Microsoft.EntityFrameworkCore;
@@ -26,7 +25,6 @@
             SimpleInjectorCompositionRoot compositionRoot = new SimpleInjectorCompositionRoot();
             compositionRoot.RegisterModules(
                 new DomainModule(compositionRoot, typeof(Blog).GetTypeInfo().Assembly),
-                new ClockModule<FrozenClock>(compositionRoot),
                 new EfCorePersistenceModule<BlogDbContext>(compositionRoot, blogDbContextOptions),
                 new BlogModule(compositionRoot));
 

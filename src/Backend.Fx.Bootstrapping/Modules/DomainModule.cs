@@ -10,8 +10,15 @@
     using Patterns.DataGeneration;
     using Patterns.DependencyInjection;
     using Patterns.EventAggregation;
+    using Patterns.Jobs;
     using SimpleInjector;
 
+    /// <summary>
+    /// Wires all injected domain services: Current <see cref="IIdentity"/> and current <see cref="TenantId"/> as set while 
+    /// beginning the scope. All <see cref="IDomainService"/>s, <see cref="IApplicationService"/>s, <see cref="IAggregateAuthorization{TAggregateRoot}"/>s 
+    /// the collections of <see cref="IDomainEventHandler{TDomainEvent}"/>s, <see cref="IJob"/>s and <see cref="InitialDataGenerator"/>s 
+    /// found in the given list of domain assemblies and a singleton <see cref="IJobExecutor"/> 
+    /// </summary>
     public class DomainModule : SimpleInjectorModule
     {
         private readonly Assembly[] assemblies;
@@ -42,6 +49,15 @@
 
             // initial data generation subsystem
             container.RegisterCollection<InitialDataGenerator>(assemblies);
+
+            // we have a singleton job executor
+            container.RegisterSingleton<IJobExecutor, JobExecutor>();
+
+            // all jobs are dynamically registered
+            foreach (var scheduledJobType in container.GetTypesToRegister(typeof(IJob), assemblies))
+            {
+                container.Register(scheduledJobType);
+            }
         }
 
         /// <summary>

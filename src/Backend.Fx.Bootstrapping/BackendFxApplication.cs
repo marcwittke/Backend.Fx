@@ -1,7 +1,6 @@
 ﻿namespace Backend.Fx.Bootstrapping
 {
     using System;
-    using System.Linq;
     using Environment.MultiTenancy;
     using Environment.Persistence;
     using Logging;
@@ -13,7 +12,6 @@
     public class BackendFxApplication : IDisposable
     {
         private static readonly ILogger Logger = LogManager.Create<BackendFxApplication>();
-        private TenantId defaultTenantId;
 
         /// <summary>
         /// Initializes the application's runtime instance
@@ -57,9 +55,6 @@
             Logger.Info("Booting application");
             CompositionRoot.Verify();
             DatabaseManager.EnsureDatabaseExistence();
-            var tenants = TenantManager.GetTenants();
-            Tenant defaultTenant = tenants.SingleOrDefault(t => t.IsDefault);
-            defaultTenantId = defaultTenant == null ? null : new TenantId(defaultTenant.Id);
         }
 
         public void Dispose()

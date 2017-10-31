@@ -30,7 +30,6 @@
                 var inMemoryIdGeneratorsModule = new InMemoryIdGeneratorsModule(compositionRoot);
                 compositionRoot.RegisterModules(
                     new DomainModule(compositionRoot, domainAssemblies),
-                    new ClockModule<FrozenClock>(compositionRoot),
                     inMemoryIdGeneratorsModule,
                     inMemoryPersistenceModule);
                 compositionRoot.RegisterModules(modules);

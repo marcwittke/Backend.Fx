@@ -12,6 +12,7 @@
     using Microsoft.Data.Sqlite;
     using Microsoft.EntityFrameworkCore;
     using Patterns.UnitOfWork;
+    using SimpleInjector;
     using Xunit;
 
     public class TheEfCorePersistenceModule
@@ -28,7 +29,7 @@
             sut.RegisterModules(
                 new DomainModule(sut, typeof(Blog).GetTypeInfo().Assembly),
                 new EfCorePersistenceModule<TestDbContext>(sut, dbContextOptions),
-                new ClockModule<FrozenClock>(sut));
+                new TestModule(sut));
             sut.Verify();
         }
 
@@ -112,6 +113,17 @@
                     ICanInterruptTransaction canInterruptTransaction = scope.GetInstance<ICanInterruptTransaction>();
                     Assert.Same(unitOfWork, canInterruptTransaction);
                 }
+            }
+        }
+
+        private class TestModule : SimpleInjectorModule
+        {
+            public TestModule(SimpleInjectorCompositionRoot compositionRoot) : base(compositionRoot)
+            { }
+
+            protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
+            {
+                container.Register<IClock, FrozenClock>();
             }
         }
     }
