@@ -23,7 +23,7 @@
             {
                 if (id == null)
                 {
-                    throw new InvalidOperationException("You must not access tha Value property when the tenant id is null");
+                    throw new InvalidOperationException("You must not access the Value property when the tenant id is null");
                 }
 
                 return id.Value;

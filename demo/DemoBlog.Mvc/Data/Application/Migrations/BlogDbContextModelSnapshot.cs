@@ -5,22 +5,24 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using DemoBlog.Persistence;
 
-namespace DemoBlog.Mvc.Data.Application
+namespace DemoBlog.Mvc.Data.Application.Migrations
 {
     [DbContext(typeof(BlogDbContext))]
-    [Migration("20170527135525_InitialSchemaCreation")]
-    partial class InitialSchemaCreation
+    partial class BlogDbContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
             modelBuilder
-                .HasAnnotation("ProductVersion", "1.1.2")
+                .HasAnnotation("ProductVersion", "1.1.3")
+                .HasAnnotation("PropertyAccessMode", PropertyAccessMode.Field)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("Backend.Fx.Environment.MultiTenancy.Tenant", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
+
+                    b.Property<string>("DefaultCultureName");
 
                     b.Property<string>("Description");
 
@@ -42,8 +44,7 @@ namespace DemoBlog.Mvc.Data.Application
 
             modelBuilder.Entity("DemoBlog.Domain.Blog", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                    b.Property<int>("Id");
 
                     b.Property<int>("BloggerId");
 
@@ -59,11 +60,13 @@ namespace DemoBlog.Mvc.Data.Application
 
                     b.Property<string>("Description");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate();
+
                     b.Property<int>("TenantId");
 
                     b.Property<string>("Title");
-
-                    b.Property<int>("Version");
 
                     b.HasKey("Id");
 
@@ -72,8 +75,7 @@ namespace DemoBlog.Mvc.Data.Application
 
             modelBuilder.Entity("DemoBlog.Domain.Blogger", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                    b.Property<int>("Id");
 
                     b.Property<string>("Bio");
 
@@ -91,9 +93,11 @@ namespace DemoBlog.Mvc.Data.Application
 
                     b.Property<string>("LastName");
 
-                    b.Property<int>("TenantId");
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate();
 
-                    b.Property<int>("Version");
+                    b.Property<int>("TenantId");
 
                     b.HasKey("Id");
 
@@ -102,8 +106,7 @@ namespace DemoBlog.Mvc.Data.Application
 
             modelBuilder.Entity("DemoBlog.Domain.Comment", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                    b.Property<int>("Id");
 
                     b.Property<string>("Author");
 
@@ -123,7 +126,9 @@ namespace DemoBlog.Mvc.Data.Application
 
                     b.Property<int>("PostId");
 
-                    b.Property<int>("Version");
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate();
 
                     b.HasKey("Id");
 
@@ -134,8 +139,7 @@ namespace DemoBlog.Mvc.Data.Application
 
             modelBuilder.Entity("DemoBlog.Domain.Post", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                    b.Property<int>("Id");
 
                     b.Property<int>("BlogId");
 
@@ -151,11 +155,13 @@ namespace DemoBlog.Mvc.Data.Application
 
                     b.Property<DateTime>("CreatedOn");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate();
+
                     b.Property<int>("TenantId");
 
                     b.Property<string>("Title");
-
-                    b.Property<int>("Version");
 
                     b.HasKey("Id");
 
@@ -164,8 +170,7 @@ namespace DemoBlog.Mvc.Data.Application
 
             modelBuilder.Entity("DemoBlog.Domain.Subscriber", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                    b.Property<int>("Id");
 
                     b.Property<int>("BlogId");
 
@@ -183,7 +188,9 @@ namespace DemoBlog.Mvc.Data.Application
 
                     b.Property<string>("Name");
 
-                    b.Property<int>("Version");
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate();
 
                     b.HasKey("Id");
 

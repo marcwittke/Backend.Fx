@@ -1,5 +1,6 @@
 ﻿namespace Backend.Fx.EfCorePersistence.Tests
 {
+    using System.Globalization;
     using System.Linq;
     using DummyImpl;
     using Environment.MultiTenancy;
@@ -20,7 +21,7 @@
         [Fact]
         public void CanCreateTenant()
         {
-            var tenant = new Tenant("Tenant 1", "Lorem ipsum", false);
+            var tenant = new Tenant("Tenant 1", "Lorem ipsum", false, CultureInfo.CurrentCulture);
             sut.SaveTenantX(tenant);
 
             Assert.Equal(1, ExecuteScalar<long>("SELECT Count(*) from Tenants"));
@@ -31,7 +32,7 @@
         {
             ExecuteNonQuery("INSERT INTO Tenants (Id, Name, Description, IsActive, IsDemoTenant, IsInitialized, IsDefault) VALUES ('4711', 'The Tenant', 'The Description', 1, 0, 1, 0)");
 
-            var tenant = new Tenant("Tenant 1", "Lorem Ipsum", false) { Id = 4711 };
+            var tenant = new Tenant("Tenant 1", "Lorem Ipsum", false, CultureInfo.CurrentCulture) { Id = 4711 };
             sut.SaveTenantX(tenant);
 
             Assert.Equal(1, ExecuteScalar<long>("SELECT Count(*) from Tenants"));

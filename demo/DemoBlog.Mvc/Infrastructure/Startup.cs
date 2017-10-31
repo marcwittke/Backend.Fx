@@ -2,9 +2,7 @@
 {
     using Backend.Fx.Bootstrapping;
     using Backend.Fx.EfCorePersistence;
-    using Backend.Fx.Environment.MultiTenancy;
     using Backend.Fx.Environment.Persistence;
-    using Backend.Fx.Patterns.DependencyInjection;
     using Bootstrapping;
     using Controllers;
     using Data.Identity;
@@ -59,6 +57,7 @@
 
             var backendFxApplication = blogBootstrapper.BuildApplication(connectionString, options => options.MigrationsAssembly("DemoBlog.Mvc"));
             backendFxApplication.Boot();
+            blogBootstrapper.EnsureDevelopmentTenantExistence(backendFxApplication);
 
             // tell the framework container to use our composition root to resolve mvc stuff
             services.AddSingleton<IControllerActivator>(new CompositionRootControllerActivator(backendFxApplication.CompositionRoot));
@@ -66,8 +65,7 @@
 
             // put the singleton application into the framework controller, so that the application middleware can be resolved
             services.AddSingleton(backendFxApplication);
-            services.AddScoped(_ => backendFxApplication.CompositionRoot.GetInstance<ICurrentTHolder<TenantId>>());
-
+            
             services.AddMvc();
         }
 

@@ -7,9 +7,13 @@
 
     public class BlogEntityIdGenerator : SequenceHiLoIdGenerator<BlogDbContext>, IEntityIdGenerator
     {
-        private static readonly int increment = 1000;
-
-        public BlogEntityIdGenerator(DbContextOptions<BlogDbContext> dbContextOptions) : base(new MsSqlSequence("SEQ_EntityId", increment), dbContextOptions)
+        public BlogEntityIdGenerator(DbContextOptions<BlogDbContext> dbContextOptions) : base(new BlogEntityIdSequence(), dbContextOptions)
         { }
+    }
+
+    public class BlogEntityIdSequence : MsSqlSequence
+    {
+        public override int Increment { get; } = 1000;
+        protected override string SequenceName { get; } = "SEQ_EntityId";
     }
 }

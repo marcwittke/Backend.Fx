@@ -2,6 +2,8 @@
 {
     using System;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Globalization;
     using JetBrains.Annotations;
 
     /// <summary>
@@ -16,12 +18,13 @@
         private Tenant()
         { }
 
-        public Tenant([NotNull] string name, string description, bool isDemoTenant)
+        public Tenant([NotNull] string name, string description, bool isDemoTenant, CultureInfo defaultCulture)
         {
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Value cannot be null or whitespace.", nameof(name));
             Name = name;
             Description = description;
             IsDemoTenant = isDemoTenant;
+            DefaultCulture = defaultCulture;
         }
 
         [Key]
@@ -39,5 +42,14 @@
         public bool IsActive { get; set; }
 
         public bool IsDefault { get; set; }
+
+        public string DefaultCultureName { get; private set; }
+
+        [NotMapped]
+        public CultureInfo DefaultCulture
+        {
+            get { return new CultureInfo(DefaultCultureName); }
+            set { DefaultCultureName = value.Name; }
+        }
     }
 }

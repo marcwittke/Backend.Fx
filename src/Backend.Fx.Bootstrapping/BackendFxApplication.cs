@@ -52,18 +52,6 @@
 
         public ICompositionRoot CompositionRoot { get; }
 
-        public TenantId DefaultTenantId
-        {
-            get
-            {
-                if (defaultTenantId == null)
-                {
-                    throw new InvalidOperationException("Default tenant id is only available after calling Boot()");
-                }
-
-                return defaultTenantId;
-            }
-        }
         public void Boot()
         {
             Logger.Info("Booting application");
@@ -71,9 +59,7 @@
             DatabaseManager.EnsureDatabaseExistence();
             var tenants = TenantManager.GetTenants();
             Tenant defaultTenant = tenants.SingleOrDefault(t => t.IsDefault);
-            defaultTenantId = defaultTenant == null
-                ? TenantManager.CreateProductionTenant("Default", "The default production tenant", true) 
-                : new TenantId(defaultTenant.Id);
+            defaultTenantId = defaultTenant == null ? null : new TenantId(defaultTenant.Id);
         }
 
         public void Dispose()

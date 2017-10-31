@@ -30,6 +30,7 @@
         private readonly RequestDelegate next;
         private readonly IHostingEnvironment env;
         private readonly BackendFxApplication backendFxApplication;
+        private readonly Lazy<TenantId> defaultTenantId;
 
         /// <summary>
         ///     This constructor is being called by the framework DI container
@@ -40,6 +41,7 @@
             this.next = next;
             this.backendFxApplication = backendFxApplication;
             this.env = env;
+            defaultTenantId = new Lazy<TenantId>(()=> backendFxApplication.TenantManager.GetDefaultTenantId());
         }
 
         /// <summary>
@@ -128,7 +130,7 @@
                 return new TenantId(parsed);
             }
 
-            return backendFxApplication.DefaultTenantId;
+            return defaultTenantId.Value;
         }
     }
 }

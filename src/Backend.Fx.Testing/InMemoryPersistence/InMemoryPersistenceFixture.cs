@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Reflection;
     using Bootstrapping;
     using Bootstrapping.Modules;
@@ -40,8 +41,8 @@
 
                 // create and fill a tenant
                 TenantId = withDemoData
-                               ? tenantManager.CreateDemonstrationTenant("test", "", false)
-                               : tenantManager.CreateProductionTenant("test", "", false);
+                               ? tenantManager.CreateDemonstrationTenant("test", "", false, new CultureInfo("en-US"))
+                               : tenantManager.CreateProductionTenant("test", "", false, new CultureInfo("en-US"));
                 tenantManager.EnsureTenantIsInitialized(TenantId);
 
                 // from now on we do not use the composition root any more, but we save the filled in memory repositories

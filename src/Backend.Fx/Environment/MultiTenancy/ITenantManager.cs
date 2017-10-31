@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using JetBrains.Annotations;
     using Logging;
@@ -17,9 +18,9 @@
         bool IsActive(TenantId tenantId);
         void EnsureTenantIsInitialized(TenantId tenantId);
         Tenant FindTenant(TenantId tenantId);
-        TenantId CreateDemonstrationTenant(string name, string description, bool isDefault);
-        TenantId CreateProductionTenant(string name, string description, bool isDefault);
-
+        TenantId CreateDemonstrationTenant(string name, string description, bool isDefault, CultureInfo defaultCultureInfo);
+        TenantId CreateProductionTenant(string name, string description, bool isDefault, CultureInfo defaultCultureInfo);
+        TenantId GetDefaultTenantId();
     }
 
     public abstract class TenantManager : ITenantManager
@@ -34,22 +35,30 @@
             this.tenantInitializer = tenantInitializer;
         }
 
-        public TenantId CreateDemonstrationTenant(string name, string description, bool isDefault)
+        public TenantId CreateDemonstrationTenant(string name, string description, bool isDefault, CultureInfo defaultCultureInfo)
         {
             lock (syncLock)
             {
                 Logger.Info($"Creating demonstration tenant: {name}");
-                return CreateTenant(name, description, true, isDefault);
+                return CreateTenant(name, description, true, isDefault, defaultCultureInfo);
             }
         }
 
-        public TenantId CreateProductionTenant(string name, string description, bool isDefault)
+        public TenantId CreateProductionTenant(string name, string description, bool isDefault, CultureInfo defaultCultureInfo)
         {
             Logger.Info($"Creating production tenant: {name}");
             lock (syncLock)
             {
-                return CreateTenant(name, description, false, isDefault);
+                return CreateTenant(name, description, false, isDefault, defaultCultureInfo);
             }
+        }
+
+        public TenantId GetDefaultTenantId()
+        {
+            var defaultTenant = GetTenants().SingleOrDefault(t => t.IsDefault);
+            return defaultTenant == null
+                       ? null
+                       : new TenantId(defaultTenant.Id);
         }
 
         protected void InitializeTenant(Tenant tenant)
@@ -108,7 +117,7 @@
 
         public abstract Tenant FindTenant(TenantId tenantId);
 
-        private TenantId CreateTenant([NotNull] string name, string description, bool isDemo, bool isDefault)
+        private TenantId CreateTenant([NotNull] string name, string description, bool isDemo, bool isDefault, CultureInfo defaultCultureInfo)
         {
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Value cannot be null or whitespace.", nameof(name));
 
@@ -117,7 +126,7 @@
                 throw new ArgumentException($"There is already a tenant named {name}");
             }
 
-            Tenant tenant = new Tenant(name, description, isDemo) { IsActive = true, IsDefault = isDefault };
+            Tenant tenant = new Tenant(name, description, isDemo, defaultCultureInfo) { IsActive = true, IsDefault = isDefault };
             SaveTenant(tenant);
             return new TenantId(tenant.Id);
         }

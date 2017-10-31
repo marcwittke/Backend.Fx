@@ -1,5 +1,6 @@
 ﻿namespace Backend.Fx.Bootstrapping.Tests
 {
+    using System.Globalization;
     using System.Reflection;
     using BuildingBlocks;
     using DummyImpl;
@@ -33,7 +34,7 @@
         [Fact]
         public void RunsNoDataGeneratorsOnTenantCreation()
         {
-            TenantId tenantId = sut.CreateProductionTenant("prod", "unit test created", true);
+            TenantId tenantId = sut.CreateProductionTenant("prod", "unit test created", true, new CultureInfo("de-DE"));
 
             using (var scope = scopeManager.BeginScope(new SystemIdentity(), tenantId))
             {
@@ -46,7 +47,7 @@
         [Fact]
         public void RunsProductiveDataGeneratorsOnTenantInitialization()
         {
-            TenantId tenantId = sut.CreateProductionTenant("prod", "unit test created", true);
+            TenantId tenantId = sut.CreateProductionTenant("prod", "unit test created", true, new CultureInfo("en-US"));
             sut.EnsureTenantIsInitialized(tenantId);
 
             using (var scope = scopeManager.BeginScope(new SystemIdentity(), tenantId))
@@ -61,7 +62,7 @@
         [Fact]
         public void RunsProductiveAndDemonstrationDataGeneratorsOnDemoTenantInitialization()
         {
-            TenantId tenantId = sut.CreateDemonstrationTenant("demo", "unit test created", true);
+            TenantId tenantId = sut.CreateDemonstrationTenant("demo", "unit test created", true, new CultureInfo("en-US"));
             sut.EnsureTenantIsInitialized(tenantId);
 
             using (var scope = scopeManager.BeginScope(new SystemIdentity(), tenantId))

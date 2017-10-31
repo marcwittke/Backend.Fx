@@ -1,6 +1,7 @@
 ﻿namespace DemoBlog.Bootstrapping
 {
     using System;
+    using System.Globalization;
     using System.Linq;
     using System.Reflection;
     using Backend.Fx.Bootstrapping;
@@ -51,7 +52,7 @@
             }
 
             // This will create a demonstration tenant. Note that using the TenantManager directly there won't be any TenantCreated event published...
-            TenantId tenantId = backendFxApplication.TenantManager.CreateDemonstrationTenant("dev", "dev tenant", true);
+            TenantId tenantId = backendFxApplication.TenantManager.CreateDemonstrationTenant("dev", "dev tenant", true, new CultureInfo("en-US"));
 
             // ... therefore it's up to us to do the initialization. Which is fine, because we are not spinning of a background action but blocking in our thread.
             backendFxApplication.TenantManager.EnsureTenantIsInitialized(tenantId);

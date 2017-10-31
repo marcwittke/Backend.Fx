@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace DemoBlog.Mvc.Data.Application
+namespace DemoBlog.Mvc.Data.Application.Migrations
 {
     public partial class InitialSchemaCreation : Migration
     {
@@ -14,6 +15,7 @@ namespace DemoBlog.Mvc.Data.Application
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    DefaultCultureName = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
                     IsActive = table.Column<bool>(nullable: false),
                     IsDefault = table.Column<bool>(nullable: false),
@@ -30,17 +32,16 @@ namespace DemoBlog.Mvc.Data.Application
                 name: "Blogs",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<int>(nullable: false),
                     BloggerId = table.Column<int>(nullable: false),
                     ChangedBy = table.Column<string>(maxLength: 100, nullable: true),
                     ChangedOn = table.Column<DateTime>(nullable: true),
                     CreatedBy = table.Column<string>(maxLength: 100, nullable: true),
                     CreatedOn = table.Column<DateTime>(nullable: false),
                     Description = table.Column<string>(nullable: true),
+                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
                     TenantId = table.Column<int>(nullable: false),
-                    Title = table.Column<string>(nullable: true),
-                    Version = table.Column<int>(nullable: false)
+                    Title = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -51,8 +52,7 @@ namespace DemoBlog.Mvc.Data.Application
                 name: "Bloggers",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<int>(nullable: false),
                     Bio = table.Column<string>(nullable: true),
                     ChangedBy = table.Column<string>(maxLength: 100, nullable: true),
                     ChangedOn = table.Column<DateTime>(nullable: true),
@@ -60,8 +60,8 @@ namespace DemoBlog.Mvc.Data.Application
                     CreatedOn = table.Column<DateTime>(nullable: false),
                     FirstName = table.Column<string>(nullable: true),
                     LastName = table.Column<string>(nullable: true),
-                    TenantId = table.Column<int>(nullable: false),
-                    Version = table.Column<int>(nullable: false)
+                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
+                    TenantId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -72,17 +72,16 @@ namespace DemoBlog.Mvc.Data.Application
                 name: "Posts",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<int>(nullable: false),
                     BlogId = table.Column<int>(nullable: false),
                     ChangedBy = table.Column<string>(maxLength: 100, nullable: true),
                     ChangedOn = table.Column<DateTime>(nullable: true),
                     Content = table.Column<string>(nullable: true),
                     CreatedBy = table.Column<string>(maxLength: 100, nullable: true),
                     CreatedOn = table.Column<DateTime>(nullable: false),
+                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
                     TenantId = table.Column<int>(nullable: false),
-                    Title = table.Column<string>(nullable: true),
-                    Version = table.Column<int>(nullable: false)
+                    Title = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -93,8 +92,7 @@ namespace DemoBlog.Mvc.Data.Application
                 name: "Subscriber",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<int>(nullable: false),
                     BlogId = table.Column<int>(nullable: false),
                     ChangedBy = table.Column<string>(maxLength: 100, nullable: true),
                     ChangedOn = table.Column<DateTime>(nullable: true),
@@ -102,7 +100,7 @@ namespace DemoBlog.Mvc.Data.Application
                     CreatedOn = table.Column<DateTime>(nullable: false),
                     Email = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true),
-                    Version = table.Column<int>(nullable: false)
+                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -119,8 +117,7 @@ namespace DemoBlog.Mvc.Data.Application
                 name: "Comment",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<int>(nullable: false),
                     Author = table.Column<string>(nullable: true),
                     ChangedBy = table.Column<string>(maxLength: 100, nullable: true),
                     ChangedOn = table.Column<DateTime>(nullable: true),
@@ -129,7 +126,7 @@ namespace DemoBlog.Mvc.Data.Application
                     CreatedOn = table.Column<DateTime>(nullable: false),
                     InReplyToCommentId = table.Column<int>(nullable: false),
                     PostId = table.Column<int>(nullable: false),
-                    Version = table.Column<int>(nullable: false)
+                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true)
                 },
                 constraints: table =>
                 {
