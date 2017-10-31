@@ -8,6 +8,7 @@
     <Authors>Marc Wittke</Authors>
     <Company>anic GmbH</Company>
 	<VersionPrefix>0.0.0</VersionPrefix>
+	<VersionSuffix>$(VersionSuffix)</VersionSuffix>
     <Product>Backend.Fx</Product>
     <Description>Abstractions of Backend.Fx and generic base implementations.</Description>
     <Copyright>All rights reserved. Distributed under the terms of the MIT License.</Copyright>

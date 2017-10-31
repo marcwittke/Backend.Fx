@@ -4,6 +4,7 @@
     <TargetFramework>netstandard1.6</TargetFramework>
     <Authors>Marc Wittke</Authors>
 	<VersionPrefix>0.0.0</VersionPrefix>
+	<VersionSuffix>$(VersionSuffix)</VersionSuffix>
     <Company>anic GmbH</Company>
     <Product>Backend.Fx</Product>
     <Description>Provides some utilities to test a Backen.Fx based application:
@@ -15,7 +16,7 @@
     <PackageProjectUrl>https://github.com/marcwittke/Backend.Fx</PackageProjectUrl>
     <RepositoryUrl>https://github.com/marcwittke/Backend.Fx.git</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
