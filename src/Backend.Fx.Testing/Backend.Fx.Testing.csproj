@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.6</TargetFramework>
-    <Version>2.0.0-beta7</Version>
     <Authors>Marc Wittke</Authors>
+	<VersionPrefix>0.0.0</VersionPrefix>
     <Company>anic GmbH</Company>
     <Product>Backend.Fx</Product>
     <Description>Provides some utilities to test a Backen.Fx based application:

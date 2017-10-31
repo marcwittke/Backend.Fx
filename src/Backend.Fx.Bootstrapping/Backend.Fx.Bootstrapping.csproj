@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard1.3</TargetFramework>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <VersionPrefix>1.1.0</VersionPrefix>
+    <VersionPrefix>0.0.0</VersionPrefix>
     <Authors>Marc Wittke</Authors>
     <Company>anic GmbH</Company>
     <Product>Backend.Fx</Product>
@@ -13,7 +13,6 @@
     <PackageProjectUrl>https://github.com/marcwittke/Backend.Fx</PackageProjectUrl>
     <RepositoryUrl>https://github.com/marcwittke/Backend.Fx.git</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
-    <Version>2.0.0-beta7</Version>
   </PropertyGroup>
 
   <ItemGroup>
