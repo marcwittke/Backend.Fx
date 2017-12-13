@@ -12,7 +12,7 @@
         {
 
             public TestSettingsService(IEntityIdGenerator idGenerator, IRepository<Setting> settingRepository) 
-                : base(idGenerator, settingRepository, new SettingSerializerFactory())
+                : base("Test", idGenerator, settingRepository, new SettingSerializerFactory())
             { }
         }
 

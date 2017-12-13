@@ -6,12 +6,14 @@ namespace Backend.Fx.ConfigurationSettings
 
     public abstract class SettingsService
     {
+        private readonly string category;
         private readonly IEntityIdGenerator idGenerator;
         private readonly IRepository<Setting> settingRepository;
         private readonly SettingSerializerFactory settingSerializerFactory;
 
-        protected SettingsService(IEntityIdGenerator idGenerator, IRepository<Setting> settingRepository, SettingSerializerFactory settingSerializerFactory)
+        protected SettingsService(string category, IEntityIdGenerator idGenerator, IRepository<Setting> settingRepository, SettingSerializerFactory settingSerializerFactory)
         {
+            this.category = category;
             this.idGenerator = idGenerator;
             this.settingRepository = settingRepository;
             this.settingSerializerFactory = settingSerializerFactory;
@@ -19,7 +21,7 @@ namespace Backend.Fx.ConfigurationSettings
 
         protected T ReadSetting<T>(string key)
         {
-            var setting = settingRepository.AggregateQueryable.SingleOrDefault(s => s.Key == key.ToString());
+            var setting = settingRepository.AggregateQueryable.SingleOrDefault(s => s.Key == category + "." + key);
             if (setting == null)
             {
                 return default(T);
@@ -28,12 +30,12 @@ namespace Backend.Fx.ConfigurationSettings
             return setting.GetValue(serializer);
         }
 
-        protected void WriteSetting<T>(string key, T value) 
+        protected void WriteSetting<T>(string key, T value)
         {
-            var setting = settingRepository.AggregateQueryable.SingleOrDefault(s => s.Key == key.ToString());
+            var setting = settingRepository.AggregateQueryable.SingleOrDefault(s => s.Key == category + "." + key);
             if (setting == null)
             {
-                setting = new Setting(idGenerator.NextId(), key);
+                setting = new Setting(idGenerator.NextId(), category + "." + key);
                 settingRepository.Add(setting);
             }
             var serializer = settingSerializerFactory.GetSerializer<T>();
