@@ -18,7 +18,7 @@
             errors.Add(error);
         }
 
-        public void AddNotFoundWhenNull<T>(int id, T t)
+        public void AddNotFoundWhenNull<T>(object id, T t)
         {
             if (t == null)
             {
@@ -30,7 +30,7 @@
         {
             if (errors.Any())
             {
-                throw new UnprocessableException("The provided arguments cannot be processed: " + string.Join(", ", errors));
+                throw new UnprocessableException("The provided arguments cannot be processed: " + string.Join(", ", errors), "ValidationFailed");
             }
         }
 

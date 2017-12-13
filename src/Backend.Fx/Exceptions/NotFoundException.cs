@@ -2,7 +2,7 @@
 {
     public class NotFoundException<TEntity> : NotFoundException
     {
-        public NotFoundException(int id) : base(typeof(TEntity).Name, id)
+        public NotFoundException(object id) : base(typeof(TEntity).Name, id)
         {}
     }
 
