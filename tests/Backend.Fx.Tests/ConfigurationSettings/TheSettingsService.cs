@@ -15,7 +15,8 @@
     {
         public class MySettingsService : SettingsService
         {
-            public MySettingsService(IEntityIdGenerator idGenerator,IRepository<Setting> repo) : base(idGenerator, repo)
+            public MySettingsService(IEntityIdGenerator idGenerator, IRepository<Setting> repo) 
+                : base(idGenerator, repo, new SettingSerializerFactory())
             {
             }
             public int SmtpPort

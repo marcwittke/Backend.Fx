@@ -8,12 +8,13 @@ namespace Backend.Fx.ConfigurationSettings
     {
         private readonly IEntityIdGenerator idGenerator;
         private readonly IRepository<Setting> settingRepository;
-        private static readonly SettingSerializerFactory SettingSerializerFactory = new SettingSerializerFactory();
+        private readonly SettingSerializerFactory settingSerializerFactory;
 
-        protected SettingsService(IEntityIdGenerator idGenerator, IRepository<Setting> settingRepository)
+        protected SettingsService(IEntityIdGenerator idGenerator, IRepository<Setting> settingRepository, SettingSerializerFactory settingSerializerFactory)
         {
             this.idGenerator = idGenerator;
             this.settingRepository = settingRepository;
+            this.settingSerializerFactory = settingSerializerFactory;
         }
 
         protected T ReadSetting<T>(string key)
@@ -23,7 +24,7 @@ namespace Backend.Fx.ConfigurationSettings
             {
                 return default(T);
             }
-            var serializer = SettingSerializerFactory.GetSerializer<T>();
+            var serializer = settingSerializerFactory.GetSerializer<T>();
             return setting.GetValue(serializer);
         }
 
@@ -35,7 +36,7 @@ namespace Backend.Fx.ConfigurationSettings
                 setting = new Setting(idGenerator.NextId(), key);
                 settingRepository.Add(setting);
             }
-            var serializer = SettingSerializerFactory.GetSerializer<T>();
+            var serializer = settingSerializerFactory.GetSerializer<T>();
             setting.SetValue(serializer, value);
         }
     }
