@@ -7,7 +7,6 @@
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <Authors>Marc Wittke</Authors>
     <Company>anic GmbH</Company>
-    <VersionPrefix>1.1.0</VersionPrefix>
     <Product>Backend.Fx</Product>
     <Description>Persistence implementation for Backend.Fx using Entity Framework Core 1.1</Description>
     <Copyright>All rights reserved. Distributed under the terms of the MIT License.</Copyright>
@@ -15,7 +14,7 @@
     <PackageProjectUrl>https://github.com/marcwittke/Backend.Fx</PackageProjectUrl>
     <RepositoryUrl>https://github.com/marcwittke/Backend.Fx.git</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
-    <Version>1.5.1</Version>
+    <Version>1.5.2</Version>
   </PropertyGroup>
 
   <ItemGroup>
