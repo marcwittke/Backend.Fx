@@ -6,7 +6,12 @@ namespace Backend.Fx.ConfigurationSettings
     using System.Reflection;
     using JetBrains.Annotations;
 
-    public class SettingSerializerFactory
+    public interface ISettingSerializerFactory
+    {
+        ISettingSerializer<T> GetSerializer<T>();
+    }
+
+    public class SettingSerializerFactory : ISettingSerializerFactory
     {
         protected Dictionary<Type, ISettingSerializer> Serializers { get; }
 

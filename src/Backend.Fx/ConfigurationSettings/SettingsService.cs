@@ -9,9 +9,9 @@ namespace Backend.Fx.ConfigurationSettings
         private readonly string category;
         private readonly IEntityIdGenerator idGenerator;
         private readonly IRepository<Setting> settingRepository;
-        private readonly SettingSerializerFactory settingSerializerFactory;
+        private readonly ISettingSerializerFactory settingSerializerFactory;
 
-        protected SettingsService(string category, IEntityIdGenerator idGenerator, IRepository<Setting> settingRepository, SettingSerializerFactory settingSerializerFactory)
+        protected SettingsService(string category, IEntityIdGenerator idGenerator, IRepository<Setting> settingRepository, ISettingSerializerFactory settingSerializerFactory)
         {
             this.category = category;
             this.idGenerator = idGenerator;
