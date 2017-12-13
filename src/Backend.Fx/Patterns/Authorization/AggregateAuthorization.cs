@@ -25,10 +25,14 @@
             return true;
         }
 
-        /// <inheritdoc />>
+        /// <summary>
+        /// Implement a guard that might disallow modifying an existing aggregate.
+        /// This overload is called directly before saving modification of an instance, so that you can use the instance's state for deciding.
+        /// This default implementation forwards to <see cref="AggregateAuthorization{TAggregateRoot}.CanCreate"/>
+        /// </summary>
         public virtual bool CanModify(TAggregateRoot t)
         {
-            return true;
+            return CanCreate(t);
         }
     }
 }

@@ -33,7 +33,7 @@
             long count = ExecuteScalar<long>("SELECT count(*) FROM Blogs");
             Assert.Equal(0, count);
 
-            count = ExecuteScalar<long>("SELECT count(*) FROM Post");
+            count = ExecuteScalar<long>("SELECT count(*) FROM Posts");
             Assert.Equal(0, count);
 
             using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantId))
@@ -47,7 +47,7 @@
             count = ExecuteScalar<long>("SELECT count(*) FROM Blogs");
             Assert.Equal(1, count);
 
-            count = ExecuteScalar<long>("SELECT count(*) FROM Post");
+            count = ExecuteScalar<long>("SELECT count(*) FROM Posts");
             Assert.Equal(1, count);
         }
 
@@ -81,7 +81,7 @@
             Assert.Equal(1, ExecuteScalar<long>("SELECT count(*) FROM Blogs"));
             Assert.Equal(id, ExecuteScalar<long>("SELECT Id FROM Blogs LIMIT 1"));
             Assert.Equal("modified", ExecuteScalar<string>("SELECT Name FROM Blogs LIMIT 1"));
-            Assert.Equal("modified", ExecuteScalar<string>("SELECT Name FROM Post LIMIT 1"));
+            Assert.Equal("modified", ExecuteScalar<string>("SELECT Name FROM Posts LIMIT 1"));
         }
 
         [Fact]
@@ -98,7 +98,7 @@
             long count = ExecuteScalar<long>("SELECT count(*) FROM Blogs");
             Assert.Equal(0, count);
 
-            count = ExecuteScalar<long>("SELECT count(*) FROM Post");
+            count = ExecuteScalar<long>("SELECT count(*) FROM Posts");
             Assert.Equal(0, count);
         }
 
@@ -106,13 +106,18 @@
         public void CanDeleteDependant()
         {
             int id = CreateBlogWithPost(10);
+            long count = ExecuteScalar<long>("SELECT count(*) FROM Posts");
+            Assert.Equal(10, count);
+
             using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantId))
             {
                 var blog = sut.Repository.Single(id);
-                blog.Posts.Remove(blog.Posts.First());
+                var firstPost = blog.Posts.First();
+                firstPost.SetName("sadfasfsadf");
+                blog.Posts.Remove(firstPost);
             }
 
-            long count = ExecuteScalar<long>("SELECT count(*) FROM Post");
+            count = ExecuteScalar<long>("SELECT count(*) FROM Posts");
             Assert.Equal(9, count);
         }
 
@@ -128,7 +133,7 @@
                 post.SetName("modified");
             }
 
-            string name = ExecuteScalar<string>($"SELECT name FROM Post where id = {post.Id}");
+            string name = ExecuteScalar<string>($"SELECT name FROM Posts where id = {post.Id}");
             Assert.Equal("modified", name);
         }
 
@@ -143,7 +148,7 @@
             }
 
 
-            long count = ExecuteScalar<long>("SELECT count(*) FROM Post");
+            long count = ExecuteScalar<long>("SELECT count(*) FROM Posts");
             Assert.Equal(11, count);
         }
 
@@ -162,7 +167,7 @@
                 blog.Posts.Add(new Post(idGenerator.NextId(), blog, "new name 5"));
             }
 
-            long count = ExecuteScalar<long>("SELECT count(*) FROM Post");
+            long count = ExecuteScalar<long>("SELECT count(*) FROM Posts");
             Assert.Equal(5, count);
         }
 
@@ -199,7 +204,7 @@
             
             for (int i = 0; i < postCount; i++)
             {
-                ExecuteNonQuery($"INSERT INTO Post (Id, BlogId, Name, CreatedOn, CreatedBy) VALUES ({nextId++}, {blogId}, 'my post {i:00}', CURRENT_TIMESTAMP, 'persistence test')");
+                ExecuteNonQuery($"INSERT INTO Posts (Id, BlogId, Name, CreatedOn, CreatedBy) VALUES ({nextId++}, {blogId}, 'my post {i:00}', CURRENT_TIMESTAMP, 'persistence test')");
             }
 
             return (int)blogId;
