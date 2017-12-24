@@ -10,6 +10,7 @@
     {
         TenantId[] GetTenantIds();
         Tenant[] GetTenants();
+        Tenant GetTenant(TenantId id);
         bool IsActive(TenantId tenantId);
         TenantId CreateDemonstrationTenant(string name, string description, bool isDefault);
         TenantId CreateProductionTenant(string name, string description, bool isDefault);
@@ -63,6 +64,17 @@
         public abstract TenantId[] GetTenantIds();
 
         public abstract Tenant[] GetTenants();
+        public Tenant GetTenant(TenantId tenantId)
+        {
+            Tenant tenant = FindTenant(tenantId);
+
+            if (tenant == null)
+            {
+                throw new ArgumentException($"Invalid tenant Id [{tenantId.Value}]", nameof(tenantId));
+            }
+
+            return tenant;
+        }
 
         public bool IsActive(TenantId tenantId)
         {

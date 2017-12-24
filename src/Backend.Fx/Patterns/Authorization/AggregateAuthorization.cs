@@ -30,5 +30,10 @@
         {
             return true;
         }
+
+        public bool CanDelete(TAggregateRoot t)
+        {
+            return CanModify(t);
+        }
     }
 }

@@ -27,5 +27,11 @@
         /// This overload is called directly before saving modification of an instance, so that you can use the instance's state for deciding.
         /// </summary>
         bool CanModify(TAggregateRoot t);
+
+        /// <summary>
+        /// Implement a guard that might disallow deleting an existing aggregate.
+        /// This overload is called directly before saving modification of an instance, so that you can use the instance's state for deciding.
+        /// </summary>
+        bool CanDelete(TAggregateRoot t);
     }
 }
