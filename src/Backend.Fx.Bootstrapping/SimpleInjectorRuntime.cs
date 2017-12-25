@@ -10,7 +10,6 @@ namespace Backend.Fx.Bootstrapping
     using Environment.Authentication;
     using Environment.MultiTenancy;
     using Environment.Persistence;
-    using Exceptions;
     using Logging;
     using Patterns.Authorization;
     using Patterns.DataGeneration;
@@ -251,15 +250,10 @@ namespace Backend.Fx.Bootstrapping
         /// </summary>
         public IRuntimeScope BeginScope(IIdentity identity, TenantId tenantId)
         {
-            if (TenantManager.IsActive(tenantId))
-            {
-                var scope = new RuntimeScope(this, identity, tenantId);
-                scope.GetInstance<ICurrentTHolder<IIdentity>>().ReplaceCurrent(identity);
-                scope.GetInstance<ICurrentTHolder<TenantId>>().ReplaceCurrent(tenantId);
-                return scope;
-            }
-
-            throw new UnprocessableException($"Tenant {tenantId.Value} is deactivated. Contact the system adminstrator.");
+            var scope = new RuntimeScope(this, identity, tenantId);
+            scope.GetInstance<ICurrentTHolder<IIdentity>>().ReplaceCurrent(identity);
+            scope.GetInstance<ICurrentTHolder<TenantId>>().ReplaceCurrent(tenantId);
+            return scope;
         }
 
         /// <summary>

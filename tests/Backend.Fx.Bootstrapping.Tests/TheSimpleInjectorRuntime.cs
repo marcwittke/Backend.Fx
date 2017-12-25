@@ -11,7 +11,6 @@ namespace Backend.Fx.Bootstrapping.Tests
     using Environment.DateAndTime;
     using Environment.MultiTenancy;
     using Environment.Persistence;
-    using Exceptions;
     using FakeItEasy;
     using Patterns.DependencyInjection;
     using Patterns.EventAggregation;
@@ -30,7 +29,6 @@ namespace Backend.Fx.Bootstrapping.Tests
             IDatabaseManager databaseManager = A.Fake<IDatabaseManager>();
 
             tenantManager = A.Fake<ITenantManager>();
-            A.CallTo(() => tenantManager.IsActive(A<TenantId>._)).Returns(true);
             TenantId[] tenantIds = {new TenantId(999)};
             A.CallTo(() => tenantManager.GetTenantIds()).Returns(tenantIds);
 
@@ -45,14 +43,6 @@ namespace Backend.Fx.Bootstrapping.Tests
             Assert.True(sut.BootApplicationWasCalled);
             Assert.True(sut.BootPersistenceWasCalled);
             Assert.True(sut.InitializeJobSchedulerWasCalled);
-        }
-
-        [Fact]
-        public void DoesNotAllowBeginningScopeWhenTenantIsDeactivated()
-        {
-            A.CallTo(() => tenantManager.IsActive(A<TenantId>._)).Returns(false);
-            sut.Boot();
-            Assert.Throws<UnprocessableException>(() => sut.BeginScope(new SystemIdentity(), new TenantId(111)));
         }
 
         [Fact]

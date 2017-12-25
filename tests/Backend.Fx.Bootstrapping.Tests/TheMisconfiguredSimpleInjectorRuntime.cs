@@ -16,8 +16,7 @@ namespace Backend.Fx.Bootstrapping.Tests
             IDatabaseManager databaseManager = A.Fake<IDatabaseManager>();
 
             ITenantManager tenantManager = A.Fake<ITenantManager>();
-            A.CallTo(() => tenantManager.IsActive(A<TenantId>._)).Returns(true);
-
+            
             var sut = new TestRuntime(tenantManager, databaseManager);
             Assert.Throws<InvalidOperationException>(() => sut.Boot(container => container.Register<UnresolvableService>()));
         }
