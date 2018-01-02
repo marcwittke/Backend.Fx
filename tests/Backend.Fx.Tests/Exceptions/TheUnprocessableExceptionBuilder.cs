@@ -11,7 +11,7 @@
         public void CatchesExceptionInAction()
         {
             var sut = UnprocessableException.UseBuilder();
-            sut.CatchPossibleException(() => { throw new InvalidOperationException("hello"); });
+            sut.CatchPossibleException(() => throw new InvalidOperationException("hello"));
             Assert.Throws<UnprocessableException>(() => sut.Dispose());
         }
 
@@ -40,26 +40,26 @@
         }
 
         [Fact]
-        public void AddsExceptionWhenAddingError()
+        public void ThrowsExceptionWhenAddingError()
         {
             var sut = UnprocessableException.UseBuilder();
-            sut.Add("something is broken");
+            sut.Add(new Error("code", "something is broken"));
             Assert.Throws<UnprocessableException>(() => sut.Dispose());
         }
 
         [Fact]
-        public void AddsExceptionWhenAddingConditionalError()
+        public void ThrowsExceptionWhenAddingConditionalError()
         {
             var sut = UnprocessableException.UseBuilder();
-            sut.AddIf(true, "something is broken");
+            sut.AddIf(true, new Error("code", "something is broken"));
             Assert.Throws<UnprocessableException>(() => sut.Dispose());
         }
 
         [Fact]
-        public void AddsExceptionWhenNotAddingConditionalError()
+        public void DoesNotThrowExceptionWhenNotAddingConditionalError()
         {
             var sut = UnprocessableException.UseBuilder();
-            sut.AddIf(false, "something is broken");
+            sut.AddIf(false, new Error("code", "something is broken"));
             sut.Dispose();
         }
     }

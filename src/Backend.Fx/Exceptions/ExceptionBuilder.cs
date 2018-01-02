@@ -3,30 +3,29 @@
     using System;
     using Logging;
 
-    public class UnprocessableExceptionBuilder : IDisposable
+    public class ExceptionBuilder<TEx> : IDisposable where TEx : ClientException, new()
     {
-        private const string EmptyKey = "";
-        private static readonly ILogger Logger = LogManager.Create<UnprocessableExceptionBuilder>();
-        private readonly UnprocessableException unprocessableException = new UnprocessableException();
+        private static readonly ILogger Logger = LogManager.Create<ExceptionBuilder<TEx>>();
+        private readonly TEx clientException = new TEx();
 
-        internal UnprocessableExceptionBuilder()
+        internal ExceptionBuilder()
         { }
 
-        public void Add(string error)
+        public void Add(Error error)
         {
-            unprocessableException.AddError(EmptyKey, error);
+            clientException.Errors.Add(Error.GenericKey, error);
         }
 
-        public void Add(string key, string error)
+        public void Add(string key, Error error)
         {
-            unprocessableException.AddError(key, error);
+            clientException.Errors.Add(key, error);
         }
 
         public void AddNotFoundWhenNull<T>(object id, T t)
         {
             if (t == null)
             {
-                unprocessableException.AddError(EmptyKey, $"{typeof(T).Name} [{id}] not found");
+                clientException.Errors.Add(Error.GenericKey, new Error("NotFound", $"{typeof(T).Name} [{id}] not found"));
             }
         }
 
@@ -34,31 +33,31 @@
         {
             if (t == null)
             {
-                unprocessableException.AddError(key, $"{typeof(T).Name} [{id}] not found");
+                clientException.Errors.Add(key, new Error("NotFound", $"{typeof(T).Name} [{id}] not found"));
             }
         }
 
         public void Dispose()
         {
-            if (unprocessableException.HasErrors)
+            if (clientException.HasErrors())
             {
                 throw new UnprocessableException("The provided arguments cannot be processed");
             }
         }
 
-        public void AddIf(bool condition, string error)
+        public void AddIf(bool condition, Error error)
         {
             if (condition)
             {
-                unprocessableException.AddError(EmptyKey, error);
+                clientException.Errors.Add(Error.GenericKey, error);
             }
         }
 
-        public void AddIf(string key, bool condition, string error)
+        public void AddIf(string key, bool condition, Error error)
         {
             if (condition)
             {
-                unprocessableException.AddError(key, error);
+                clientException.Errors.Add(key, error);
             }
         }
 
@@ -72,7 +71,7 @@
             catch (Exception ex)
             {
                 Logger.Info(ex, $"Exception of type {ex.GetType().Name} will be appended to an {nameof(UnprocessableException)}.");
-                unprocessableException.AddError(EmptyKey, ex.Message);
+                clientException.Errors.Add(Error.GenericKey, new Error(ex.GetType().Name, ex.Message));
             }
             return t;
         }
@@ -87,7 +86,7 @@
             catch (Exception ex)
             {
                 Logger.Info(ex, $"Exception of type {ex.GetType().Name} will be appended to an {nameof(UnprocessableException)}.");
-                unprocessableException.AddError(key, ex.Message);
+                clientException.Errors.Add(key, new Error(ex.GetType().Name, ex.Message));
             }
             return t;
         }
@@ -101,7 +100,7 @@
             catch (Exception ex)
             {
                 Logger.Info(ex, $"Exception of type {ex.GetType().Name} will be appended to an {nameof(UnprocessableException)}.");
-                unprocessableException.AddError(EmptyKey, ex.Message);
+                clientException.Errors.Add(Error.GenericKey, new Error(ex.GetType().Name, ex.Message));
             }
         }
 
@@ -114,8 +113,12 @@
             catch (Exception ex)
             {
                 Logger.Info(ex, $"Exception of type {ex.GetType().Name} will be appended to an {nameof(UnprocessableException)}.");
-                unprocessableException.AddError(key, ex.Message);
+                clientException.Errors.Add(key, new Error(ex.GetType().Name, ex.Message));
             }
         }
     }
+
+    public class UnprocessableExceptionBuilder : ExceptionBuilder<UnprocessableException> { }
+
+    public class ClientExceptionBuilder : ExceptionBuilder<ClientException> { }
 }
