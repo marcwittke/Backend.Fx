@@ -6,36 +6,39 @@ namespace Backend.Fx.ConfigurationSettings
 
     public abstract class SettingsService
     {
+        private readonly string category;
         private readonly IEntityIdGenerator idGenerator;
         private readonly IRepository<Setting> settingRepository;
-        private static readonly SettingSerializerFactory SettingSerializerFactory = new SettingSerializerFactory();
+        private readonly ISettingSerializerFactory settingSerializerFactory;
 
-        protected SettingsService(IEntityIdGenerator idGenerator, IRepository<Setting> settingRepository)
+        protected SettingsService(string category, IEntityIdGenerator idGenerator, IRepository<Setting> settingRepository, ISettingSerializerFactory settingSerializerFactory)
         {
+            this.category = category;
             this.idGenerator = idGenerator;
             this.settingRepository = settingRepository;
+            this.settingSerializerFactory = settingSerializerFactory;
         }
 
         protected T ReadSetting<T>(string key)
         {
-            var setting = settingRepository.AggregateQueryable.SingleOrDefault(s => s.Key == key.ToString());
+            var setting = settingRepository.AggregateQueryable.SingleOrDefault(s => s.Key == category + "." + key);
             if (setting == null)
             {
                 return default(T);
             }
-            var serializer = SettingSerializerFactory.GetSerializer<T>();
+            var serializer = settingSerializerFactory.GetSerializer<T>();
             return setting.GetValue(serializer);
         }
 
-        protected void WriteSetting<T>(string key, T value) 
+        protected void WriteSetting<T>(string key, T value)
         {
-            var setting = settingRepository.AggregateQueryable.SingleOrDefault(s => s.Key == key.ToString());
+            var setting = settingRepository.AggregateQueryable.SingleOrDefault(s => s.Key == category + "." + key);
             if (setting == null)
             {
-                setting = new Setting(idGenerator.NextId(), key);
+                setting = new Setting(idGenerator.NextId(), category + "." + key);
                 settingRepository.Add(setting);
             }
-            var serializer = SettingSerializerFactory.GetSerializer<T>();
+            var serializer = settingSerializerFactory.GetSerializer<T>();
             setting.SetValue(serializer, value);
         }
     }

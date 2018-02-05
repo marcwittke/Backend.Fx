@@ -37,9 +37,7 @@
 
         public bool IsDemoTenant { get; set; }
         
-        public bool IsInitialized { get; set; }
-
-        public bool IsActive { get; set; }
+        public TenantState State { get; set; }
 
         public bool IsDefault { get; set; }
 
@@ -51,5 +49,13 @@
             get { return new CultureInfo(DefaultCultureName); }
             set { DefaultCultureName = value.Name; }
         }
+    }
+
+    public enum TenantState
+    {
+        Created = 0,
+        Initializing = 1,
+        Active = 2,
+        Inactive = int.MaxValue
     }
 }

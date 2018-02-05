@@ -30,7 +30,7 @@
         [Fact]
         public void CanUpdateTenant()
         {
-            ExecuteNonQuery("INSERT INTO Tenants (Id, Name, Description, IsActive, IsDemoTenant, IsInitialized, IsDefault) VALUES ('4711', 'The Tenant', 'The Description', 1, 0, 1, 0)");
+            ExecuteNonQuery("INSERT INTO Tenants (Id, Name, Description, State, IsDemoTenant, IsDefault) VALUES ('4711', 'The Tenant', 'The Description', 2, 0, 0)");
 
             var tenant = new Tenant("Tenant 1", "Lorem Ipsum", false, CultureInfo.CurrentCulture) { Id = 4711 };
             sut.SaveTenantX(tenant);
@@ -43,7 +43,7 @@
         [Fact]
         public void CanFindTenant()
         {
-            ExecuteNonQuery("INSERT INTO Tenants (Id, Name, Description, IsActive, IsDemoTenant, IsInitialized, IsDefault) VALUES ('4711', 'The Tenant', 'The Description', 1, 0, 1, 0)");
+            ExecuteNonQuery("INSERT INTO Tenants (Id, Name, Description, State, IsDemoTenant, IsDefault) VALUES ('4711', 'The Tenant', 'The Description', 2, 1, 0)");
 
             var tenant = sut.FindTenantX(new TenantId(4711));
             Assert.Equal("The Tenant", tenant.Name);
@@ -53,10 +53,10 @@
         [Fact]
         public void CanGetTenants()
         {
-            ExecuteNonQuery("INSERT INTO Tenants (Id, Name, Description, IsActive, IsDemoTenant, IsInitialized, IsDefault) VALUES ('4711', 'The Tenant 1', 'The Description 1', 1, 0, 1, 0)");
-            ExecuteNonQuery("INSERT INTO Tenants (Id, Name, Description, IsActive, IsDemoTenant, IsInitialized, IsDefault) VALUES ('4712', 'The Tenant 2', 'The Description 2', 1, 0, 1, 0)");
-            ExecuteNonQuery("INSERT INTO Tenants (Id, Name, Description, IsActive, IsDemoTenant, IsInitialized, IsDefault) VALUES ('4713', 'The Tenant 3', 'The Description 3', 1, 0, 1, 0)");
-            ExecuteNonQuery("INSERT INTO Tenants (Id, Name, Description, IsActive, IsDemoTenant, IsInitialized, IsDefault) VALUES ('4714', 'The Tenant 4', 'The Description 4', 1, 0, 1, 0)");
+            ExecuteNonQuery("INSERT INTO Tenants (Id, Name, Description, State, IsDemoTenant, IsDefault) VALUES ('4711', 'The Tenant 1', 'The Description 1', 2, 1, 0)");
+            ExecuteNonQuery("INSERT INTO Tenants (Id, Name, Description, State, IsDemoTenant, IsDefault) VALUES ('4712', 'The Tenant 2', 'The Description 2', 2, 1, 0)");
+            ExecuteNonQuery("INSERT INTO Tenants (Id, Name, Description, State, IsDemoTenant, IsDefault) VALUES ('4713', 'The Tenant 3', 'The Description 3', 2, 1, 0)");
+            ExecuteNonQuery("INSERT INTO Tenants (Id, Name, Description, State, IsDemoTenant, IsDefault) VALUES ('4714', 'The Tenant 4', 'The Description 4', 2, 1, 0)");
 
             var tenants = sut.GetTenants();
             Assert.Equal(4, tenants.Length);
@@ -69,10 +69,10 @@
         [Fact]
         public void CanGetTenantIds()
         {
-            ExecuteNonQuery("INSERT INTO Tenants (Id, Name, Description, IsActive, IsDemoTenant, IsInitialized, IsDefault) VALUES ('4711', 'The Tenant 1', 'The Description 1', 1, 0, 1, 0)");
-            ExecuteNonQuery("INSERT INTO Tenants (Id, Name, Description, IsActive, IsDemoTenant, IsInitialized, IsDefault) VALUES ('4712', 'The Tenant 2', 'The Description 2', 1, 0, 1, 0)");
-            ExecuteNonQuery("INSERT INTO Tenants (Id, Name, Description, IsActive, IsDemoTenant, IsInitialized, IsDefault) VALUES ('4713', 'The Tenant 3', 'The Description 3', 1, 0, 1, 0)");
-            ExecuteNonQuery("INSERT INTO Tenants (Id, Name, Description, IsActive, IsDemoTenant, IsInitialized, IsDefault) VALUES ('4714', 'The Tenant 4', 'The Description 4', 1, 0, 1, 0)");
+            ExecuteNonQuery("INSERT INTO Tenants (Id, Name, Description, State, IsDemoTenant, IsDefault) VALUES ('4711', 'The Tenant 1', 'The Description 1', 2, 1, 0)");
+            ExecuteNonQuery("INSERT INTO Tenants (Id, Name, Description, State, IsDemoTenant, IsDefault) VALUES ('4712', 'The Tenant 2', 'The Description 2', 2, 1, 0)");
+            ExecuteNonQuery("INSERT INTO Tenants (Id, Name, Description, State, IsDemoTenant, IsDefault) VALUES ('4713', 'The Tenant 3', 'The Description 3', 2, 1, 0)");
+            ExecuteNonQuery("INSERT INTO Tenants (Id, Name, Description, State, IsDemoTenant, IsDefault) VALUES ('4714', 'The Tenant 4', 'The Description 4', 2, 1, 0)");
 
             var tenants = sut.GetTenantIds();
             Assert.Equal(4, tenants.Length);

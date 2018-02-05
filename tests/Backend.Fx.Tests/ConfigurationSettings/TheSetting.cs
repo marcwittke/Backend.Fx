@@ -11,7 +11,8 @@
         public class TestSettingsService : SettingsService
         {
 
-            public TestSettingsService(IEntityIdGenerator idGenerator, IRepository<Setting> settingRepository) : base(idGenerator, settingRepository)
+            public TestSettingsService(IEntityIdGenerator idGenerator, IRepository<Setting> settingRepository) 
+                : base("Test", idGenerator, settingRepository, new SettingSerializerFactory())
             { }
         }
 

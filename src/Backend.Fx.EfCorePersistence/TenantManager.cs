@@ -53,13 +53,12 @@
                 }
                 else
                 {
-                    existingTenant.IsActive = tenant.IsActive;
+                    existingTenant.State = tenant.State;
                     if (existingTenant.IsDemoTenant && !tenant.IsDemoTenant)
                     {
                         throw new InvalidOperationException("It is not possible to convert a demonstration tenant to a productive tenant");
                     }
                     existingTenant.IsDemoTenant = tenant.IsDemoTenant;
-                    existingTenant.IsInitialized = tenant.IsInitialized;
                     existingTenant.Name = tenant.Name;
                     existingTenant.Description = tenant.Description;
                 }

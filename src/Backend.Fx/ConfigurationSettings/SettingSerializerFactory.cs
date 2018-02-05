@@ -6,13 +6,18 @@ namespace Backend.Fx.ConfigurationSettings
     using System.Reflection;
     using JetBrains.Annotations;
 
-    public class SettingSerializerFactory
+    public interface ISettingSerializerFactory
     {
-        private readonly Dictionary<Type, ISettingSerializer> serializers;
+        ISettingSerializer<T> GetSerializer<T>();
+    }
+
+    public class SettingSerializerFactory : ISettingSerializerFactory
+    {
+        protected Dictionary<Type, ISettingSerializer> Serializers { get; }
 
         public SettingSerializerFactory()
         {
-            serializers = typeof(ISettingSerializer)
+            Serializers = typeof(ISettingSerializer)
                 .GetTypeInfo()
                 .Assembly
                 .ExportedTypes
@@ -28,9 +33,9 @@ namespace Backend.Fx.ConfigurationSettings
         [NotNull]
         public ISettingSerializer<T> GetSerializer<T>()
         {
-            if (serializers.ContainsKey(typeof(T)))
+            if (Serializers.ContainsKey(typeof(T)))
             {
-                return (ISettingSerializer<T>) serializers[typeof(T)];
+                return (ISettingSerializer<T>) Serializers[typeof(T)];
             }
 
             throw new ArgumentOutOfRangeException(nameof(T), string.Format("No Serializer for Setting Type {0} available", typeof(T).Name));

@@ -66,10 +66,11 @@
 
         public void Delete(TAggregateRoot aggregateRoot)
         {
-            if (aggregateRoot.TenantId != tenantId.Value)
+            if (aggregateRoot.TenantId != tenantId.Value || !aggregateAuthorization.CanDelete(aggregateRoot))
             {
                 throw new System.Security.SecurityException($"You are not allowed to delete {typeof(TAggregateRoot).Name}[{aggregateRoot.Id}]");
             }
+
             DeletePersistent(aggregateRoot);
         }
 

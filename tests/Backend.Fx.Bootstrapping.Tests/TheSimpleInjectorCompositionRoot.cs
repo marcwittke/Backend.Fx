@@ -26,6 +26,7 @@ namespace Backend.Fx.Bootstrapping.Tests
         
         public TheSimpleInjectorCompositionRoot()
         {
+
             sut = new SimpleInjectorCompositionRoot();
             var domainAssembly = typeof(AnAggregate).GetTypeInfo().Assembly;
             sut.RegisterModules(
@@ -35,6 +36,7 @@ namespace Backend.Fx.Bootstrapping.Tests
                 new InMemoryPersistenceModule(sut, domainAssembly));
             
             sut.Verify();
+
         }
 
         [Fact]

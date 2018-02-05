@@ -2,7 +2,7 @@
 {
     public class NotFoundException<TEntity> : NotFoundException
     {
-        public NotFoundException(int id) : base(typeof(TEntity).Name, id)
+        public NotFoundException(object id) : base(typeof(TEntity).Name, id)
         {}
     }
 
@@ -11,9 +11,9 @@
 
         public string EntityName { get; }
 
-        public int Id { get; }
+        public object Id { get; }
 
-        protected NotFoundException(string entityName, int id) : base($"No {entityName} with id {id} found.")
+        protected NotFoundException(string entityName, object id) : base($"No {entityName}[{id}] found.")
         {
             EntityName = entityName;
             Id = id;

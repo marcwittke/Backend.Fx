@@ -34,5 +34,11 @@
         {
             return CanCreate(t);
         }
+
+        /// <inheritdoc />>
+        public virtual bool CanDelete(TAggregateRoot t)
+        {
+            return CanModify(t);
+        }
     }
 }

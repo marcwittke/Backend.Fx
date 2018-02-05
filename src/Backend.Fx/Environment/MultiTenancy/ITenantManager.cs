@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using Exceptions;
     using JetBrains.Annotations;
     using Logging;
 
@@ -15,7 +16,7 @@
     {
         TenantId[] GetTenantIds();
         Tenant[] GetTenants();
-        bool IsActive(TenantId tenantId);
+        Tenant GetTenant(TenantId id);
         void EnsureTenantIsInitialized(TenantId tenantId);
         Tenant FindTenant(TenantId tenantId);
         TenantId CreateDemonstrationTenant(string name, string description, bool isDefault, CultureInfo defaultCultureInfo);
@@ -63,37 +64,41 @@
 
         protected void InitializeTenant(Tenant tenant)
         {
-            if (tenant.IsInitialized) return;
-
-            Logger.Info($"Initializing {(tenant.IsDemoTenant ? "demonstration" : "production")} tenant[{tenant.Id}] ({tenant.Name})");
-            var tenantId = new TenantId(tenant.Id);
-            tenantInitializer.RunProductiveInitialDataGenerators(tenantId);
-            if (tenant.IsDemoTenant)
+            switch (tenant.State)
             {
-                tenantInitializer.RunDemoInitialDataGenerators(tenantId);
+                case TenantState.Inactive: throw new UnprocessableException($"Cannot initialize inactive Tenant[{tenant.Id}]");
+                case TenantState.Created:
+                    tenant.State = TenantState.Initializing;
+                    SaveTenant(tenant);
+
+                    Logger.Info($"Initializing {(tenant.IsDemoTenant ? "demonstration" : "production")} tenant[{tenant.Id}] ({tenant.Name})");
+                    var tenantId = new TenantId(tenant.Id);
+                    tenantInitializer.RunProductiveInitialDataGenerators(tenantId);
+                    if (tenant.IsDemoTenant)
+                    {
+                        tenantInitializer.RunDemoInitialDataGenerators(tenantId);
+                    }
+                    tenant.State = TenantState.Active;
+                    break;
+                default:
+                    return;
             }
-            tenant.IsInitialized = true;
+            
         }
 
         public abstract TenantId[] GetTenantIds();
 
         public abstract Tenant[] GetTenants();
-
-        public bool IsActive(TenantId tenantId)
+        public Tenant GetTenant(TenantId tenantId)
         {
-            if (tenantId.HasValue)
+            Tenant tenant = FindTenant(tenantId);
+
+            if (tenant == null)
             {
-                Tenant tenant = FindTenant(tenantId);
-
-                if (tenant == null)
-                {
-                    throw new ArgumentException($"Invalid tenant Id [{tenantId.Value}]", nameof(tenantId));
-                }
-
-                return tenant.IsActive;
+                throw new ArgumentException($"Invalid tenant Id [{tenantId.Value}]", nameof(tenantId));
             }
 
-            return true;
+            return tenant;
         }
 
         public void EnsureTenantIsInitialized(TenantId tenantId)
@@ -126,7 +131,7 @@
                 throw new ArgumentException($"There is already a tenant named {name}");
             }
 
-            Tenant tenant = new Tenant(name, description, isDemo, defaultCultureInfo) { IsActive = true, IsDefault = isDefault };
+            Tenant tenant = new Tenant(name, description, isDemo, defaultCultureInfo) { State = TenantState.Created, IsDefault = isDefault };
             SaveTenant(tenant);
             return new TenantId(tenant.Id);
         }

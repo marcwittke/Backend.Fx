@@ -15,7 +15,8 @@
     {
         public class MySettingsService : SettingsService
         {
-            public MySettingsService(IEntityIdGenerator idGenerator,IRepository<Setting> repo) : base(idGenerator, repo)
+            public MySettingsService(IEntityIdGenerator idGenerator, IRepository<Setting> repo) 
+                : base("My", idGenerator, repo, new SettingSerializerFactory())
             {
             }
             public int SmtpPort
@@ -56,13 +57,13 @@
             Setting[] settings = settingRepository.GetAll();
             Assert.Equal(1, settings.Length);
             Assert.Equal("333", settings[0].SerializedValue);
-            Assert.Equal("SmtpPort", settings[0].Key);
+            Assert.Equal("My.SmtpPort", settings[0].Key);
         }
 
         [Fact]
         public void ReadsSettingFromRepository()
         {
-            var setting = new Setting(1, "SmtpPort");
+            var setting = new Setting(1, "My.SmtpPort");
             setting.SetPrivate(set => set.SerializedValue, "333");
 
             settingRepository.Add(setting);
@@ -74,7 +75,7 @@
         [Fact]
         public void ReadsNullSettingFromRepository()
         {
-            var setting = new Setting(3,"SmtpHost");
+            var setting = new Setting(3,"My.SmtpHost");
             setting.SetPrivate(set => set.SerializedValue, null);
 
             settingRepository.Add(setting);
