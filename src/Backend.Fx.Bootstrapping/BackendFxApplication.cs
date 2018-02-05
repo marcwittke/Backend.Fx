@@ -5,6 +5,7 @@
     using Environment.Persistence;
     using Logging;
     using Patterns.DependencyInjection;
+    using Patterns.Jobs;
 
     /// <summary>
     /// The root object of the whole backend fx application framework
@@ -26,6 +27,7 @@
                           ITenantManager tenantManager,
                           IScopeManager scopeManager)
         {
+            JobExecutor = new JobExecutor(tenantManager, scopeManager);
             CompositionRoot = compositionRoot;
             DatabaseManager = databaseManager;
             TenantManager = tenantManager;
@@ -49,6 +51,8 @@
         public IScopeManager ScopeManager { get; }
 
         public ICompositionRoot CompositionRoot { get; }
+
+        public IJobExecutor JobExecutor { get; }
 
         public void Boot()
         {

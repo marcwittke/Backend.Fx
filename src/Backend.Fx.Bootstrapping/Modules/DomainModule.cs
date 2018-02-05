@@ -50,9 +50,6 @@
             // initial data generation subsystem
             container.RegisterCollection<InitialDataGenerator>(assemblies);
 
-            // we have a singleton job executor
-            container.RegisterSingleton<IJobExecutor, JobExecutor>();
-
             // all jobs are dynamically registered
             foreach (var scheduledJobType in container.GetTypesToRegister(typeof(IJob), assemblies))
             {

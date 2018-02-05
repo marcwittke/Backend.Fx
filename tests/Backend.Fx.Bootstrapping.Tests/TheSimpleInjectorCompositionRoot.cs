@@ -27,6 +27,11 @@ namespace Backend.Fx.Bootstrapping.Tests
         public TheSimpleInjectorCompositionRoot()
         {
 
+            var tenantManager = A.Fake<ITenantManager>();
+            TenantId[] tenantIds = { new TenantId(999) };
+            A.CallTo(() => tenantManager.GetTenantIds()).Returns(tenantIds);
+
+
             sut = new SimpleInjectorCompositionRoot();
             var domainAssembly = typeof(AnAggregate).GetTypeInfo().Assembly;
             sut.RegisterModules(
