@@ -7,5 +7,6 @@
     {
         void EnsureDatabaseExistence();
         void DeleteDatabase();
+        bool DatabaseExists { get; }
     }
 }

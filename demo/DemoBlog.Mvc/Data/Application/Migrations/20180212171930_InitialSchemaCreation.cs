@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Microsoft.EntityFrameworkCore.Metadata;
+using System;
+using System.Collections.Generic;
 
 namespace DemoBlog.Mvc.Data.Application.Migrations
 {
@@ -10,22 +10,23 @@ namespace DemoBlog.Mvc.Data.Application.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Tenants",
+                name: "Bloggers",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    DefaultCultureName = table.Column<string>(nullable: true),
-                    Description = table.Column<string>(nullable: true),
-                    IsActive = table.Column<bool>(nullable: false),
-                    IsDefault = table.Column<bool>(nullable: false),
-                    IsDemoTenant = table.Column<bool>(nullable: false),
-                    IsInitialized = table.Column<bool>(nullable: false),
-                    Name = table.Column<string>(nullable: false)
+                    Id = table.Column<int>(nullable: false),
+                    Bio = table.Column<string>(nullable: true),
+                    ChangedBy = table.Column<string>(maxLength: 100, nullable: true),
+                    ChangedOn = table.Column<DateTime>(nullable: true),
+                    CreatedBy = table.Column<string>(maxLength: 100, nullable: true),
+                    CreatedOn = table.Column<DateTime>(nullable: false),
+                    FirstName = table.Column<string>(nullable: true),
+                    LastName = table.Column<string>(nullable: true),
+                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
+                    TenantId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Tenants", x => x.Id);
+                    table.PrimaryKey("PK_Bloggers", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -49,26 +50,6 @@ namespace DemoBlog.Mvc.Data.Application.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Bloggers",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false),
-                    Bio = table.Column<string>(nullable: true),
-                    ChangedBy = table.Column<string>(maxLength: 100, nullable: true),
-                    ChangedOn = table.Column<DateTime>(nullable: true),
-                    CreatedBy = table.Column<string>(maxLength: 100, nullable: true),
-                    CreatedOn = table.Column<DateTime>(nullable: false),
-                    FirstName = table.Column<string>(nullable: true),
-                    LastName = table.Column<string>(nullable: true),
-                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
-                    TenantId = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Bloggers", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Posts",
                 columns: table => new
                 {
@@ -86,6 +67,24 @@ namespace DemoBlog.Mvc.Data.Application.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Posts", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Tenants",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    DefaultCultureName = table.Column<string>(nullable: true),
+                    Description = table.Column<string>(nullable: true),
+                    IsDefault = table.Column<bool>(nullable: false),
+                    IsDemoTenant = table.Column<bool>(nullable: false),
+                    Name = table.Column<string>(nullable: false),
+                    State = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tenants", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -153,9 +152,6 @@ namespace DemoBlog.Mvc.Data.Application.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Tenants");
-
-            migrationBuilder.DropTable(
                 name: "Bloggers");
 
             migrationBuilder.DropTable(
@@ -163,6 +159,9 @@ namespace DemoBlog.Mvc.Data.Application.Migrations
 
             migrationBuilder.DropTable(
                 name: "Subscriber");
+
+            migrationBuilder.DropTable(
+                name: "Tenants");
 
             migrationBuilder.DropTable(
                 name: "Posts");

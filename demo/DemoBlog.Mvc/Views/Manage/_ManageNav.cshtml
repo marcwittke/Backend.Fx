@@ -1,5 +1,7 @@
-﻿@using WebApplication6.Views.Manage
-@inject SignInManager<ApplicationUser> SignInManager
+﻿@using DemoBlog.Mvc.Data.Identity
+@using DemoBlog.Mvc.Views.Manage
+
+@inject SignInManager<BlogUser> SignInManager
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
 }

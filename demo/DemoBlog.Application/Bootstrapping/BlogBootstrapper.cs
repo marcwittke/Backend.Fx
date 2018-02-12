@@ -44,9 +44,12 @@
         /// </summary>
         public void EnsureDevelopmentTenantExistence(BackendFxApplication backendFxApplication)
         {
-            if (backendFxApplication.TenantManager.GetTenants().Any(t => t.IsDemoTenant && t.Name == "dev"))
+            if (backendFxApplication.DatabaseManager.DatabaseExists)
             {
-                return;
+                if (backendFxApplication.TenantManager.GetTenants().Any(t => t.IsDemoTenant && t.Name == "dev"))
+                {
+                    return;
+                }
             }
 
             // This will create a demonstration tenant. Note that using the TenantManager directly there won't be any TenantCreated event published...

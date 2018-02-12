@@ -2,12 +2,13 @@
 {
     using Backend.Fx.Bootstrapping;
     using Backend.Fx.EfCorePersistence;
+    using Backend.Fx.Environment.MultiTenancy;
     using Backend.Fx.Environment.Persistence;
+    using Backend.Fx.Patterns.DependencyInjection;
     using Bootstrapping;
     using Controllers;
     using Data.Identity;
     using Infrastructure;
-    using Microsoft.AspNetCore.Authentication.Google;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity;
@@ -16,9 +17,9 @@
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Logging;
     using Services;
-
+    using SimpleInjector;
+    
     public class Startup
     {
         private readonly BlogBootstrapper blogBootstrapper = new BlogBootstrapper();
@@ -59,21 +60,21 @@
             services.AddTransient<IEmailSender, AuthMessageSender>();
 
             var backendFxApplication = blogBootstrapper.BuildApplication(connectionString, options => options.MigrationsAssembly("DemoBlog.Mvc"));
-            backendFxApplication.Boot();
-            blogBootstrapper.EnsureDevelopmentTenantExistence(backendFxApplication);
 
             // tell the framework container to use our composition root to resolve mvc stuff
             services.AddSingleton<IControllerActivator>(new CompositionRootControllerActivator(backendFxApplication.CompositionRoot));
             services.AddSingleton<IViewComponentActivator>(new CompositionRootViewComponentActivator(backendFxApplication.CompositionRoot));
-
             // put the singleton application into the framework controller, so that the application middleware can be resolved
             services.AddSingleton(backendFxApplication);
+
+            // cross wired services:
+            services.AddScoped(_ => backendFxApplication.CompositionRoot.GetInstance<ICurrentTHolder<TenantId>>());
             
             services.AddMvc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, Microsoft.Extensions.Logging.ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
@@ -90,13 +91,18 @@
 
             app.UseAuthentication();
 
+            // booting backendFxApplication
+            var backendFxApplication = app.ApplicationServices.GetRequiredService<BackendFxApplication>();
+            backendFxApplication.Boot();
+            blogBootstrapper.EnsureDevelopmentTenantExistence(backendFxApplication);
+            
             // backendFxApplication should be gracefully disposed on shutdown
-            app.ApplicationServices.GetRequiredService<IApplicationLifetime>().ApplicationStopping.Register(() => app.ApplicationServices.GetRequiredService<BackendFxApplication>().Dispose());
+            app.ApplicationServices.GetRequiredService<IApplicationLifetime>().ApplicationStopping.Register(() => backendFxApplication.Dispose());
 
             // controllers that use ASP.NET Identity are not resolved using the application container, but the framework container
             var compositionRootControllerActivator = (CompositionRootControllerActivator)app.ApplicationServices.GetRequiredService<IControllerActivator>();
-            compositionRootControllerActivator.RegisterFrameworkOnlyService(() => app.ApplicationServices.GetService<AccountController>());
-            compositionRootControllerActivator.RegisterFrameworkOnlyService(() => app.ApplicationServices.GetService<ManageController>());
+            compositionRootControllerActivator.RegisterFrameworkOnlyService(app.GetRequiredRequestService<AccountController>);
+            compositionRootControllerActivator.RegisterFrameworkOnlyService(app.GetRequiredRequestService<ManageController>);
 
             app.UseMiddleware<BackendFxMiddleware>();
 
