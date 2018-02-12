@@ -2,7 +2,7 @@
 {
     using System.Globalization;
     using JetBrains.Annotations;
-    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+    using Microsoft.AspNetCore.Identity;
 
     public sealed class BlogUser : IdentityUser
     {
@@ -14,10 +14,10 @@
 
         public BlogUser(int tenantId)
         {
-            Claims.Add(new IdentityUserClaim<string> {
-                ClaimType = TenantIdClaimType,
-                ClaimValue = tenantId.ToString(CultureInfo.InvariantCulture),
-            });
+            //Claims.Add(new IdentityUserClaim<string> {
+            //    ClaimType = TenantIdClaimType,
+            //    ClaimValue = tenantId.ToString(CultureInfo.InvariantCulture),
+            //});
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace DemoBlog.Mvc.Infrastructure
+﻿namespace DemoBlog.Mvc
 {
     using Backend.Fx.Bootstrapping;
     using Backend.Fx.EfCorePersistence;
@@ -6,9 +6,11 @@
     using Bootstrapping;
     using Controllers;
     using Data.Identity;
+    using Infrastructure;
+    using Microsoft.AspNetCore.Authentication.Google;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+    using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc.Controllers;
     using Microsoft.AspNetCore.Mvc.ViewComponents;
     using Microsoft.EntityFrameworkCore;
@@ -20,19 +22,14 @@
     public class Startup
     {
         private readonly BlogBootstrapper blogBootstrapper = new BlogBootstrapper();
-        protected IConfigurationRoot Configuration;
 
-        public Startup(IHostingEnvironment env)
+        public Startup(IConfiguration configuration)
         {
-            IConfigurationBuilder builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
-                .AddEnvironmentVariables();
-
-            Configuration = builder.Build();
+            Configuration = configuration;
         }
-        
+
+        public IConfiguration Configuration { get; }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -50,10 +47,16 @@
             services.AddIdentity<BlogUser, IdentityRole>()
                     .AddEntityFrameworkStores<BlogIdentityDbContext>()
                     .AddDefaultTokenProviders();
+            services.ConfigureApplicationCookie(options => options.LoginPath = "/Account/Login");
+            services.AddAuthentication()
+                    .AddGoogle(options => {
+                                   options.ClientId = "434483408261-55tc8n0cs4ff1fe21ea8df2o443v2iuc.apps.googleusercontent.com";
+                                   options.ClientSecret = "3gcoTrEDPPJ0ukn_aYYT6PWo";
+                               });
+
             services.AddScoped<AccountController>();
             services.AddScoped<ManageController>();
             services.AddTransient<IEmailSender, AuthMessageSender>();
-            services.AddTransient<ISmsSender, AuthMessageSender>();
 
             var backendFxApplication = blogBootstrapper.BuildApplication(connectionString, options => options.MigrationsAssembly("DemoBlog.Mvc"));
             backendFxApplication.Boot();
@@ -85,20 +88,7 @@
 
             app.UseStaticFiles();
 
-            app.UseIdentity();
-
-            // Add external authentication middleware below. To configure them please see https://go.microsoft.com/fwlink/?LinkID=532715
-            app.UseGoogleAuthentication(new GoogleOptions
-            {
-                AuthenticationScheme = "Google",
-                DisplayName = "Google",
-                SignInScheme = "Identity.External",
-
-                // values stolen from Domick Baier, who encourages use of these credentials with localhost:5000 here: 
-                // http://docs.identityserver.io/en/release/quickstarts/4_external_authentication.html#adding-google-support
-                ClientId = "434483408261-55tc8n0cs4ff1fe21ea8df2o443v2iuc.apps.googleusercontent.com",
-                ClientSecret = "3gcoTrEDPPJ0ukn_aYYT6PWo"
-            });
+            app.UseAuthentication();
 
             // backendFxApplication should be gracefully disposed on shutdown
             app.ApplicationServices.GetRequiredService<IApplicationLifetime>().ApplicationStopping.Register(() => app.ApplicationServices.GetRequiredService<BackendFxApplication>().Dispose());

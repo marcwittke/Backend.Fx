@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.3</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <VersionPrefix>0.0.0</VersionPrefix>
 	<VersionSuffix>$(VersionSuffix)</VersionSuffix>
     <Authors>Marc Wittke</Authors>

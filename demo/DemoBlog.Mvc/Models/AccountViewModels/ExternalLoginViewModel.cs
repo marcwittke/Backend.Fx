@@ -1,8 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
-
 namespace DemoBlog.Mvc.Models.AccountViewModels
 {
-    public class ExternalLoginConfirmationViewModel
+    using System.ComponentModel.DataAnnotations;
+
+    public class ExternalLoginViewModel
     {
         [Required]
         [EmailAddress]

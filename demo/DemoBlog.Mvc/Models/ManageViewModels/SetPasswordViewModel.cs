@@ -1,7 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace DemoBlog.Mvc.Models.ManageViewModels
+﻿namespace DemoBlog.Mvc.Models.ManageViewModels
 {
+    using System.ComponentModel.DataAnnotations;
+
     public class SetPasswordViewModel
     {
         [Required]
@@ -14,5 +14,7 @@ namespace DemoBlog.Mvc.Models.ManageViewModels
         [Display(Name = "Confirm new password")]
         [Compare("NewPassword", ErrorMessage = "The new password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
+
+        public string StatusMessage { get; set; }
     }
 }
