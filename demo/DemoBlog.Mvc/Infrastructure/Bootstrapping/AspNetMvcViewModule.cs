@@ -1,4 +1,4 @@
-﻿namespace DemoBlog.Mvc.Infrastructure
+﻿namespace DemoBlog.Mvc.Infrastructure.Bootstrapping
 {
     using Backend.Fx.Bootstrapping;
     using Backend.Fx.Bootstrapping.Modules;
@@ -18,6 +18,10 @@
 
         protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
         {
+            // don't do this, it will result in unresolvable constructor parameters (IUserManager) in AccountController and ManageController
+            // SimpleInjector can resolve all controllers even when not registered explicitly
+            // container.RegisterMvcControllers(applicationBuilder);
+            
             container.RegisterMvcViewComponents(applicationBuilder);
             container.Register(() => applicationBuilder.ApplicationServices.GetService<JavaScriptSnippet>());
         }

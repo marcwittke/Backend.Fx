@@ -5,9 +5,7 @@
     using System.Globalization;
     using System.Reflection;
     using Bootstrapping;
-    using Bootstrapping.Modules;
     using BuildingBlocks;
-    using Environment.DateAndTime;
     using Environment.MultiTenancy;
     using Patterns.Authorization;
     using Patterns.DependencyInjection;
@@ -28,10 +26,8 @@
             {
                 var inMemoryPersistenceModule = new InMemoryPersistenceModule(compositionRoot, domainAssemblies);
                 var inMemoryIdGeneratorsModule = new InMemoryIdGeneratorsModule(compositionRoot);
-                compositionRoot.RegisterModules(
-                    new DomainModule(compositionRoot, domainAssemblies),
-                    inMemoryIdGeneratorsModule,
-                    inMemoryPersistenceModule);
+                var inMemoryApplicationModule = new InMemoryApplicationModule(compositionRoot, domainAssemblies);
+                compositionRoot.RegisterModules(inMemoryApplicationModule, inMemoryIdGeneratorsModule, inMemoryPersistenceModule);
                 compositionRoot.RegisterModules(modules);
                 compositionRoot.Verify();
 

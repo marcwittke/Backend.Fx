@@ -1,4 +1,4 @@
-﻿namespace DemoBlog.Mvc.Infrastructure
+﻿namespace DemoBlog.Mvc.Infrastructure.Integration
 {
     using System;
     using System.Collections.Generic;

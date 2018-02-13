@@ -10,7 +10,7 @@
     /// <summary>
     /// The root object of the whole backend fx application framework
     /// </summary>
-    public class BackendFxApplication : IDisposable
+    public abstract class BackendFxApplication : IDisposable
     {
         private static readonly ILogger Logger = LogManager.Create<BackendFxApplication>();
 
@@ -21,7 +21,7 @@
         /// <param name="databaseManager">The database manager for the current application</param>
         /// <param name="tenantManager">The tenant manager for the current application</param>
         /// <param name="scopeManager">The scope manager for the current application</param>
-        public BackendFxApplication(
+        protected BackendFxApplication(
                           ICompositionRoot compositionRoot,
                           IDatabaseManager databaseManager,
                           ITenantManager tenantManager,
@@ -54,17 +54,26 @@
 
         public IJobExecutor JobExecutor { get; }
 
-        public void Boot()
+        public virtual void Boot()
         {
             Logger.Info("Booting application");
             CompositionRoot.Verify();
             DatabaseManager.EnsureDatabaseExistence();
         }
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Logger.Info("Application shut down initialized");
+                CompositionRoot?.Dispose();
+            }
+        }
+
         public void Dispose()
         {
-            Logger.Info("Application shut down initialized");
-            CompositionRoot?.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

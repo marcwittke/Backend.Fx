@@ -24,6 +24,18 @@ namespace Backend.Fx.Bootstrapping.Tests
     {
         private readonly SimpleInjectorCompositionRoot sut;
         
+        private class AnApplicationModule  : ApplicationModule 
+        {
+            public AnApplicationModule(SimpleInjectorCompositionRoot compositionRoot, params Assembly[] domainAssemblies) : base(compositionRoot, domainAssemblies)
+            { }
+
+            protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
+            {
+                base.Register(container, scopedLifestyle);
+                container.Register<IClock, FrozenClock>();
+            }
+        }
+
         public TheSimpleInjectorCompositionRoot()
         {
 
@@ -35,8 +47,7 @@ namespace Backend.Fx.Bootstrapping.Tests
             sut = new SimpleInjectorCompositionRoot();
             var domainAssembly = typeof(AnAggregate).GetTypeInfo().Assembly;
             sut.RegisterModules(
-                new TestModule(sut),
-                new DomainModule(sut, domainAssembly),
+                new AnApplicationModule(sut, domainAssembly),
                 new InMemoryIdGeneratorsModule(sut),
                 new InMemoryPersistenceModule(sut, domainAssembly));
             
@@ -318,17 +329,6 @@ namespace Backend.Fx.Bootstrapping.Tests
         public void Dispose()
         {
             sut.Dispose();
-        }
-
-        private class TestModule : SimpleInjectorModule
-        {
-            public TestModule(SimpleInjectorCompositionRoot compositionRoot) : base(compositionRoot)
-            { }
-
-            protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
-            {
-                container.Register<IClock, FrozenClock>();
-            }
         }
     }
 }

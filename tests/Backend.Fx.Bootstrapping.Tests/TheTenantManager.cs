@@ -5,9 +5,11 @@
     using BuildingBlocks;
     using DummyImpl;
     using Environment.Authentication;
+    using Environment.DateAndTime;
     using Environment.MultiTenancy;
     using Modules;
     using Patterns.DependencyInjection;
+    using SimpleInjector;
     using Testing.InMemoryPersistence;
     using Xunit;
 
@@ -16,12 +18,24 @@
         private readonly ITenantManager sut;
         private readonly IScopeManager scopeManager;
 
+        private class AnApplicationModule  : ApplicationModule 
+        {
+            public AnApplicationModule(SimpleInjectorCompositionRoot compositionRoot, params Assembly[] domainAssemblies) : base(compositionRoot, domainAssemblies)
+            { }
+
+            protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
+            {
+                base.Register(container, scopedLifestyle);
+                container.Register<IClock, FrozenClock>();
+            }
+        }
+
         public TheTenantManager()
         {
             var compositionRoot = new SimpleInjectorCompositionRoot();
             var domainAssembly = typeof(AnAggregate).GetTypeInfo().Assembly;
             compositionRoot.RegisterModules(
-                new DomainModule(compositionRoot, domainAssembly),
+                new AnApplicationModule(compositionRoot, domainAssembly),
                 new InMemoryIdGeneratorsModule(compositionRoot),
                 new InMemoryPersistenceModule(compositionRoot, domainAssembly));
 

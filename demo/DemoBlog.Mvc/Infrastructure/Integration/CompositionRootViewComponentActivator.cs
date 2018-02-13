@@ -1,4 +1,4 @@
-﻿namespace DemoBlog.Mvc.Infrastructure
+﻿namespace DemoBlog.Mvc.Infrastructure.Integration
 {
     using Backend.Fx.Patterns.DependencyInjection;
     using Microsoft.AspNetCore.Mvc.ViewComponents;

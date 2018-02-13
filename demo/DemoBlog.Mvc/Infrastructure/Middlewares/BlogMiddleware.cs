@@ -1,4 +1,4 @@
-﻿namespace DemoBlog.Mvc.Infrastructure
+﻿namespace DemoBlog.Mvc.Infrastructure.Middlewares
 {
     using System;
     using System.Linq;
@@ -11,6 +11,7 @@
     using Backend.Fx.Environment.MultiTenancy;
     using Backend.Fx.Exceptions;
     using Backend.Fx.Logging;
+    using Bootstrapping;
     using Data.Identity;
     using JetBrains.Annotations;
     using Microsoft.AspNetCore.Hosting;
@@ -24,24 +25,24 @@
     ///     The Middleware handles exceptions and is responsible for beginning and completing (or disposing) the unit
     ///     of work for each request.
     /// </summary>
-    public class BackendFxMiddleware
+    public class BlogMiddleware
     {
-        private static readonly ILogger Logger = LogManager.Create<BackendFxMiddleware>();
+        private static readonly ILogger Logger = LogManager.Create<BlogMiddleware>();
         private readonly RequestDelegate next;
         private readonly IHostingEnvironment env;
-        private readonly BackendFxApplication backendFxApplication;
+        private readonly BackendFxApplication blogApplication;
         private readonly Lazy<TenantId> defaultTenantId;
 
         /// <summary>
         ///     This constructor is being called by the framework DI container
         /// </summary>
         [UsedImplicitly]
-        public BackendFxMiddleware(RequestDelegate next, BackendFxApplication backendFxApplication, IHostingEnvironment env)
+        public BlogMiddleware(RequestDelegate next, BlogApplication blogApplication, IHostingEnvironment env)
         {
             this.next = next;
-            this.backendFxApplication = backendFxApplication;
+            this.blogApplication = blogApplication;
             this.env = env;
-            defaultTenantId = new Lazy<TenantId>(()=> backendFxApplication.TenantManager.GetDefaultTenantId());
+            defaultTenantId = new Lazy<TenantId>(()=> blogApplication.TenantManager.GetDefaultTenantId());
         }
 
         /// <summary>
@@ -54,7 +55,7 @@
             {
                 TenantId tenantId = GetTenantId(context.User.Identity);
 
-                using (var scope = backendFxApplication.ScopeManager.BeginScope(context.User.Identity, tenantId))
+                using (var scope = blogApplication.ScopeManager.BeginScope(context.User.Identity, tenantId))
                 {
                     try
                     {

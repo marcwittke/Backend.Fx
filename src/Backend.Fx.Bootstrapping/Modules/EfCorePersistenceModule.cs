@@ -14,12 +14,12 @@
     /// <see cref="IAggregateMapping{T}"/>s, <see cref="IQueryable{T}"/> and the various forms of <see cref="IUnitOfWork"/>
     /// </summary>
     /// <typeparam name="TDbContext"></typeparam>
-    public class EfCorePersistenceModule<TDbContext> : SimpleInjectorModule 
+    public abstract class EfCorePersistenceModule<TDbContext> : SimpleInjectorModule 
         where TDbContext : DbContext
     {
         private readonly DbContextOptions<TDbContext> dbContextOptions;
 
-        public EfCorePersistenceModule(SimpleInjectorCompositionRoot compositionRoot, DbContextOptions<TDbContext> dbContextOptions) : base(compositionRoot)
+        protected EfCorePersistenceModule(SimpleInjectorCompositionRoot compositionRoot, DbContextOptions<TDbContext> dbContextOptions) : base(compositionRoot)
         {
             this.dbContextOptions = dbContextOptions;
         }

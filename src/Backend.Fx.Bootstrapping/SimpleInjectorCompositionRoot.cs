@@ -14,7 +14,7 @@ namespace Backend.Fx.Bootstrapping
     /// <summary>
     ///     Provides a reusable compostion root assuming Simple Injector as container
     /// </summary>
-    public class SimpleInjectorCompositionRoot : ICompositionRoot, IEventHandlerProvider, IScopeManager
+    public sealed class SimpleInjectorCompositionRoot : ICompositionRoot, IEventHandlerProvider, IScopeManager
     {
         private static readonly ILogger Logger = LogManager.Create<SimpleInjectorCompositionRoot>();
 
@@ -100,22 +100,9 @@ namespace Backend.Fx.Bootstrapping
         #endregion
 
         #region IDisposable implementation
-        /// <summary>
-        /// Ensures disposal of the container
-        /// </summary>
-        /// <param name="disposing"></param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Container?.Dispose();
-            }
-        }
-
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            Container?.Dispose();
         }
         #endregion
 

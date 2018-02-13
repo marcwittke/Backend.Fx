@@ -1,4 +1,4 @@
-﻿namespace DemoBlog.Mvc
+﻿namespace DemoBlog.Mvc.Infrastructure.Diagnostics
 {
     using System;
     using System.Globalization;

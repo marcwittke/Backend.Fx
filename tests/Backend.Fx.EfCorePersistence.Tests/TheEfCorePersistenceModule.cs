@@ -19,6 +19,25 @@
     {
         private readonly SimpleInjectorCompositionRoot sut;
         
+        private class APersistenceModule : EfCorePersistenceModule<TestDbContext> 
+        {
+            public APersistenceModule(SimpleInjectorCompositionRoot compositionRoot, DbContextOptions<TestDbContext> dbContextOptions) 
+                    : base(compositionRoot, dbContextOptions)
+            { }
+        }
+
+        private class AnApplicationModule  : ApplicationModule 
+        {
+            public AnApplicationModule(SimpleInjectorCompositionRoot compositionRoot, params Assembly[] domainAssemblies) : base(compositionRoot, domainAssemblies)
+            { }
+
+            protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
+            {
+                base.Register(container, scopedLifestyle);
+                container.Register<IClock, FrozenClock>();
+            }
+        }
+
         public TheEfCorePersistenceModule()
         {
             var connection = new SqliteConnection("DataSource=:memory:");
@@ -27,9 +46,8 @@
 
             sut = new SimpleInjectorCompositionRoot();
             sut.RegisterModules(
-                new DomainModule(sut, typeof(Blog).GetTypeInfo().Assembly),
-                new EfCorePersistenceModule<TestDbContext>(sut, dbContextOptions),
-                new TestModule(sut));
+                new AnApplicationModule(sut, typeof(Blog).GetTypeInfo().Assembly),
+                new APersistenceModule(sut, dbContextOptions));
             sut.Verify();
         }
 
@@ -113,17 +131,6 @@
                     ICanInterruptTransaction canInterruptTransaction = scope.GetInstance<ICanInterruptTransaction>();
                     Assert.Same(unitOfWork, canInterruptTransaction);
                 }
-            }
-        }
-
-        private class TestModule : SimpleInjectorModule
-        {
-            public TestModule(SimpleInjectorCompositionRoot compositionRoot) : base(compositionRoot)
-            { }
-
-            protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
-            {
-                container.Register<IClock, FrozenClock>();
             }
         }
     }

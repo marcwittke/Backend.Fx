@@ -8,7 +8,7 @@ namespace Backend.Fx.Bootstrapping
     using Patterns.UnitOfWork;
     using SimpleInjector;
 
-    public class SimpleInjectorScope : IScope
+    public sealed class SimpleInjectorScope : IScope
     {
         private static readonly ILogger Logger = LogManager.Create<SimpleInjectorScope>();
         private readonly Scope scope;

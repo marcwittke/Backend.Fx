@@ -17,13 +17,13 @@
     /// Wires all injected domain services: Current <see cref="IIdentity"/> and current <see cref="TenantId"/> as set while 
     /// beginning the scope. All <see cref="IDomainService"/>s, <see cref="IApplicationService"/>s, <see cref="IAggregateAuthorization{TAggregateRoot}"/>s 
     /// the collections of <see cref="IDomainEventHandler{TDomainEvent}"/>s, <see cref="IJob"/>s and <see cref="InitialDataGenerator"/>s 
-    /// found in the given list of domain assemblies and a singleton <see cref="IJobExecutor"/> 
+    /// found in the given list of domain assemblies.
     /// </summary>
-    public class DomainModule : SimpleInjectorModule
+    public abstract class ApplicationModule : SimpleInjectorModule
     {
         private readonly Assembly[] assemblies;
 
-        public DomainModule(SimpleInjectorCompositionRoot compositionRoot, params Assembly[] domainAssemblies) : base(compositionRoot)
+        protected ApplicationModule(SimpleInjectorCompositionRoot compositionRoot, params Assembly[] domainAssemblies) : base(compositionRoot)
         {
             assemblies = domainAssemblies.Concat(new[] {
                 typeof(Entity).GetTypeInfo().Assembly,
