@@ -6,36 +6,37 @@
     using Environment.Persistence;
     using Logging;
     using Microsoft.EntityFrameworkCore;
-    using Mssql;
 
     public abstract class DatabaseManager<TDbContext> : IDatabaseManager where TDbContext : DbContext
     {
         private static readonly ILogger Logger = LogManager.Create<DatabaseManager<TDbContext>>();
 
-        protected DatabaseManager(DbContextOptions dbContextOptions)
+        protected DatabaseManager(DbContextOptions<TDbContext> dbContextOptions)
         {
             DbContextOptions = dbContextOptions;
         }
 
         public bool DatabaseExists { get; protected set; }
 
-        protected DbContextOptions DbContextOptions { get; }
+        public DbContextOptions<TDbContext> DbContextOptions { get; }
 
         public void EnsureDatabaseExistence()
         {
-            using (var dbContext = DbContextOptions.CreateDbContext<TDbContext>())
+            Logger.Info("Ensuring database existence");
+            using (var dbContext = DbContextOptions.CreateDbContext())
             {
                 ExecuteCreationStrategy(dbContext);
             }
 
-            EnsureSequenceExistence();
             EnsureSearchIndexExistence();
+            EnsureSequenceExistence();
 
             DatabaseExists = true;
         }
 
         private void EnsureSearchIndexExistence()
         {
+            Logger.Info("Ensuring existence of full text search indizes");
             var fullTextSearchIndexTypes = typeof(TDbContext)
                     .GetTypeInfo()
                     .Assembly
@@ -43,7 +44,7 @@
                     .Select(t => t.GetTypeInfo())
                     .Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericType && typeof(IFullTextSearchIndex).GetTypeInfo().IsAssignableFrom(t));
 
-            using (var dbContext = DbContextOptions.CreateDbContext<TDbContext>())
+            using (var dbContext = DbContextOptions.CreateDbContext())
             {
                 foreach (var fullTextSearchIndexType in fullTextSearchIndexTypes)
                 {
@@ -55,25 +56,30 @@
 
         private void EnsureSequenceExistence()
         {
-            var sqlSequenceHiLoIdGeneratorTypes = typeof(TDbContext)
+            Logger.Info("Ensuring existence of sequences");
+            var sequenceTypes = typeof(TDbContext)
                     .GetTypeInfo()
                     .Assembly
                     .ExportedTypes
                     .Select(t => t.GetTypeInfo())
-                    .Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericType && typeof(SqlSequenceHiLoIdGenerator).GetTypeInfo().IsAssignableFrom(t));
+                    .Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericType && typeof(ISequence).GetTypeInfo().IsAssignableFrom(t));
 
-            foreach (var sqlSequenceHiLoIdGeneratorType in sqlSequenceHiLoIdGeneratorTypes)
+            using (var dbContext = DbContextOptions.CreateDbContext())
             {
-                SqlSequenceHiLoIdGenerator sqlSequenceHiLoIdGenerator = (SqlSequenceHiLoIdGenerator) Activator.CreateInstance(sqlSequenceHiLoIdGeneratorType.AsType(), DbContextOptions);
-                sqlSequenceHiLoIdGenerator.EnsureSqlSequenceExistence();
+                foreach (var sequenceType in sequenceTypes)
+                {
+                    ISequence sequence = (ISequence)Activator.CreateInstance(sequenceType.AsType());
+                    sequence.EnsureSequence(dbContext);
+                }
             }
+            
         }
 
         protected abstract void ExecuteCreationStrategy(DbContext dbContext);
 
         public virtual void DeleteDatabase()
         {
-            using (var dbContext = DbContextOptions.CreateDbContext<TDbContext>())
+            using (var dbContext = DbContextOptions.CreateDbContext())
             {
                 Logger.Warn("Database is being deleted!");
                 dbContext.Database.EnsureDeleted();

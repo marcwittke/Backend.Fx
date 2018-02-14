@@ -41,11 +41,11 @@
                 .Assembly
                 .ExportedTypes
                 .Select(t => t.GetTypeInfo())
-                .Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericType && typeof(IAggregateRootMapping).GetTypeInfo().IsAssignableFrom(t));
+                .Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericType && typeof(IAggregateMapping).GetTypeInfo().IsAssignableFrom(t));
             foreach (var typeInfo in aggregateDefinitionTypeInfos)
             {
-                IAggregateRootMapping aggregateRootMapping = (IAggregateRootMapping)Activator.CreateInstance(typeInfo.AsType());
-                aggregateRootMapping.ApplyEfMapping(modelBuilder);
+                IAggregateMapping aggregateMapping = (IAggregateMapping)Activator.CreateInstance(typeInfo.AsType());
+                aggregateMapping.ApplyEfMapping(modelBuilder);
             }
         }
 
@@ -197,7 +197,7 @@
             }
         }
 
-        public static TDbContext CreateDbContext<TDbContext>(this DbContextOptions options) where TDbContext : DbContext
+        public static TDbContext CreateDbContext<TDbContext>(this DbContextOptions<TDbContext> options) where TDbContext : DbContext
         {
             return (TDbContext)Activator.CreateInstance(typeof(TDbContext), options);
         }

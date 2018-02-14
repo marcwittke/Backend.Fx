@@ -1,12 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.3</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Backend.Fx.EfCorePersistence</AssemblyName>
     <RootNamespace>Backend.Fx.EfCorePersistence</RootNamespace>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <Authors>Marc Wittke</Authors>
     <Company>anic GmbH</Company>
+    <VersionPrefix>0.0.0</VersionPrefix>
+	<VersionSuffix>$(VersionSuffix)</VersionSuffix>
     <Product>Backend.Fx</Product>
     <Description>Persistence implementation for Backend.Fx using Entity Framework Core 1.1</Description>
     <Copyright>All rights reserved. Distributed under the terms of the MIT License.</Copyright>
@@ -14,16 +16,14 @@
     <PackageProjectUrl>https://github.com/marcwittke/Backend.Fx</PackageProjectUrl>
     <RepositoryUrl>https://github.com/marcwittke/Backend.Fx.git</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
-    <Version>1.5.9</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="1.1.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="1.1.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="2.0.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Backend.Fx.Bootstrapping\Backend.Fx.Bootstrapping.csproj" />
     <ProjectReference Include="..\Backend.Fx\Backend.Fx.csproj" />
   </ItemGroup>
 

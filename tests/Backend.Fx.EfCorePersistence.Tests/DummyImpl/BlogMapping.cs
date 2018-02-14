@@ -5,7 +5,7 @@
     using System.Linq.Expressions;
     using Microsoft.EntityFrameworkCore;
 
-    public class BlogMapping : AggregateRootMapping<Blog>
+    public class BlogMapping : AggregateMapping<Blog>
     {
         public override void ApplyEfMapping(ModelBuilder modelBuilder)
         { }

@@ -2,42 +2,51 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Reflection;
+    using Bootstrapping;
     using BuildingBlocks;
-    using Environment.DateAndTime;
     using Environment.MultiTenancy;
-    using FakeItEasy;
-    using JetBrains.Annotations;
     using Patterns.Authorization;
+    using Patterns.DependencyInjection;
     using Patterns.IdGeneration;
-    using Patterns.UnitOfWork;
     using RandomData;
-    using SimpleInjector;
 
-    public abstract class InMemoryPersistenceFixture : IEntityIdGenerator
+    public abstract class InMemoryPersistenceFixture
     {
         private readonly Dictionary<Type, object> stores;
-        private int nextId;
-        
-        protected InMemoryPersistenceFixture(bool withDemoData, Assembly domainAssembly, [CanBeNull] Action<Container> additionalContainerConfig)
+
+        protected InMemoryPersistenceFixture(bool withDemoData, Assembly domainAssembly, params IModule[] modules)
+            : this(withDemoData, new[] { domainAssembly }, modules)
+        {}
+
+        protected InMemoryPersistenceFixture(bool withDemoData, Assembly[] domainAssemblies, params IModule[] modules)
         {
-            EntityIdGenerator = A.Fake<IEntityIdGenerator>();
-            A.CallTo(() => EntityIdGenerator.NextId()).ReturnsLazily(() => nextId++);
-
-            using (var dataGenerationRuntime = new DataGenerationRuntime(domainAssembly, additionalContainerConfig))
+            using (SimpleInjectorCompositionRoot compositionRoot = new SimpleInjectorCompositionRoot())
             {
-                dataGenerationRuntime.Boot(container => container.RegisterSingleton<IEntityIdGenerator>(this));
+                var inMemoryPersistenceModule = new InMemoryPersistenceModule(compositionRoot, domainAssemblies);
+                var inMemoryIdGeneratorsModule = new InMemoryIdGeneratorsModule(compositionRoot);
+                var inMemoryApplicationModule = new InMemoryApplicationModule(compositionRoot, domainAssemblies);
+                compositionRoot.RegisterModules(inMemoryApplicationModule, inMemoryIdGeneratorsModule, inMemoryPersistenceModule);
+                compositionRoot.RegisterModules(modules);
+                compositionRoot.Verify();
+
+                ITenantInitializer tenantInitializer = new TenantInitializer(compositionRoot);
+                ITenantManager tenantManager = new InMemoryTenantManager(tenantInitializer);
+
+                // create and fill a tenant
                 TenantId = withDemoData
-                               ? dataGenerationRuntime.TenantManager.CreateDemonstrationTenant("test", "", false)
-                               : dataGenerationRuntime.TenantManager.CreateProductionTenant("test", "", false);
-                dataGenerationRuntime.TenantManager.EnsureTenantIsInitialized(TenantId);
-                stores = dataGenerationRuntime.Stores;
+                               ? tenantManager.CreateDemonstrationTenant("test", "", false, new CultureInfo("en-US"))
+                               : tenantManager.CreateProductionTenant("test", "", false, new CultureInfo("en-US"));
+                tenantManager.EnsureTenantIsInitialized(TenantId);
+
+                // from now on we do not use the composition root any more, but we save the filled in memory repositories
+                stores = inMemoryPersistenceModule.Stores;
+                // and the in memory entity id generator
+                EntityIdGenerator = inMemoryIdGeneratorsModule.EntityIdGenerator;
             }
+            
         }
-
-        public IClock Clock { get; } = new FrozenClock();
-
-        public ICanFlush CanFlush { get; } = new DummyCanFlush();
 
         public TenantId TenantId { get; }
 
@@ -45,28 +54,37 @@
 
         public TAggregateRoot GetRandom<TAggregateRoot>() where TAggregateRoot : AggregateRoot
         {
-            return LinqExtensions.Random<TAggregateRoot>(Repository<TAggregateRoot>().AggregateQueryable);
+            return GetRepository<TAggregateRoot>().AggregateQueryable.Random();
         }
 
-        public InMemoryRepository<TAggregateRoot> Repository<TAggregateRoot>() where TAggregateRoot : AggregateRoot
+        public InMemoryQueryable<TAggregateRoot> GetQueryable<TAggregateRoot>() where TAggregateRoot : AggregateRoot
+        {
+            IInMemoryStore<TAggregateRoot> store = (IInMemoryStore<TAggregateRoot>) stores[typeof(TAggregateRoot)];
+            return new InMemoryQueryable<TAggregateRoot>(store);
+        } 
+
+        public InMemoryRepository<TAggregateRoot> GetRepository<TAggregateRoot>() where TAggregateRoot : AggregateRoot
         {
             return new InMemoryRepository<TAggregateRoot>((IInMemoryStore<TAggregateRoot>)stores[typeof(TAggregateRoot)], TenantId, new AllowAll<TAggregateRoot>());
         }
 
         public void ClearRepository<TAggregateRoot>() where TAggregateRoot : AggregateRoot
         {
-            Repository<TAggregateRoot>().Clear();
+            GetRepository<TAggregateRoot>().Clear();
         }
+    }
 
-        private class DummyCanFlush : ICanFlush
-        {
-            public void Flush()
-            { }
-        }
+    public abstract class InMemoryPersistenceWithProdDataFixture : InMemoryPersistenceFixture
+    {
+        protected InMemoryPersistenceWithProdDataFixture(params Assembly[] domainAssemblies)
+            : base(false, domainAssemblies)
+        { }
+    }
 
-        public int NextId()
-        {
-            return nextId++;
-        }
+    public abstract class InMemoryPersistenceWithDemoDataFixture : InMemoryPersistenceFixture
+    {
+        protected InMemoryPersistenceWithDemoDataFixture(params Assembly[] domainAssemblies)
+            : base(true, domainAssemblies)
+        { }
     }
 }

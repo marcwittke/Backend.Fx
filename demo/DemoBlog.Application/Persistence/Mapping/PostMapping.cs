@@ -7,7 +7,7 @@
     using Domain;
     using Microsoft.EntityFrameworkCore;
 
-    public class PostMapping : AggregateRootMapping<Post> {
+    public class PostMapping : AggregateMapping<Post> {
         public override IEnumerable<Expression<Func<Post, object>>> IncludeDefinitions
         {
             get

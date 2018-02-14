@@ -22,7 +22,7 @@
             return store.Values.ToArray();
         }
 
-        protected override Tenant FindTenant(TenantId tenantId)
+        public override Tenant FindTenant(TenantId tenantId)
         {
             return store[tenantId.Value];
         }

@@ -3,5 +3,5 @@
     using Backend.Fx.EfCorePersistence;
     using Domain;
 
-    public class BloggerMapping : PlainAggregateRootMapping<Blogger> { }
+    public class BloggerMapping : PlainAggregateMapping<Blogger> { }
 }

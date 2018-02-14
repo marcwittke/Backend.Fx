@@ -4,20 +4,22 @@
     using System.Linq;
     using Environment.MultiTenancy;
     using Extensions;
+    using JetBrains.Annotations;
     using Microsoft.EntityFrameworkCore;
 
     public class TenantManager<TDbContext> : TenantManager where TDbContext : DbContext
     {
-        private readonly DbContextOptions dbContextOptions;
+        private readonly DbContextOptions<TDbContext> dbContextOptions;
 
-        public TenantManager(ITenantInitializer tenantInitializer, DbContextOptions dbContextOptions) : base(tenantInitializer)
+        public TenantManager(ITenantInitializer tenantInitializer, DbContextOptions<TDbContext> dbContextOptions) 
+            : base(tenantInitializer)
         {
             this.dbContextOptions = dbContextOptions;
         }
 
         public override TenantId[] GetTenantIds()
         {
-            using (var dbContext = dbContextOptions.CreateDbContext<TDbContext>())
+            using (var dbContext = dbContextOptions.CreateDbContext())
             {
                 return dbContext.Set<Tenant>().Select(t => new TenantId(t.Id)).ToArray();
             }
@@ -25,15 +27,16 @@
 
         public override Tenant[] GetTenants()
         {
-            using (var dbContext = dbContextOptions.CreateDbContext<TDbContext>())
+            using (var dbContext = dbContextOptions.CreateDbContext())
             {
                 return dbContext.Set<Tenant>().ToArray();
             }
         }
         
-        protected override Tenant FindTenant(TenantId tenantId)
+        [CanBeNull]
+        public override Tenant FindTenant(TenantId tenantId)
         {
-            using (var dbContext = dbContextOptions.CreateDbContext<TDbContext>())
+            using (var dbContext = dbContextOptions.CreateDbContext())
             {
                 return dbContext.Set<Tenant>().Find(tenantId.Value);
             }
@@ -41,7 +44,7 @@
 
         protected override void SaveTenant(Tenant tenant)
         {
-            using (var dbContext = dbContextOptions.CreateDbContext<TDbContext>())
+            using (var dbContext = dbContextOptions.CreateDbContext())
             {
                 var existingTenant = dbContext.Set<Tenant>().Find(tenant.Id);
                 if (existingTenant == null)

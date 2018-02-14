@@ -1,13 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.4</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>DemoBlog</AssemblyName>
     <RootNamespace>DemoBlog</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="FluentScheduler" Version="5.2.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.0.1" />
     <PackageReference Include="System.Security.Claims" Version="4.3.0" />
   </ItemGroup>
 
@@ -15,10 +16,6 @@
     <ProjectReference Include="..\..\src\Backend.Fx.Bootstrapping\Backend.Fx.Bootstrapping.csproj" />
     <ProjectReference Include="..\..\src\Backend.Fx.EfCorePersistence\Backend.Fx.EfCorePersistence.csproj" />
     <ProjectReference Include="..\..\src\Backend.Fx\Backend.Fx.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Application\" />
   </ItemGroup>
 
 </Project>

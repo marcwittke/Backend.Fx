@@ -1,7 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace DemoBlog.Mvc.Models.AccountViewModels
+﻿namespace DemoBlog.Mvc.Models.AccountViewModels
 {
+    using System.ComponentModel.DataAnnotations;
+
     public class ForgotPasswordViewModel
     {
         [Required]

@@ -1,50 +1,69 @@
 ﻿
 namespace DemoBlog.Mvc
 {
+    using System;
     using System.IO;
     using Backend.Fx.Logging;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.Extensions.Logging;
     using Backend.Fx.NLogLogging;
-    using Infrastructure;
-    using Microsoft.Extensions.DependencyInjection;
+    using Infrastructure.Bootstrapping;
+    using Infrastructure.Diagnostics;
+    using Microsoft.AspNetCore;
     using NLog.Config;
 
     public class Program
     {
-        //this class was just extended with NLog initialization and some detailed logging
+        private static Backend.Fx.Logging.ILogger logger;
+
         public static void Main(string[] args)
         {
-            var contentRoot = Directory.GetCurrentDirectory();
+            try
+            {
+                LogManager.Initialize(new NLogLoggerFactory());
+                ConfigurationItemFactory.Default.Targets.RegisterDefinition("ApplicationInsightsTarget", typeof(ApplicationInsightsTarget));
+                NLog.LogManager.Configuration = new XmlLoggingConfiguration(Path.Combine(Directory.GetCurrentDirectory(), "nlog.config"));
+                logger = LogManager.Create<Program>();
+                logger.Debug("Logging initialized");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Logging cannot be initialized: " + ex);
+                Environment.Exit(-1);
+            }
 
-            LogManager.Initialize(new NLogLoggerFactory());
-            ConfigurationItemFactory.Default.Targets.RegisterDefinition("ApplicationInsightsTarget", typeof(ApplicationInsightsTarget));
-            NLog.LogManager.Configuration = new XmlLoggingConfiguration(Path.Combine(contentRoot, "nlog.config"));
+            try
+            {
+                var webHost = BuildWebHost(args);
+                using (logger.InfoDuration("Starting web host", "Web host Stopped"))
+                {
+                    webHost.Run();
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Fatal(ex, "Web host died unexpectedly");
+                Environment.Exit(-2);
+            }
+        }
 
-            var logger = LogManager.Create<Program>();
-
+        public static IWebHost BuildWebHost(string[] args)
+        {
             IWebHost host;
             using (logger.InfoDuration("Building web host"))
             {
-                host = new WebHostBuilder()
-                        .UseLoggerFactory(new FrameworkToBackendFxLoggerFactory())
-                    .CaptureStartupErrors(true)
-                    .UseSetting("detailedErrors", "true")
-                    .UseKestrel()
-                    .UseContentRoot(contentRoot)
-                    .UseIISIntegration()
-                    .UseStartup<Startup>()
-                    .UseApplicationInsights()
-                    .Build();
-
-                host.Services.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>().AddProvider(new BackendFxLoggerProvider());
+                host = WebHost.CreateDefaultBuilder(args)
+                              .ConfigureLogging(builder => {
+                                                    builder.ClearProviders();
+                                                    builder.AddProvider(new BackendFxLoggerProvider());
+                                                    builder.AddDebug();
+                                                })
+                              .UseStartup<Startup>()
+                              .Build();
             }
 
-            using (logger.InfoDuration(
-                $"Running {host.Services.GetRequiredService<IHostingEnvironment>().EnvironmentName} web host with content root {contentRoot}",
-                "Web host was shut down"))
-            {
-                host.Run();
-            }
+            return host;
         }
+
     }
 }

@@ -7,6 +7,9 @@
 
     public class InMemoryUnitOfWork : UnitOfWork
     {
+        public int CommitCalls { get; private set; }
+        public int RollbackCalls { get; private set; }
+
         public InMemoryUnitOfWork(IClock clock, IIdentity identity) : base(clock, identity)
         { }
 
@@ -14,9 +17,13 @@
         { }
 
         protected override void Commit()
-        { }
+        {
+            CommitCalls++;
+        }
 
         protected override void Rollback()
-        { }
+        {
+            RollbackCalls++;
+        }
     }
 }

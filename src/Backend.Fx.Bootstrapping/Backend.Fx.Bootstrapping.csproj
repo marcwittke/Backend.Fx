@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.3</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>Marc Wittke</Authors>
     <Company>anic GmbH</Company>
@@ -12,14 +12,14 @@
     <PackageProjectUrl>https://github.com/marcwittke/Backend.Fx</PackageProjectUrl>
     <RepositoryUrl>https://github.com/marcwittke/Backend.Fx.git</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
-    <Version>1.5.9</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SimpleInjector" Version="4.0.8" />
+    <PackageReference Include="SimpleInjector" Version="4.0.12" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Backend.Fx.EfCorePersistence\Backend.Fx.EfCorePersistence.csproj" />
     <ProjectReference Include="..\Backend.Fx\Backend.Fx.csproj" />
   </ItemGroup>
 

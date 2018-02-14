@@ -4,7 +4,7 @@
 
     public class CurrentTenantIdHolder : CurrentTHolder<TenantId>
     {
-        public override TenantId ProvideInitialInstance()
+        public override TenantId ProvideInstance()
         {
             return new TenantId(null);
         }
