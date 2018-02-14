@@ -1,17 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
     <Authors>Marc Wittke</Authors>
     <Company>anic GmbH</Company>
-    <Product>Backend.Fx</Product>
-    <Description>Bootstrapping for Backend.Fx using Simple Injector 4</Description>
     <Copyright>All rights reserved. Distributed under the terms of the MIT License.</Copyright>
+    <Description>Bootstrapping for Backend.Fx using Simple Injector 4</Description>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/marcwittke/Backend.Fx</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/marcwittke/Backend.Fx.git</RepositoryUrl>
+    <Product>Backend.Fx</Product>
     <RepositoryType>Git</RepositoryType>
+    <RepositoryUrl>https://github.com/marcwittke/Backend.Fx.git</RepositoryUrl>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Version>2.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

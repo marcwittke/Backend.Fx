@@ -4,9 +4,7 @@
     using Backend.Fx.Bootstrapping;
     using Backend.Fx.Bootstrapping.Modules;
     using Backend.Fx.Environment.DateAndTime;
-    using Backend.Fx.Patterns.IdGeneration;
     using Domain;
-    using Persistence;
     using SimpleInjector;
 
     public class BlogApplicationModule : ApplicationModule
@@ -18,7 +16,6 @@
         {
             base.Register(container, scopedLifestyle);
             container.Register<IClock, FrozenClock>();
-            container.RegisterSingleton<IEntityIdGenerator, BlogEntityIdGenerator>();
         }
     }
 }
