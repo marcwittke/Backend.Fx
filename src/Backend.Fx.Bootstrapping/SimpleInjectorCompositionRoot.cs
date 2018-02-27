@@ -14,7 +14,7 @@ namespace Backend.Fx.Bootstrapping
     /// <summary>
     ///     Provides a reusable compostion root assuming Simple Injector as container
     /// </summary>
-    public sealed class SimpleInjectorCompositionRoot : ICompositionRoot, IEventHandlerProvider, IScopeManager
+    public sealed class SimpleInjectorCompositionRoot : ICompositionRoot, IScopeManager
     {
         private static readonly ILogger Logger = LogManager.Create<SimpleInjectorCompositionRoot>();
 
