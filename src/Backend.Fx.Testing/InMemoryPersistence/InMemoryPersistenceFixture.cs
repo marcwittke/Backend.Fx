@@ -76,15 +76,15 @@
 
     public abstract class InMemoryPersistenceWithProdDataFixture : InMemoryPersistenceFixture
     {
-        protected InMemoryPersistenceWithProdDataFixture(params Assembly[] domainAssemblies)
-            : base(false, domainAssemblies)
+        protected InMemoryPersistenceWithProdDataFixture(Assembly[] domainAssemblies, params IModule[] modules)
+            : base(false, domainAssemblies, modules)
         { }
     }
 
     public abstract class InMemoryPersistenceWithDemoDataFixture : InMemoryPersistenceFixture
     {
-        protected InMemoryPersistenceWithDemoDataFixture(params Assembly[] domainAssemblies)
-            : base(true, domainAssemblies)
+        protected InMemoryPersistenceWithDemoDataFixture(Assembly[] domainAssemblies,params IModule[] modules)
+            : base(true, domainAssemblies, modules)
         { }
     }
 }
