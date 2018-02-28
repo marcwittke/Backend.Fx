@@ -34,11 +34,11 @@
             string indexedColumnsSqlFragment = string.Join(", ", indexedColumnDefinitions);
 
             dbContext.Database.ExecuteSqlCommand(
-                    $"IF ((SELECT count(*) FROM sys.fulltext_catalogs WHERE name = '{FullTextCatalogName}') = 0) CREATE FULLTEXT CATALOG {FullTextCatalogName}");
+                    $"IF ((SELECT count(*) FROM sys.fulltext_catalogs WHERE name = '{FullTextCatalogName}') = 0) CREATE FULLTEXT CATALOG " + FullTextCatalogName);
 
             dbContext.Database.ExecuteSqlCommand(
                     $"IF ((SELECT count(*) FROM sys.fulltext_indexes i INNER JOIN sys.tables t ON t.object_id = i.object_id WHERE t.name = '{table}') = 0) " +
-                    $" CREATE FULLTEXT INDEX ON [{schema}].[{table}] ({indexedColumnsSqlFragment}) KEY INDEX {primaryKeyIndexName} ON {FullTextCatalogName}");
+                    " CREATE FULLTEXT INDEX ON ["+schema+"].["+table+"] ("+indexedColumnsSqlFragment+") KEY INDEX "+primaryKeyIndexName+" ON "+FullTextCatalogName);
         }
 
         private static string GetMemberName(Expression<Func<TAggregateRoot, object>> exp)
