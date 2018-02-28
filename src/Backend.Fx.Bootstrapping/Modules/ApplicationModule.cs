@@ -22,13 +22,15 @@
     public abstract class ApplicationModule : SimpleInjectorModule
     {
         private readonly Assembly[] assemblies;
+        private readonly EventAggregator eventAggregator;
 
         protected ApplicationModule(SimpleInjectorCompositionRoot compositionRoot, params Assembly[] domainAssemblies) : base(compositionRoot)
         {
             assemblies = domainAssemblies.Concat(new[] {
                 typeof(Entity).GetTypeInfo().Assembly,
             }).ToArray();
-        }
+
+            eventAggregator = new EventAggregator(compositionRoot);        }
 
         protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
         {
@@ -46,6 +48,7 @@
 
             // domain event subsystem
             container.RegisterCollection(typeof(IDomainEventHandler<>), assemblies);
+            container.RegisterSingleton(eventAggregator);
 
             // initial data generation subsystem
             container.RegisterCollection<InitialDataGenerator>(assemblies);
