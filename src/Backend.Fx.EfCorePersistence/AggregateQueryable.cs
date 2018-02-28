@@ -49,8 +49,12 @@
         {
             get
             {
-                int tenantIdValue = tenantId.Value;
-                return dbContext.Set<TAggregateRoot>().Where(agg => agg.TenantId == tenantIdValue);
+                if (tenantId.HasValue)
+                {
+                    return dbContext.Set<TAggregateRoot>().Where(agg => agg.TenantId == tenantId.Value);
+                }
+
+                return dbContext.Set<TAggregateRoot>().Where(agg => false);
             }
         }
     }
