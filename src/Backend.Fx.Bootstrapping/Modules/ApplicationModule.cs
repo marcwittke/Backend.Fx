@@ -22,7 +22,7 @@
     public abstract class ApplicationModule : SimpleInjectorModule
     {
         private readonly Assembly[] assemblies;
-        private EventAggregator eventAggregator;
+        private IEventAggregator eventAggregator;
 
         protected ApplicationModule(params Assembly[] domainAssemblies)
         {
@@ -54,7 +54,7 @@
 
             // domain event subsystem
             container.RegisterCollection(typeof(IDomainEventHandler<>), assemblies);
-            container.RegisterSingleton(eventAggregator);
+            container.RegisterSingleton<IEventAggregator>(eventAggregator);
 
             // initial data generation subsystem
             container.RegisterCollection<InitialDataGenerator>(assemblies);
