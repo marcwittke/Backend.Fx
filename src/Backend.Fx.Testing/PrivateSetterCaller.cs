@@ -14,9 +14,7 @@ namespace Backend.Fx.Testing
 
         private static string GetName<T, TValue>(Expression<Func<T, TValue>> exp)
         {
-            MemberExpression body = exp.Body as MemberExpression;
-
-            if (body == null)
+            if (!(exp.Body is MemberExpression body))
             {
                 UnaryExpression ubody = (UnaryExpression)exp.Body;
                 body = ubody.Operand as MemberExpression;

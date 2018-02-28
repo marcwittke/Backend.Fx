@@ -40,8 +40,7 @@
                 throw new ArgumentNullException(nameof(source));
             }
 
-            var sourceQueryable = source as IQueryable<T>;
-            if (sourceQueryable != null)
+            if (source is IQueryable<T> sourceQueryable)
             {
                 int count = sourceQueryable.Count();
                 return sourceQueryable.Skip(TestRandom.Next(count - 1)).First();
