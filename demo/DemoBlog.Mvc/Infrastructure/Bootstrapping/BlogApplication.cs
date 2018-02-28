@@ -47,8 +47,8 @@
             // application composition root initialization
             SimpleInjectorCompositionRoot compositionRoot = new SimpleInjectorCompositionRoot();
             compositionRoot.RegisterModules(
-                new BlogPersistenceModule(compositionRoot, blogDbContextOptions),
-                new BlogApplicationModule(compositionRoot));
+                new BlogPersistenceModule(blogDbContextOptions),
+                new BlogApplicationModule());
 
             var blogApplication = new BlogApplication(
                 connectionString,
@@ -76,7 +76,7 @@
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             doEnsureDevelopmentTenantExistenceOnBoot = env.IsDevelopment();
-            CompositionRoot.RegisterModules(new AspNetMvcViewModule((SimpleInjectorCompositionRoot) CompositionRoot, app));
+            CompositionRoot.RegisterModules(new AspNetMvcViewModule(app));
 
             // this instance should be gracefully disposed on shutdown
             app.ApplicationServices.GetRequiredService<IApplicationLifetime>().ApplicationStopping.Register(Dispose);

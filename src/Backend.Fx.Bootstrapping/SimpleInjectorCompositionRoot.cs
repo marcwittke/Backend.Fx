@@ -33,7 +33,7 @@ namespace Backend.Fx.Bootstrapping
             foreach (var module in modules)
             {
                 Logger.Info($"Registering {module.GetType().Name}");
-                module.Register();
+                module.Register(this);
             }
         }
 

@@ -26,7 +26,7 @@ namespace Backend.Fx.Bootstrapping.Tests
         
         private class AnApplicationModule  : ApplicationModule 
         {
-            public AnApplicationModule(SimpleInjectorCompositionRoot compositionRoot, params Assembly[] domainAssemblies) : base(compositionRoot, domainAssemblies)
+            public AnApplicationModule(params Assembly[] domainAssemblies) : base(domainAssemblies)
             { }
 
             protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
@@ -47,9 +47,9 @@ namespace Backend.Fx.Bootstrapping.Tests
             sut = new SimpleInjectorCompositionRoot();
             var domainAssembly = typeof(AnAggregate).GetTypeInfo().Assembly;
             sut.RegisterModules(
-                new AnApplicationModule(sut, domainAssembly),
-                new InMemoryIdGeneratorsModule(sut),
-                new InMemoryPersistenceModule(sut, domainAssembly));
+                new AnApplicationModule(domainAssembly),
+                new InMemoryIdGeneratorsModule(),
+                new InMemoryPersistenceModule(domainAssembly));
             
             sut.Verify();
 

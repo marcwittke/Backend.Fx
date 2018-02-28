@@ -22,18 +22,24 @@
     public abstract class ApplicationModule : SimpleInjectorModule
     {
         private readonly Assembly[] assemblies;
-        private readonly IEventAggregator eventAggregator;
+        private EventAggregator eventAggregator;
 
-        protected ApplicationModule(SimpleInjectorCompositionRoot compositionRoot, params Assembly[] domainAssemblies) : base(compositionRoot)
+        protected ApplicationModule(params Assembly[] domainAssemblies)
         {
             assemblies = domainAssemblies.Concat(new[] {
                 typeof(Entity).GetTypeInfo().Assembly,
             }).ToArray();
+        }
 
-            eventAggregator = new EventAggregator(compositionRoot);        }
+        public override void Register(ICompositionRoot compositionRoot)
+        {
+            eventAggregator = new EventAggregator(compositionRoot);        
+            base.Register(compositionRoot);
+        }
 
         protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
         {
+
             // the current IIdentity is resolved using the scoped CurrentIdentityHolder that is maintained when opening a scope
             container.Register<ICurrentTHolder<IIdentity>, CurrentIdentityHolder>();
             container.Register(() => container.GetInstance<ICurrentTHolder<IIdentity>>().Current);

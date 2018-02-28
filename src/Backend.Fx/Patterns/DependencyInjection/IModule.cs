@@ -2,6 +2,6 @@
 {
     public interface IModule
     {
-        void Register();
+        void Register(ICompositionRoot compositionRoot);
     }
 }

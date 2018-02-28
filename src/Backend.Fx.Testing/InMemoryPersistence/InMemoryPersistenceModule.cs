@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using Bootstrapping;
     using Bootstrapping.Modules;
     using BuildingBlocks;
     using ConfigurationSettings;
@@ -18,7 +17,7 @@
     {
         public Dictionary<Type, object> Stores { get; }
 
-        public InMemoryPersistenceModule(SimpleInjectorCompositionRoot compositionRoot, params Assembly[] domainAssemblies) : base(compositionRoot)
+        public InMemoryPersistenceModule(params Assembly[] domainAssemblies)
         {
             Stores = domainAssemblies.SelectMany(ass => ass.GetExportedTypes())
                     .Where(t => !t.GetTypeInfo().IsAbstract && t.GetTypeInfo().IsClass)

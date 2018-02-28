@@ -21,14 +21,14 @@
         
         private class APersistenceModule : EfCorePersistenceModule<TestDbContext> 
         {
-            public APersistenceModule(SimpleInjectorCompositionRoot compositionRoot, DbContextOptions<TestDbContext> dbContextOptions) 
-                    : base(compositionRoot, dbContextOptions)
+            public APersistenceModule(DbContextOptions<TestDbContext> dbContextOptions) 
+                    : base(dbContextOptions)
             { }
         }
 
         private class AnApplicationModule  : ApplicationModule 
         {
-            public AnApplicationModule(SimpleInjectorCompositionRoot compositionRoot, params Assembly[] domainAssemblies) : base(compositionRoot, domainAssemblies)
+            public AnApplicationModule(params Assembly[] domainAssemblies) : base(domainAssemblies)
             { }
 
             protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
@@ -46,8 +46,8 @@
 
             sut = new SimpleInjectorCompositionRoot();
             sut.RegisterModules(
-                new AnApplicationModule(sut, typeof(Blog).GetTypeInfo().Assembly),
-                new APersistenceModule(sut, dbContextOptions));
+                new AnApplicationModule(typeof(Blog).GetTypeInfo().Assembly),
+                new APersistenceModule(dbContextOptions));
             sut.Verify();
         }
 

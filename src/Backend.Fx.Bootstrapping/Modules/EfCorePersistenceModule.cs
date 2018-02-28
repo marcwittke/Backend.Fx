@@ -2,7 +2,6 @@
 {
     using System.Linq;
     using System.Reflection;
-    using Bootstrapping;
     using BuildingBlocks;
     using EfCorePersistence;
     using Microsoft.EntityFrameworkCore;
@@ -19,7 +18,7 @@
     {
         private readonly DbContextOptions<TDbContext> dbContextOptions;
 
-        protected EfCorePersistenceModule(SimpleInjectorCompositionRoot compositionRoot, DbContextOptions<TDbContext> dbContextOptions) : base(compositionRoot)
+        protected EfCorePersistenceModule(DbContextOptions<TDbContext> dbContextOptions)
         {
             this.dbContextOptions = dbContextOptions;
         }

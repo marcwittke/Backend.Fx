@@ -1,6 +1,5 @@
 ﻿namespace DemoBlog.Mvc.Infrastructure.Bootstrapping
 {
-    using Backend.Fx.Bootstrapping;
     using Backend.Fx.Bootstrapping.Modules;
     using Microsoft.ApplicationInsights.AspNetCore;
     using Microsoft.AspNetCore.Builder;
@@ -11,7 +10,7 @@
     {
         private readonly IApplicationBuilder applicationBuilder;
 
-        public AspNetMvcViewModule(SimpleInjectorCompositionRoot compositionRoot, IApplicationBuilder applicationBuilder) : base(compositionRoot)
+        public AspNetMvcViewModule(IApplicationBuilder applicationBuilder)
         {
             this.applicationBuilder = applicationBuilder;
         }

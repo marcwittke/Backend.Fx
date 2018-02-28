@@ -24,9 +24,9 @@
         {
             using (SimpleInjectorCompositionRoot compositionRoot = new SimpleInjectorCompositionRoot())
             {
-                var inMemoryPersistenceModule = new InMemoryPersistenceModule(compositionRoot, domainAssemblies);
-                var inMemoryIdGeneratorsModule = new InMemoryIdGeneratorsModule(compositionRoot);
-                var inMemoryApplicationModule = new InMemoryApplicationModule(compositionRoot, domainAssemblies);
+                var inMemoryPersistenceModule = new InMemoryPersistenceModule(domainAssemblies);
+                var inMemoryIdGeneratorsModule = new InMemoryIdGeneratorsModule();
+                var inMemoryApplicationModule = new InMemoryApplicationModule(domainAssemblies);
                 compositionRoot.RegisterModules(inMemoryApplicationModule, inMemoryIdGeneratorsModule, inMemoryPersistenceModule);
                 compositionRoot.RegisterModules(modules);
                 compositionRoot.Verify();

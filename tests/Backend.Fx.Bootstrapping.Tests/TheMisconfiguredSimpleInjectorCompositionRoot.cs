@@ -12,7 +12,7 @@ namespace Backend.Fx.Bootstrapping.Tests
         public void ThrowsOnValidation()
         {
             SimpleInjectorCompositionRoot sut = new SimpleInjectorCompositionRoot();
-            sut.RegisterModules(new BadModule(sut));
+            sut.RegisterModules(new BadModule());
             Assert.Throws<InvalidOperationException>(() => sut.Verify());
         }
 
@@ -26,9 +26,6 @@ namespace Backend.Fx.Bootstrapping.Tests
 
         public class BadModule : SimpleInjectorModule
         {
-            public BadModule(SimpleInjectorCompositionRoot compositionRoot) : base(compositionRoot)
-            { }
-
             protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
             {
                 // this registration should be recognized as unresolvable during validation

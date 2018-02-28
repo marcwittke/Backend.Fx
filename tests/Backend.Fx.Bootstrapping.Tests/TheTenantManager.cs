@@ -20,7 +20,7 @@
 
         private class AnApplicationModule  : ApplicationModule 
         {
-            public AnApplicationModule(SimpleInjectorCompositionRoot compositionRoot, params Assembly[] domainAssemblies) : base(compositionRoot, domainAssemblies)
+            public AnApplicationModule(params Assembly[] domainAssemblies) : base(domainAssemblies)
             { }
 
             protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
@@ -35,9 +35,9 @@
             var compositionRoot = new SimpleInjectorCompositionRoot();
             var domainAssembly = typeof(AnAggregate).GetTypeInfo().Assembly;
             compositionRoot.RegisterModules(
-                new AnApplicationModule(compositionRoot, domainAssembly),
-                new InMemoryIdGeneratorsModule(compositionRoot),
-                new InMemoryPersistenceModule(compositionRoot, domainAssembly));
+                new AnApplicationModule(domainAssembly),
+                new InMemoryIdGeneratorsModule(),
+                new InMemoryPersistenceModule(domainAssembly));
 
             compositionRoot.Verify();
 
