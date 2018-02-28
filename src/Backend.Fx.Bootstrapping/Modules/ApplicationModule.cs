@@ -22,7 +22,7 @@
     public abstract class ApplicationModule : SimpleInjectorModule
     {
         private readonly Assembly[] assemblies;
-        private readonly EventAggregator eventAggregator;
+        private readonly IEventAggregator eventAggregator;
 
         protected ApplicationModule(SimpleInjectorCompositionRoot compositionRoot, params Assembly[] domainAssemblies) : base(compositionRoot)
         {
