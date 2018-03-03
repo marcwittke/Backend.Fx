@@ -8,16 +8,17 @@
     using Extensions;
     using Logging;
     using Patterns.Authorization;
+    using Patterns.DependencyInjection;
 
     public abstract class Repository<TAggregateRoot> : IRepository<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
         private static readonly ILogger Logger = LogManager.Create<Repository<TAggregateRoot>>();
         private readonly IAggregateAuthorization<TAggregateRoot> aggregateAuthorization;
-        private readonly TenantId tenantId;
+        private readonly ICurrentTHolder<TenantId> tenantIdHolder;
 
-        protected Repository(TenantId tenantId, IAggregateAuthorization<TAggregateRoot> aggregateAuthorization)
+        protected Repository(ICurrentTHolder<TenantId> tenantIdHolder, IAggregateAuthorization<TAggregateRoot> aggregateAuthorization)
         {
-            this.tenantId = tenantId;
+            this.tenantIdHolder = tenantIdHolder;
             this.aggregateAuthorization = aggregateAuthorization;
         }
 
@@ -32,10 +33,10 @@
         {
             get
             {
-                if (tenantId.HasValue)
+                if (tenantIdHolder.Current.HasValue)
                 {
                     return aggregateAuthorization.Filter(RawAggregateQueryable
-                            .Where(agg => agg.TenantId == tenantId.Value));
+                            .Where(agg => agg.TenantId == tenantIdHolder.Current.Value));
                 }
 
                 return RawAggregateQueryable.Where(agg => false);
@@ -66,7 +67,7 @@
 
         public void Delete(TAggregateRoot aggregateRoot)
         {
-            if (aggregateRoot.TenantId != tenantId.Value || !aggregateAuthorization.CanDelete(aggregateRoot))
+            if (aggregateRoot.TenantId != tenantIdHolder.Current.Value || !aggregateAuthorization.CanDelete(aggregateRoot))
             {
                 throw new System.Security.SecurityException($"You are not allowed to delete {typeof(TAggregateRoot).Name}[{aggregateRoot.Id}]");
             }
@@ -78,7 +79,7 @@
         {
             if (aggregateAuthorization.CanCreate(aggregateRoot))
             {
-                aggregateRoot.TenantId = tenantId.Value;
+                aggregateRoot.TenantId = tenantIdHolder.Current.Value;
                 AddPersistent(aggregateRoot);
             }
             else
@@ -96,7 +97,7 @@
                     throw new System.Security.SecurityException($"You are not allowed to create records of type {typeof(TAggregateRoot).Name}");
                 }
             });
-            aggregateRoots.ForAll(agg => agg.TenantId = tenantId.Value);
+            aggregateRoots.ForAll(agg => agg.TenantId = tenantIdHolder.Current.Value);
 
             AddRangePersistent(aggregateRoots);
         }
