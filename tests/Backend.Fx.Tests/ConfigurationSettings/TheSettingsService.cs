@@ -45,7 +45,7 @@
             idGenerator = A.Fake<IEntityIdGenerator>();
             int nextId=1;
             A.CallTo(() => idGenerator.NextId()).ReturnsLazily(() => nextId++);
-            settingRepository = new InMemoryRepository<Setting>(new InMemoryStore<Setting>(), new TenantId(999), settingAuthorization);
+            settingRepository = new InMemoryRepository<Setting>(new InMemoryStore<Setting>(), CurrentTenantIdHolder.Create(999), settingAuthorization);
         }
 
         [Fact]

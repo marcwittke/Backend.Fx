@@ -4,6 +4,20 @@
 
     public class CurrentTenantIdHolder : CurrentTHolder<TenantId>
     {
+        public static CurrentTenantIdHolder Create(int tenantId)
+        {
+            var instance = new CurrentTenantIdHolder();
+            instance.ReplaceCurrent(new TenantId(tenantId));
+            return instance;
+        }
+
+        public static CurrentTenantIdHolder Create(TenantId tenantId)
+        {
+            var instance = new CurrentTenantIdHolder();
+            instance.ReplaceCurrent(tenantId);
+            return instance;
+        }
+
         public override TenantId ProvideInstance()
         {
             return new TenantId(null);

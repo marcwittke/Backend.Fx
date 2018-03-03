@@ -9,18 +9,19 @@ namespace Backend.Fx.EfCorePersistence.Tests
     using Logging;
     using Microsoft.Data.Sqlite;
     using Microsoft.EntityFrameworkCore;
-    
+    using Patterns.DependencyInjection;
+
     public abstract class TestWithInMemorySqliteDbContext : IDisposable
     {
         private static readonly ILogger Logger = LogManager.Create<TestWithInMemorySqliteDbContext>();
         public SqliteConnection Connection { get; }
         public DbContextOptions<TestDbContext> DbContextOptions { get; }
-        public TenantId TenantId { get; }
+        public ICurrentTHolder<TenantId> TenantIdHolder { get; } = new CurrentTenantIdHolder();
         public IClock Clock { get; } = new FrozenClock();
 
         protected TestWithInMemorySqliteDbContext()
         {
-            TenantId = new TenantId(12);
+            TenantIdHolder.ReplaceCurrent(new TenantId(12));
             Connection = new SqliteConnection("DataSource=:memory:");
             Connection.Open();
             DbContextOptions = new DbContextOptionsBuilder<TestDbContext>().UseSqlite(Connection).Options;

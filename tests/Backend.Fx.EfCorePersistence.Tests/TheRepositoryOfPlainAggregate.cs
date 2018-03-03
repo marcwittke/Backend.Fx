@@ -22,7 +22,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 using (var uow = new EfUnitOfWork(Clock, new SystemIdentity(), dbContext))
                 {
                     uow.Begin();
-                    var repo = new EfRepository<Blogger>(dbContext, new BloggerMapping(), TenantId, new AllowAll<Blogger>());
+                    var repo = new EfRepository<Blogger>(dbContext, new BloggerMapping(), TenantIdHolder, new AllowAll<Blogger>());
                     repo.Add(new Blogger(345, "Metulsky", "Bratislav"));
                     uow.Complete();
                 }
@@ -52,7 +52,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 using (var uow = new EfUnitOfWork(Clock, new SystemIdentity(), dbContext))
                 {
                     uow.Begin();
-                    var repo = new EfRepository<Blogger>(dbContext, new BloggerMapping(), TenantId, new AllowAll<Blogger>());
+                    var repo = new EfRepository<Blogger>(dbContext, new BloggerMapping(), TenantIdHolder, new AllowAll<Blogger>());
                     Blogger bratislavMetulsky = repo.Single(444);
                     Assert.Equal(12, bratislavMetulsky.TenantId);
                     Assert.Equal("the test", bratislavMetulsky.CreatedBy);
@@ -78,7 +78,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 using (var uow = new EfUnitOfWork(Clock, new SystemIdentity(), dbContext))
                 {
                     uow.Begin();
-                    var repo = new EfRepository<Blogger>(dbContext, new BloggerMapping(), TenantId, new AllowAll<Blogger>());
+                    var repo = new EfRepository<Blogger>(dbContext, new BloggerMapping(), TenantIdHolder, new AllowAll<Blogger>());
                     Blogger bratislavMetulsky = repo.Single(555);
                     repo.Delete(bratislavMetulsky);
                     uow.Complete();
@@ -104,7 +104,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 using (var uow = new EfUnitOfWork(Clock, new SystemIdentity(), dbContext))
                 {
                     uow.Begin();
-                    var repo = new EfRepository<Blogger>(dbContext, new BloggerMapping(), TenantId, new AllowAll<Blogger>());
+                    var repo = new EfRepository<Blogger>(dbContext, new BloggerMapping(), TenantIdHolder, new AllowAll<Blogger>());
                     Blogger bratislavMetulsky = repo.Single(456);
                     bratislavMetulsky.FirstName = "Johnny";
                     bratislavMetulsky.LastName = "Flash";
@@ -123,7 +123,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 using (var uow = new EfUnitOfWork(Clock, new SystemIdentity(), dbContext))
                 {
                     uow.Begin();
-                    var repo = new EfRepository<Blogger>(dbContext, new BloggerMapping(), TenantId, new AllowAll<Blogger>());
+                    var repo = new EfRepository<Blogger>(dbContext, new BloggerMapping(), TenantIdHolder, new AllowAll<Blogger>());
                     Blogger johnnyFlash = repo.Single(456);
                     Assert.Equal(Clock.UtcNow, johnnyFlash.ChangedOn, new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(1000)));
                     Assert.Equal(new SystemIdentity().Name, johnnyFlash.ChangedBy);

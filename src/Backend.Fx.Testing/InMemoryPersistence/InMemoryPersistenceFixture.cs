@@ -26,7 +26,7 @@
             {
                 var inMemoryPersistenceModule = new InMemoryPersistenceModule(domainAssemblies);
                 var inMemoryIdGeneratorsModule = new InMemoryIdGeneratorsModule();
-                var inMemoryApplicationModule = new InMemoryApplicationModule(domainAssemblies);
+                var inMemoryApplicationModule = new InMemoryDomainModule(domainAssemblies);
                 compositionRoot.RegisterModules(inMemoryApplicationModule, inMemoryIdGeneratorsModule, inMemoryPersistenceModule);
                 compositionRoot.RegisterModules(modules);
                 compositionRoot.Verify();
@@ -35,10 +35,11 @@
                 ITenantManager tenantManager = new InMemoryTenantManager(tenantInitializer);
 
                 // create and fill a tenant
-                TenantId = withDemoData
+                var tenantId = withDemoData
                                ? tenantManager.CreateDemonstrationTenant("test", "", false, new CultureInfo("en-US"))
                                : tenantManager.CreateProductionTenant("test", "", false, new CultureInfo("en-US"));
-                tenantManager.EnsureTenantIsInitialized(TenantId);
+                tenantManager.EnsureTenantIsInitialized(tenantId);
+                TenantIdHolder.ReplaceCurrent(tenantId);
 
                 // from now on we do not use the composition root any more, but we save the filled in memory repositories
                 stores = inMemoryPersistenceModule.Stores;
@@ -48,7 +49,7 @@
             
         }
 
-        public TenantId TenantId { get; }
+        public CurrentTenantIdHolder TenantIdHolder { get; } = new CurrentTenantIdHolder();
 
         public IEntityIdGenerator EntityIdGenerator { get; }
 
@@ -65,7 +66,7 @@
 
         public InMemoryRepository<TAggregateRoot> GetRepository<TAggregateRoot>() where TAggregateRoot : AggregateRoot
         {
-            return new InMemoryRepository<TAggregateRoot>((IInMemoryStore<TAggregateRoot>)stores[typeof(TAggregateRoot)], TenantId, new AllowAll<TAggregateRoot>());
+            return new InMemoryRepository<TAggregateRoot>((IInMemoryStore<TAggregateRoot>)stores[typeof(TAggregateRoot)], TenantIdHolder, new AllowAll<TAggregateRoot>());
         }
 
         public void ClearRepository<TAggregateRoot>() where TAggregateRoot : AggregateRoot
