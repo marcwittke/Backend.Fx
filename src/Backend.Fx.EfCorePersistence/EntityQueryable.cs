@@ -6,21 +6,18 @@
     using System.Linq;
     using System.Linq.Expressions;
     using BuildingBlocks;
-    using Environment.MultiTenancy;
     using Microsoft.EntityFrameworkCore;
     
-    public class AggregateQueryable<TAggregateRoot> : IQueryable<TAggregateRoot> where TAggregateRoot : AggregateRoot
+    public class EntityQueryable<TEntity> : IQueryable<TEntity> where TEntity : Entity
     {
         private readonly DbContext dbContext;
-        private readonly TenantId tenantId;
-
-        public AggregateQueryable(DbContext dbContext, TenantId tenantId)
+        
+        public EntityQueryable(DbContext dbContext)
         {
             this.dbContext = dbContext;
-            this.tenantId = tenantId;
         }
 
-        public IEnumerator<TAggregateRoot> GetEnumerator()
+        public IEnumerator<TEntity> GetEnumerator()
         {
             return InnerQueryable.GetEnumerator();
         }
@@ -45,16 +42,11 @@
             get { return InnerQueryable.Provider; }
         }
 
-        private IQueryable<TAggregateRoot> InnerQueryable
+        private IQueryable<TEntity> InnerQueryable
         {
             get
             {
-                if (tenantId.HasValue)
-                {
-                    return dbContext.Set<TAggregateRoot>().Where(agg => agg.TenantId == tenantId.Value);
-                }
-
-                return dbContext.Set<TAggregateRoot>().Where(agg => false);
+                return dbContext.Set<TEntity>();
             }
         }
     }

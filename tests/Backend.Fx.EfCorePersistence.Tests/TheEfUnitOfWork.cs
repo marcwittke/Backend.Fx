@@ -18,7 +18,7 @@
         {
             using(var dbContext = new TestDbContext(DbContextOptions))
             {
-                var sut = new EfUnitOfWork(new FrozenClock(), new SystemIdentity(), dbContext);
+                var sut = new EfUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), dbContext);
                 
                 Assert.Null(dbContext.Database.CurrentTransaction);
                 sut.Begin();
@@ -33,7 +33,7 @@
         {
             using (var dbContext = new TestDbContext(DbContextOptions))
             {
-                var sut = new EfUnitOfWork(new FrozenClock(), new SystemIdentity(), dbContext);
+                var sut = new EfUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), dbContext);
                 sut.Begin();
                 dbContext.Add(new Blogger(333, "Bratislav", "Metulsky"));
                 sut.Dispose();

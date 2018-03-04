@@ -42,11 +42,9 @@
 
             // the current IIdentity is resolved using the scoped CurrentIdentityHolder that is maintained when opening a scope
             container.Register<ICurrentTHolder<IIdentity>, CurrentIdentityHolder>();
-            container.Register(() => container.GetInstance<ICurrentTHolder<IIdentity>>().Current);
-
             // same for the current TenantId
             container.Register<ICurrentTHolder<TenantId>, CurrentTenantIdHolder>();
-            container.Register(() => container.GetInstance<ICurrentTHolder<TenantId>>().Current);
+            
 
             container.RegisterDomainAndApplicationServices(assemblies);
 
@@ -54,7 +52,7 @@
 
             // domain event subsystem
             container.RegisterCollection(typeof(IDomainEventHandler<>), assemblies);
-            container.RegisterSingleton<IEventAggregator>(eventAggregator);
+            container.RegisterSingleton(eventAggregator);
 
             // initial data generation subsystem
             container.RegisterCollection<InitialDataGenerator>(assemblies);

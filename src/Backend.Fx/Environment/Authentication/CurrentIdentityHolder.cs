@@ -20,5 +20,12 @@
             string auth = instance.IsAuthenticated ? $"authenticated via {instance.AuthenticationType}" : "not authenticated";
             return $"Identity: {instance.Name}, {auth}";
         }
+
+        public static ICurrentTHolder<IIdentity> CreateSystem()
+        {
+            var currentIdentityHolder = new CurrentIdentityHolder();
+            currentIdentityHolder.ReplaceCurrent(new SystemIdentity());
+            return currentIdentityHolder;
+        }
     }
 }

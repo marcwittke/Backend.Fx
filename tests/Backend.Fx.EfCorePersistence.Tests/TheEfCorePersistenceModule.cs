@@ -91,7 +91,7 @@
             {
                 var queryable = sut.GetInstance<IQueryable<Blog>>();
                 Assert.NotNull(queryable);
-                Assert.IsType<AggregateQueryable<Blog>>(queryable);
+                Assert.IsType<EntityQueryable<Blog>>(queryable);
             }
         }
 

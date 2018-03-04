@@ -2,6 +2,7 @@
 {
     using System;
     using System.Security.Principal;
+    using DependencyInjection;
     using Logging;
 
     /// <summary>
@@ -19,12 +20,12 @@
         private bool? isCompleted;
         private IDisposable lifetimeLogger;
 
-        protected ReadonlyUnitOfWork(IIdentity identity)
+        protected ReadonlyUnitOfWork(ICurrentTHolder<IIdentity> identityHolder)
         {
-            Identity = identity;
+            IdentityHolder = identityHolder;
         }
 
-        public IIdentity Identity { get; }
+        public ICurrentTHolder<IIdentity> IdentityHolder { get; }
 
         public virtual void Begin()
         {
