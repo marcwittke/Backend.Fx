@@ -2,7 +2,11 @@
 {
     public class Error
     {
-        public const string GenericKey = "_error";
+        public Error(string message)
+        {
+            Code = "";
+            Message = message;
+        }
 
         public Error(object code, string message)
         {

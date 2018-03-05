@@ -13,7 +13,7 @@
 
         public void Add(Error error)
         {
-            clientException.Errors.Add(Error.GenericKey, error);
+            clientException.Errors.Add(Errors.GenericErrorKey, error);
         }
 
         public void Add(string key, Error error)
@@ -25,7 +25,7 @@
         {
             if (t == null)
             {
-                clientException.Errors.Add(Error.GenericKey, new Error("NotFound", $"{typeof(T).Name} [{id}] not found"));
+                clientException.Errors.Add(Errors.GenericErrorKey, new Error("NotFound", $"{typeof(T).Name} [{id}] not found"));
             }
         }
 
@@ -49,7 +49,7 @@
         {
             if (condition)
             {
-                clientException.Errors.Add(Error.GenericKey, error);
+                clientException.Errors.Add(Errors.GenericErrorKey, error);
             }
         }
 
@@ -71,7 +71,7 @@
             catch (Exception ex)
             {
                 Logger.Info(ex, $"Exception of type {ex.GetType().Name} will be appended to an {nameof(UnprocessableException)}.");
-                clientException.Errors.Add(Error.GenericKey, new Error(ex.GetType().Name, ex.Message));
+                clientException.Errors.Add(Errors.GenericErrorKey, new Error(ex.GetType().Name, ex.Message));
             }
             return t;
         }
@@ -100,7 +100,7 @@
             catch (Exception ex)
             {
                 Logger.Info(ex, $"Exception of type {ex.GetType().Name} will be appended to an {nameof(UnprocessableException)}.");
-                clientException.Errors.Add(Error.GenericKey, new Error(ex.GetType().Name, ex.Message));
+                clientException.Errors.Add(Errors.GenericErrorKey, new Error(ex.GetType().Name, ex.Message));
             }
         }
 
