@@ -24,7 +24,7 @@
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            this.ApplyAggregateRootMappings(builder);
+            this.ApplyAggregateMappings(builder);
             builder.RegisterRowVersionProperty();
             builder.RegisterEntityIdAsNeverGenerated();
         }

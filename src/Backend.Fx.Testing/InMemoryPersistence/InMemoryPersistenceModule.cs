@@ -43,7 +43,7 @@
             container.Register(typeof(IRepository<>), typeof(InMemoryRepository<>));
             container.Register(typeof(IQueryable<>), typeof(InMemoryQueryable<>));
 
-            var uowRegistration = Lifestyle.Scoped.CreateRegistration(() => new InMemoryUnitOfWork(new FrozenClock(), new SystemIdentity()), container);
+            var uowRegistration = Lifestyle.Scoped.CreateRegistration(() => new InMemoryUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem()), container);
             container.AddRegistration(typeof(IUnitOfWork), uowRegistration);
             container.AddRegistration(typeof(ICanFlush), uowRegistration);
             container.Register(A.Fake<IReadonlyUnitOfWork>);

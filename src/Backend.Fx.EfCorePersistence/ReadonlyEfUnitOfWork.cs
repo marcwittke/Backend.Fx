@@ -5,6 +5,7 @@
     using Logging;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Storage;
+    using Patterns.DependencyInjection;
     using Patterns.UnitOfWork;
 
     public class ReadonlyEfUnitOfWork : ReadonlyUnitOfWork
@@ -14,7 +15,7 @@
         private IDisposable transactionLifetimeLogger;
         private IDbContextTransaction currentTransaction;
 
-        public ReadonlyEfUnitOfWork(DbContext dbContext, IIdentity identity) : base(identity)
+        public ReadonlyEfUnitOfWork(DbContext dbContext, ICurrentTHolder<IIdentity> identityHolder) : base(identityHolder)
         {
             this.dbContext = dbContext;
             this.dbContext.ChangeTracker.AutoDetectChangesEnabled = false;

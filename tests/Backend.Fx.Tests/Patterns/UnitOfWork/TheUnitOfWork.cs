@@ -9,7 +9,7 @@
         [Fact]
         public void CommitsBackOnComplete()
         {
-            TestUnitOfWork sut = new TestUnitOfWork(new FrozenClock(), new SystemIdentity());
+            TestUnitOfWork sut = new TestUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem());
             sut.Begin();
             sut.Complete();
             sut.Dispose();
@@ -21,7 +21,7 @@
         [Fact]
         public void RollsBackOnDispose()
         {
-            TestUnitOfWork sut = new TestUnitOfWork(new FrozenClock(), new SystemIdentity());
+            TestUnitOfWork sut = new TestUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem());
             sut.Begin();
             sut.Dispose();
             Assert.Equal(1, sut.RollbackCount);
@@ -30,9 +30,9 @@
         }
 
         [Fact]
-        public void UpdatesTrackingPropertiesOnFLush()
+        public void UpdatesTrackingPropertiesOnFlush()
         {
-            TestUnitOfWork sut = new TestUnitOfWork(new FrozenClock(), new SystemIdentity());
+            TestUnitOfWork sut = new TestUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem());
             sut.Begin();
             sut.Flush();
             Assert.Equal(0, sut.RollbackCount);

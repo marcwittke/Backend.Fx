@@ -18,9 +18,9 @@
         private readonly ITenantManager sut;
         private readonly IScopeManager scopeManager;
 
-        private class AnApplicationModule  : ApplicationModule 
+        private class AnDomainModule  : DomainModule 
         {
-            public AnApplicationModule(params Assembly[] domainAssemblies) : base(domainAssemblies)
+            public AnDomainModule(params Assembly[] domainAssemblies) : base(domainAssemblies)
             { }
 
             protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
@@ -35,7 +35,7 @@
             var compositionRoot = new SimpleInjectorCompositionRoot();
             var domainAssembly = typeof(AnAggregate).GetTypeInfo().Assembly;
             compositionRoot.RegisterModules(
-                new AnApplicationModule(domainAssembly),
+                new AnDomainModule(domainAssembly),
                 new InMemoryIdGeneratorsModule(),
                 new InMemoryPersistenceModule(domainAssembly));
 

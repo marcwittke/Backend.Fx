@@ -3,6 +3,7 @@
     using System;
     using System.Security.Principal;
     using Fx.Environment.DateAndTime;
+    using Fx.Patterns.DependencyInjection;
     using Fx.Patterns.UnitOfWork;
 
     public class TestUnitOfWork : UnitOfWork
@@ -25,7 +26,7 @@
             RollbackCount++;
         }
 
-        public TestUnitOfWork(IClock clock, IIdentity identity) : base(clock, identity)
+        public TestUnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder) : base(clock, identityHolder)
         { }
     }
 }

@@ -16,7 +16,7 @@
         {
             using(var dbContext = new TestDbContext(DbContextOptions))
             {
-                var sut = new ReadonlyEfUnitOfWork(dbContext, new SystemIdentity());
+                var sut = new ReadonlyEfUnitOfWork(dbContext, CurrentIdentityHolder.CreateSystem());
                 
                 Assert.Null(dbContext.Database.CurrentTransaction);
                 sut.Begin();
@@ -31,7 +31,7 @@
         {
             using (var dbContext = new TestDbContext(DbContextOptions))
             {
-                var sut = new ReadonlyEfUnitOfWork(dbContext, new SystemIdentity());
+                var sut = new ReadonlyEfUnitOfWork(dbContext, CurrentIdentityHolder.CreateSystem());
                 sut.Begin();
                 dbContext.Add(new Blogger(334, "Bratislav", "Metulsky"));
                 sut.Complete();
@@ -45,7 +45,7 @@
         {
             using (var dbContext = new TestDbContext(DbContextOptions))
             {
-                var sut = new ReadonlyEfUnitOfWork(dbContext, new SystemIdentity());
+                var sut = new ReadonlyEfUnitOfWork(dbContext, CurrentIdentityHolder.CreateSystem());
                 sut.Begin();
                 dbContext.Add(new Blogger(335, "Bratislav", "Metulsky"));
                 sut.Dispose();

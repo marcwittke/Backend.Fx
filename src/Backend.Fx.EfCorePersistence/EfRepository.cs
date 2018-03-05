@@ -9,7 +9,8 @@
     using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
     using Microsoft.EntityFrameworkCore.Infrastructure;
     using Patterns.Authorization;
-    
+    using Patterns.DependencyInjection;
+
     public class EfRepository<TAggregateRoot> : Repository<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
         private static readonly ILogger Logger = LogManager.Create<EfRepository<TAggregateRoot>>();
@@ -18,8 +19,8 @@
         private readonly IAggregateAuthorization<TAggregateRoot> aggregateAuthorization;
 
         public EfRepository(DbContext dbContext, IAggregateMapping<TAggregateRoot> aggregateMapping,
-            TenantId tenantId, IAggregateAuthorization<TAggregateRoot> aggregateAuthorization)
-            : base(tenantId, aggregateAuthorization)
+            ICurrentTHolder<TenantId> currentTenantIdHolder, IAggregateAuthorization<TAggregateRoot> aggregateAuthorization)
+            : base(currentTenantIdHolder, aggregateAuthorization)
         {
             this.dbContext = dbContext;
             this.aggregateMapping = aggregateMapping;

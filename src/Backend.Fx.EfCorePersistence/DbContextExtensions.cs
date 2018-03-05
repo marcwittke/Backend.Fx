@@ -32,9 +32,9 @@
                         .ForAll(mt => modelBuilder.Entity(mt.ClrType).Property(nameof(Entity.Id)).ValueGeneratedNever());
         }
 
-        public static void ApplyAggregateRootMappings(this DbContext dbContext, ModelBuilder modelBuilder)
+        public static void ApplyAggregateMappings(this DbContext dbContext, ModelBuilder modelBuilder)
         {
-            //CAVE: IAggregateRootMapping implementations must reside in the same assembly as the Applications DbContext-type
+            //CAVE: IAggregateMapping implementations must reside in the same assembly as the Applications DbContext-type
             var aggregateDefinitionTypeInfos = dbContext
                 .GetType()
                 .GetTypeInfo()

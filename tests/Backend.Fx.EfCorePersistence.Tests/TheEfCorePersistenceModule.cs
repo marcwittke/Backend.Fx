@@ -26,9 +26,9 @@
             { }
         }
 
-        private class AnApplicationModule  : ApplicationModule 
+        private class AnDomainModule  : DomainModule 
         {
-            public AnApplicationModule(params Assembly[] domainAssemblies) : base(domainAssemblies)
+            public AnDomainModule(params Assembly[] domainAssemblies) : base(domainAssemblies)
             { }
 
             protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
@@ -46,7 +46,7 @@
 
             sut = new SimpleInjectorCompositionRoot();
             sut.RegisterModules(
-                new AnApplicationModule(typeof(Blog).GetTypeInfo().Assembly),
+                new AnDomainModule(typeof(Blog).GetTypeInfo().Assembly),
                 new APersistenceModule(dbContextOptions));
             sut.Verify();
         }
@@ -91,7 +91,7 @@
             {
                 var queryable = sut.GetInstance<IQueryable<Blog>>();
                 Assert.NotNull(queryable);
-                Assert.IsType<AggregateQueryable<Blog>>(queryable);
+                Assert.IsType<EntityQueryable<Blog>>(queryable);
             }
         }
 

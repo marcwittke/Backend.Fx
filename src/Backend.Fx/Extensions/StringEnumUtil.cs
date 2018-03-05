@@ -7,8 +7,7 @@
     {
         public static TEnum Parse<TEnum>(this string value) where TEnum : struct
         {
-            TEnum enumValue;
-            if(Enum.TryParse(value, out enumValue))
+            if(Enum.TryParse(value, out TEnum enumValue))
             {
                 return enumValue;
             }

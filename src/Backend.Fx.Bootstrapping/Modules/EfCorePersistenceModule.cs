@@ -33,7 +33,7 @@
             container.Register(typeof(IAggregateMapping<>), new[] { typeof(TDbContext).GetTypeInfo().Assembly });
 
             // IQueryable for framework use only, since it bypasses authorization
-            container.Register(typeof(IQueryable<>), typeof(AggregateQueryable<>));
+            container.Register(typeof(IQueryable<>), typeof(EntityQueryable<>));
 
             // EF unit of work
             var uowRegistration = lifestyle.CreateRegistration<EfUnitOfWork>(container);
