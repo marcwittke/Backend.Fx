@@ -6,7 +6,7 @@
 
     public class Errors : IReadOnlyDictionary<string, Error[]>
     {
-        public const string DefaultErrorKey = "_error";
+        public const string GenericErrorKey = "_error";
         private readonly IDictionary<string, List<Error>> dictionaryImplementation = new Dictionary<string, List<Error>>();
 
         public bool ContainsKey(string key)
@@ -65,12 +65,12 @@
 
         public void Add(Error error)
         {
-            Add(DefaultErrorKey, error);
+            Add(GenericErrorKey, error);
         }
 
         public void Add(IEnumerable<Error> errors)
         {
-            Add(DefaultErrorKey, errors);
+            Add(GenericErrorKey, errors);
         }
 
         public IEnumerator<KeyValuePair<string, Error[]>> GetEnumerator()

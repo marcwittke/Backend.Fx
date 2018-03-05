@@ -19,7 +19,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
         {
             using (var dbContext = new TestDbContext(DbContextOptions))
             {
-                using (var uow = new EfUnitOfWork(Clock, new SystemIdentity(), dbContext))
+                using (var uow = new EfUnitOfWork(Clock, CurrentIdentityHolder.CreateSystem(), dbContext))
                 {
                     uow.Begin();
                     var repo = new EfRepository<Blogger>(dbContext, new BloggerMapping(), TenantIdHolder, new AllowAll<Blogger>());
@@ -49,7 +49,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
             
             using (var dbContext = new TestDbContext(DbContextOptions))
             {
-                using (var uow = new EfUnitOfWork(Clock, new SystemIdentity(), dbContext))
+                using (var uow = new EfUnitOfWork(Clock, CurrentIdentityHolder.CreateSystem(), dbContext))
                 {
                     uow.Begin();
                     var repo = new EfRepository<Blogger>(dbContext, new BloggerMapping(), TenantIdHolder, new AllowAll<Blogger>());
@@ -75,7 +75,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (var dbContext = new TestDbContext(DbContextOptions))
             {
-                using (var uow = new EfUnitOfWork(Clock, new SystemIdentity(), dbContext))
+                using (var uow = new EfUnitOfWork(Clock, CurrentIdentityHolder.CreateSystem(), dbContext))
                 {
                     uow.Begin();
                     var repo = new EfRepository<Blogger>(dbContext, new BloggerMapping(), TenantIdHolder, new AllowAll<Blogger>());
@@ -101,7 +101,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (var dbContext = new TestDbContext(DbContextOptions))
             {
-                using (var uow = new EfUnitOfWork(Clock, new SystemIdentity(), dbContext))
+                using (var uow = new EfUnitOfWork(Clock, CurrentIdentityHolder.CreateSystem(), dbContext))
                 {
                     uow.Begin();
                     var repo = new EfRepository<Blogger>(dbContext, new BloggerMapping(), TenantIdHolder, new AllowAll<Blogger>());
@@ -120,7 +120,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (var dbContext = new TestDbContext(DbContextOptions))
             {
-                using (var uow = new EfUnitOfWork(Clock, new SystemIdentity(), dbContext))
+                using (var uow = new EfUnitOfWork(Clock, CurrentIdentityHolder.CreateSystem(), dbContext))
                 {
                     uow.Begin();
                     var repo = new EfRepository<Blogger>(dbContext, new BloggerMapping(), TenantIdHolder, new AllowAll<Blogger>());

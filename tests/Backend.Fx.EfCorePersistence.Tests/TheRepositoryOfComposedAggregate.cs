@@ -220,7 +220,7 @@
             public SystemUnderTest(DbContextOptions<TestDbContext> dbContextOptions, IClock clock, ICurrentTHolder<TenantId> tenantIdHolder)
             {
                 DbContext = new TestDbContext(dbContextOptions);
-                UnitOfWork = new EfUnitOfWork(clock, new SystemIdentity(), DbContext);
+                UnitOfWork = new EfUnitOfWork(clock, CurrentIdentityHolder.CreateSystem(), DbContext);
                 UnitOfWork.Begin();
                 Repository = new EfRepository<Blog>(DbContext, new BlogMapping(), tenantIdHolder, new AllowAll<Blog>());
             }

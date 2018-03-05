@@ -12,7 +12,7 @@
             RollbackCount++;
         }
 
-        public TestReadonlyUnitOfWork() : base(new SystemIdentity())
+        public TestReadonlyUnitOfWork() : base(CurrentIdentityHolder.CreateSystem())
         { }
     }
 }
