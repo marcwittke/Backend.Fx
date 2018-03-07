@@ -9,7 +9,7 @@
     /// </summary>
     public interface IEventAggregator
     {
-        void PublishDomainEvent<TDomainEvent>(TDomainEvent domainEvent) where TDomainEvent : IDomainEvent;
+        Task PublishDomainEvent<TDomainEvent>(TDomainEvent domainEvent) where TDomainEvent : IDomainEvent;
 
         Task PublishIntegrationEvent<TIntegrationEvent>(TIntegrationEvent integrationEvent) where TIntegrationEvent : IIntegrationEvent;
 

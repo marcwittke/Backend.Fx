@@ -97,6 +97,13 @@ namespace Backend.Fx.Bootstrapping
         {
             return Container.GetAllInstances<IDomainEventHandler<TDomainEvent>>();
         }
+
+        /// <inheritdoc />
+        public IEnumerable<IAsyncDomainEventHandler<TDomainEvent>> GetAllAsyncEventHandlers<TDomainEvent>() where TDomainEvent : IDomainEvent
+        {
+            return Container.GetAllInstances<IAsyncDomainEventHandler<TDomainEvent>>();
+        }
+
         #endregion
 
         #region IDisposable implementation

@@ -23,13 +23,26 @@
         /// </summary>
         /// <typeparam name="TDomainEvent"></typeparam>
         /// <param name="domainEvent"></param>
-        public void PublishDomainEvent<TDomainEvent>(TDomainEvent domainEvent) where TDomainEvent : IDomainEvent
+        public async Task PublishDomainEvent<TDomainEvent>(TDomainEvent domainEvent) where TDomainEvent : IDomainEvent
         {
             foreach (var injectedHandler in eventHandlerProvider.GetAllEventHandlers<TDomainEvent>())
             {
                 try
                 {
                     injectedHandler.Handle(domainEvent);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, $"Handling of {typeof(TDomainEvent).Name} by {injectedHandler.GetType().Name} failed.");
+                    throw;
+                }
+            }
+
+            foreach (var injectedHandler in eventHandlerProvider.GetAllAsyncEventHandlers<TDomainEvent>())
+            {
+                try
+                {
+                    await injectedHandler.HandleAsync(domainEvent);
                 }
                 catch (Exception ex)
                 {
