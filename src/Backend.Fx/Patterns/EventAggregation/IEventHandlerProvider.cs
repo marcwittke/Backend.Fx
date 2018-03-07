@@ -1,6 +1,5 @@
 namespace Backend.Fx.Patterns.EventAggregation
 {
-    using System.Collections;
     using System.Collections.Generic;
 
     public interface IEventHandlerProvider
@@ -11,6 +10,5 @@ namespace Backend.Fx.Patterns.EventAggregation
         /// <typeparam name="TDomainEvent"></typeparam>
         /// <returns></returns>
         IEnumerable<IDomainEventHandler<TDomainEvent>> GetAllEventHandlers<TDomainEvent>() where TDomainEvent : IDomainEvent;
-        IEnumerable<IAsyncDomainEventHandler<TDomainEvent>> GetAllAsyncEventHandlers<TDomainEvent>() where TDomainEvent : IDomainEvent;
     }
 }
