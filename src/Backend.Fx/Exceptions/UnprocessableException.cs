@@ -4,7 +4,7 @@
 
     public class UnprocessableException : ClientException
     {
-        public UnprocessableException()
+        public UnprocessableException() : this("The provided arguments could not be processed.")
         { }
 
         public UnprocessableException(string message) : base(message)
