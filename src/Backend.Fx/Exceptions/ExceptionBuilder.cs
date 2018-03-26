@@ -41,7 +41,7 @@
         {
             if (clientException.HasErrors())
             {
-                throw new UnprocessableException("The provided arguments cannot be processed");
+                throw clientException;
             }
         }
 
