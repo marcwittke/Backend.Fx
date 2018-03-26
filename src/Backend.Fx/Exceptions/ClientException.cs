@@ -5,7 +5,7 @@
 
     public class ClientException : Exception
     {
-        public ClientException()
+        public ClientException() : this("Bad Request")
         {}
 
         public ClientException(string message) : base(message)
