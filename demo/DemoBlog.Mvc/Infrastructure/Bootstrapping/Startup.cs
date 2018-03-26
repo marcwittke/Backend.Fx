@@ -53,10 +53,13 @@
             identityApplication.Boot();
 
             // booting blogApplication
-            blogApplication.Configure(app, env);
-            blogApplication.Boot();
-
+            blogApplication.Configure(app);
+            
             app.UseMvc(routes => routes.MapRoute(name: "default", template: "{controller=Home}/{action=Index}/{id?}"));
+
+            app.ApplicationServices.GetRequiredService<IApplicationLifetime>()
+               .ApplicationStarted
+               .Register(async () => { await blogApplication.Boot(env.IsDevelopment()); });
         }
     }
 }

@@ -2,6 +2,7 @@
 {
     using System;
     using System.Security.Principal;
+    using DependencyInjection;
     using Environment.DateAndTime;
     using Logging;
 
@@ -12,7 +13,7 @@
     {
         void Begin();
         void Complete();
-        IIdentity Identity { get; }
+        ICurrentTHolder<IIdentity> IdentityHolder { get; }
     }
 
     public abstract class UnitOfWork : IUnitOfWork, ICanFlush
@@ -24,18 +25,18 @@
         private bool? isCompleted;
         private IDisposable lifetimeLogger;
 
-        protected UnitOfWork(IClock clock, IIdentity identity)
+        protected UnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder)
         {
             this.clock = clock;
-            this.Identity = identity;
+            this.IdentityHolder = identityHolder;
         }
 
-        public IIdentity Identity { get; }
+        public ICurrentTHolder<IIdentity> IdentityHolder { get; }
 
         public virtual void Flush()
         {
             Logger.Debug("Flushing unit of work #" + instanceId);
-            UpdateTrackingProperties(Identity.Name, clock.UtcNow);
+            UpdateTrackingProperties(IdentityHolder.Current.Name, clock.UtcNow);
         }
         
         public virtual void Begin()
@@ -47,7 +48,7 @@
         public void Complete()
         {
             Logger.Debug("Completing unit of work #" + instanceId);
-            UpdateTrackingProperties(Identity.Name, clock.UtcNow);
+            UpdateTrackingProperties(IdentityHolder.Current.Name, clock.UtcNow);
             Commit();
             isCompleted = true;
         }

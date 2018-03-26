@@ -19,12 +19,12 @@
     /// the collections of <see cref="IDomainEventHandler{TDomainEvent}"/>s, <see cref="IJob"/>s and <see cref="InitialDataGenerator"/>s 
     /// found in the given list of domain assemblies.
     /// </summary>
-    public abstract class ApplicationModule : SimpleInjectorModule
+    public abstract class DomainModule : SimpleInjectorModule
     {
         private readonly Assembly[] assemblies;
         private IEventAggregator eventAggregator;
 
-        protected ApplicationModule(params Assembly[] domainAssemblies)
+        protected DomainModule(params Assembly[] domainAssemblies)
         {
             assemblies = domainAssemblies.Concat(new[] {
                 typeof(Entity).GetTypeInfo().Assembly,
@@ -42,19 +42,17 @@
 
             // the current IIdentity is resolved using the scoped CurrentIdentityHolder that is maintained when opening a scope
             container.Register<ICurrentTHolder<IIdentity>, CurrentIdentityHolder>();
-            container.Register(() => container.GetInstance<ICurrentTHolder<IIdentity>>().Current);
-
             // same for the current TenantId
             container.Register<ICurrentTHolder<TenantId>, CurrentTenantIdHolder>();
-            container.Register(() => container.GetInstance<ICurrentTHolder<TenantId>>().Current);
+            
 
-            RegisterDomainAndApplicationServices(container);
+            container.RegisterDomainAndApplicationServices(assemblies);
 
             RegisterAuthorization(container);
 
             // domain event subsystem
             container.RegisterCollection(typeof(IDomainEventHandler<>), assemblies);
-            container.RegisterSingleton<IEventAggregator>(eventAggregator);
+            container.RegisterSingleton(eventAggregator);
 
             // initial data generation subsystem
             container.RegisterCollection<InitialDataGenerator>(assemblies);
@@ -63,31 +61,6 @@
             foreach (var scheduledJobType in container.GetTypesToRegister(typeof(IJob), assemblies))
             {
                 container.Register(scheduledJobType);
-            }
-        }
-
-        /// <summary>
-        ///     Auto registering all implementors of <see cref="IApplicationService" /> and <see cref="IDomainService" /> with
-        ///     their implementations as scoped instances
-        /// </summary>
-        private void RegisterDomainAndApplicationServices(Container container)
-        {
-            var serviceRegistrations = container
-                    .GetTypesToRegister(typeof(IDomainService), assemblies)
-                    .Concat(container.GetTypesToRegister(typeof(IApplicationService), assemblies))
-                    .SelectMany(type =>
-                                    type.GetTypeInfo()
-                                        .ImplementedInterfaces
-                                        .Where(i => typeof(IDomainService) != i && typeof(IApplicationService) != i && (i.Namespace.StartsWith("Backend") || assemblies.Contains(i.GetTypeInfo().Assembly)))
-                                        .Select(service => new
-                                        {
-                                            Service = service,
-                                            Implementation = type
-                                        })
-                    );
-            foreach (var reg in serviceRegistrations)
-            {
-                container.Register(reg.Service, reg.Implementation);
             }
         }
 

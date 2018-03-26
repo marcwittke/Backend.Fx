@@ -6,9 +6,9 @@
     using Domain;
     using SimpleInjector;
 
-    public class BlogApplicationModule : ApplicationModule
+    public class BlogDomainModule : DomainModule
     {
-        public BlogApplicationModule() : base(typeof(Blog).GetTypeInfo().Assembly)
+        public BlogDomainModule() : base(typeof(Blog).GetTypeInfo().Assembly)
         { }
 
         protected override void Register(Container container, ScopedLifestyle scopedLifestyle)

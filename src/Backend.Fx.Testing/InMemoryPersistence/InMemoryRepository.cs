@@ -5,14 +5,15 @@
     using Environment.MultiTenancy;
     using Extensions;
     using Patterns.Authorization;
+    using Patterns.DependencyInjection;
     using RandomData;
 
     public class InMemoryRepository<T> : Repository<T> where T : AggregateRoot
     {
         public virtual IInMemoryStore<T> Store { get; }
 
-        public InMemoryRepository(IInMemoryStore<T> store, TenantId tenantId, IAggregateAuthorization<T> aggregateAuthorization) 
-            : base(tenantId, aggregateAuthorization)
+        public InMemoryRepository(IInMemoryStore<T> store, ICurrentTHolder<TenantId> currentTenantIdHolder, IAggregateAuthorization<T> aggregateAuthorization) 
+            : base(currentTenantIdHolder, aggregateAuthorization)
         {
             Store = store;
         }

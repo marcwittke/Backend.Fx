@@ -2,7 +2,6 @@
 {
     using System;
     using System.Data.SqlClient;
-    using System.Globalization;
     using System.Linq;
     using System.Net.Sockets;
     using Backend.Fx.Bootstrapping;
@@ -27,8 +26,7 @@
     {
         private static readonly ILogger Logger = LogManager.Create<BlogApplication>();
         private readonly string connectionString;
-        private bool doEnsureDevelopmentTenantExistenceOnBoot;
-
+    
         private BlogApplication(string connectionString,
                                 ICompositionRoot compositionRoot, 
                                 IDatabaseManager databaseManager, 
@@ -48,7 +46,7 @@
             SimpleInjectorCompositionRoot compositionRoot = new SimpleInjectorCompositionRoot();
             compositionRoot.RegisterModules(
                 new BlogPersistenceModule(blogDbContextOptions),
-                new BlogApplicationModule());
+                new BlogDomainModule());
 
             var blogApplication = new BlogApplication(
                 connectionString,
@@ -73,9 +71,8 @@
             services.AddSingleton(this);
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
-            doEnsureDevelopmentTenantExistenceOnBoot = env.IsDevelopment();
             CompositionRoot.RegisterModules(new AspNetMvcViewModule(app));
 
             // this instance should be gracefully disposed on shutdown
@@ -83,16 +80,6 @@
 
             // every request runs through our application middleware, using this instance
             app.UseMiddleware<BlogMiddleware>();
-        }
-
-        public override void Boot()
-        {
-            base.Boot();
-
-            if (doEnsureDevelopmentTenantExistenceOnBoot)
-            {
-                EnsureDevelopmentTenantExistence();
-            }
         }
 
         public void CheckDatabaseExistence()
@@ -136,34 +123,6 @@
                                             .WaitAndRetry(retries, attempt => TimeSpan.FromSeconds(secondsToWait));
 
             retryPolicy.Execute(CheckDatabaseExistence);
-        }
-
-        /// <summary>
-        /// This is only supported in development environments. Running inside of an IIS host will result in timeouts during the first 
-        /// request, leaving the system in an unpredicted state. To achieve the same effect in a hosted demo environment, use the same
-        /// functionality via service endpoints.
-        /// </summary>
-        public void EnsureDevelopmentTenantExistence()
-        {
-            const string devTenantCode = "dev";
-
-            if (DatabaseManager.DatabaseExists)
-            {
-                if (TenantManager.GetTenants().Any(t => t.IsDemoTenant && t.Name == devTenantCode))
-                {
-                    return;
-                }
-            }
-
-            Logger.Info("Creating dev tenant");
-
-            // This will create a demonstration tenant. Note that by using the TenantManager directly instead of the TenantsController
-            // there won't be any TenantCreated event published...
-            TenantId tenantId = TenantManager.CreateDemonstrationTenant(devTenantCode, "dev tenant", true, new CultureInfo("en-US"));
-
-            // ... therefore it's up to us to do the initialization. Which is fine, because we are not spinning of a background action
-            // but blocking in our thread.
-            TenantManager.EnsureTenantIsInitialized(tenantId);
         }
     }
 }

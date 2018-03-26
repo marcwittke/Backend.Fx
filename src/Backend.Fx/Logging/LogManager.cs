@@ -2,6 +2,7 @@
 {
     using System;
     using System.Diagnostics;
+    using System.Linq;
     using System.Threading;
 
     [DebuggerStepThrough]
@@ -22,7 +23,13 @@
 
         public static ILogger Create(Type t)
         {
-            return Create(t.FullName);
+            string s = t.FullName;
+            var indexOf = s.IndexOf('[');
+            if (indexOf > 0)
+            {
+                s = s.Substring(0, indexOf);
+            }
+            return Create(s);
         }
 
         public static ILogger Create(string s)

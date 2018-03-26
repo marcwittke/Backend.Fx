@@ -11,6 +11,7 @@
     using FakeItEasy;
     using Microsoft.EntityFrameworkCore;
     using Patterns.Authorization;
+    using Patterns.DependencyInjection;
     using Patterns.IdGeneration;
     using Testing;
     using Xunit;
@@ -36,7 +37,7 @@
             count = ExecuteScalar<long>("SELECT count(*) FROM Posts");
             Assert.Equal(0, count);
 
-            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantId))
+            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantIdHolder))
             {
                 var repository = sut.Repository;
                 var blog = new Blog(123, "my blog");
@@ -56,7 +57,7 @@
         {
             var id = CreateBlogWithPost();
             Blog blog;
-            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantId))
+            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantIdHolder))
             {
                 blog = sut.Repository.Single(id);
             }
@@ -72,7 +73,7 @@
         {
             var id = CreateBlogWithPost();
 
-            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantId))
+            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantIdHolder))
             {
                 var blog = sut.Repository.Single(id);
                 blog.Modify("modified");
@@ -89,7 +90,7 @@
         {
             var id = CreateBlogWithPost();
 
-            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantId))
+            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantIdHolder))
             {
                 var blog = sut.Repository.Single(id);
                 sut.Repository.Delete(blog);
@@ -109,7 +110,7 @@
             long count = ExecuteScalar<long>("SELECT count(*) FROM Posts");
             Assert.Equal(10, count);
 
-            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantId))
+            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantIdHolder))
             {
                 var blog = sut.Repository.Single(id);
                 var firstPost = blog.Posts.First();
@@ -126,7 +127,7 @@
         {
             int id = CreateBlogWithPost(10);
             Post post;
-            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantId))
+            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantIdHolder))
             {
                 var blog = sut.Repository.Single(id);
                 post = blog.Posts.First();
@@ -141,7 +142,7 @@
         public void CanAddDependant()
         {
             int id = CreateBlogWithPost(10);
-            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantId))
+            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantIdHolder))
             {
                 var blog = sut.Repository.Single(id);
                 blog.Posts.Add(new Post(idGenerator.NextId(), blog, "added"));
@@ -156,7 +157,7 @@
         public void CanReplaceDependentCollection()
         {
             var id = CreateBlogWithPost(10);
-            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantId))
+            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantIdHolder))
             {
                 var blog = sut.Repository.Single(id);
                 blog.Posts.Clear();
@@ -179,7 +180,7 @@
             var expectedModifiedOn = Clock.UtcNow.AddHours(1);
             Clock.OverrideUtcNow(expectedModifiedOn);
 
-            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantId))
+            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantIdHolder))
             {
                 var blog = sut.Repository.Single(id);
                 blog.Posts.Remove(blog.Posts.First());
@@ -187,7 +188,7 @@
 
             Clock.OverrideUtcNow(Clock.UtcNow.AddHours(1));
 
-            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantId))
+            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantIdHolder))
             {
                 var blog = sut.DbContext.Blogs.Find(id);
                 Assert.NotNull(blog.ChangedOn);
@@ -198,7 +199,7 @@
         private int CreateBlogWithPost(int postCount = 1)
         {
             long blogId = nextId++;
-            ExecuteNonQuery($"INSERT INTO Blogs (Id, TenantId, Name, CreatedOn, CreatedBy) VALUES ({blogId}, {TenantId.Value}, 'my blog', CURRENT_TIMESTAMP, 'persistence test')");
+            ExecuteNonQuery($"INSERT INTO Blogs (Id, TenantId, Name, CreatedOn, CreatedBy) VALUES ({blogId}, {TenantIdHolder.Current.Value}, 'my blog', CURRENT_TIMESTAMP, 'persistence test')");
             long count = ExecuteScalar<long>("SELECT count(*) FROM Blogs");
             Assert.Equal(1, count);
             
@@ -216,12 +217,12 @@
             public EfUnitOfWork UnitOfWork { get; }
             public IRepository<Blog> Repository { get; }
 
-            public SystemUnderTest(DbContextOptions<TestDbContext> dbContextOptions, IClock clock, TenantId tenantId)
+            public SystemUnderTest(DbContextOptions<TestDbContext> dbContextOptions, IClock clock, ICurrentTHolder<TenantId> tenantIdHolder)
             {
                 DbContext = new TestDbContext(dbContextOptions);
-                UnitOfWork = new EfUnitOfWork(clock, new SystemIdentity(), DbContext);
+                UnitOfWork = new EfUnitOfWork(clock, CurrentIdentityHolder.CreateSystem(), DbContext);
                 UnitOfWork.Begin();
-                Repository = new EfRepository<Blog>(DbContext, new BlogMapping(), tenantId, new AllowAll<Blog>());
+                Repository = new EfRepository<Blog>(DbContext, new BlogMapping(), tenantIdHolder, new AllowAll<Blog>());
             }
 
             public void Dispose()
