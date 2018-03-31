@@ -5,7 +5,7 @@ namespace Backend.Fx.Patterns.EventAggregation
     public interface IEventHandlerProvider
     {
         /// <summary>
-        /// get all deomain event handlers that want to handle a specific domain event
+        /// get all domain event handlers that want to handle a specific domain event
         /// </summary>
         /// <typeparam name="TDomainEvent"></typeparam>
         /// <returns></returns>

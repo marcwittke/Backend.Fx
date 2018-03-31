@@ -37,6 +37,19 @@
                     throw;
                 }
             }
+
+            foreach (var subscribedHandler in subscribedEventHandlers.OfType<Action<TDomainEvent>>().ToArray())
+            {
+                try
+                {
+                    subscribedHandler.Invoke(domainEvent);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, $"Handling of {typeof(TDomainEvent).Name} by a subscribed handler failed.");
+                    throw;
+                }
+            }
         }
 
         /// <summary>
@@ -70,6 +83,16 @@
         /// <typeparam name="TIntegrationEvent"></typeparam>
         /// <param name="handler"></param>
         public void SubscribeToIntegrationEvent<TIntegrationEvent>(Action<TIntegrationEvent> handler) where TIntegrationEvent : IIntegrationEvent
+        {
+            subscribedEventHandlers.Add(handler);
+        }
+
+        /// <summary>
+        /// Register a delegate that should be called synchronously in the same scope/transaction where the domain event is published.
+        /// </summary>
+        /// <typeparam name="TDomainEvent"></typeparam>
+        /// <param name="handler"></param>
+        public void SubscribeToDomainEvent<TDomainEvent>(Action<TDomainEvent> handler) where TDomainEvent : IDomainEvent
         {
             subscribedEventHandlers.Add(handler);
         }
