@@ -24,13 +24,15 @@
         /// <param name="databaseManager">The database manager for the current application</param>
         /// <param name="tenantManager">The tenant manager for the current application</param>
         /// <param name="scopeManager">The scope manager for the current application</param>
+        /// <param name="jobExecutor">The job executor for the current application. If not provided, a default <see cref="Patterns.Jobs.JobExecutor"/> instance is generated.</param>
         protected BackendFxApplication(
                           ICompositionRoot compositionRoot,
                           IDatabaseManager databaseManager,
                           ITenantManager tenantManager,
-                          IScopeManager scopeManager)
+                          IScopeManager scopeManager,
+                          IJobExecutor jobExecutor = null)
         {
-            JobExecutor = new JobExecutor(tenantManager, scopeManager);
+            JobExecutor = jobExecutor ?? new JobExecutor(tenantManager, scopeManager);
             CompositionRoot = compositionRoot;
             DatabaseManager = databaseManager;
             TenantManager = tenantManager;

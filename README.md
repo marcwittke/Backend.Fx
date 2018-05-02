@@ -1,6 +1,6 @@
 # Backend.Fx 
-## An opinionated backend architecture based on .NET Standard 1.3
-I am using this set of class libraries in three projects now. Obeying the Rule of Three I am generalizing most of it now. Targetting .NET Standard 1.3 allows you to reference these libraries from .net4.6, .net core 1.0, Xamarin and UWP
+## An opinionated backend architecture based on .NET Standard 2.0
+I am using this set of class libraries in three projects now. Obeying the Rule of Three I am generalizing most of it now. Targetting .NET Standard 2.0 allows you to reference these libraries from .net4.6, .net core 1.0, Xamarin and UWP
 
 Library | NuGet
 --- | --- 
