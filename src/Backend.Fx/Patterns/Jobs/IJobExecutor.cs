@@ -1,6 +1,7 @@
 ﻿namespace Backend.Fx.Patterns.Jobs
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using DependencyInjection;
     using Environment.Authentication;
@@ -29,40 +30,42 @@
             this.scopeManager = scopeManager;
         }
 
-        public async Task ExecuteJobAsync<TJob>(int? tenantId = null, int delayInSeconds = 0) where TJob : class, IJob
+        public virtual void ExecuteJob<TJob>(int? tenantId = null, int delayInSeconds = 0) where TJob : class, IJob
         {
-            await Task.Delay(delayInSeconds * 1000);
-            await Task.Run(() =>
-                           {
-                               TenantId[] tenants = tenantId == null
-                                                        ? tenantManager.GetTenantIds()
-                                                        : new[] { new TenantId(tenantId.Value) };
+            Thread.Sleep(delayInSeconds * 1000);
+            TenantId[] tenants = tenantId == null
+                                         ? tenantManager.GetTenantIds()
+                                         : new[] { new TenantId(tenantId.Value) };
 
-                               string jobName = typeof(TJob).Name;
-                               foreach (var tenant in tenants)
-                               {
-                                   using (Logger.InfoDuration($"Beginning {jobName} scope", $"{jobName} scope completed"))
-                                   {
-                                       using (IScope scope = scopeManager.BeginScope(new SystemIdentity(), tenant))
-                                       {
-                                           scope.BeginUnitOfWork(false);
-                                           try
-                                           {
-                                               scope.GetInstance<TJob>().Execute();
-                                               scope.GetInstance<IUnitOfWork>().Complete();
-                                           }
-                                           catch (Exception ex)
-                                           {
-                                               Logger.Error(ex, $"Execution of {jobName} failed: {ex.Message}");
-                                           }
-                                           finally
-                                           {
-                                               scope.GetInstance<IUnitOfWork>().Dispose();
-                                           }
-                                       }
-                                   }
-                               }
-                           });
+            string jobName = typeof(TJob).Name;
+            foreach (var tenant in tenants)
+            {
+                using (Logger.InfoDuration($"Beginning {jobName} scope", $"{jobName} scope completed"))
+                {
+                    using (IScope scope = scopeManager.BeginScope(new SystemIdentity(), tenant))
+                    {
+                        scope.BeginUnitOfWork(false);
+                        try
+                        {
+                            scope.GetInstance<TJob>().Execute();
+                            scope.GetInstance<IUnitOfWork>().Complete();
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Error(ex, $"Execution of {jobName} failed: {ex.Message}");
+                        }
+                        finally
+                        {
+                            scope.GetInstance<IUnitOfWork>().Dispose();
+                        }
+                    }
+                }
+            }
+        }
+
+        public virtual async Task ExecuteJobAsync<TJob>(int? tenantId = null, int delayInSeconds = 0) where TJob : class, IJob
+        {
+            await Task.Run(() => ExecuteJob<TJob>(tenantId, delayInSeconds));
         }
     }
 }

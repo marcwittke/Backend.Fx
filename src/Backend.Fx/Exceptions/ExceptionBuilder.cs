@@ -8,7 +8,7 @@
         private static readonly ILogger Logger = LogManager.Create<ExceptionBuilder<TEx>>();
         private readonly TEx clientException = new TEx();
 
-        internal ExceptionBuilder()
+        public ExceptionBuilder()
         { }
 
         public void Add(Error error)
