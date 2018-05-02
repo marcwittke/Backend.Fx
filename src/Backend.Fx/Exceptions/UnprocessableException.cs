@@ -4,7 +4,7 @@
 
     public class UnprocessableException : ClientException
     {
-        public UnprocessableException() : this("The provided arguments could not be processed.")
+        public UnprocessableException()
         { }
 
         public UnprocessableException(string message) : base(message)
@@ -16,6 +16,11 @@
         public static UnprocessableExceptionBuilder UseBuilder()
         {
             return new UnprocessableExceptionBuilder();
+        }
+
+        protected override string DefaultMessage
+        {
+            get { return "The provided arguments could not be processed."; }
         }
     }
 }
