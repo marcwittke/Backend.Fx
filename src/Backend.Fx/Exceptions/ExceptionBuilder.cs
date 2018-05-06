@@ -3,13 +3,24 @@
     using System;
     using Logging;
 
-    public class ExceptionBuilder<TEx> : IDisposable where TEx : ClientException, new()
+    public interface IExceptionBuilder : IDisposable
+    {
+        void Add(Error error);
+        void Add(string key, Error error);
+        void AddNotFoundWhenNull<T>(object id, T t);
+        void AddNotFoundWhenNull<T>(string key, object id, T t);
+        void AddIf(bool condition, Error error);
+        void AddIf(string key, bool condition, Error error);
+        T CatchPossibleException<T>(Func<T> function);
+        T CatchPossibleException<T>(string key, Func<T> function);
+        void CatchPossibleException(Action action);
+        void CatchPossibleException(string key, Action action);
+    }
+
+    public class ExceptionBuilder<TEx> : IExceptionBuilder where TEx : ClientException, new()
     {
         private static readonly ILogger Logger = LogManager.Create<ExceptionBuilder<TEx>>();
         private readonly TEx clientException = new TEx();
-
-        public ExceptionBuilder()
-        { }
 
         public void Add(Error error)
         {
@@ -117,8 +128,4 @@
             }
         }
     }
-
-    public class UnprocessableExceptionBuilder : ExceptionBuilder<UnprocessableException> { }
-
-    public class ClientExceptionBuilder : ExceptionBuilder<ClientException> { }
 }

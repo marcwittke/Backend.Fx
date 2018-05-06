@@ -6,43 +6,32 @@
     public class ClientException : Exception
     {
         public ClientException()
+                : base("Bad request.")
         {}
 
-        public ClientException(string message) : base(message)
-        {}
+        public ClientException(params Error[] errors) 
+                : base("Bad request.")
+        {
+            Errors.Add(errors);
+        }
 
-        public ClientException(string message, Exception innerException) : base(message, innerException)
-        {}
+        public ClientException(string message, params Error[] errors) 
+                : base(message)
+        {
+            Errors.Add(errors);
+        }
+
+        public ClientException(string message, Exception innerException, params Error[] errors) 
+                : base(message, innerException)
+        {
+            Errors.Add(errors);
+        }
 
         public Errors Errors { get; } = new Errors();
 
         public bool HasErrors()
         {
             return Errors.Any();
-        }
-
-        public override string Message
-        {
-            get 
-            { 
-                if (!string.IsNullOrEmpty(base.Message))
-                {
-                    return base.Message;
-                }
-
-                if (HasErrors() && Errors.TryGetValue(Errors.GenericErrorKey, out Error[] genericErrors))
-                {
-                    var errors = genericErrors.Select(err => $"{err.Code}:{err.Message}");
-                    return string.Join(". ", errors);
-                }
-
-                return DefaultMessage;
-            }       
-        }
-
-        protected virtual string DefaultMessage
-        {
-            get { return "Bad Request."; }
         }
     }
 }

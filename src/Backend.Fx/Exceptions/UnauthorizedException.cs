@@ -8,42 +8,29 @@
         {
             AccessDenied,
             NotAuthenticated,
-            AccountLocked
+            AccountLocked,
+            InvalidLogonAttempt,
         }
 
-        public UnauthorizedException()
+        public UnauthorizedException() 
+                : base("Unauthorized")
         { }
 
-        public UnauthorizedException(string message) : base(message)
+        public UnauthorizedException(params Error[] errors) 
+                : base("Unauthorized", errors)
         { }
 
-        public UnauthorizedException(string message, Exception innerException) : base(message, innerException)
+        public UnauthorizedException(string message, params Error[] errors) 
+                : base(message, errors)
         { }
 
-        public static UnauthorizedException AccessDenied()
+        public UnauthorizedException(string message, Exception innerException, params Error[] errors)
+                : base(message, innerException, errors)
+        { }
+        
+        public static IExceptionBuilder UseBuilder()
         {
-            var exception = new UnauthorizedException();
-            exception.Errors.Add(new Error(Code.AccessDenied, "Access to this function or data is denied."));
-            return exception;
-        }
-
-        public static UnauthorizedException AccountLocked()
-        {
-            var exception = new UnauthorizedException();
-            exception.Errors.Add(new Error(Code.AccountLocked, "The identity's user account is locked."));
-            return exception;
-        }
-
-        public static UnauthorizedException NotAuthenticated()
-        {
-            var exception = new UnauthorizedException();
-            exception.Errors.Add(new Error(Code.NotAuthenticated, "Identity must be authenticated to access this function or data."));
-            return exception;
-        }
-
-        protected override string DefaultMessage
-        {
-            get { return "Unauthorized access."; }
+            return new ExceptionBuilder<UnauthorizedException>();
         }
     }
 }
