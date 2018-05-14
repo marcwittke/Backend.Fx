@@ -22,7 +22,7 @@
     using Polly;
     using Polly.Retry;
 
-    public class BlogApplication : BackendFxApplication
+    public class BlogApplication : BackendFxDbApplication
     {
         private static readonly ILogger Logger = LogManager.Create<BlogApplication>();
         private readonly string connectionString;

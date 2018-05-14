@@ -30,7 +30,7 @@
         private static readonly ILogger Logger = LogManager.Create<BlogMiddleware>();
         private readonly RequestDelegate next;
         private readonly IHostingEnvironment env;
-        private readonly BackendFxApplication blogApplication;
+        private readonly BackendFxDbApplication blogApplication;
         private readonly Lazy<TenantId> defaultTenantId;
 
         /// <summary>
