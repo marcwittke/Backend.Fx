@@ -7,9 +7,9 @@
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
 
-    public abstract class ProgramBase<TStartup> where TStartup : class
+    public class BackendFxProgram<TStartup> where TStartup : class
     {
-        private static Logging.ILogger logger = new DebugLogger(nameof(ProgramBase<TStartup>));
+        private static Logging.ILogger logger = new DebugLogger(nameof(BackendFxProgram<TStartup>));
 
         public void Main(string[] args)
         {
@@ -43,7 +43,7 @@
         {
             try
             {
-                logger = LogManager.Create<ProgramBase<TStartup>>();
+                logger = LogManager.Create<BackendFxProgram<TStartup>>();
                 logger.Debug("Logging initialized");
             }
             catch (Exception ex)
