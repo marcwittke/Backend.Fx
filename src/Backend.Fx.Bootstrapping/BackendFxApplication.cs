@@ -1,14 +1,29 @@
 ﻿namespace Backend.Fx.Bootstrapping
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Logging;
     using Patterns.DependencyInjection;
 
+    public interface IBackendFxApplication : IDisposable
+    {
+        /// <summary>
+        /// You should use the <see cref="IScopeManager"/> to open an injection scope for every logical operation.
+        /// In case of web applications, this refers to a single HTTP request, for example.
+        /// </summary>
+        IScopeManager ScopeManager { get; }
+
+        ICompositionRoot CompositionRoot { get; }
+        ManualResetEventSlim IsBooted { get; }
+
+        Task Boot();
+    }
+
     /// <summary>
     /// The root object of the whole backend fx application framework
     /// </summary>
-    public abstract class BackendFxApplication : IDisposable
+    public abstract class BackendFxApplication : IBackendFxApplication
     {
         private static readonly ILogger Logger = LogManager.Create<BackendFxApplication>();
 
@@ -31,11 +46,18 @@
 
         public ICompositionRoot CompositionRoot { get; }
 
+        public ManualResetEventSlim IsBooted { get; } = new ManualResetEventSlim(true);
+
         public virtual async Task Boot()
         {
             Logger.Info("Booting application");
             CompositionRoot.Verify();
             await Task.CompletedTask;
+        }
+
+        protected void BootFinished()
+        {
+            IsBooted.Set();
         }
 
         protected virtual void Dispose(bool disposing)

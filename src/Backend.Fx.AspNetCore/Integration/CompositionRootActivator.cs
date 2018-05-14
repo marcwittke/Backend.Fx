@@ -1,4 +1,4 @@
-﻿namespace Backend.Fx.AspNetCore
+﻿namespace Backend.Fx.AspNetCore.Integration
 {
     using System;
     using Patterns.DependencyInjection;
