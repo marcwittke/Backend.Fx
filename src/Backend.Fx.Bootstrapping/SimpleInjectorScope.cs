@@ -1,5 +1,7 @@
 namespace Backend.Fx.Bootstrapping
 {
+    using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Security.Principal;
     using Environment.MultiTenancy;
@@ -35,9 +37,19 @@ namespace Backend.Fx.Bootstrapping
             return scope.Container.GetInstance<TService>();
         }
 
+        public object GetInstance(Type serviceType)
+        {
+            return scope.Container.GetInstance(serviceType);
+        }
+
         public IEnumerable<TService> GetAllInstances<TService>() where TService : class
         {
             return scope.Container.GetAllInstances<TService>();
+        }
+
+        public IEnumerable GetAllInstance(Type serviceType)
+        {
+            return scope.Container.GetAllInstances(serviceType);
         }
 
         public void Dispose()
