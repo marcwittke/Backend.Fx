@@ -9,30 +9,32 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C7885592
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "demo", "demo", "{B2783441-6760-4018-B87E-9F5180C0FAD8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoBlog.Mvc", "demo\DemoBlog.Mvc\DemoBlog.Mvc.csproj", "{3A60CB72-4B1F-44E6-9B63-A51589CADE01}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoBlog.Mvc", "demo\DemoBlog.Mvc\DemoBlog.Mvc.csproj", "{3A60CB72-4B1F-44E6-9B63-A51589CADE01}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoBlog", "demo\DemoBlog.Application\DemoBlog.csproj", "{786BE0E2-9DB0-44EF-AA96-51770FDE35DB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoBlog", "demo\DemoBlog.Application\DemoBlog.csproj", "{786BE0E2-9DB0-44EF-AA96-51770FDE35DB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend.Fx", "src\Backend.Fx\Backend.Fx.csproj", "{0BBA42D0-0ED7-4AA6-A665-1FBBAF913306}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx", "src\Backend.Fx\Backend.Fx.csproj", "{0BBA42D0-0ED7-4AA6-A665-1FBBAF913306}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend.Fx.NLogLogging", "src\Backend.Fx.NLogLogging\Backend.Fx.NLogLogging.csproj", "{80F4951E-56E4-442F-96BC-53EB9BE70928}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.NLogLogging", "src\Backend.Fx.NLogLogging\Backend.Fx.NLogLogging.csproj", "{80F4951E-56E4-442F-96BC-53EB9BE70928}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend.Fx.Bootstrapping", "src\Backend.Fx.Bootstrapping\Backend.Fx.Bootstrapping.csproj", "{4B32B982-EB4B-42F4-969A-9D2D8EA23451}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.Bootstrapping", "src\Backend.Fx.Bootstrapping\Backend.Fx.Bootstrapping.csproj", "{4B32B982-EB4B-42F4-969A-9D2D8EA23451}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend.Fx.EfCorePersistence", "src\Backend.Fx.EfCorePersistence\Backend.Fx.EfCorePersistence.csproj", "{16D81037-F0D0-4647-BA4E-CA5518F6846D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.EfCorePersistence", "src\Backend.Fx.EfCorePersistence\Backend.Fx.EfCorePersistence.csproj", "{16D81037-F0D0-4647-BA4E-CA5518F6846D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6B64354E-D95B-4711-BAF6-B32049C90CD9}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend.Fx.Tests", "tests\Backend.Fx.Tests\Backend.Fx.Tests.csproj", "{3706F748-43F6-41BD-8875-81FA679220C7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.Tests", "tests\Backend.Fx.Tests\Backend.Fx.Tests.csproj", "{3706F748-43F6-41BD-8875-81FA679220C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend.Fx.Bootstrapping.Tests", "tests\Backend.Fx.Bootstrapping.Tests\Backend.Fx.Bootstrapping.Tests.csproj", "{C348AD1C-E928-4B11-8A88-EFCA70667B1D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.Bootstrapping.Tests", "tests\Backend.Fx.Bootstrapping.Tests\Backend.Fx.Bootstrapping.Tests.csproj", "{C348AD1C-E928-4B11-8A88-EFCA70667B1D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend.Fx.EfCorePersistence.Tests", "tests\Backend.Fx.EfCorePersistence.Tests\Backend.Fx.EfCorePersistence.Tests.csproj", "{764846E9-8133-4CF3-894D-E75F55D58C88}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.EfCorePersistence.Tests", "tests\Backend.Fx.EfCorePersistence.Tests\Backend.Fx.EfCorePersistence.Tests.csproj", "{764846E9-8133-4CF3-894D-E75F55D58C88}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.Testing", "src\Backend.Fx.Testing\Backend.Fx.Testing.csproj", "{0C9D99AE-D0E9-4EB7-9D44-BB05C4DF322D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend.Fx.RabbitMq", "src\Backend.Fx.RabbitMq\Backend.Fx.RabbitMq.csproj", "{AE43EDA9-52F3-493A-AA14-F10B61B5D6E9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -80,6 +82,10 @@ Global
 		{0C9D99AE-D0E9-4EB7-9D44-BB05C4DF322D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0C9D99AE-D0E9-4EB7-9D44-BB05C4DF322D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0C9D99AE-D0E9-4EB7-9D44-BB05C4DF322D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE43EDA9-52F3-493A-AA14-F10B61B5D6E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE43EDA9-52F3-493A-AA14-F10B61B5D6E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE43EDA9-52F3-493A-AA14-F10B61B5D6E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE43EDA9-52F3-493A-AA14-F10B61B5D6E9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -95,5 +101,9 @@ Global
 		{C348AD1C-E928-4B11-8A88-EFCA70667B1D} = {C7885592-A4B8-4BA8-8D3A-1EDA4025D17A}
 		{764846E9-8133-4CF3-894D-E75F55D58C88} = {C7885592-A4B8-4BA8-8D3A-1EDA4025D17A}
 		{0C9D99AE-D0E9-4EB7-9D44-BB05C4DF322D} = {53D4501E-953C-4A7C-97C4-1F9DE04BD092}
+		{AE43EDA9-52F3-493A-AA14-F10B61B5D6E9} = {53D4501E-953C-4A7C-97C4-1F9DE04BD092}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FF3B5D40-423B-434B-B2AD-610F352A3B26}
 	EndGlobalSection
 EndGlobal
