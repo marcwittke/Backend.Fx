@@ -1,6 +1,5 @@
 ﻿namespace Backend.Fx.Bootstrapping
 {
-    using System;
     using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
@@ -47,11 +46,16 @@
 
         public IJobExecutor JobExecutor { get; }
 
-        public virtual async Task Boot(bool doEnsureDevelopmentTenantExistenceOnBoot)
+        public override async Task Boot()
         {
             await base.Boot();
             DatabaseManager.EnsureDatabaseExistence();
+        }
 
+        public virtual async Task Boot(bool doEnsureDevelopmentTenantExistenceOnBoot)
+        {
+            await Boot();
+            
             if (doEnsureDevelopmentTenantExistenceOnBoot)
             {
                 EnsureDevelopmentTenantExistence();
