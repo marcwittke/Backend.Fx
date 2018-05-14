@@ -85,8 +85,6 @@
         
         private async Task HandleClientError(HttpContext context, int httpStatusCode, string code, ClientException exception)
         {
-            Logger.Warn(exception);
-            
             if (context.Response.HasStarted)
             {
                 Logger.Warn("exception cannot be handled correctly, because the response has already started");
@@ -107,7 +105,6 @@
 
         private async Task HandleServerError(HttpContext context, Exception exception)
         {
-            Logger.Error(exception);
             if (context.Response.HasStarted)
             {
                 Logger.Warn("exception cannot be handled correctly, because the response has already started");
