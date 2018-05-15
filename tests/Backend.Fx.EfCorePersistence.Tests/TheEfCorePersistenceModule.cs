@@ -100,7 +100,7 @@
         {
             using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(111)))
             {
-                using (var unitOfWork = scope.BeginUnitOfWork(false))
+                using (var unitOfWork = scope.GetInstance<IUnitOfWork>())
                 {
                     Assert.NotNull(unitOfWork);
                     Assert.IsType<EfUnitOfWork>(unitOfWork);
@@ -113,7 +113,7 @@
         {
             using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(111)))
             {
-                using (var unitOfWork = scope.BeginUnitOfWork(true))
+                using (var unitOfWork = scope.GetInstance<IReadonlyUnitOfWork>())
                 {
                     Assert.NotNull(unitOfWork);
                     Assert.IsType<ReadonlyEfUnitOfWork>(unitOfWork);
@@ -126,7 +126,7 @@
         {
             using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(100)))
             {
-                using (var unitOfWork = scope.BeginUnitOfWork(false))
+                using (var unitOfWork = scope.GetInstance<IUnitOfWork>())
                 {
                     ICanInterruptTransaction canInterruptTransaction = scope.GetInstance<ICanInterruptTransaction>();
                     Assert.Same(unitOfWork, canInterruptTransaction);

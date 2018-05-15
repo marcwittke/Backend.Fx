@@ -7,7 +7,6 @@ namespace Backend.Fx.Bootstrapping
     using Environment.MultiTenancy;
     using Logging;
     using Patterns.DependencyInjection;
-    using Patterns.UnitOfWork;
     using SimpleInjector;
 
     public sealed class SimpleInjectorScope : IScope
@@ -21,17 +20,7 @@ namespace Backend.Fx.Bootstrapping
             this.scope = scope;
             Logger.Info($"Began new scope for identity [{identity.Name}] and tenant[{(tenantId.HasValue ? tenantId.Value.ToString() : "")}]");
         }
-
-        public IUnitOfWork BeginUnitOfWork(bool beginAsReadonlyUnitOfWork)
-        {
-            IUnitOfWork unitOfWork = beginAsReadonlyUnitOfWork
-                             ? scope.Container.GetInstance<IReadonlyUnitOfWork>()
-                             : scope.Container.GetInstance<IUnitOfWork>();
-
-            unitOfWork.Begin();
-            return unitOfWork;
-        }
-
+        
         public TService GetInstance<TService>() where TService : class
         {
             return scope.Container.GetInstance<TService>();
