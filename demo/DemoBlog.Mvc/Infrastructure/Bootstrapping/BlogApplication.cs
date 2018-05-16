@@ -4,6 +4,8 @@
     using System.Data.SqlClient;
     using System.Linq;
     using System.Net.Sockets;
+    using Backend.Fx.AspNetCore.ErrorHandling;
+    using Backend.Fx.AspNetCore.Scoping;
     using Backend.Fx.Bootstrapping;
     using Backend.Fx.EfCorePersistence;
     using Backend.Fx.Environment.MultiTenancy;
@@ -22,7 +24,7 @@
     using Polly;
     using Polly.Retry;
 
-    public class BlogApplication : BackendFxApplication
+    public class BlogApplication : BackendFxDbApplication
     {
         private static readonly ILogger Logger = LogManager.Create<BlogApplication>();
         private readonly string connectionString;
@@ -78,8 +80,11 @@
             // this instance should be gracefully disposed on shutdown
             app.ApplicationServices.GetRequiredService<IApplicationLifetime>().ApplicationStopping.Register(Dispose);
 
-            // every request runs through our application middleware, using this instance
+            // every request runs through our application middlewares, using this instance
+            app.UseMiddleware<JsonErrorHandlingMiddleware>();
+            app.UseMiddleware<ErrorLoggingMiddleware>();
             app.UseMiddleware<BlogMiddleware>();
+            app.UseMiddleware<UnitOfWorkMiddleware>();
         }
 
         public void CheckDatabaseExistence()

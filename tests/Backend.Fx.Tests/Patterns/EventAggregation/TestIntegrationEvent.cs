@@ -1,16 +1,14 @@
 ﻿namespace Backend.Fx.Tests.Patterns.EventAggregation
 {
-    using Fx.Patterns.EventAggregation;
+    using Fx.Patterns.EventAggregation.Integration;
 
-    public class TestIntegrationEvent : IIntegrationEvent
+    public class TestIntegrationEvent : IntegrationEvent
     {
-        public TestIntegrationEvent(int id, int tenantId)
-        {
-            Id = id;
-            TenantId = tenantId;
-        }
+        public int Whatever { get; }
 
-        public int Id { get; }
-        public int TenantId { get; }
+        public TestIntegrationEvent(int whatever, int tenantId) : base(tenantId)
+        {
+            Whatever = whatever;
+        }
     }
 }

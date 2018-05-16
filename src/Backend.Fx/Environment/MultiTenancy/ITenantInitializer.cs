@@ -7,6 +7,7 @@ namespace Backend.Fx.Environment.MultiTenancy
     using Logging;
     using Patterns.DataGeneration;
     using Patterns.DependencyInjection;
+    using Patterns.UnitOfWork;
 
     /// <summary>
     /// Provides a tenant with initial data by running all available <see cref="InitialDataGenerator"/>s 
@@ -69,8 +70,9 @@ namespace Backend.Fx.Environment.MultiTenancy
                 var type = dataGeneratorTypesToRun.Dequeue();
                 using (IScope scope = scopeManager.BeginScope(new SystemIdentity(), tenantId))
                 {
-                    using (var unitOfWork = scope.BeginUnitOfWork(false))
+                    using (var unitOfWork = scope.GetInstance<IUnitOfWork>())
                     {
+                        unitOfWork.Begin();
                         var instance = scope.GetAllInstances<InitialDataGenerator>().Single(idg => idg.GetType() == type);
                         instance.Generate();
                         unitOfWork.Complete();

@@ -19,7 +19,7 @@
         /// </summary>
         public static void RegisterDomainAndApplicationServices(this Container container, Assembly[] assemblies)
         {
-            
+            Logger.Debug($"Registering domain and application services from {string.Join(",", assemblies.Select(ass => ass.GetName().Name))}");
             var serviceRegistrations = container
                                        .GetTypesToRegister(typeof(IDomainService), assemblies)
                                        .Concat(container.GetTypesToRegister(typeof(IApplicationService), assemblies))

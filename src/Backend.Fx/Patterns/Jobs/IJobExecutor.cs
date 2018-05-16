@@ -44,19 +44,18 @@
                 {
                     using (IScope scope = scopeManager.BeginScope(new SystemIdentity(), tenant))
                     {
-                        scope.BeginUnitOfWork(false);
-                        try
+                        using (var unitOfWork = scope.GetInstance<IUnitOfWork>())
                         {
-                            scope.GetInstance<TJob>().Execute();
-                            scope.GetInstance<IUnitOfWork>().Complete();
-                        }
-                        catch (Exception ex)
-                        {
-                            Logger.Error(ex, $"Execution of {jobName} failed: {ex.Message}");
-                        }
-                        finally
-                        {
-                            scope.GetInstance<IUnitOfWork>().Dispose();
+                            unitOfWork.Begin();
+                            try
+                            {
+                                scope.GetInstance<TJob>().Execute();
+                                unitOfWork.Complete();
+                            }
+                            catch (Exception ex)
+                            {
+                                Logger.Error(ex, $"Execution of {jobName} failed: {ex.Message}");
+                            }
                         }
                     }
                 }

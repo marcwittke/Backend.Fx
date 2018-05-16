@@ -1,15 +1,14 @@
 namespace Backend.Fx.Bootstrapping.Tests.DummyImpl
 {
-    using Patterns.EventAggregation;
+    using Patterns.EventAggregation.Integration;
 
-    public class TheIntegrationEvent : IIntegrationEvent
+    public class TheIntegrationEvent : IntegrationEvent
     {
-        public TheIntegrationEvent(int tenantId, int whatever)
+        public TheIntegrationEvent(int tenantId, int whatever) : base(tenantId)
         {
-            TenantId = tenantId;
             Whatever = whatever;
         }
-        public int TenantId { get; }
+
         public int Whatever { get; }
     }
 }

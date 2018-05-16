@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using EventAggregation;
+    using EventAggregation.Domain;
 
     /// <summary>
     /// Encapsulates the injection framework of choice. The implementation follows the Register/Resolve/Release pattern.
@@ -10,7 +11,7 @@
     /// the domain or application logic, this would result in the Service Locator anti pattern, described here:
     /// http://blog.ploeh.dk/2010/02/03/ServiceLocatorisanAnti-Pattern/
     /// </summary>
-    public interface ICompositionRoot : IDisposable, IEventHandlerProvider
+    public interface ICompositionRoot : IDisposable, IDomainEventHandlerProvider
     {
         /// <summary>
         /// Gets a service instance by providing its type

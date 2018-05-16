@@ -1,6 +1,7 @@
 ﻿namespace Backend.Fx.Bootstrapping.Tests.DummyImpl
 {
-    using Patterns.EventAggregation;
+    using Patterns.EventAggregation.Domain;
+
     public class ADomainEvent : IDomainEvent
     {
     }

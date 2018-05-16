@@ -209,106 +209,6 @@ namespace Backend.Fx.Bootstrapping.Tests
         }
 
         [Fact]
-        public void BeginsReadonlyUnitOfWork()
-        {
-            
-            Assert.Throws<ActivationException>(() => sut.GetInstance<IUnitOfWork>());
-            Assert.Throws<ActivationException>(() => sut.GetInstance<IReadonlyUnitOfWork>());
-
-            var scope = sut.BeginScope(new SystemIdentity(), new TenantId(111));
-
-            scope.BeginUnitOfWork(true);
-
-            using (var uowFake = sut.GetInstance<IReadonlyUnitOfWork>())
-            {
-                Assert.NotNull(uowFake);
-                A.CallTo(() => uowFake.Begin()).MustHaveHappened(Repeated.Exactly.Once);
-
-                uowFake.Complete();
-
-                A.CallTo(() => uowFake.Complete()).MustHaveHappened(Repeated.Exactly.Once);
-
-                scope.Dispose();
-                A.CallTo(() => uowFake.Dispose()).MustHaveHappened(Repeated.Exactly.Once);
-            }
-        }
-
-        [Fact]
-        public void BeginsButDoesNotCompleteReadonlyUnitOfWorkOnFailure()
-        {
-            Assert.Throws<ActivationException>(() => sut.GetInstance<IUnitOfWork>());
-            Assert.Throws<ActivationException>(() => sut.GetInstance<IReadonlyUnitOfWork>());
-
-            IUnitOfWork uowFake = null;
-            try
-            {
-                using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(111)))
-                {
-                    scope.BeginUnitOfWork(true);
-                    uowFake = sut.GetInstance<IReadonlyUnitOfWork>();
-
-                    throw new InvalidOperationException("This is the siumulation of an error inside the business transaction");
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-            }
-
-            A.CallTo(() => uowFake.Complete()).MustNotHaveHappened();
-            A.CallTo(() => uowFake.Dispose()).MustHaveHappened(Repeated.Exactly.Once);
-        }
-
-        [Fact]
-        public void BeginsAndCompletesUnitOfWork()
-        {
-            
-            Assert.Throws<ActivationException>(() => sut.GetInstance<IUnitOfWork>());
-            Assert.Throws<ActivationException>(() => sut.GetInstance<IReadonlyUnitOfWork>());
-
-            var scope = sut.BeginScope(new SystemIdentity(), new TenantId(111));
-
-            scope.BeginUnitOfWork(false);
-
-            using (var unitOfWork = sut.GetInstance<IUnitOfWork>())
-            {
-                Assert.NotNull(unitOfWork);
-                
-                unitOfWork.Complete();
-                Assert.Equal(1, ((InMemoryUnitOfWork)unitOfWork).CommitCalls);
-                Assert.Equal(0, ((InMemoryUnitOfWork)unitOfWork).RollbackCalls);
-            }
-        }
-
-        [Fact]
-        public void BeginsButDoesNotCompleteUnitOfWorkOnFailure()
-        {
-            
-            Assert.Throws<ActivationException>(() => sut.GetInstance<IUnitOfWork>());
-            Assert.Throws<ActivationException>(() => sut.GetInstance<IReadonlyUnitOfWork>());
-
-            IUnitOfWork unitOfWork = null;
-            try
-            {
-                using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(111)))
-                {
-                    unitOfWork = scope.BeginUnitOfWork(false);
-                    throw new InvalidOperationException("This is the siumulation of an error inside the business transaction");
-                    //scope.CompleteUnitOfWork();
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-            }
-
-            // ReSharper disable once PossibleNullReferenceException
-            Assert.Equal(0, ((InMemoryUnitOfWork)unitOfWork).CommitCalls);
-            // ReSharper disable once PossibleNullReferenceException
-            Assert.Equal(1, ((InMemoryUnitOfWork)unitOfWork).RollbackCalls);
-        }
-
-        [Fact]
         public void CanProvideEventHandlers()
         {
             
@@ -323,9 +223,7 @@ namespace Backend.Fx.Bootstrapping.Tests
                 Assert.True(handlers.OfType<ADomainEventHandler3>().Any());
             }
         }
-
-       
-
+        
         public void Dispose()
         {
             sut.Dispose();

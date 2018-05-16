@@ -1,7 +1,7 @@
 namespace Backend.Fx.Tests.Patterns.EventAggregation
 {
     using System;
-    using Fx.Patterns.EventAggregation;
+    using Fx.Patterns.EventAggregation.Domain;
 
     public class FailingDomainEventHandler : IDomainEventHandler<TestDomainEvent>
     {
