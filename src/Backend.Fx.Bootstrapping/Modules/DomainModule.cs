@@ -10,7 +10,7 @@
     using Patterns.Authorization;
     using Patterns.DataGeneration;
     using Patterns.DependencyInjection;
-    using Patterns.EventAggregation;
+    using Patterns.EventAggregation.Domain;
     using Patterns.Jobs;
     using SimpleInjector;
 
@@ -24,7 +24,7 @@
     {
         private static readonly ILogger Logger = LogManager.Create<DomainModule>();
         private readonly Assembly[] assemblies;
-        private IEventAggregator eventAggregator;
+        private IDomainEventAggregator domainEventAggregator;
 
         protected DomainModule(params Assembly[] domainAssemblies)
         {
@@ -35,7 +35,7 @@
 
         public override void Register(ICompositionRoot compositionRoot)
         {
-            eventAggregator = new EventAggregator(compositionRoot);        
+            domainEventAggregator = new DomainEventAggregator(compositionRoot);        
             base.Register(compositionRoot);
         }
 
@@ -57,7 +57,7 @@
             Logger.Debug($"Registering domain event handlers from {string.Join(",", assemblies.Select(ass => ass.GetName().Name))}");
             container.RegisterCollection(typeof(IDomainEventHandler<>), assemblies);
             Logger.Debug("Registering singleton event aggregator instance");
-            container.RegisterSingleton(eventAggregator);
+            container.RegisterSingleton(domainEventAggregator);
 
             // initial data generation subsystem
             Logger.Debug($"Registering initial data generators from {string.Join(",", assemblies.Select(ass => ass.GetName().Name))}");

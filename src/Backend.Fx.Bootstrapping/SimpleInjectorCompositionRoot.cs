@@ -6,7 +6,7 @@ namespace Backend.Fx.Bootstrapping
     using Environment.MultiTenancy;
     using Logging;
     using Patterns.DependencyInjection;
-    using Patterns.EventAggregation;
+    using Patterns.EventAggregation.Domain;
     using SimpleInjector;
     using SimpleInjector.Advanced;
     using SimpleInjector.Lifestyles;

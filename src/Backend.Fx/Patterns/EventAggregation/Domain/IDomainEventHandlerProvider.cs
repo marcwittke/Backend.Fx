@@ -1,8 +1,8 @@
-namespace Backend.Fx.Patterns.EventAggregation
+namespace Backend.Fx.Patterns.EventAggregation.Domain
 {
     using System.Collections.Generic;
 
-    public interface IEventHandlerProvider
+    public interface IDomainEventHandlerProvider
     {
         /// <summary>
         /// get all domain event handlers that want to handle a specific domain event

@@ -1,4 +1,4 @@
-﻿namespace Backend.Fx.Patterns.EventAggregation
+﻿namespace Backend.Fx.Patterns.EventAggregation.Domain
 {
     /// <summary>
     /// Marker interface for domain events that must be handled in the same scope and transaction of the publishing logic.

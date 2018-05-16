@@ -28,4 +28,10 @@
     <PackageReference Include="System.Security.Principal" Version="4.3.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp">
+      <HintPath>..\..\..\..\..\.nuget\packages\microsoft.csharp\4.4.0\ref\netstandard2.0\Microsoft.CSharp.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
