@@ -91,7 +91,7 @@
 
         public bool EnsureOpen()
         {
-            if (!isDisposed && connection.IsOpen && model.IsOpen && consumer.IsRunning)
+            if (!isDisposed && connection?.IsOpen == true && model?.IsOpen == true && consumer?.IsRunning == true)
             {
                 return true;
             }
