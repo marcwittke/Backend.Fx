@@ -15,6 +15,7 @@
         IScopeManager ScopeManager { get; }
 
         ICompositionRoot CompositionRoot { get; }
+
         ManualResetEventSlim IsBooted { get; }
 
         Task Boot();
