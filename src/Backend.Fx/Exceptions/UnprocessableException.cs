@@ -4,23 +4,25 @@
 
     public class UnprocessableException : ClientException
     {
-        public UnprocessableException()
+        public UnprocessableException() 
+                : base("The provided arguments could not be processed.")
+        {}
+
+        public UnprocessableException(params Error[] errors) 
+                : base("The provided arguments could not be processed.", errors)
         { }
 
-        public UnprocessableException(string message) : base(message)
+        public UnprocessableException(string message, params Error[] errors) 
+                : base(message, errors)
         { }
 
-        public UnprocessableException(string message, Exception innerException) : base(message, innerException)
+        public UnprocessableException(string message, Exception innerException, params Error[] errors) 
+                : base(message, innerException, errors)
         { }
 
-        public static UnprocessableExceptionBuilder UseBuilder()
+        public static IExceptionBuilder UseBuilder()
         {
-            return new UnprocessableExceptionBuilder();
-        }
-
-        protected override string DefaultMessage
-        {
-            get { return "The provided arguments could not be processed."; }
+            return new ExceptionBuilder<UnprocessableException>();
         }
     }
 }

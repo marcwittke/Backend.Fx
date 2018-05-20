@@ -70,7 +70,11 @@
 
         public void Add(IEnumerable<Error> errors)
         {
-            Add(GenericErrorKey, errors);
+            var errorArray = errors as Error[] ?? errors.ToArray();
+            if (errorArray.Any()) 
+            {
+                Add(GenericErrorKey, errorArray);
+            }
         }
 
         public IEnumerator<KeyValuePair<string, Error[]>> GetEnumerator()

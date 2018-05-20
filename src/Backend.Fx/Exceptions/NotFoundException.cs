@@ -2,21 +2,35 @@
 {
     public class NotFoundException<TEntity> : NotFoundException
     {
-        public NotFoundException(object id) : base(typeof(TEntity).Name, id)
+        public NotFoundException(object id, params Error[] errors) 
+                : base(typeof(TEntity).Name, id, errors)
         {}
     }
 
-    public abstract class NotFoundException : ClientException
+    public class NotFoundException : ClientException
     {
-
         public string EntityName { get; }
 
         public object Id { get; }
 
-        protected NotFoundException(string entityName, object id) : base($"No {entityName}[{id}] found.")
+        public NotFoundException()
+                : base("Not found.") 
+        {}
+
+        public NotFoundException(params Error[] errors) 
+                : base("Not found.", errors) 
+        {}
+
+        public NotFoundException(string entityName, object id, params Error[] errors)
+                : base($"No {entityName}[{id}] found.", errors)
         {
             EntityName = entityName;
             Id = id;
+        }
+
+        public static IExceptionBuilder UseBuilder()
+        {
+            return new ExceptionBuilder<NotFoundException>();
         }
     }
 }
