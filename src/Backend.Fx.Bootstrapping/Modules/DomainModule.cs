@@ -69,7 +69,12 @@
                 Logger.Debug($"Registering {scheduledJobType.Name}");
                 container.Register(scheduledJobType);
             }
+
+            container.Register(typeof(IJobExecutor<>), typeof(JobExecutor<>));
+            container.RegisterDecorator(typeof(IJobExecutor<>), typeof(UnitOfWorkJobExecutor<>));
+            container.RegisterDecorator(typeof(IJobExecutor<>), typeof(ExceptionLoggingJobExecutor<>));
         }
+
 
         /// <summary>
         ///     Auto registering all aggregate authorization classes

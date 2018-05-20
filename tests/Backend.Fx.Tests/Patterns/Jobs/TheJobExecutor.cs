@@ -1,84 +1,42 @@
 ﻿namespace Backend.Fx.Tests.Patterns.Jobs
 {
-    using System.Security.Principal;
-    using FakeItEasy;
-    using Fx.Environment.MultiTenancy;
-    using Fx.Patterns.DependencyInjection;
+    using System.Threading.Tasks;
     using Fx.Patterns.Jobs;
     using JetBrains.Annotations;
     using Xunit;
 
     public class TheJobExecutor
     {
-        private readonly IJobExecutor sut;
-        private readonly IScopeManager scopeManager;
-        
+        [UsedImplicitly]
+        public class MyJob : IJob
+        {
+            public int ExecutionCount { get; set; }
+            public void Run()
+            {
+                ExecutionCount++;
+            }
+        }
+
+        private readonly MyJob myJob = new MyJob();
+        private readonly JobExecutor<MyJob> sut;
+
         public TheJobExecutor()
         {
-            MyJob.ExecutionCounter = 0;
-
-            var tenantManager = A.Fake<ITenantManager>();
-            A.CallTo(() => tenantManager.GetTenantIds()).Returns(new[] {
-                new TenantId(1),
-                new TenantId(2),
-                new TenantId(3),
-                new TenantId(4)
-            });
-
-            scopeManager = A.Fake<IScopeManager>();
-            A.CallTo(() => scopeManager.BeginScope(A<IIdentity>._, A<TenantId>._)).Returns(A.Fake<IScope>());
-
-            sut = new JobExecutor(tenantManager, scopeManager);
+            sut = new JobExecutor<MyJob>(myJob);
         }
 
         [Fact]
-        public async void ExecutesTheJobInSystemScopeForEachTenant()
+        public void RunsTheJob()
         {
-            await sut.ExecuteJobAsync<MyJob>();
-
-            A.CallTo(()=>scopeManager.BeginScope(A<IIdentity>.That.Matches(id => id.Name == "SYSTEM"), A<TenantId>.That.Matches(t => t.Value == 1)))
-                .MustHaveHappened(Repeated.Exactly.Once);
-
-            A.CallTo(() => scopeManager.BeginScope(A<IIdentity>.That.Matches(id => id.Name == "SYSTEM"), A<TenantId>.That.Matches(t => t.Value == 2)))
-             .MustHaveHappened(Repeated.Exactly.Once);
-
-            A.CallTo(() => scopeManager.BeginScope(A<IIdentity>.That.Matches(id => id.Name == "SYSTEM"), A<TenantId>.That.Matches(t => t.Value == 3)))
-             .MustHaveHappened(Repeated.Exactly.Once);
-
-            A.CallTo(() => scopeManager.BeginScope(A<IIdentity>.That.Matches(id => id.Name == "SYSTEM"), A<TenantId>.That.Matches(t => t.Value == 4)))
-             .MustHaveHappened(Repeated.Exactly.Once);
-
-            Assert.Equal(MyJob.ExecutionCounter, 4);
+            sut.ExecuteJob();
+            Assert.Equal(1, myJob.ExecutionCount);
         }
 
         [Fact]
-        public async void ExecutesTheJobInSystemScopeForGivenTenant()
+        public async Task RunsTheJobAsynchronously()
         {
-            await sut.ExecuteJobAsync<MyJob>(1);
-
-            A.CallTo(() => scopeManager.BeginScope(A<IIdentity>.That.Matches(id => id.Name == "SYSTEM"), A<TenantId>.That.Matches(t => t.Value == 1)))
-             .MustHaveHappened(Repeated.Exactly.Once);
-
-            A.CallTo(() => scopeManager.BeginScope(A<IIdentity>.That.Matches(id => id.Name == "SYSTEM"), A<TenantId>.That.Matches(t => t.Value == 2)))
-             .MustNotHaveHappened();
-
-            A.CallTo(() => scopeManager.BeginScope(A<IIdentity>.That.Matches(id => id.Name == "SYSTEM"), A<TenantId>.That.Matches(t => t.Value == 3)))
-             .MustNotHaveHappened();
-
-            A.CallTo(() => scopeManager.BeginScope(A<IIdentity>.That.Matches(id => id.Name == "SYSTEM"), A<TenantId>.That.Matches(t => t.Value == 4)))
-             .MustNotHaveHappened();
-
-            Assert.Equal(MyJob.ExecutionCounter, 1);
-        }
-
-        [UsedImplicitly]
-        private class MyJob : IJob
-        {
-            public static int ExecutionCounter = 0;
-            public void Execute()
-            {
-                ExecutionCounter++;
-            }
+            await sut.ExecuteJobAsync();
+            Assert.Equal(1, myJob.ExecutionCount);
         }
     }
 }

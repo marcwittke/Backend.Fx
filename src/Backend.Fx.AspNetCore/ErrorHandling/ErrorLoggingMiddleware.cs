@@ -1,9 +1,7 @@
 ﻿namespace Backend.Fx.AspNetCore.ErrorHandling
 {
     using System;
-    using System.Linq;
     using System.Threading.Tasks;
-    using Exceptions;
     using JetBrains.Annotations;
     using Logging;
     using Microsoft.AspNetCore.Http;
@@ -11,7 +9,7 @@
     public class ErrorLoggingMiddleware
     {
         private readonly RequestDelegate next;
-        private static readonly ILogger Logger = LogManager.Create<ErrorLoggingMiddleware>();
+        private readonly IExceptionLogger exceptionLogger = new ExceptionLogger(LogManager.Create<ErrorLoggingMiddleware>());
 
         [UsedImplicitly]
         public ErrorLoggingMiddleware(RequestDelegate next)
@@ -26,19 +24,13 @@
             {
                 await next.Invoke(context);
             }
-            catch (ClientException cex)
-            {
-                string[] clientErrorStrings = cex.Errors
-                                                 .SelectMany(err => err.Value.Select(er => $"{Environment.NewLine}  {er.Code}:{er.Message}"))
-                                                 .ToArray();
-
-                var clientErrorString = string.Join("", clientErrorStrings);
-                Logger.Warn(cex, cex.Message + clientErrorString);
-                throw;
-            }
             catch (Exception uex)
             {
-                Logger.Error(uex);
+                if (!context.Items.ContainsKey("ExceptionLogged")) 
+                {
+                    exceptionLogger.LogException(uex);
+                    context.Items["ExceptionLogged"] = true;
+                }
                 throw;
             }
         }
