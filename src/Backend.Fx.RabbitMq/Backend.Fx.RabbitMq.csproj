@@ -1,16 +1,24 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>0.0.0.0</Version>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute> 
+  </PropertyGroup>
+  
+  <PropertyGroup>
     <Authors>Marc Wittke</Authors>
     <Company>anic GmbH</Company>
-    <Description>An event bus implementation based on Rabbit.MQ</Description>
     <Copyright>All rights reserved. Distributed under the terms of the MIT License.</Copyright>
+    <Description>An event bus implementation based on RabbitMQ</Description>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/marcwittke/Backend.Fx</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/marcwittke/Backend.Fx.git</RepositoryUrl>
+    <Product>Backend.Fx</Product>
     <RepositoryType>Git</RepositoryType>
+    <RepositoryUrl>https://github.com/marcwittke/Backend.Fx.git</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
