@@ -17,7 +17,7 @@
         private readonly IBackendFxApplication application;
 
         [UsedImplicitly]
-        protected UnitOfWorkMiddleware(RequestDelegate next, IBackendFxApplication application)
+        public UnitOfWorkMiddleware(RequestDelegate next, IBackendFxApplication application)
         {
             this.next = next;
             this.application = application;
