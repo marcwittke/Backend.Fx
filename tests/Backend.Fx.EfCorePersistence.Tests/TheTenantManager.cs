@@ -1,7 +1,6 @@
 ﻿namespace Backend.Fx.EfCorePersistence.Tests
 {
     using System.Globalization;
-    using System.Linq;
     using DummyImpl;
     using Environment.MultiTenancy;
     using FakeItEasy;
@@ -60,10 +59,11 @@
 
             var tenants = sut.GetTenants();
             Assert.Equal(4, tenants.Length);
-            Assert.True(tenants.Any(t => t.Id == 4711));
-            Assert.True(tenants.Any(t => t.Id == 4712));
-            Assert.True(tenants.Any(t => t.Id == 4713));
-            Assert.True(tenants.Any(t => t.Id == 4714));
+            Assert.Contains(tenants, t => t.Id == 4711);
+            Assert.Contains(tenants, t => t.Id == 4712);
+            Assert.Contains(tenants, t => t.Id == 4713);
+            
+            Assert.Contains(tenants, t => t.Id == 4714);
         }
 
         [Fact]
@@ -76,10 +76,10 @@
 
             var tenants = sut.GetTenantIds();
             Assert.Equal(4, tenants.Length);
-            Assert.True(tenants.Any(t => t.Value == 4711));
-            Assert.True(tenants.Any(t => t.Value == 4712));
-            Assert.True(tenants.Any(t => t.Value == 4713));
-            Assert.True(tenants.Any(t => t.Value == 4714));
+            Assert.Contains(tenants, t => t.Value == 4711);
+            Assert.Contains(tenants, t => t.Value == 4712);
+            Assert.Contains(tenants, t => t.Value == 4713);
+            Assert.Contains(tenants, t => t.Value == 4714);
         }
 
         private class MyTenantManager : TenantManager<TestDbContext>

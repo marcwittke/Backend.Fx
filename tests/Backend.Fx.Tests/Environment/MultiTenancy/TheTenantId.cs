@@ -13,10 +13,11 @@
             Assert.False(sut.HasValue);
         }
 
-        public void ThrowsOnAccessingTHeValueWhenInitializedWithNull()
+        [Fact]
+        public void ThrowsOnAccessingTheValueWhenInitializedWithNull()
         {
             var sut = new TenantId(null);
-            Assert.Throws<InvalidOperationException>(()=>sut.Value);
+            Assert.Throws<InvalidOperationException>(() => sut.Value);
         }
     }
 }

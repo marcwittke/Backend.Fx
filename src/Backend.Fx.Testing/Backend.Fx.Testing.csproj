@@ -12,7 +12,7 @@
     <Authors>Marc Wittke</Authors>
     <Company>anic GmbH</Company>
     <Copyright>All rights reserved. Distributed under the terms of the MIT License.</Copyright>
-    <Description>Provides some utilities to test a Backen.Fx based application: - In memory persistence layer - test data generation - xunit logging</Description>
+    <Description>Provides some utilities to test a Backend.Fx based application: - In memory persistence layer - test data generation - xunit logging</Description>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/marcwittke/Backend.Fx</PackageProjectUrl>
