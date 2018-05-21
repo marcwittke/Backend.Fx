@@ -6,6 +6,7 @@
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>  
+    <IsPackable Condition="'$(IsPackable)' == ''">true</IsPackable>
   </PropertyGroup>
   
   <PropertyGroup>
@@ -21,13 +22,7 @@
     <RepositoryUrl>https://github.com/marcwittke/Backend.Fx.git</RepositoryUrl>
   </PropertyGroup>
     
-  <ItemGroup>
-    <Compile Remove="TestData\**" />
-    <EmbeddedResource Remove="TestData\**" />
-    <None Remove="TestData\**" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ItemGroup>
     <PackageReference Include="FakeItEasy" Version="4.6.0" />
     <PackageReference Include="xunit" Version="2.3.1" />
   </ItemGroup>
