@@ -11,7 +11,7 @@
 
         public void EnsureSequence(DbContext dbContext)
         {
-            Logger.Info($"Ensuring existence of oracle sequence {SequenceName}");
+            Logger.Info($"Ensuring existence of mssql sequence {SequenceName}");
             using (var dbConnection = dbContext.Database.GetDbConnection())
             {
                 dbConnection.Open();
