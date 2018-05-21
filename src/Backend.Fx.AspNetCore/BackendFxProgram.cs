@@ -1,4 +1,4 @@
-﻿namespace Backend.Fx.AspNetCore.Integration
+﻿namespace Backend.Fx.AspNetCore
 {
     using System;
     using Logging;
