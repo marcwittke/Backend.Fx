@@ -1,6 +1,5 @@
 ﻿namespace Backend.Fx.AspNetCore.Scoping
 {
-    using System.Security.Principal;
     using System.Threading.Tasks;
     using Bootstrapping;
     using Environment.MultiTenancy;
