@@ -1,4 +1,4 @@
-﻿namespace Backend.Fx.AspNetCore
+﻿namespace Backend.Fx.AspNetCore.Configuration
 {
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Options;
