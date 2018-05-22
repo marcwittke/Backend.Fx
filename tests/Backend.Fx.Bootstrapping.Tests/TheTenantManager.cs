@@ -54,7 +54,7 @@
             {
                 IRepository<AnAggregate> repository = scope.GetInstance<IRepository<AnAggregate>>();
                 AnAggregate[] allAggregates = repository.GetAll();
-                Assert.Equal(0, allAggregates.Length);
+                Assert.Empty(allAggregates);
             }
         }
 
@@ -68,7 +68,7 @@
             {
                 IRepository<AnAggregate> repository = scope.GetInstance<IRepository<AnAggregate>>();
                 AnAggregate[] allAggregates = repository.GetAll();
-                Assert.Equal(1, allAggregates.Length);
+                Assert.Single(allAggregates);
                 Assert.Equal("Productive record", allAggregates[0].Name);
             }
         }

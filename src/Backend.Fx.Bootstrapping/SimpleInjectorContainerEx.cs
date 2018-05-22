@@ -42,13 +42,13 @@
 
         public static void Configure<TOptions>(this Container container, Action<TOptions> configure) where TOptions : class
         {
-            container.RegisterSingleton<IConfigureOptions<TOptions>>(new ConfigureOptions<TOptions>(configure));
+            container.RegisterInstance<IConfigureOptions<TOptions>>(new ConfigureOptions<TOptions>(configure));
         }
 
         public static void Configure<TOptions>(this Container container, IConfiguration configuration) where TOptions : class
         {
-            container.RegisterSingleton<IOptionsChangeTokenSource<TOptions>>(new ConfigurationChangeTokenSource<TOptions>(Options.DefaultName, configuration));
-            container.RegisterSingleton<IConfigureOptions<TOptions>>(new NamedConfigureFromConfigurationOptions<TOptions>(Options.DefaultName, configuration));
+            container.RegisterInstance<IOptionsChangeTokenSource<TOptions>>(new ConfigurationChangeTokenSource<TOptions>(Options.DefaultName, configuration));
+            container.RegisterInstance<IConfigureOptions<TOptions>>(new NamedConfigureFromConfigurationOptions<TOptions>(Options.DefaultName, configuration));
         }
 
     }

@@ -7,8 +7,6 @@
     using Environment.Persistence;
     using Logging;
     using Patterns.DependencyInjection;
-    using Patterns.Jobs;
-    
     
     public abstract class BackendFxDbApplication : BackendFxApplication
     {
@@ -21,15 +19,12 @@
         /// <param name="databaseManager">The database manager for the current application</param>
         /// <param name="tenantManager">The tenant manager for the current application</param>
         /// <param name="scopeManager">The scope manager for the current application</param>
-        /// <param name="jobExecutor">The job executor for the current application. If not provided, a default <see cref="Patterns.Jobs.JobExecutor"/> instance is generated.</param>
         protected BackendFxDbApplication(
                           ICompositionRoot compositionRoot,
                           IDatabaseManager databaseManager,
                           ITenantManager tenantManager,
-                          IScopeManager scopeManager,
-                          IJobExecutor jobExecutor = null) : base(compositionRoot,scopeManager)
+                          IScopeManager scopeManager) : base(compositionRoot,scopeManager)
         {
-            JobExecutor = jobExecutor ?? new JobExecutor(tenantManager, scopeManager);
             DatabaseManager = databaseManager;
             TenantManager = tenantManager;
         }
@@ -44,7 +39,6 @@
         /// </summary>
         public ITenantManager TenantManager { get; }
 
-        public IJobExecutor JobExecutor { get; }
 
         public override async Task Boot()
         {

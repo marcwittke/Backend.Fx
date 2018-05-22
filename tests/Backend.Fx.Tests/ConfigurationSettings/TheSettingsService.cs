@@ -55,7 +55,7 @@
             Assert.Equal(333, sut.SmtpPort);
 
             Setting[] settings = settingRepository.GetAll();
-            Assert.Equal(1, settings.Length);
+            Assert.Single(settings);
             Assert.Equal("333", settings[0].SerializedValue);
             Assert.Equal("My.SmtpPort", settings[0].Key);
         }
@@ -81,14 +81,14 @@
             settingRepository.Add(setting);
 
             MySettingsService sut = new MySettingsService(idGenerator, settingRepository);
-            Assert.Equal(null, sut.SmtpHost);
+            Assert.Null(sut.SmtpHost);
         }
 
         [Fact]
         public void ReadsNonExistingSettingAsDefaultFromRepository()
         {
             MySettingsService sut = new MySettingsService(idGenerator, settingRepository);
-            Assert.Equal(null, sut.SmtpHost);
+            Assert.Null(sut.SmtpHost);
         }
     }
 }

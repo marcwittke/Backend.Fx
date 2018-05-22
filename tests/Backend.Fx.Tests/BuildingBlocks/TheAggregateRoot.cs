@@ -44,7 +44,7 @@
             var sut = new TestAggregateRoot(nextId++, "gaga");
             sut.SetCreatedProperties("me", now);
             Assert.Equal("me", sut.CreatedBy);
-            Assert.Equal(null, sut.ChangedBy);
+            Assert.Null(sut.ChangedBy);
         }
 
         [Fact]
@@ -54,7 +54,7 @@
             var sut = new TestAggregateRoot(nextId++, "gaga");
             sut.SetCreatedProperties("me", now);
             Assert.Equal(now, sut.CreatedOn);
-            Assert.Equal(null, sut.ChangedOn);
+            Assert.Null(sut.ChangedOn);
         }
 
         [Fact]
@@ -64,7 +64,7 @@
             var sut = new TestAggregateRoot(nextId++, "gaga");
             sut.SetModifiedProperties("me", now);
             Assert.Equal("me", sut.ChangedBy);
-            Assert.Equal(null, sut.CreatedBy);
+            Assert.Null(sut.CreatedBy);
         }
 
         [Fact]

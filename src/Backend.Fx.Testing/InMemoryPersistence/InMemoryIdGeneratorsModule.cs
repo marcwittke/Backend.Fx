@@ -10,7 +10,7 @@
 
         protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
         {
-            container.RegisterSingleton(EntityIdGenerator);
+            container.RegisterInstance(EntityIdGenerator);
         }
     }
 }

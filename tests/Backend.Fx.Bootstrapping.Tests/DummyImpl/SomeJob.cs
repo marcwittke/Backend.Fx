@@ -4,7 +4,7 @@
 
     public class SomeJob : IJob
     {
-        public void Execute()
+        public void Run()
         {}
     }
 }

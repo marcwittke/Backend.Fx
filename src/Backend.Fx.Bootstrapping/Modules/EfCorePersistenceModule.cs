@@ -25,7 +25,7 @@
 
         protected override void Register(Container container, ScopedLifestyle lifestyle)
         {
-            container.RegisterSingleton(dbContextOptions);
+            container.RegisterInstance(dbContextOptions);
             container.Register<DbContext,TDbContext>();
 
             // EF Repositories

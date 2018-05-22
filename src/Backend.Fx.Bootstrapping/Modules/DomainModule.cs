@@ -55,13 +55,13 @@
 
             // domain event subsystem
             Logger.Debug($"Registering domain event handlers from {string.Join(",", assemblies.Select(ass => ass.GetName().Name))}");
-            container.RegisterCollection(typeof(IDomainEventHandler<>), assemblies);
+            container.Collection.Register(typeof(IDomainEventHandler<>), assemblies);
             Logger.Debug("Registering singleton event aggregator instance");
-            container.RegisterSingleton(domainEventAggregator);
+            container.RegisterInstance(domainEventAggregator);
 
             // initial data generation subsystem
             Logger.Debug($"Registering initial data generators from {string.Join(",", assemblies.Select(ass => ass.GetName().Name))}");
-            container.RegisterCollection<InitialDataGenerator>(assemblies);
+            container.Collection.Register<InitialDataGenerator>(assemblies);
 
             // all jobs are dynamically registered
             foreach (var scheduledJobType in container.GetTypesToRegister(typeof(IJob), assemblies))
@@ -69,7 +69,12 @@
                 Logger.Debug($"Registering {scheduledJobType.Name}");
                 container.Register(scheduledJobType);
             }
+
+            container.Register(typeof(IJobExecutor<>), typeof(JobExecutor<>));
+            container.RegisterDecorator(typeof(IJobExecutor<>), typeof(UnitOfWorkJobExecutor<>));
+            container.RegisterDecorator(typeof(IJobExecutor<>), typeof(ExceptionLoggingJobExecutor<>));
         }
+
 
         /// <summary>
         ///     Auto registering all aggregate authorization classes

@@ -54,9 +54,9 @@
         {
             Setting sut = new Setting(4, "key");
             sut.SetValue(new BooleanSerializer(), null);
-            Assert.Equal(null, sut.SerializedValue);
+            Assert.Null(sut.SerializedValue);
             var booleanValueRead = sut.GetValue(new BooleanSerializer());
-            Assert.Equal(null, booleanValueRead);
+            Assert.Null(booleanValueRead);
         }
 
         [Fact]
@@ -75,9 +75,9 @@
         {
             Setting sut = new Setting(6, "key");
             sut.SetValue(new DoubleSerializer(), null);
-            Assert.Equal(null, sut.SerializedValue);
+            Assert.Null(sut.SerializedValue);
             var doubleValueRead = sut.GetValue(new DoubleSerializer());
-            Assert.Equal(null, doubleValueRead);
+            Assert.Null(doubleValueRead);
         }
 
         [Fact]
@@ -96,9 +96,9 @@
         {
             Setting sut = new Setting(8, "key");
             sut.SetValue(new IntegerSerializer(), null);
-            Assert.Equal(null, sut.SerializedValue);
+            Assert.Null(sut.SerializedValue);
             var intValueRead = sut.GetValue(new IntegerSerializer());
-            Assert.Equal(null, intValueRead);
+            Assert.Null(intValueRead);
         }
 
         [Fact]
@@ -117,9 +117,9 @@
         {
             Setting sut = new Setting(10, "key");
             sut.SetValue(new DateTimeSerializer(), null);
-            Assert.Equal(null, sut.SerializedValue);
+            Assert.Null(sut.SerializedValue);
             var dateTimeValueRead = sut.GetValue(new DateTimeSerializer());
-            Assert.Equal(null, dateTimeValueRead);
+            Assert.Null(dateTimeValueRead);
         }
     }
 }

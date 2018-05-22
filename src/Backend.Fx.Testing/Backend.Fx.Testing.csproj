@@ -6,13 +6,14 @@
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>  
+    <IsPackable Condition="'$(IsPackable)' == ''">true</IsPackable>
   </PropertyGroup>
   
   <PropertyGroup>
     <Authors>Marc Wittke</Authors>
     <Company>anic GmbH</Company>
     <Copyright>All rights reserved. Distributed under the terms of the MIT License.</Copyright>
-    <Description>Provides some utilities to test a Backen.Fx based application: - In memory persistence layer - test data generation - xunit logging</Description>
+    <Description>Provides some utilities to test a Backend.Fx based application: - In memory persistence layer - test data generation - xunit logging</Description>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/marcwittke/Backend.Fx</PackageProjectUrl>
@@ -21,17 +22,9 @@
     <RepositoryUrl>https://github.com/marcwittke/Backend.Fx.git</RepositoryUrl>
   </PropertyGroup>
     
-  <ItemGroup>
-    <Compile Remove="TestData\**" />
-    <EmbeddedResource Remove="TestData\**" />
-    <None Remove="TestData\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="FakeItEasy" Version="4.4.0" />
-    <PackageReference Include="NLog" Version="5.0.0-beta11" />
-    <PackageReference Include="SimpleInjector" Version="4.0.12" />
-    <PackageReference Include="xunit" Version="2.2.0" />
+    <ItemGroup>
+    <PackageReference Include="FakeItEasy" Version="4.6.0" />
+    <PackageReference Include="xunit" Version="2.3.1" />
   </ItemGroup>
 
   <ItemGroup>
