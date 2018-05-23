@@ -12,7 +12,7 @@
     public class TestContainer : MssqlDockerContainer
     {
         public TestContainer(string dockerApiUrl) 
-                : base(dockerApiUrl, TestRandom.NextPassword(), "BackendFxTests" + DateTime.UtcNow.ToString("yyyMMdd_HHmmss"))
+                : base(dockerApiUrl, TestRandom.NextPassword(), "BackendFxTests" + DateTime.UtcNow.ToString("yyyyMMdd_HHmmss"))
         { }
 
         public override IDbConnection CreateConnection()
