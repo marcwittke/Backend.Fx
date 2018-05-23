@@ -1,0 +1,46 @@
+﻿namespace Backend.Fx.Tests.Environment
+{
+    public enum BuildReason
+    {
+        None,
+        /// <summary>
+        ///     A user manually queued the build.
+        /// </summary>
+        Manual,
+
+        /// <summary>
+        ///     Continuous integration (CI) triggered by a Git push or a TFVC check-in.
+        /// </summary>
+        IndividualCI,
+
+        /// <summary>
+        ///     Continuous integration (CI) triggered by a Git push or a TFVC check-in, and the Batch changes was selected.
+        /// </summary>
+        BatchedCI,
+
+        /// <summary>
+        ///     Scheduled trigger.
+        /// </summary>
+        Schedule,
+
+        /// <summary>
+        ///     A user manually queued the build of a specific TFVC shelveset.
+        /// </summary>
+        ValidateShelveset,
+
+        /// <summary>
+        ///     Gated check-in trigger.
+        /// </summary>
+        CheckInShelveset,
+
+        /// <summary>
+        ///     The build was triggered by a Git branch policy that requires a build.
+        /// </summary>
+        PullRequest,
+
+        /// <summary>
+        ///     The build was triggered by another build.
+        /// </summary>
+        BuildCompletion
+    }
+}

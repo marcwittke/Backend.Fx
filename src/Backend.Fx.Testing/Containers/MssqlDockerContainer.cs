@@ -14,7 +14,7 @@
         private readonly string saPassword;
 
         protected MssqlDockerContainer(string dockerApiUrl, [NotNull] string saPassword, string name = null, string baseImage = null)
-                : base(baseImage ?? "microsoft/mssql-server-linux:latest", name, new[] { $"SA_PASSWORD={saPassword}","ACCEPT_EULA=Y", "MSSQL_PID=Developer" }, dockerApiUrl)
+                : base(baseImage ?? "microsoft/mssql-server-linux:latest", name, new[] { $"SA_PASSWORD={saPassword}", "ACCEPT_EULA=Y", "MSSQL_PID=Developer" }, dockerApiUrl)
         {
             this.saPassword = saPassword ?? throw new ArgumentNullException(nameof(saPassword));
         }
@@ -66,11 +66,41 @@
 
                 using (var restoreCommand = connection.CreateCommand())
                 {
+                    restoreCommand.CommandText = "USE master";
+                    restoreCommand.ExecuteNonQuery();
+                }
+
+                string logicalDataName = "";
+                string logicalLogName = "";
+                using (var fileListCommand=connection.CreateCommand())
+                {
+                    fileListCommand.CommandText = $"RESTORE FILELISTONLY FROM DISK = N'{targetPath}/{Path.GetFileName(bakFilePath)}'";
+                    using (var reader = fileListCommand.ExecuteReader())
+                    {
+                        while(reader.Read())
+                        {
+                            int typeOrdinal = reader.GetOrdinal("Type");
+                            int logicalNameOrdinal = reader.GetOrdinal("LogicalName");
+                            if (reader.GetString(typeOrdinal) == "D")
+                            {
+                                logicalDataName = reader.GetString(logicalNameOrdinal);
+                            }
+
+                            if (reader.GetString(typeOrdinal) == "L")
+                            {
+                                logicalLogName = reader.GetString(logicalNameOrdinal);
+                            }
+                        }
+                    }
+                }
+
+                using (var restoreCommand = connection.CreateCommand())
+                {
                     var restoreCommandCommandText
                             = $"RESTORE DATABASE [{dbName}] FROM  DISK = N'{targetPath}/{Path.GetFileName(bakFilePath)}' " +
                               "WITH FILE = 1, " +
-                              $"MOVE N'mep-prod-sql_Data' TO N'/var/opt/mssql/data/{dbName}_data.mdf', " +
-                              $"MOVE N'mep-prod-sql_Log' TO N'/var/opt/mssql/data/{dbName}_log.ldf', " +
+                              $"MOVE N'{logicalDataName}' TO N'/var/opt/mssql/data/{dbName}_data.mdf', " +
+                              $"MOVE N'{logicalLogName}' TO N'/var/opt/mssql/data/{dbName}_log.ldf', " +
                               "NOUNLOAD, REPLACE ";
 
                     restoreCommand.CommandText = restoreCommandCommandText;
@@ -81,20 +111,17 @@
 
         private Stream CreateTarGz(string sourceFile)
         {
+            var tempFileName = Path.GetTempFileName();
+            Stream outStream = File.Create(tempFileName);
+            Stream gzoStream = new GZipOutputStream(outStream);
+            TarArchive tarArchive = TarArchive.CreateOutputTarArchive(gzoStream);
+    
+            TarEntry tarEntry = TarEntry.CreateEntryFromFile(sourceFile);
+            tarArchive.WriteEntry(tarEntry, true);
+    
+            tarArchive.Close();
 
-            Stream outStream = new MemoryStream();
-            using (Stream gzoStream = new GZipOutputStream(outStream))
-            {
-                using (TarArchive tarArchive = TarArchive.CreateOutputTarArchive(gzoStream))
-                {
-                    TarEntry tarEntry = TarEntry.CreateEntryFromFile(sourceFile);
-                    tarArchive.WriteEntry(tarEntry, true);
-                    tarArchive.Close();
-                }
-            }
-
-            outStream.Seek(0, SeekOrigin.Begin);
-            return outStream;
+            return File.OpenRead(tempFileName);
         }
     }
 }
