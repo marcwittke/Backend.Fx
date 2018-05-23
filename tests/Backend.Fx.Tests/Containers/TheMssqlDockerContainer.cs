@@ -4,9 +4,9 @@
     using System.Data;
     using System.Data.SqlClient;
     using System.Threading.Tasks;
+    using Fx.Extensions;
     using RandomData;
     using Testing.Containers;
-    using Testing.OnContainers;
     using Xunit;
 
     public class TestContainer : MssqlDockerContainer
@@ -23,10 +23,16 @@
 
     public class TheMssqlDockerContainer
     {
+        public TheMssqlDockerContainer()
+        {
+            string apiUrl = AsyncHelper.RunSync(()=> DockerUtilities.DetectDockerClientApi());
+            AsyncHelper.RunSync(()=> DockerUtilities.KillAllOlderThan(apiUrl, TimeSpan.FromMinutes(30)));
+        }
+
         [Fact]
         public async Task CanBeUsed()
         {
-            string apiUrl = await DockerDiscovery.DetectDockerClientApi();
+            string apiUrl = await DockerUtilities.DetectDockerClientApi();
 
             using (TestContainer container = new TestContainer(apiUrl))
             {

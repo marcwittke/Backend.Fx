@@ -1,4 +1,4 @@
-﻿namespace Backend.Fx.Testing.OnContainers
+﻿namespace Backend.Fx.Testing.Containers
 {
     using System;
     using System.Linq;
@@ -7,9 +7,23 @@
     using Docker.DotNet.Models;
     using Fx.Logging;
 
-    public class DockerDiscovery
+    public class DockerUtilities
     {
-        private static readonly ILogger Logger = LogManager.Create<DockerDiscovery>();
+        private static readonly ILogger Logger = LogManager.Create<DockerUtilities>();
+
+        public static async Task KillAllOlderThan(string dockerApiUri, TimeSpan maxAge)
+        {
+            using (var client = new DockerClientConfiguration(new Uri(dockerApiUri)).CreateClient())
+            {
+                var list = await client.Containers.ListContainersAsync(new ContainersListParameters{ });
+                var tooOldContainers = list.Where(cnt => cnt.Created + maxAge < DateTime.UtcNow);
+                foreach (var tooOldContainer in tooOldContainers)
+                {
+                    Logger.Warn($"Killing container {tooOldContainer.ID}");
+                    await client.Containers.KillContainerAsync(tooOldContainer.ID, new ContainerKillParameters());
+                }
+            }
+        }
 
         public static async Task<string> DetectDockerClientApi(params string[] urisToDetect)
         {
@@ -41,8 +55,12 @@
             try
             {
                 Logger.Info($"Trying {uriToDetect}");
-                var client = new DockerClientConfiguration(new Uri(uriToDetect)).CreateClient();
-                VersionResponse version = await client.System.GetVersionAsync();
+                VersionResponse version;
+                using (var client = new DockerClientConfiguration(new Uri(uriToDetect)).CreateClient())
+                {
+                    version = await client.System.GetVersionAsync();
+                }
+
                 Logger.Info($"Docker API version {version.APIVersion} detected at {uriToDetect}");
                 return uriToDetect;
             }
