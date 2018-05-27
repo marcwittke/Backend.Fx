@@ -1,7 +1,6 @@
 namespace Backend.Fx.Bootstrapping.Tests
 {
     using System;
-    using System.Diagnostics;
     using System.Linq;
     using System.Reflection;
     using System.Security.Principal;
@@ -15,7 +14,6 @@ namespace Backend.Fx.Bootstrapping.Tests
     using Modules;
     using Patterns.DependencyInjection;
     using Patterns.IdGeneration;
-    using Patterns.UnitOfWork;
     using SimpleInjector;
     using Testing.InMemoryPersistence;
     using Xunit;
