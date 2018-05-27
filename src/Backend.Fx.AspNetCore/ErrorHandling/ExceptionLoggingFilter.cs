@@ -15,7 +15,6 @@
                 ILogger logger = LogManager.Create(context.Controller.GetType().FullName);
                 IExceptionLogger exceptionLogger = new ExceptionLogger(logger);
                 exceptionLogger.LogException(context.Exception);
-                context.HttpContext.Items["ExceptionLogged"] = true;
             }
         }
     }

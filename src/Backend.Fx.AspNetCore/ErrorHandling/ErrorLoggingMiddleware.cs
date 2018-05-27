@@ -9,12 +9,13 @@
     public class ErrorLoggingMiddleware
     {
         private readonly RequestDelegate next;
-        private readonly IExceptionLogger exceptionLogger = new ExceptionLogger(LogManager.Create<ErrorLoggingMiddleware>());
+        private readonly IExceptionLogger exceptionLogger;
 
         [UsedImplicitly]
-        public ErrorLoggingMiddleware(RequestDelegate next)
+        public ErrorLoggingMiddleware(RequestDelegate next, IExceptionLogger exceptionLogger)
         {
             this.next = next;
+            this.exceptionLogger = exceptionLogger;
         }
 
         [UsedImplicitly]
@@ -24,11 +25,11 @@
             {
                 await next.Invoke(context);
             }
-            catch (Exception uex)
+            catch (Exception exception)
             {
                 if (!context.Items.ContainsKey("ExceptionLogged")) 
                 {
-                    exceptionLogger.LogException(uex);
+                    exceptionLogger.LogException(exception);
                     context.Items["ExceptionLogged"] = true;
                 }
                 throw;
