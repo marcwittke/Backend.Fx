@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl;
 
 namespace Backend.Fx.EfCorePersistence.Tests.Migrations

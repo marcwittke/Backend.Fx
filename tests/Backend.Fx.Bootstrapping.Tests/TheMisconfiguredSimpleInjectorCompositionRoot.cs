@@ -20,7 +20,7 @@ namespace Backend.Fx.Bootstrapping.Tests
         {
             public UnresolvableService(Entity e)
             {
-                throw new Exception("This constructor should never be called, since the Entity e cannot be resolved by the container");
+                throw new Exception($"This constructor should never be called, since the Entity {e?.GetType().Name} cannot be resolved by the container");
             }
         }
 
