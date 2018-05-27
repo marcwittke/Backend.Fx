@@ -4,7 +4,6 @@
     using System.Data;
     using System.Data.SqlClient;
     using System.Threading.Tasks;
-    using Environment;
     using Environment.VisualStudioOnline;
     using Fx.Extensions;
     using RandomData;
@@ -13,8 +12,8 @@
 
     public class TestContainer : MssqlDockerContainer
     {
-        public TestContainer(string dockerApiUrl, string name) 
-                : base(dockerApiUrl, TestRandom.NextPassword(), name + DateTime.UtcNow.ToString("yyyyMMdd_HHmmss"))
+        public TestContainer(string dockerApiUrl, string name)
+                : base(dockerApiUrl, TestRandom.NextPassword(), name)
         { }
 
         public override IDbConnection CreateConnection()
@@ -29,17 +28,19 @@
 
         public TheMssqlDockerContainer()
         {
-            dockerApiUri = AsyncHelper.RunSync(()=> DockerUtilities.DetectDockerClientApi());
-            if (Build.IsTfBuild) 
+            dockerApiUri = AsyncHelper.RunSync(() => DockerUtilities.DetectDockerClientApi());
+            if (Build.IsTfBuild)
             {
-                AsyncHelper.RunSync(()=> DockerUtilities.KillAllOlderThan(dockerApiUri, TimeSpan.FromMinutes(30)));
+                AsyncHelper.RunSync(() => DockerUtilities.KillAllOlderThan(dockerApiUri, TimeSpan.FromMinutes(30)));
             }
         }
 
         [Fact]
         public async Task CanBeUsed()
         {
-            using (TestContainer container = new TestContainer(dockerApiUri, "TheMssqlDockerContainer_CanBeUsed"))
+            var containerName = CreateContainerName("TheMssqlDockerContainer_CanBeUsed");
+            await DockerUtilities.EnsureKilledAndRemoved(dockerApiUri, containerName);
+            using (TestContainer container = new TestContainer(dockerApiUri, containerName))
             {
                 await container.CreateAndStart();
                 Assert.False(container.HealthCheck());
@@ -50,7 +51,9 @@
         [Fact]
         public async Task CanRestore()
         {
-            using (TestContainer container = new TestContainer(dockerApiUri, "TheMssqlDockerContainer_CanRestore"))
+            var containerName = CreateContainerName("TheMssqlDockerContainer_CanRestore");
+            await DockerUtilities.EnsureKilledAndRemoved(dockerApiUri, containerName);
+            using (TestContainer container = new TestContainer(dockerApiUri, containerName))
             {
                 await container.CreateAndStart();
                 Assert.False(container.HealthCheck());
@@ -58,6 +61,16 @@
 
                 await container.Restore("Backup.bak", "RestoredDb");
             }
+        }
+
+        private static string CreateContainerName(string name)
+        {
+            if (Build.IsTfBuild)
+            {
+                return $"{name}_agent{Agent.Id}";
+            }
+
+            return name;
         }
     }
 }

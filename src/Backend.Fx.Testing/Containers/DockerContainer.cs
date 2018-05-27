@@ -1,7 +1,6 @@
 ﻿namespace Backend.Fx.Testing.Containers
 {
     using System;
-    using System.Linq;
     using System.Threading.Tasks;
     using Docker.DotNet;
     using Docker.DotNet.Models;
@@ -97,10 +96,6 @@
                     Logger.Info($"Stopping container {ContainerId}");
                     AsyncHelper.RunSync(() => Client.Containers.KillContainerAsync(ContainerId, new ContainerKillParameters()));
                     Logger.Info($"Container {ContainerId} was stopped successfully");
-
-                    Logger.Info($"Removing container {ContainerId}");
-                    AsyncHelper.RunSync(() => Client.Containers.RemoveContainerAsync(ContainerId, new ContainerRemoveParameters()));
-                    Logger.Info($"Container {ContainerId} was removed successfully");
                 }
 
                 Client?.Dispose();
