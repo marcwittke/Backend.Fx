@@ -95,7 +95,7 @@
             get
             {
                 var buildReasonString = global::System.Environment.GetEnvironmentVariable("BUILD_REASON") ?? "None";
-                return global::System.Enum.Parse<BuildReason>(buildReasonString);
+                return (BuildReason) global::System.Enum.Parse(typeof(BuildReason), buildReasonString);
             }
         }
 
@@ -133,7 +133,7 @@
             get
             {
                 var environmentVariable = global::System.Environment.GetEnvironmentVariable("BUILD_REPOSITORY_PROVIDER") ?? "None";
-                return global::System.Enum.Parse<BuildProvider>(environmentVariable);
+                return (BuildProvider) global::System.Enum.Parse(typeof(BuildProvider), environmentVariable);
             }
         }
 
