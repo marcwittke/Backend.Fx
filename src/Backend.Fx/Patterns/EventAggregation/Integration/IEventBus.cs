@@ -10,8 +10,10 @@
     using Logging;
     using UnitOfWork;
 
-    public interface IEventBus
+    public interface IEventBus : IDisposable
     {
+        void Connect();
+
         void Publish(IntegrationEvent integrationEvent);
 
         void Subscribe<THandler>(string eventName)
@@ -33,6 +35,7 @@
             this.scopeManager = scopeManager;
         }
 
+        public abstract void Connect();
         public abstract void Publish(IntegrationEvent integrationEvent);
 
         public void Subscribe<THandler>(string eventName) where THandler : IIntegrationEventHandler
@@ -107,6 +110,15 @@
 
             public TenantId TenantId { get; }
             public dynamic Event { get; set; }
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {}
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

@@ -2,12 +2,14 @@
 {
     using System;
     using System.Text;
+    using System.Threading.Tasks;
     using Environment.MultiTenancy;
     using Logging;
     using Newtonsoft.Json.Linq;
     using Patterns.DependencyInjection;
     using Patterns.EventAggregation.Integration;
     using RabbitMQ.Client;
+    using RabbitMQ.Client.Events;
 
     public class RabbitMQEventBus : EventBus, IDisposable
     {
@@ -24,14 +26,17 @@
             channel = new RabbitMQChannel(connectionFactory, brokerName, queueName, retryCount);
         }
 
-        public void Connect()
+        public override void Connect()
         {
             if (channel.EnsureOpen())
             {
-                channel.MessageReceived += async (sender, args) => {
-                                               await Process(args.RoutingKey, args.Body);
-                                           };
+                channel.MessageReceived += ChannelOnMessageReceived;
             }
+        }
+
+        private async void ChannelOnMessageReceived(object sender, BasicDeliverEventArgs args)
+        {
+            await Process(args.RoutingKey, args.Body);
         }
 
         public override void Publish(IntegrationEvent integrationEvent)
@@ -68,9 +73,18 @@
             channel.Unsubscribe(eventName);
         }
 
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            channel?.Dispose();
+            if (disposing)
+            {
+                if (channel != null)
+                {
+                    channel.MessageReceived -= ChannelOnMessageReceived;
+                    channel.Dispose();
+                }
+            }
+
+            base.Dispose(disposing);
         }
     }
 }

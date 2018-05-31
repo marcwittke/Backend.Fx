@@ -8,6 +8,9 @@
         public InMemoryEventBus(IScopeManager scopeManager) : base(scopeManager)
         { }
 
+        public override void Connect()
+        { }
+
         public override void Publish(IntegrationEvent integrationEvent)
         {
             Process(integrationEvent.GetType().Name, integrationEvent).Start();

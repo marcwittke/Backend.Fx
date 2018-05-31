@@ -1,4 +1,4 @@
-﻿namespace Backend.Fx.Tests.Environment.VisualStudioOnline
+﻿namespace Backend.Fx.Testing.BuildEnv
 {
     public static class System
     {
