@@ -41,12 +41,13 @@
         {
             return Policy
                    .HandleResult<bool>(r => !r)
-                   .WaitAndRetry(retries, 
-                                 retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), 
-                                 (result, span) => { 
-                                     Logger.Info(result.Result 
-                                                         ? $"Container {ContainerId} is healthy" 
-                                                         : $"Container {ContainerId} not yet healthy"); 
+                   .WaitAndRetry(retries,
+                                 retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                                 (result, span) =>
+                                 {
+                                     Logger.Info(result.Result
+                                                         ? $"Container {ContainerId} is healthy"
+                                                         : $"Container {ContainerId} not yet healthy");
                                  })
                    .Execute(HealthCheck);
         }
@@ -63,7 +64,7 @@
             {
                 throw new InvalidOperationException($"Container {ContainerId} has been created before.");
             }
-            
+
             Logger.Info($"Creating container from base image {BaseImage}");
             CreateContainerResponse response = await Client.Containers.CreateContainerAsync(CreateParameters);
             if (Name == null)
@@ -76,7 +77,7 @@
 
             Logger.Info($"Starting container {ContainerId}");
             bool isStarted = await Client.Containers.StartContainerAsync(ContainerId, new ContainerStartParameters());
-            if(!isStarted)
+            if (!isStarted)
             {
                 throw new Exception($"Starting container {ContainerId} failed");
             }
@@ -94,11 +95,25 @@
                 if (ContainerId != null)
                 {
                     Logger.Info($"Stopping container {ContainerId}");
-                    AsyncHelper.RunSync(() => Client.Containers.KillContainerAsync(ContainerId, new ContainerKillParameters()));
-                    Logger.Info($"Container {ContainerId} was stopped successfully");
+                    try
+                    {
+                        AsyncHelper.RunSync(() => Client.Containers.KillContainerAsync(ContainerId, new ContainerKillParameters()));
+                        Logger.Info($"Container {ContainerId} was stopped successfully");
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Warn(ex, $"Error on killing Container {ContainerId}");
+                    }
                 }
 
-                Client?.Dispose();
+                try
+                {
+                    Client?.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Warn(ex, "Error on disposing Docker API Client instance");
+                }
             }
         }
 
