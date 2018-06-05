@@ -1,19 +1,22 @@
 ﻿namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
+    using System;
     using DependencyInjection;
     using Environment.MultiTenancy;
+    using Logging;
 
     public class InMemoryEventBus : EventBus
     {
-        public InMemoryEventBus(IScopeManager scopeManager) : base(scopeManager)
+        public InMemoryEventBus(IScopeManager scopeManager, IExceptionLogger exceptionLogger)
+                : base(scopeManager, exceptionLogger)
         { }
 
         public override void Connect()
         { }
 
-        public override void Publish(IntegrationEvent integrationEvent)
+        public override void Publish(IIntegrationEvent integrationEvent)
         {
-            Process(integrationEvent.GetType().Name, integrationEvent).Start();
+            Process(integrationEvent.GetType().FullName, new InMemoryProcessingContext(integrationEvent));
         }
 
         protected override void Subscribe(string eventName)
@@ -22,10 +25,29 @@
         protected override void Unsubscribe(string eventName)
         {}
 
-        protected override IntegrationEventData Deserialize(object rawEventPayload)
+        private class InMemoryProcessingContext : EventProcessingContext 
         {
-            IntegrationEvent integrationEvent = (IntegrationEvent) rawEventPayload;
-            return new IntegrationEventData(new TenantId(integrationEvent.TenantId), integrationEvent);
+            private readonly IIntegrationEvent integrationEvent;
+
+            public InMemoryProcessingContext(IIntegrationEvent integrationEvent)
+            {
+                this.integrationEvent = integrationEvent;
+            }
+
+            public override TenantId TenantId
+            {
+                get { return new TenantId(integrationEvent.TenantId); }
+            }
+
+            public override dynamic DynamicEvent
+            {
+                get { return integrationEvent; }
+            }
+
+            public override IIntegrationEvent GetTypedEvent(Type eventType)
+            {
+                return integrationEvent;
+            }
         }
     }
 }

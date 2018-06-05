@@ -1,9 +1,12 @@
 ﻿namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
-    using System.Threading.Tasks;
-
     public interface IIntegrationEventHandler
     {
-        Task Handle(dynamic eventData);
+        void Handle(dynamic eventData);
+    }
+
+    public interface IIntegrationEventHandler<in TEvent> where TEvent : IIntegrationEvent
+    {
+        void Handle(TEvent eventData);
     }
 }

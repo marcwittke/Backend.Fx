@@ -1,4 +1,4 @@
-namespace Backend.Fx.Tests.Patterns.EventAggregation
+namespace Backend.Fx.Tests.Patterns.EventAggregation.Domain
 {
     using System.Collections.Generic;
     using Fx.Patterns.EventAggregation.Domain;

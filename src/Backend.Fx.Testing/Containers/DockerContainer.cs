@@ -4,7 +4,6 @@
     using System.Threading.Tasks;
     using Docker.DotNet;
     using Docker.DotNet.Models;
-    using Extensions;
     using Fx.Logging;
     using JetBrains.Annotations;
     using Polly;
@@ -84,6 +83,18 @@
             Logger.Info($"Container {ContainerId} was started successfully");
         }
 
+        public async Task Kill()
+        {
+            if (ContainerId == null)
+            {
+                throw new InvalidOperationException($"Container has not been created.");
+            }
+
+            Logger.Info($"Killing container {ContainerId}");
+            await Client.Containers.KillContainerAsync(ContainerId, new ContainerKillParameters());
+            Logger.Info($"Container {ContainerId} was killed successfully");
+        }
+
         /// <summary>
         /// Kills and removes the container
         /// </summary>
@@ -94,25 +105,14 @@
             {
                 if (ContainerId != null)
                 {
-                    Logger.Info($"Stopping container {ContainerId}");
                     try
                     {
-                        AsyncHelper.RunSync(() => Client.Containers.KillContainerAsync(ContainerId, new ContainerKillParameters()));
-                        Logger.Info($"Container {ContainerId} was stopped successfully");
+                        Kill().Wait();
                     }
                     catch (Exception ex)
                     {
-                        Logger.Warn(ex, $"Error on killing Container {ContainerId}");
+                        Logger.Warn(ex, $"Failed to kill container {ContainerId}");
                     }
-                }
-
-                try
-                {
-                    Client?.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    Logger.Warn(ex, "Error on disposing Docker API Client instance");
                 }
             }
         }
