@@ -2,6 +2,7 @@
 {
     using System;
     using System.Text;
+    using System.Threading.Tasks;
     using Environment.MultiTenancy;
     using Logging;
     using Newtonsoft.Json;
@@ -40,11 +41,12 @@
             Process(args.RoutingKey, new RabbitMqEventProcessingContext(args.Body));
         }
 
-        public override void Publish(IIntegrationEvent integrationEvent)
+        public override Task Publish(IIntegrationEvent integrationEvent)
         {
             Logger.Info($"Publishing {integrationEvent.GetType().Name}");
             channel.EnsureOpen();
             channel.PublishEvent(integrationEvent);
+            return Task.CompletedTask;
         }
         
         protected override void Subscribe(string eventName)

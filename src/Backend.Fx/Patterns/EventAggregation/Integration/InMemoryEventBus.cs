@@ -1,6 +1,7 @@
 ﻿namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
     using System;
+    using System.Threading.Tasks;
     using DependencyInjection;
     using Environment.MultiTenancy;
     using Logging;
@@ -14,9 +15,10 @@
         public override void Connect()
         { }
 
-        public override void Publish(IIntegrationEvent integrationEvent)
+        public override Task Publish(IIntegrationEvent integrationEvent)
         {
-            Process(integrationEvent.GetType().FullName, new InMemoryProcessingContext(integrationEvent));
+            return Task.Run(
+                    () => Process(integrationEvent.GetType().FullName, new InMemoryProcessingContext(integrationEvent)));
         }
 
         protected override void Subscribe(string eventName)

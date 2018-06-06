@@ -6,6 +6,7 @@
     using System.Diagnostics;
     using System.Linq;
     using System.Reflection;
+    using System.Threading.Tasks;
     using DependencyInjection;
     using Environment.Authentication;
     using Environment.MultiTenancy;
@@ -17,7 +18,7 @@
     {
         void Connect();
 
-        void Publish(IIntegrationEvent integrationEvent);
+        Task Publish(IIntegrationEvent integrationEvent);
 
         /// <summary>
         /// Subscribes to an integration event with a dynamic event handler
@@ -65,7 +66,7 @@
         }
 
         public abstract void Connect();
-        public abstract void Publish(IIntegrationEvent integrationEvent);
+        public abstract Task Publish(IIntegrationEvent integrationEvent);
 
 
         /// <inheritdoc />
