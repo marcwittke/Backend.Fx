@@ -1,7 +1,6 @@
 ﻿namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
     using System;
-    using System.Collections;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Diagnostics;
@@ -154,41 +153,35 @@
                                         MethodInfo handleMethod = handlerType.GetRuntimeMethod("Handle", new[] { eventType });
                                         Debug.Assert(handleMethod != null, $"No method with signature `Handle({eventName} event)` found on {handlerType.Name}");
 
-                                        IEnumerable handlerInstances = scope.GetAllInstances(handlerType);
-                                        foreach (var handlerInstance in handlerInstances)
+                                        object handlerInstance = scope.GetInstance(handlerType);
+
+                                        try
                                         {
-                                            try
-                                            {
-                                                handleMethod.Invoke(handlerInstance, new object[] { integrationEvent });
-                                            }
-                                            catch(TargetInvocationException ex)
-                                            {
-                                                Logger.Info(ex, $"Handling of {eventName} by typed handler {handlerType} failed: {(ex.InnerException ?? ex).Message}");
-                                                exceptionLogger.LogException(ex.InnerException ?? ex);
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                Logger.Info(ex, $"Handling of {eventName} by typed handler {handlerType} failed: {ex.Message}");
-                                                exceptionLogger.LogException(ex);
-                                            }
+                                            handleMethod.Invoke(handlerInstance, new object[] { integrationEvent });
+                                        }
+                                        catch (TargetInvocationException ex)
+                                        {
+                                            Logger.Info(ex, $"Handling of {eventName} by typed handler {handlerType} failed: {(ex.InnerException ?? ex).Message}");
+                                            exceptionLogger.LogException(ex.InnerException ?? ex);
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Logger.Info(ex, $"Handling of {eventName} by typed handler {handlerType} failed: {ex.Message}");
+                                            exceptionLogger.LogException(ex);
                                         }
                                     }
                                     else
                                     {
-                                        IEnumerable handlerInstances = scope.GetAllInstances(handlerType);
-                                        foreach (var handlerInstance in handlerInstances)
+                                        object handlerInstance = scope.GetInstance(handlerType);
+                                        try
                                         {
-                                            try
-                                            {
-                                                ((IIntegrationEventHandler)handlerInstance).Handle(context.DynamicEvent);
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                Logger.Info(ex, $"Handling of {eventName} by dynamic handler {handlerType} failed: {ex.Message}");
-                                                exceptionLogger.LogException(ex);
-                                            }
+                                            ((IIntegrationEventHandler)handlerInstance).Handle(context.DynamicEvent);
                                         }
-
+                                        catch (Exception ex)
+                                        {
+                                            Logger.Info(ex, $"Handling of {eventName} by dynamic handler {handlerType} failed: {ex.Message}");
+                                            exceptionLogger.LogException(ex);
+                                        }
                                     }
                                 }
 

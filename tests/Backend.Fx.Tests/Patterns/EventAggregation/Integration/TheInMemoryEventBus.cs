@@ -112,17 +112,17 @@
                 A.CallTo(() => ScopeManager.BeginScope(A<IIdentity>._, A<TenantId>._))
                  .Returns(Scope);
 
-                A.CallTo(() => Scope.GetAllInstances(A<Type>.That.IsEqualTo(typeof(TypedEventHandler))))
-                 .Returns(new object[] { new TypedEventHandler(TypedHandler) });
+                A.CallTo(() => Scope.GetInstance(A<Type>.That.IsEqualTo(typeof(TypedEventHandler))))
+                 .Returns(new TypedEventHandler(TypedHandler));
 
-                A.CallTo(() => Scope.GetAllInstances(A<Type>.That.IsEqualTo(typeof(ThrowingTypedEventHandler))))
-                 .Returns(new object[] { new ThrowingTypedEventHandler() });
+                A.CallTo(() => Scope.GetInstance(A<Type>.That.IsEqualTo(typeof(ThrowingTypedEventHandler))))
+                 .Returns(new ThrowingTypedEventHandler());
 
-                A.CallTo(() => Scope.GetAllInstances(A<Type>.That.IsEqualTo(typeof(DynamicEventHandler))))
-                 .Returns(new object[] { new DynamicEventHandler(DynamicHandler) });
+                A.CallTo(() => Scope.GetInstance(A<Type>.That.IsEqualTo(typeof(DynamicEventHandler))))
+                 .Returns(new DynamicEventHandler(DynamicHandler));
 
-                A.CallTo(() => Scope.GetAllInstances(A<Type>.That.IsEqualTo(typeof(ThrowingDynamicEventHandler))))
-                 .Returns(new object[] { new ThrowingDynamicEventHandler() });
+                A.CallTo(() => Scope.GetInstance(A<Type>.That.IsEqualTo(typeof(ThrowingDynamicEventHandler))))
+                 .Returns(new ThrowingDynamicEventHandler());
             }
         }
     }
