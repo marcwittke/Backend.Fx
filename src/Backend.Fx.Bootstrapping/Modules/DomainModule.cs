@@ -25,12 +25,15 @@
         private static readonly ILogger Logger = LogManager.Create<DomainModule>();
         private readonly Assembly[] assemblies;
         private IDomainEventAggregator domainEventAggregator;
+        private readonly string assembliesForLogging;
 
         protected DomainModule(params Assembly[] domainAssemblies)
         {
             assemblies = domainAssemblies.Concat(new[] {
                 typeof(Entity).GetTypeInfo().Assembly,
             }).ToArray();
+
+            assembliesForLogging = string.Join(",", assemblies.Select(ass => ass.GetName().Name));
         }
 
         public override void Register(ICompositionRoot compositionRoot)
@@ -54,13 +57,13 @@
             RegisterAuthorization(container);
 
             // domain event subsystem
-            Logger.Debug($"Registering domain event handlers from {string.Join(",", assemblies.Select(ass => ass.GetName().Name))}");
+            Logger.Debug($"Registering domain event handlers from {assembliesForLogging}");
             container.Collection.Register(typeof(IDomainEventHandler<>), assemblies);
             Logger.Debug("Registering singleton event aggregator instance");
             container.RegisterInstance(domainEventAggregator);
 
             // initial data generation subsystem
-            Logger.Debug($"Registering initial data generators from {string.Join(",", assemblies.Select(ass => ass.GetName().Name))}");
+            Logger.Debug($"Registering initial data generators from {assembliesForLogging}");
             container.Collection.Register<InitialDataGenerator>(assemblies);
 
             // all jobs are dynamically registered
@@ -81,7 +84,7 @@
         /// </summary>
         private void RegisterAuthorization(Container container)
         {
-            Logger.Debug($"Registering authorization services from {string.Join(",", assemblies.Select(ass => ass.GetName().Name))}");
+            Logger.Debug($"Registering authorization services from {assembliesForLogging}");
             var aggregateRootAuthorizationTypes = container.GetTypesToRegister(typeof(IAggregateAuthorization<>), assemblies).ToArray();
             foreach (var aggregateAuthorizationType in aggregateRootAuthorizationTypes)
             {

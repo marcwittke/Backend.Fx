@@ -2,6 +2,7 @@
 {
     using System;
     using System.Security.Principal;
+    using System.Threading.Tasks;
     using FakeItEasy;
     using Fx.Environment.MultiTenancy;
     using Fx.Logging;
@@ -39,10 +40,10 @@
         protected abstract IEventBus Create(IScopeManager scopeManager, IExceptionLogger exceptionLogger);
 
         [Fact]
-        public void CallsTypedEventHandler()
+        public async Task CallsTypedEventHandler()
         {
             sut.Subscribe<TypedEventHandler, TestIntegrationEvent>();
-            sut.Publish(new TestIntegrationEvent(34, "gaga"));
+            await sut.Publish(new TestIntegrationEvent(34, "gaga"));
 
             A.CallTo(() => inj.TypedHandler.Handle(A<TestIntegrationEvent>
                                                    .That
@@ -53,10 +54,10 @@
         }
 
         [Fact]
-        public void HandlesExceptionFromTypedEventHandler()
+        public async void HandlesExceptionFromTypedEventHandler()
         {
             sut.Subscribe<ThrowingTypedEventHandler, TestIntegrationEvent>();
-            sut.Publish(new TestIntegrationEvent(34, "gaga"));
+            await sut.Publish(new TestIntegrationEvent(34, "gaga"));
 
             A.CallTo(() => inj.ExceptionLogger.LogException(A<InvalidOperationException>
                                                             .That
@@ -65,19 +66,19 @@
         }
 
         [Fact]
-        public void CallsDynamicEventHandler()
+        public async void CallsDynamicEventHandler()
         {
             sut.Subscribe<DynamicEventHandler>(typeof(TestIntegrationEvent).FullName);
-            sut.Publish(new TestIntegrationEvent(34, "gaga"));
+            await sut.Publish(new TestIntegrationEvent(34, "gaga"));
             A.CallTo(() => inj.TypedHandler.Handle(A<TestIntegrationEvent>._)).MustNotHaveHappened();
             A.CallTo(() => inj.DynamicHandler.Handle(A<object>._)).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
-        public void HandlesExceptionFromDynamicEventHandler()
+        public async void HandlesExceptionFromDynamicEventHandler()
         {
             sut.Subscribe<ThrowingDynamicEventHandler>(typeof(TestIntegrationEvent).FullName);
-            sut.Publish(new TestIntegrationEvent(34, "gaga"));
+            await sut.Publish(new TestIntegrationEvent(34, "gaga"));
 
             A.CallTo(() => inj.ExceptionLogger.LogException(A<InvalidOperationException>
                                                         .That
@@ -86,11 +87,11 @@
         }
 
         [Fact]
-        public void CallsMixedEventHandlers()
+        public async void CallsMixedEventHandlers()
         {
             sut.Subscribe<DynamicEventHandler>(typeof(TestIntegrationEvent).FullName);
             sut.Subscribe<TypedEventHandler, TestIntegrationEvent>();
-            sut.Publish(new TestIntegrationEvent(34, "gaga"));
+            await sut.Publish(new TestIntegrationEvent(34, "gaga"));
             A.CallTo(() => inj.TypedHandler.Handle(A<TestIntegrationEvent>
                                                    .That
                                                    .Matches(evt => evt.IntParam == 34 && evt.StringParam == "gaga")))
@@ -112,17 +113,17 @@
                 A.CallTo(() => ScopeManager.BeginScope(A<IIdentity>._, A<TenantId>._))
                  .Returns(Scope);
 
-                A.CallTo(() => Scope.GetAllInstances(A<Type>.That.IsEqualTo(typeof(TypedEventHandler))))
-                 .Returns(new object[] { new TypedEventHandler(TypedHandler) });
+                A.CallTo(() => Scope.GetInstance(A<Type>.That.IsEqualTo(typeof(TypedEventHandler))))
+                 .Returns(new TypedEventHandler(TypedHandler));
 
-                A.CallTo(() => Scope.GetAllInstances(A<Type>.That.IsEqualTo(typeof(ThrowingTypedEventHandler))))
-                 .Returns(new object[] { new ThrowingTypedEventHandler() });
+                A.CallTo(() => Scope.GetInstance(A<Type>.That.IsEqualTo(typeof(ThrowingTypedEventHandler))))
+                 .Returns(new ThrowingTypedEventHandler());
 
-                A.CallTo(() => Scope.GetAllInstances(A<Type>.That.IsEqualTo(typeof(DynamicEventHandler))))
-                 .Returns(new object[] { new DynamicEventHandler(DynamicHandler) });
+                A.CallTo(() => Scope.GetInstance(A<Type>.That.IsEqualTo(typeof(DynamicEventHandler))))
+                 .Returns(new DynamicEventHandler(DynamicHandler));
 
-                A.CallTo(() => Scope.GetAllInstances(A<Type>.That.IsEqualTo(typeof(ThrowingDynamicEventHandler))))
-                 .Returns(new object[] { new ThrowingDynamicEventHandler() });
+                A.CallTo(() => Scope.GetInstance(A<Type>.That.IsEqualTo(typeof(ThrowingDynamicEventHandler))))
+                 .Returns(new ThrowingDynamicEventHandler());
             }
         }
     }
