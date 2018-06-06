@@ -11,7 +11,6 @@
     using Patterns.DataGeneration;
     using Patterns.DependencyInjection;
     using Patterns.EventAggregation.Domain;
-    using Patterns.EventAggregation.Integration;
     using Patterns.Jobs;
     using SimpleInjector;
 
@@ -63,11 +62,6 @@
             Logger.Debug("Registering singleton event aggregator instance");
             container.RegisterInstance(domainEventAggregator);
 
-            // integration event subsystem
-            Logger.Debug($"Registering integration event handlers from {assembliesForLogging}");
-            container.Register(typeof(IIntegrationEventHandler), assemblies);
-            container.Register(typeof(IIntegrationEventHandler<>), assemblies);
-            
             // initial data generation subsystem
             Logger.Debug($"Registering initial data generators from {assembliesForLogging}");
             container.Collection.Register<InitialDataGenerator>(assemblies);
@@ -90,7 +84,7 @@
         /// </summary>
         private void RegisterAuthorization(Container container)
         {
-            Logger.Debug($"Registering authorization services from {string.Join(",", assemblies.Select(ass => ass.GetName().Name))}");
+            Logger.Debug($"Registering authorization services from {assembliesForLogging}");
             var aggregateRootAuthorizationTypes = container.GetTypesToRegister(typeof(IAggregateAuthorization<>), assemblies).ToArray();
             foreach (var aggregateAuthorizationType in aggregateRootAuthorizationTypes)
             {

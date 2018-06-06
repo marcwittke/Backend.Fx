@@ -4,6 +4,8 @@
 
     public interface IIntegrationEvent
     {
+        Guid Id { get; }
+        DateTime CreationDate { get; }
         int TenantId { get; }
     }
 
