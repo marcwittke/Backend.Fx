@@ -6,14 +6,12 @@ namespace Backend.Fx.EfCorePersistence.Tests
     using DummyImpl;
     using Environment.DateAndTime;
     using Environment.MultiTenancy;
-    using Logging;
     using Microsoft.Data.Sqlite;
     using Microsoft.EntityFrameworkCore;
     using Patterns.DependencyInjection;
 
     public abstract class TestWithInMemorySqliteDbContext : IDisposable
     {
-        private static readonly ILogger Logger = LogManager.Create<TestWithInMemorySqliteDbContext>();
         public SqliteConnection Connection { get; }
         public DbContextOptions<TestDbContext> DbContextOptions { get; }
         public ICurrentTHolder<TenantId> TenantIdHolder { get; } = new CurrentTenantIdHolder();

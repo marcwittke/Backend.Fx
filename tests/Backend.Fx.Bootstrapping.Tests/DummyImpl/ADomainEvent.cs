@@ -8,7 +8,7 @@
 
     public class ADomainEventHandler1 : IDomainEventHandler<ADomainEvent>
     {
-        private int callCount = 0;
+        private int callCount;
         public void Handle(ADomainEvent domainEvent)
         {
             callCount++;
@@ -17,7 +17,7 @@
 
     public class ADomainEventHandler2 : IDomainEventHandler<ADomainEvent>
     {
-        private int callCount = 0;
+        private int callCount;
         public void Handle(ADomainEvent domainEvent)
         {
             callCount++;
@@ -26,7 +26,7 @@
 
     public class ADomainEventHandler3 : IDomainEventHandler<ADomainEvent>
     {
-        private int callCount = 0;
+        private int callCount;
         public void Handle(ADomainEvent domainEvent)
         {
             callCount++;

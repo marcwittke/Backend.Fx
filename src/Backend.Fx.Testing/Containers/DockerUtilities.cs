@@ -16,7 +16,7 @@
         {
             using (var client = new DockerClientConfiguration(new Uri(dockerApiUri)).CreateClient())
             {
-                var list = await client.Containers.ListContainersAsync(new ContainersListParameters { });
+                var list = await client.Containers.ListContainersAsync(new ContainersListParameters ());
                 var tooOldContainers = list.Where(cnt => cnt.Created + maxAge < DateTime.UtcNow);
                 foreach (var tooOldContainer in tooOldContainers)
                 {
@@ -82,7 +82,7 @@
                         Filters = new Dictionary<string, IDictionary<string, bool>> {
                                 {
                                         "name", new Dictionary<string, bool> {
-                                                {containerName, true},
+                                                {"^/"+containerName+"$", true},
                                         }
                                 }
                         },

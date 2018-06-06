@@ -34,9 +34,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.EfCorePersistenc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.Testing", "src\Backend.Fx.Testing\Backend.Fx.Testing.csproj", "{0C9D99AE-D0E9-4EB7-9D44-BB05C4DF322D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend.Fx.RabbitMq", "src\Backend.Fx.RabbitMq\Backend.Fx.RabbitMq.csproj", "{AE43EDA9-52F3-493A-AA14-F10B61B5D6E9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.RabbitMq", "src\Backend.Fx.RabbitMq\Backend.Fx.RabbitMq.csproj", "{AE43EDA9-52F3-493A-AA14-F10B61B5D6E9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend.Fx.AspNetCore", "src\Backend.Fx.AspNetCore\Backend.Fx.AspNetCore.csproj", "{11A6283B-88E5-41D9-8177-D84BE0FC3E67}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.AspNetCore", "src\Backend.Fx.AspNetCore\Backend.Fx.AspNetCore.csproj", "{11A6283B-88E5-41D9-8177-D84BE0FC3E67}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

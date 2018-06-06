@@ -4,9 +4,9 @@
     using System.Data;
     using System.Data.SqlClient;
     using System.Threading.Tasks;
-    using Environment.VisualStudioOnline;
     using Fx.Extensions;
     using RandomData;
+    using Testing.BuildEnv;
     using Testing.Containers;
     using Xunit;
 

@@ -10,6 +10,6 @@ namespace Backend.Fx.Patterns.DependencyInjection
         object GetInstance(Type serviceType);
 
         IEnumerable<TService> GetAllInstances<TService>() where TService : class;
-        IEnumerable GetAllInstance(Type serviceType);
+        IEnumerable GetAllInstances(Type serviceType);
     }
 }

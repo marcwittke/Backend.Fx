@@ -36,7 +36,7 @@ namespace Backend.Fx.Bootstrapping
             return scope.Container.GetAllInstances<TService>();
         }
 
-        public IEnumerable GetAllInstance(Type serviceType)
+        public IEnumerable GetAllInstances(Type serviceType)
         {
             return scope.Container.GetAllInstances(serviceType);
         }

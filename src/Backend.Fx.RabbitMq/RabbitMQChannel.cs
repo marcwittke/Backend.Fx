@@ -145,7 +145,7 @@
             }
         }
 
-        public void PublishEvent(IntegrationEvent integrationEvent)
+        public void PublishEvent(IIntegrationEvent integrationEvent)
         {
             var eventName = integrationEvent.GetType().Name;
             var message = JsonConvert.SerializeObject(integrationEvent);

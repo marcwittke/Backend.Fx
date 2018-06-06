@@ -4,7 +4,6 @@
     using System.Threading.Tasks;
     using Docker.DotNet;
     using Docker.DotNet.Models;
-    using Extensions;
     using Fx.Logging;
     using JetBrains.Annotations;
     using Polly;
@@ -41,12 +40,13 @@
         {
             return Policy
                    .HandleResult<bool>(r => !r)
-                   .WaitAndRetry(retries, 
-                                 retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), 
-                                 (result, span) => { 
-                                     Logger.Info(result.Result 
-                                                         ? $"Container {ContainerId} is healthy" 
-                                                         : $"Container {ContainerId} not yet healthy"); 
+                   .WaitAndRetry(retries,
+                                 retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                                 (result, span) =>
+                                 {
+                                     Logger.Info(result.Result
+                                                         ? $"Container {ContainerId} is healthy"
+                                                         : $"Container {ContainerId} not yet healthy");
                                  })
                    .Execute(HealthCheck);
         }
@@ -63,7 +63,7 @@
             {
                 throw new InvalidOperationException($"Container {ContainerId} has been created before.");
             }
-            
+
             Logger.Info($"Creating container from base image {BaseImage}");
             CreateContainerResponse response = await Client.Containers.CreateContainerAsync(CreateParameters);
             if (Name == null)
@@ -76,11 +76,23 @@
 
             Logger.Info($"Starting container {ContainerId}");
             bool isStarted = await Client.Containers.StartContainerAsync(ContainerId, new ContainerStartParameters());
-            if(!isStarted)
+            if (!isStarted)
             {
                 throw new Exception($"Starting container {ContainerId} failed");
             }
             Logger.Info($"Container {ContainerId} was started successfully");
+        }
+
+        public async Task Kill()
+        {
+            if (ContainerId == null)
+            {
+                throw new InvalidOperationException($"Container has not been created.");
+            }
+
+            Logger.Info($"Killing container {ContainerId}");
+            await Client.Containers.KillContainerAsync(ContainerId, new ContainerKillParameters());
+            Logger.Info($"Container {ContainerId} was killed successfully");
         }
 
         /// <summary>
@@ -93,12 +105,15 @@
             {
                 if (ContainerId != null)
                 {
-                    Logger.Info($"Stopping container {ContainerId}");
-                    AsyncHelper.RunSync(() => Client.Containers.KillContainerAsync(ContainerId, new ContainerKillParameters()));
-                    Logger.Info($"Container {ContainerId} was stopped successfully");
+                    try
+                    {
+                        Kill().Wait();
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Warn(ex, $"Failed to kill container {ContainerId}");
+                    }
                 }
-
-                Client?.Dispose();
             }
         }
 

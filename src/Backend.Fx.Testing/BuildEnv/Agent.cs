@@ -1,4 +1,4 @@
-﻿namespace Backend.Fx.Tests.Environment.VisualStudioOnline
+﻿namespace Backend.Fx.Testing.BuildEnv
 {
 
     public static class Agent
@@ -32,7 +32,7 @@
         /// </summary>
         public static AgentJobStatus JobStatus
         {
-            get { return global::System.Enum.Parse<AgentJobStatus>(global::System.Environment.GetEnvironmentVariable("AGENT_JOBSTATUS") ?? "None"); }
+            get { return (AgentJobStatus) global::System.Enum.Parse(typeof(AgentJobStatus), global::System.Environment.GetEnvironmentVariable("AGENT_JOBSTATUS") ?? "None"); }
         }
 
         /// <summary>

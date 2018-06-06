@@ -3,7 +3,7 @@
     using Microsoft.EntityFrameworkCore;
     using Patterns.IdGeneration;
 
-    public abstract class SequenceHiLoIdGenerator<TDbContext> : HiLoIdGenerator where TDbContext : DbContext
+    public abstract class SequenceHiLoIdGenerator<TDbContext> : HiLoIdGenerator, IEntityIdGenerator where TDbContext : DbContext
     {
         private readonly ISequence sequence;
         private readonly DbContextOptions<TDbContext> dbContextOptions;

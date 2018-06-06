@@ -1,4 +1,4 @@
-﻿namespace Backend.Fx.Tests.Environment
+﻿namespace Backend.Fx.Testing.BuildEnv
 {
     public enum AgentJobStatus
     {
