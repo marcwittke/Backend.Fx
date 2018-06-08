@@ -7,6 +7,7 @@
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Storage;
     using Patterns.DependencyInjection;
+    using Patterns.EventAggregation.Domain;
     using Patterns.UnitOfWork;
 
     public class EfUnitOfWork : UnitOfWork, ICanInterruptTransaction
@@ -15,8 +16,8 @@
         private IDisposable transactionLifetimeLogger;
         private IDbContextTransaction currentTransaction;
 
-        public EfUnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder, DbContext dbContext)
-            : base(clock, identityHolder)
+        public EfUnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder, IDomainEventAggregator eventAggregator, DbContext dbContext)
+            : base(clock, identityHolder, eventAggregator)
         {
             DbContext = dbContext;
         }

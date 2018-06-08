@@ -7,5 +7,6 @@
     public interface IDomainEventAggregator
     {
         void PublishDomainEvent<TDomainEvent>(TDomainEvent domainEvent) where TDomainEvent : IDomainEvent;
+        void RaiseEvents();
     }
 }

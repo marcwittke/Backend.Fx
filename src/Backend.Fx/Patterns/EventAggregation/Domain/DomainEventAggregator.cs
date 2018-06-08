@@ -1,12 +1,14 @@
 ﻿namespace Backend.Fx.Patterns.EventAggregation.Domain
 {
     using System;
+    using System.Collections.Generic;
     using Logging;
 
     public class DomainEventAggregator : IDomainEventAggregator
     {
         private static readonly ILogger Logger = LogManager.Create<DomainEventAggregator>();
         private readonly IDomainEventHandlerProvider domainEventHandlerProvider;
+        private readonly List<(string, string, Action)> handleActions = new List<(string, string, Action)>();
 
         public DomainEventAggregator(IDomainEventHandlerProvider domainEventHandlerProvider)
         {
@@ -23,13 +25,27 @@
         {
             foreach (var injectedHandler in domainEventHandlerProvider.GetAllEventHandlers<TDomainEvent>())
             {
+                (string, string, Action) handleAction = (
+                                                            typeof(TDomainEvent).Name,
+                                                            injectedHandler.GetType().Name,
+                                                            () => injectedHandler.Handle(domainEvent));
+
+                handleActions.Add(handleAction);
+                Logger.Debug($"Invocation of {injectedHandler.GetType().Name} for domain event {typeof(TDomainEvent).Name} registered. It will be executed on completion of unit of work");
+            }
+        }
+
+        public void RaiseEvents()
+        {
+            foreach (var handleAction in handleActions)
+            {
                 try
                 {
-                    injectedHandler.Handle(domainEvent);
+                    handleAction.Item3.Invoke();
                 }
                 catch (Exception ex)
                 {
-                    Logger.Error(ex, $"Handling of {typeof(TDomainEvent).Name} by {injectedHandler.GetType().Name} failed.");
+                    Logger.Error(ex, $"Handling of {handleAction.Item1} by {handleAction.Item2} failed.");
                     throw;
                 }
             }

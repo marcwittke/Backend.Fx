@@ -4,6 +4,7 @@
     using System.Security.Principal;
     using DependencyInjection;
     using Environment.DateAndTime;
+    using EventAggregation.Domain;
     using Logging;
 
     /// <summary>
@@ -22,13 +23,15 @@
         private static int index;
         private readonly int instanceId = index++;
         private readonly IClock clock;
+        private readonly IDomainEventAggregator eventAggregator;
         private bool? isCompleted;
         private IDisposable lifetimeLogger;
 
-        protected UnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder)
+        protected UnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder, IDomainEventAggregator eventAggregator)
         {
             this.clock = clock;
-            this.IdentityHolder = identityHolder;
+            this.eventAggregator = eventAggregator;
+            IdentityHolder = identityHolder;
         }
 
         public ICurrentTHolder<IIdentity> IdentityHolder { get; }
@@ -48,7 +51,8 @@
         public void Complete()
         {
             Logger.Debug("Completing unit of work #" + instanceId);
-            UpdateTrackingProperties(IdentityHolder.Current.Name, clock.UtcNow);
+            Flush();
+            eventAggregator.RaiseEvents();
             Commit();
             isCompleted = true;
         }

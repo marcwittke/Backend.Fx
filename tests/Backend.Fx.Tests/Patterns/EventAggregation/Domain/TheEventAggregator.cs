@@ -18,6 +18,7 @@
             IDomainEventAggregator sut = new DomainEventAggregator(fakeDomainEventHandlerProvider);
 
             sut.PublishDomainEvent(new TestDomainEvent(4711));
+            sut.RaiseEvents();
 
             A.CallTo(() => fakeDomainEventHandlerProvider.GetAllEventHandlers<TestDomainEvent>()).MustHaveHappened(Repeated.Exactly.Once);
 
@@ -38,7 +39,8 @@
             A.CallTo(() => fakeDomainEventHandlerProvider.GetAllEventHandlers<TestDomainEvent>()).Returns(new[] { handler });
 
             IDomainEventAggregator sut = new DomainEventAggregator(fakeDomainEventHandlerProvider);
-            Assert.Throws<NotSupportedException>(()=>sut.PublishDomainEvent(new TestDomainEvent(444)));
+            sut.PublishDomainEvent(new TestDomainEvent(444));
+            Assert.Throws<NotSupportedException>(() => sut.RaiseEvents());
         }
     }
 }

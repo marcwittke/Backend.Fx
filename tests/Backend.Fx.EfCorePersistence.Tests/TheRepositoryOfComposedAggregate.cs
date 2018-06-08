@@ -12,6 +12,7 @@
     using Microsoft.EntityFrameworkCore;
     using Patterns.Authorization;
     using Patterns.DependencyInjection;
+    using Patterns.EventAggregation.Domain;
     using Patterns.IdGeneration;
     using Testing;
     using Xunit;
@@ -220,7 +221,7 @@
             public SystemUnderTest(DbContextOptions<TestDbContext> dbContextOptions, IClock clock, ICurrentTHolder<TenantId> tenantIdHolder)
             {
                 DbContext = new TestDbContext(dbContextOptions);
-                UnitOfWork = new EfUnitOfWork(clock, CurrentIdentityHolder.CreateSystem(), DbContext);
+                UnitOfWork = new EfUnitOfWork(clock, CurrentIdentityHolder.CreateSystem(), A.Fake<IDomainEventAggregator>(), DbContext);
                 UnitOfWork.Begin();
                 Repository = new EfRepository<Blog>(DbContext, new BlogMapping(), tenantIdHolder, new AllowAll<Blog>());
             }

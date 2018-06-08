@@ -4,6 +4,7 @@
     using System.Security.Principal;
     using Environment.DateAndTime;
     using Patterns.DependencyInjection;
+    using Patterns.EventAggregation.Domain;
     using Patterns.UnitOfWork;
 
     public class InMemoryUnitOfWork : UnitOfWork
@@ -11,7 +12,8 @@
         public int CommitCalls { get; private set; }
         public int RollbackCalls { get; private set; }
 
-        public InMemoryUnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder) : base(clock, identityHolder)
+        public InMemoryUnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder, IDomainEventAggregator eventAggregator) 
+                : base(clock, identityHolder, eventAggregator)
         { }
 
         protected override void UpdateTrackingProperties(string userId, DateTime utcNow)
