@@ -6,6 +6,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
     using FakeItEasy;
     using Patterns.Authorization;
     using Patterns.EventAggregation.Domain;
+    using Patterns.EventAggregation.Integration;
     using Testing;
     using Xunit;
 
@@ -21,7 +22,8 @@ namespace Backend.Fx.EfCorePersistence.Tests
         {
             using (var dbContext = new TestDbContext(DbContextOptions))
             {
-                using (var uow = new EfUnitOfWork(Clock, CurrentIdentityHolder.CreateSystem(), A.Fake<IDomainEventAggregator>(), dbContext))
+                using (var uow = new EfUnitOfWork(Clock, CurrentIdentityHolder.CreateSystem(), A.Fake<IDomainEventAggregator>(), 
+                                                  A.Fake<IEventBusScope>(), dbContext))
                 {
                     uow.Begin();
                     var repo = new EfRepository<Blogger>(dbContext, new BloggerMapping(), TenantIdHolder, new AllowAll<Blogger>());
@@ -51,7 +53,8 @@ namespace Backend.Fx.EfCorePersistence.Tests
             
             using (var dbContext = new TestDbContext(DbContextOptions))
             {
-                using (var uow = new EfUnitOfWork(Clock, CurrentIdentityHolder.CreateSystem(), A.Fake<IDomainEventAggregator>(), dbContext))
+                using (var uow = new EfUnitOfWork(Clock, CurrentIdentityHolder.CreateSystem(), A.Fake<IDomainEventAggregator>(), 
+                                                  A.Fake<IEventBusScope>(), dbContext))
                 {
                     uow.Begin();
                     var repo = new EfRepository<Blogger>(dbContext, new BloggerMapping(), TenantIdHolder, new AllowAll<Blogger>());
@@ -77,7 +80,8 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (var dbContext = new TestDbContext(DbContextOptions))
             {
-                using (var uow = new EfUnitOfWork(Clock, CurrentIdentityHolder.CreateSystem(), A.Fake<IDomainEventAggregator>(), dbContext))
+                using (var uow = new EfUnitOfWork(Clock, CurrentIdentityHolder.CreateSystem(), A.Fake<IDomainEventAggregator>(), 
+                                                  A.Fake<IEventBusScope>(), dbContext))
                 {
                     uow.Begin();
                     var repo = new EfRepository<Blogger>(dbContext, new BloggerMapping(), TenantIdHolder, new AllowAll<Blogger>());
@@ -103,7 +107,8 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (var dbContext = new TestDbContext(DbContextOptions))
             {
-                using (var uow = new EfUnitOfWork(Clock, CurrentIdentityHolder.CreateSystem(), A.Fake<IDomainEventAggregator>(), dbContext))
+                using (var uow = new EfUnitOfWork(Clock, CurrentIdentityHolder.CreateSystem(), A.Fake<IDomainEventAggregator>(), 
+                                                  A.Fake<IEventBusScope>(), dbContext))
                 {
                     uow.Begin();
                     var repo = new EfRepository<Blogger>(dbContext, new BloggerMapping(), TenantIdHolder, new AllowAll<Blogger>());
@@ -122,7 +127,8 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (var dbContext = new TestDbContext(DbContextOptions))
             {
-                using (var uow = new EfUnitOfWork(Clock, CurrentIdentityHolder.CreateSystem(), A.Fake<IDomainEventAggregator>(), dbContext))
+                using (var uow = new EfUnitOfWork(Clock, CurrentIdentityHolder.CreateSystem(), A.Fake<IDomainEventAggregator>(), 
+                                                  A.Fake<IEventBusScope>(), dbContext))
                 {
                     uow.Begin();
                     var repo = new EfRepository<Blogger>(dbContext, new BloggerMapping(), TenantIdHolder, new AllowAll<Blogger>());

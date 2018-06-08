@@ -9,8 +9,10 @@
     using Environment.Authentication;
     using Environment.DateAndTime;
     using Environment.MultiTenancy;
+    using FakeItEasy;
     using Microsoft.Data.Sqlite;
     using Microsoft.EntityFrameworkCore;
+    using Patterns.EventAggregation.Integration;
     using Patterns.UnitOfWork;
     using SimpleInjector;
     using Xunit;
@@ -26,15 +28,16 @@
             { }
         }
 
-        private class AnDomainModule  : DomainModule 
+        private class ADomainModule  : DomainModule 
         {
-            public AnDomainModule(params Assembly[] domainAssemblies) : base(domainAssemblies)
+            public ADomainModule(params Assembly[] domainAssemblies) : base(domainAssemblies)
             { }
 
             protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
             {
                 base.Register(container, scopedLifestyle);
                 container.Register<IClock, FrozenClock>();
+                container.RegisterInstance(A.Fake<IEventBus>());
             }
         }
 
@@ -46,7 +49,7 @@
 
             sut = new SimpleInjectorCompositionRoot();
             sut.RegisterModules(
-                new AnDomainModule(typeof(Blog).GetTypeInfo().Assembly),
+                new ADomainModule(typeof(Blog).GetTypeInfo().Assembly),
                 new APersistenceModule(dbContextOptions));
             sut.Verify();
         }

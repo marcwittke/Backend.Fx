@@ -5,6 +5,8 @@
     using DependencyInjection;
     using Environment.DateAndTime;
     using EventAggregation.Domain;
+    using EventAggregation.Integration;
+    using Extensions;
     using Logging;
 
     /// <summary>
@@ -24,13 +26,16 @@
         private readonly int instanceId = index++;
         private readonly IClock clock;
         private readonly IDomainEventAggregator eventAggregator;
+        private readonly IEventBusScope eventBusScope;
         private bool? isCompleted;
         private IDisposable lifetimeLogger;
 
-        protected UnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder, IDomainEventAggregator eventAggregator)
+        protected UnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder,
+                             IDomainEventAggregator eventAggregator, IEventBusScope eventBusScope)
         {
             this.clock = clock;
             this.eventAggregator = eventAggregator;
+            this.eventBusScope = eventBusScope;
             IdentityHolder = identityHolder;
         }
 
@@ -41,7 +46,7 @@
             Logger.Debug("Flushing unit of work #" + instanceId);
             UpdateTrackingProperties(IdentityHolder.Current.Name, clock.UtcNow);
         }
-        
+    
         public virtual void Begin()
         {
             lifetimeLogger = Logger.DebugDuration($"Beginning unit of work #{instanceId}", $"Disposing unit of work #{instanceId}");
@@ -54,6 +59,7 @@
             Flush();
             eventAggregator.RaiseEvents();
             Commit();
+            AsyncHelper.RunSync(()=>eventBusScope.RaiseEvents());
             isCompleted = true;
         }
 

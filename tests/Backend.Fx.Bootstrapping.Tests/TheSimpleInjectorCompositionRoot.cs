@@ -13,6 +13,7 @@ namespace Backend.Fx.Bootstrapping.Tests
     using FakeItEasy;
     using Modules;
     using Patterns.DependencyInjection;
+    using Patterns.EventAggregation.Integration;
     using Patterns.IdGeneration;
     using SimpleInjector;
     using Testing.InMemoryPersistence;
@@ -22,15 +23,16 @@ namespace Backend.Fx.Bootstrapping.Tests
     {
         private readonly SimpleInjectorCompositionRoot sut;
         
-        private class AnDomainModule  : DomainModule 
+        private class ADomainModule  : DomainModule 
         {
-            public AnDomainModule(params Assembly[] domainAssemblies) : base(domainAssemblies)
+            public ADomainModule(params Assembly[] domainAssemblies) : base(domainAssemblies)
             { }
 
             protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
             {
                 base.Register(container, scopedLifestyle);
                 container.Register<IClock, FrozenClock>();
+                container.RegisterInstance(A.Fake<IEventBus>());
             }
         }
 
@@ -45,7 +47,7 @@ namespace Backend.Fx.Bootstrapping.Tests
             sut = new SimpleInjectorCompositionRoot();
             var domainAssembly = typeof(AnAggregate).GetTypeInfo().Assembly;
             sut.RegisterModules(
-                new AnDomainModule(domainAssembly),
+                new ADomainModule(domainAssembly),
                 new InMemoryIdGeneratorsModule(),
                 new InMemoryPersistenceModule(domainAssembly));
             

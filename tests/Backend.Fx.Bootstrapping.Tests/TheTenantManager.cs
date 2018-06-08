@@ -7,8 +7,10 @@
     using Environment.Authentication;
     using Environment.DateAndTime;
     using Environment.MultiTenancy;
+    using FakeItEasy;
     using Modules;
     using Patterns.DependencyInjection;
+    using Patterns.EventAggregation.Integration;
     using SimpleInjector;
     using Testing.InMemoryPersistence;
     using Xunit;
@@ -18,15 +20,16 @@
         private readonly ITenantManager sut;
         private readonly IScopeManager scopeManager;
 
-        private class AnDomainModule  : DomainModule 
+        private class ADomainModule  : DomainModule 
         {
-            public AnDomainModule(params Assembly[] domainAssemblies) : base(domainAssemblies)
+            public ADomainModule(params Assembly[] domainAssemblies) : base(domainAssemblies)
             { }
 
             protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
             {
                 base.Register(container, scopedLifestyle);
                 container.Register<IClock, FrozenClock>();
+                container.RegisterInstance(A.Fake<IEventBus>());
             }
         }
 
@@ -34,8 +37,9 @@
         {
             var compositionRoot = new SimpleInjectorCompositionRoot();
             var domainAssembly = typeof(AnAggregate).GetTypeInfo().Assembly;
+            var backendfxAssembly = typeof(Entity).GetTypeInfo().Assembly;
             compositionRoot.RegisterModules(
-                new AnDomainModule(domainAssembly),
+                new ADomainModule(domainAssembly, backendfxAssembly),
                 new InMemoryIdGeneratorsModule(),
                 new InMemoryPersistenceModule(domainAssembly));
 

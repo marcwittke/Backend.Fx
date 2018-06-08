@@ -5,6 +5,7 @@
     using Fx.Environment.DateAndTime;
     using Fx.Patterns.DependencyInjection;
     using Fx.Patterns.EventAggregation.Domain;
+    using Fx.Patterns.EventAggregation.Integration;
     using Fx.Patterns.UnitOfWork;
 
     public class TestUnitOfWork : UnitOfWork
@@ -27,8 +28,8 @@
             RollbackCount++;
         }
 
-        public TestUnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder, IDomainEventAggregator eventAggregator) 
-                : base(clock, identityHolder, eventAggregator)
+        public TestUnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder, IDomainEventAggregator eventAggregator, IEventBusScope eventBusScope) 
+                : base(clock, identityHolder, eventAggregator, eventBusScope)
         { }
     }
 }
