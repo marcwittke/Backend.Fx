@@ -87,7 +87,7 @@
         /// <inheritdoc />
         public void Subscribe<THandler, TEvent>() where THandler : IIntegrationEventHandler<TEvent> where TEvent : IIntegrationEvent
         {
-            string eventName = typeof(TEvent).FullName;
+            string eventName = typeof(TEvent).FullName ?? typeof(TEvent).Name;
 
             Logger.Info($"Subscribing to {eventName}");
             var handlerType = typeof(THandler);

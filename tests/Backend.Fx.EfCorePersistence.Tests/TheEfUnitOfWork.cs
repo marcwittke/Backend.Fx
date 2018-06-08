@@ -3,6 +3,9 @@
     using DummyImpl;
     using Environment.Authentication;
     using Environment.DateAndTime;
+    using FakeItEasy;
+    using Patterns.EventAggregation.Domain;
+    using Patterns.EventAggregation.Integration;
     using Xunit;
 
     public class TheEfUnitOfWork : TestWithInMemorySqliteDbContext
@@ -18,7 +21,8 @@
         {
             using(var dbContext = new TestDbContext(DbContextOptions))
             {
-                var sut = new EfUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), dbContext);
+                var sut = new EfUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), A.Fake<IDomainEventAggregator>(), 
+                                           A.Fake<IEventBusScope>(), dbContext);
                 
                 Assert.Null(dbContext.Database.CurrentTransaction);
                 sut.Begin();
@@ -33,7 +37,8 @@
         {
             using (var dbContext = new TestDbContext(DbContextOptions))
             {
-                var sut = new EfUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), dbContext);
+                var sut = new EfUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), A.Fake<IDomainEventAggregator>(), 
+                                           A.Fake<IEventBusScope>(), dbContext);
                 sut.Begin();
                 dbContext.Add(new Blogger(333, "Bratislav", "Metulsky"));
                 sut.Dispose();

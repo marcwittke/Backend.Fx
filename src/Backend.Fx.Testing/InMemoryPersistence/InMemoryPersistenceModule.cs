@@ -10,6 +10,8 @@
     using Environment.Authentication;
     using Environment.DateAndTime;
     using FakeItEasy;
+    using Patterns.EventAggregation.Domain;
+    using Patterns.EventAggregation.Integration;
     using Patterns.UnitOfWork;
     using SimpleInjector;
     
@@ -43,7 +45,11 @@
             container.Register(typeof(IRepository<>), typeof(InMemoryRepository<>));
             container.Register(typeof(IQueryable<>), typeof(InMemoryQueryable<>));
 
-            var uowRegistration = Lifestyle.Scoped.CreateRegistration(() => new InMemoryUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem()), container);
+            var uowRegistration = Lifestyle.Scoped.CreateRegistration(
+                    ()  => new InMemoryUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), 
+                                                  container.GetInstance<IDomainEventAggregator>(), 
+                                                  container.GetInstance<IEventBusScope>()), 
+                    container);
             container.AddRegistration(typeof(IUnitOfWork), uowRegistration);
             container.AddRegistration(typeof(ICanFlush), uowRegistration);
             container.Register(A.Fake<IReadonlyUnitOfWork>);
