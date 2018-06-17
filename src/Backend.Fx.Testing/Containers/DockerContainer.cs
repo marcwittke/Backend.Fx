@@ -4,6 +4,7 @@
     using System.Threading.Tasks;
     using Docker.DotNet;
     using Docker.DotNet.Models;
+    using Extensions;
     using Fx.Logging;
     using JetBrains.Annotations;
     using Polly;
@@ -107,7 +108,7 @@
                 {
                     try
                     {
-                        Kill().Wait();
+                        AsyncHelper.RunSync(Kill);
                     }
                     catch (Exception ex)
                     {

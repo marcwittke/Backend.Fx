@@ -93,25 +93,4 @@
             }
         }
     }
-
-
-
-    //[Fact]
-    //    public void HandlesIntegrationEvents()
-    //    {
-    //        bool wasHandled = false;
-    //        sut.Boot();
-    //        TenantId tenantId = sut.TenantManager.CreateDemonstrationTenant("for integration event test", "", true);
-
-    //        sut.SubscribeToIntegrationEvent<TheIntegrationEvent>(evt =>
-    //        {
-    //            Assert.Equal(tenantId.Value, evt.TenantId);
-    //            Assert.Equal(42, evt.Whatever);
-    //            wasHandled = true;
-    //        });
-
-    //        sut.GetInstance<IEventAggregator>().PublishIntegrationEvent(new TheIntegrationEvent(tenantId.Value, 42)).Wait();
-    //        Assert.True(wasHandled);
-    //    }
-    //}
 }
