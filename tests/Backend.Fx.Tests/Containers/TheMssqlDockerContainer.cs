@@ -4,7 +4,6 @@
     using System.Data;
     using System.Data.SqlClient;
     using System.Threading.Tasks;
-    using Fx.Extensions;
     using RandomData;
     using Testing.BuildEnv;
     using Testing.Containers;
@@ -13,7 +12,7 @@
     public class TestContainer : MssqlDockerContainer
     {
         public TestContainer(string dockerApiUrl, string name)
-                : base(dockerApiUrl, TestRandom.NextPassword(), name)
+            : base(dockerApiUrl, TestRandom.NextPassword(), name)
         { }
 
         public override IDbConnection CreateConnection()
@@ -22,45 +21,36 @@
         }
     }
 
-    public class TheMssqlDockerContainer
+    public class TheMssqlDockerContainer : IAsyncLifetime
     {
-        private readonly string dockerApiUri;
-
-        public TheMssqlDockerContainer()
-        {
-            dockerApiUri = AsyncHelper.RunSync(() => DockerUtilities.DetectDockerClientApi());
-            if (Build.IsTfBuild)
-            {
-                AsyncHelper.RunSync(() => DockerUtilities.KillAllOlderThan(dockerApiUri, TimeSpan.FromMinutes(30)));
-            }
-        }
+        private string dockerApiUri;
+        private string containerName;
+        private TestContainer container;
 
         [Fact]
         public async Task CanBeUsed()
         {
-            var containerName = CreateContainerName("TheMssqlDockerContainer_CanBeUsed");
+            containerName = CreateContainerName("TheMssqlDockerContainer_CanBeUsed");
             await DockerUtilities.EnsureKilledAndRemoved(dockerApiUri, containerName);
-            using (TestContainer container = new TestContainer(dockerApiUri, containerName))
-            {
-                await container.CreateAndStart();
-                Assert.False(container.HealthCheck());
-                Assert.True(container.WaitUntilIsHealthy());
-            }
+            container = new TestContainer(dockerApiUri, containerName);
+
+            await container.CreateAndStartAsync();
+            Assert.False(container.HealthCheck());
+            Assert.True(container.WaitUntilIsHealthy());
         }
 
         [Fact]
         public async Task CanRestore()
         {
-            var containerName = CreateContainerName("TheMssqlDockerContainer_CanRestore");
+            containerName = CreateContainerName("TheMssqlDockerContainer_CanRestore");
             await DockerUtilities.EnsureKilledAndRemoved(dockerApiUri, containerName);
-            using (TestContainer container = new TestContainer(dockerApiUri, containerName))
-            {
-                await container.CreateAndStart();
-                Assert.False(container.HealthCheck());
-                Assert.True(container.WaitUntilIsHealthy());
+            container = new TestContainer(dockerApiUri, containerName);
 
-                await container.Restore("Backup.bak", "RestoredDb");
-            }
+            await container.CreateAndStartAsync();
+            Assert.False(container.HealthCheck());
+            Assert.True(container.WaitUntilIsHealthy());
+
+            await container.Restore("Backup.bak", "RestoredDb");
         }
 
         private static string CreateContainerName(string name)
@@ -71,6 +61,20 @@
             }
 
             return name;
+        }
+
+        public async Task InitializeAsync()
+        {
+            dockerApiUri = await DockerUtilities.DetectDockerClientApi();
+            if (Build.IsTfBuild)
+            {
+                await DockerUtilities.KillAllOlderThan(dockerApiUri, TimeSpan.FromMinutes(30));
+            }
+        }
+
+        public async Task DisposeAsync()
+        {
+            await container.EnsureKilledAsync();
         }
     }
 }

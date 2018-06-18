@@ -60,7 +60,7 @@
         /// Creates a container from the base image and starts it
         /// </summary>
         /// <returns></returns>
-        public async Task CreateAndStart()
+        public async Task CreateAndStartAsync()
         {
             if (ContainerId != null)
             {
@@ -86,10 +86,12 @@
             Logger.Info($"Container {ContainerId} was started successfully");
         }
 
-        public async Task EnsureKilled()
+        public async Task EnsureKilledAsync()
         {
-            var containersListParameters = new ContainersListParameters
+            for (int i = 0; i < 3; i++)
             {
+                var containersListParameters = new ContainersListParameters
+                {
                     All = true,
                     Filters = new Dictionary<string, IDictionary<string, bool>> {
                             {
@@ -98,19 +100,20 @@
                                     }
                             }
                     },
-            };
+                };
 
-            var container = (await Client.Containers.ListContainersAsync(containersListParameters)).FirstOrDefault();
+                var container = (await Client.Containers.ListContainersAsync(containersListParameters)).FirstOrDefault();
 
-            if (container?.Status == "running")
-            {
-                Logger.Info($"Killing container {container.ID}");
-                await Client.Containers.KillContainerAsync(container.ID, new ContainerKillParameters());
-                Logger.Info($"Container {container.ID} killed");
+                if (container?.Status == "running")
+                {
+                    Logger.Info($"Killing container {container.ID}");
+                    await Client.Containers.KillContainerAsync(container.ID, new ContainerKillParameters());
+                    Logger.Info($"Container {container.ID} killed");
+                }
             }
         }
 
-        public async Task Kill()
+        public async Task KillAsync()
         {
             if (ContainerId == null)
             {
@@ -134,7 +137,7 @@
                 {
                     try
                     {
-                        AsyncHelper.RunSync(Kill);
+                        AsyncHelper.RunSync(EnsureKilledAsync);
                     }
                     catch (Exception ex)
                     {

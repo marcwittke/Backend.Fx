@@ -109,7 +109,7 @@
             }
         }
 
-        private Stream CreateTarGz(string sourceFile)
+        private static Stream CreateTarGz(string sourceFile)
         {
             var tempFileName = Path.GetTempFileName();
             Stream outStream = File.Create(tempFileName);
