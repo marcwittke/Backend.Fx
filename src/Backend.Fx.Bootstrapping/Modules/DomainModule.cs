@@ -1,5 +1,6 @@
 ﻿namespace Backend.Fx.Bootstrapping.Modules
 {
+    using System;
     using System.Linq;
     using System.Reflection;
     using System.Security.Principal;
@@ -24,7 +25,7 @@
     {
         private static readonly ILogger Logger = LogManager.Create<DomainModule>();
         private readonly Assembly[] assemblies;
-        private IDomainEventAggregator domainEventAggregator;
+        private Func<DomainEventAggregator> domainEventAggregatorFactory;
         private readonly string assembliesForLogging;
 
         protected DomainModule(params Assembly[] domainAssemblies)
@@ -38,7 +39,7 @@
 
         public override void Register(ICompositionRoot compositionRoot)
         {
-            domainEventAggregator = new DomainEventAggregator(compositionRoot);        
+            domainEventAggregatorFactory = ()=>new DomainEventAggregator(compositionRoot);        
             base.Register(compositionRoot);
         }
 
@@ -59,8 +60,8 @@
             // domain event subsystem
             Logger.Debug($"Registering domain event handlers from {assembliesForLogging}");
             container.Collection.Register(typeof(IDomainEventHandler<>), assemblies);
-            Logger.Debug("Registering singleton event aggregator instance");
-            container.RegisterInstance(domainEventAggregator);
+            Logger.Debug("Registering event aggregator");
+            container.Register<IDomainEventAggregator>(domainEventAggregatorFactory);
 
             // initial data generation subsystem
             Logger.Debug($"Registering initial data generators from {assembliesForLogging}");
