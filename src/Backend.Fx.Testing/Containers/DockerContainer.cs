@@ -1,9 +1,12 @@
 ﻿namespace Backend.Fx.Testing.Containers
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Docker.DotNet;
     using Docker.DotNet.Models;
+    using Extensions;
     using Fx.Logging;
     using JetBrains.Annotations;
     using Polly;
@@ -83,6 +86,30 @@
             Logger.Info($"Container {ContainerId} was started successfully");
         }
 
+        public async Task EnsureKilled()
+        {
+            var containersListParameters = new ContainersListParameters
+            {
+                    All = true,
+                    Filters = new Dictionary<string, IDictionary<string, bool>> {
+                            {
+                                    "id", new Dictionary<string, bool> {
+                                            {ContainerId, true},
+                                    }
+                            }
+                    },
+            };
+
+            var container = (await Client.Containers.ListContainersAsync(containersListParameters)).FirstOrDefault();
+
+            if (container?.Status == "running")
+            {
+                Logger.Info($"Killing container {container.ID}");
+                await Client.Containers.KillContainerAsync(container.ID, new ContainerKillParameters());
+                Logger.Info($"Container {container.ID} killed");
+            }
+        }
+
         public async Task Kill()
         {
             if (ContainerId == null)
@@ -107,7 +134,7 @@
                 {
                     try
                     {
-                        Kill().Wait();
+                        AsyncHelper.RunSync(Kill);
                     }
                     catch (Exception ex)
                     {
