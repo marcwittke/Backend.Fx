@@ -47,7 +47,7 @@
 
         public ICompositionRoot CompositionRoot { get; }
 
-        public ManualResetEventSlim IsBooted { get; } = new ManualResetEventSlim(true);
+        public ManualResetEventSlim IsBooted { get; } = new ManualResetEventSlim(false);
 
         public virtual async Task Boot()
         {
