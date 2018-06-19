@@ -31,9 +31,9 @@
         public async Task CanBeUsed()
         {
             containerName = CreateContainerName("TheMssqlDockerContainer_CanBeUsed");
-            await DockerUtilities.EnsureKilledAndRemoved(dockerApiUri, containerName);
+            
             container = new TestContainer(dockerApiUri, containerName);
-
+            await container.InitializeAsync();
             await container.CreateAndStartAsync();
             Assert.False(container.HealthCheck());
             Assert.True(container.WaitUntilIsHealthy());

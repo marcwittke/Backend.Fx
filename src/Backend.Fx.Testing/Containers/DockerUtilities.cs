@@ -16,7 +16,7 @@
         {
             using (var client = new DockerClientConfiguration(new Uri(dockerApiUri)).CreateClient())
             {
-                var list = await client.Containers.ListContainersAsync(new ContainersListParameters ());
+                var list = await client.Containers.ListContainersAsync(new ContainersListParameters());
                 var tooOldContainers = list.Where(cnt => cnt.Created + maxAge < DateTime.UtcNow);
                 foreach (var tooOldContainer in tooOldContainers)
                 {
@@ -77,9 +77,10 @@
         {
             using (var client = new DockerClientConfiguration(new Uri(dockerApiUrl)).CreateClient())
             {
-                var containersListParameters = new ContainersListParameters {
-                        All = true,
-                        Filters = new Dictionary<string, IDictionary<string, bool>> {
+                var containersListParameters = new ContainersListParameters
+                {
+                    All = true,
+                    Filters = new Dictionary<string, IDictionary<string, bool>> {
                                 {
                                         "name", new Dictionary<string, bool> {
                                                 {"^/"+containerName+"$", true},
@@ -88,17 +89,17 @@
                         },
                 };
 
-                var container = (await client.Containers.ListContainersAsync(containersListParameters)).FirstOrDefault();
-
-                if (container?.Status == "running")
-                {
-                    Logger.Info($"Killing container {container.ID}");
-                    await client.Containers.KillContainerAsync(container.ID, new ContainerKillParameters());
-                    Logger.Info($"Container {container.ID} killed");
-                }
-
+                ContainerListResponse container = (await client.Containers.ListContainersAsync(containersListParameters)).FirstOrDefault();
                 if (container != null)
                 {
+                    if (container.State == "running")
+                    {
+                        Logger.Info($"Killing container {container.ID}");
+                        await client.Containers.KillContainerAsync(container.ID, new ContainerKillParameters());
+                        Logger.Info($"Container {container.ID} killed");
+                    }
+
+
                     Logger.Info($"Removing container {container.ID}");
                     await client.Containers.RemoveContainerAsync(container.ID, new ContainerRemoveParameters());
                     Logger.Info($"Container {container.ID} removed");
