@@ -6,7 +6,6 @@
     using System.Threading.Tasks;
     using Docker.DotNet;
     using Docker.DotNet.Models;
-    using Extensions;
     using Fx.Logging;
     using JetBrains.Annotations;
     using Polly;
@@ -17,10 +16,12 @@
     /// </summary>
     public abstract class DockerContainer : IAsyncLifetime
     {
+        private readonly string dockerApiUrl;
         private static readonly ILogger Logger = LogManager.Create<DockerContainer>();
 
         protected DockerContainer([NotNull] string baseImage, string name, string dockerApiUrl, string containerId = null)
         {
+            this.dockerApiUrl = dockerApiUrl;
             BaseImage = baseImage ?? throw new ArgumentNullException(nameof(baseImage));
             Name = name;
             ContainerId = containerId;
@@ -128,7 +129,10 @@
 
         public virtual async Task InitializeAsync()
         {
-            await Task.CompletedTask;
+            for (int i = 0; i < 3; i++)
+            {
+                await DockerUtilities.EnsureKilledAndRemoved(dockerApiUrl, Name);
+            }
         }
 
         public virtual async Task DisposeAsync()
