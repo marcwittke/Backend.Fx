@@ -8,6 +8,7 @@
     using NLog.Layouts;
     using NLog.Targets;
     using System.Collections.Generic;
+    using System.Reflection;
     using NLogLogging;
 
     public static class Configurations
@@ -19,8 +20,8 @@
             lock (SyncLock)
             {
                 if (NLog.LogManager.Configuration != null) return;
-
-                const string logfilename = "${shortdate}.xlog";
+                
+                string logfilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xlog";
                 Backend.Fx.Logging.LogManager.Initialize(new NLogLoggerFactory());
                 var config = new LoggingConfiguration();
 

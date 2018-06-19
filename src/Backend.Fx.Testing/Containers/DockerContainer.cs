@@ -6,20 +6,22 @@
     using System.Threading.Tasks;
     using Docker.DotNet;
     using Docker.DotNet.Models;
-    using Extensions;
     using Fx.Logging;
     using JetBrains.Annotations;
     using Polly;
+    using Xunit;
 
     /// <summary>
     /// An abstraction over a container running on local docker. Communication is done using the Docker API
     /// </summary>
-    public abstract class DockerContainer : IDisposable
+    public abstract class DockerContainer : IAsyncLifetime
     {
+        private readonly string dockerApiUrl;
         private static readonly ILogger Logger = LogManager.Create<DockerContainer>();
 
         protected DockerContainer([NotNull] string baseImage, string name, string dockerApiUrl, string containerId = null)
         {
+            this.dockerApiUrl = dockerApiUrl;
             BaseImage = baseImage ?? throw new ArgumentNullException(nameof(baseImage));
             Name = name;
             ContainerId = containerId;
@@ -60,7 +62,7 @@
         /// Creates a container from the base image and starts it
         /// </summary>
         /// <returns></returns>
-        public async Task CreateAndStart()
+        public async Task CreateAndStartAsync()
         {
             if (ContainerId != null)
             {
@@ -86,12 +88,13 @@
             Logger.Info($"Container {ContainerId} was started successfully");
         }
 
-        public async Task EnsureKilled()
+        public async Task EnsureKilledAsync()
         {
+
             var containersListParameters = new ContainersListParameters
             {
-                    All = true,
-                    Filters = new Dictionary<string, IDictionary<string, bool>> {
+                All = true,
+                Filters = new Dictionary<string, IDictionary<string, bool>> {
                             {
                                     "id", new Dictionary<string, bool> {
                                             {ContainerId, true},
@@ -102,15 +105,16 @@
 
             var container = (await Client.Containers.ListContainersAsync(containersListParameters)).FirstOrDefault();
 
-            if (container?.Status == "running")
+            if (container?.State == "running")
             {
                 Logger.Info($"Killing container {container.ID}");
                 await Client.Containers.KillContainerAsync(container.ID, new ContainerKillParameters());
                 Logger.Info($"Container {container.ID} killed");
             }
+
         }
 
-        public async Task Kill()
+        public async Task KillAsync()
         {
             if (ContainerId == null)
             {
@@ -122,32 +126,24 @@
             Logger.Info($"Container {ContainerId} was killed successfully");
         }
 
-        /// <summary>
-        /// Kills and removes the container
-        /// </summary>
-        /// <param name="disposing"></param>
-        protected virtual void Dispose(bool disposing)
+        public virtual async Task InitializeAsync()
         {
-            if (disposing)
-            {
-                if (ContainerId != null)
-                {
-                    try
-                    {
-                        AsyncHelper.RunSync(Kill);
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Warn(ex, $"Failed to kill container {ContainerId}");
-                    }
-                }
-            }
+            await DockerUtilities.EnsureKilledAndRemoved(dockerApiUrl, Name);
         }
 
-        public void Dispose()
+        public virtual async Task DisposeAsync()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            if (ContainerId != null)
+            {
+                try
+                {
+                    await EnsureKilledAsync();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Warn(ex, $"Failed to kill container {ContainerId}");
+                }
+            }
         }
     }
 }
