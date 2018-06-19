@@ -10,11 +10,12 @@
     using Fx.Logging;
     using JetBrains.Annotations;
     using Polly;
+    using Xunit;
 
     /// <summary>
     /// An abstraction over a container running on local docker. Communication is done using the Docker API
     /// </summary>
-    public abstract class DockerContainer : IDisposable
+    public abstract class DockerContainer : IAsyncLifetime
     {
         private static readonly ILogger Logger = LogManager.Create<DockerContainer>();
 
@@ -125,32 +126,24 @@
             Logger.Info($"Container {ContainerId} was killed successfully");
         }
 
-        /// <summary>
-        /// Kills and removes the container
-        /// </summary>
-        /// <param name="disposing"></param>
-        protected virtual void Dispose(bool disposing)
+        public virtual async Task InitializeAsync()
         {
-            if (disposing)
-            {
-                if (ContainerId != null)
-                {
-                    try
-                    {
-                        AsyncHelper.RunSync(EnsureKilledAsync);
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Warn(ex, $"Failed to kill container {ContainerId}");
-                    }
-                }
-            }
+            await Task.CompletedTask;
         }
 
-        public void Dispose()
+        public virtual async Task DisposeAsync()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            if (ContainerId != null)
+            {
+                try
+                {
+                    await EnsureKilledAsync();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Warn(ex, $"Failed to kill container {ContainerId}");
+                }
+            }
         }
     }
 }
