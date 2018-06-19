@@ -14,10 +14,20 @@
         /// </summary>
         IScopeManager ScopeManager { get; }
 
+        /// <summary>
+        /// The composition root of the dependency injection framework
+        /// </summary>
         ICompositionRoot CompositionRoot { get; }
 
+        /// <summary>
+        /// allows asynchronously awaiting application startup
+        /// </summary>
         ManualResetEventSlim IsBooted { get; }
 
+        /// <summary>
+        /// Initializes ans starts the application (async)
+        /// </summary>
+        /// <returns></returns>
         Task Boot();
     }
 
@@ -39,16 +49,16 @@
             ScopeManager = scopeManager;
         }
 
-        /// <summary>
-        /// You should use the <see cref="IScopeManager"/> to open an injection scope for every logical operation.
-        /// In case of web applications, this refers to a single HTTP request, for example.
-        /// </summary>
+        /// <inheritdoc />
         public IScopeManager ScopeManager { get; }
 
+        /// <inheritdoc />
         public ICompositionRoot CompositionRoot { get; }
 
+        /// <inheritdoc />
         public ManualResetEventSlim IsBooted { get; } = new ManualResetEventSlim(false);
 
+        /// <inheritdoc />
         public virtual async Task Boot()
         {
             Logger.Info("Booting application");
@@ -60,7 +70,7 @@
         {
             IsBooted.Set();
         }
-
+        
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
