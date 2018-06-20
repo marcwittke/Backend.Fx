@@ -8,20 +8,18 @@
     using NLog.Layouts;
     using NLog.Targets;
     using System.Collections.Generic;
-    using System.Reflection;
     using NLogLogging;
 
     public static class Configurations
     {
         private static readonly object SyncLock = new object();
 
-        public static void ForTests(string appRootNamespace)
+        public static void ForTests(string appRootNamespace, string logfilename = "tests.xlog")
         {
             lock (SyncLock)
             {
                 if (NLog.LogManager.Configuration != null) return;
                 
-                string logfilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xlog";
                 Backend.Fx.Logging.LogManager.Initialize(new NLogLoggerFactory());
                 var config = new LoggingConfiguration();
 

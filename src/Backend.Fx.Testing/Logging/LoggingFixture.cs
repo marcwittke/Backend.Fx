@@ -12,7 +12,7 @@
 
         protected LoggingFixture(string appRootNamespace)
         {
-            Configurations.ForTests(appRootNamespace);
+            Configurations.ForTests(appRootNamespace, GetType().Assembly.GetName().Name + ".xlog");
 
             lifetimeLogger = Backend.Fx.Logging.LogManager.Create<LoggingFixture>().InfoDuration("Test run started", "Test run finished");
         }
