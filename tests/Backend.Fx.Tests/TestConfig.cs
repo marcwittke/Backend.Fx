@@ -4,9 +4,9 @@
 namespace Backend.Fx.Tests
 {
     using Testing.Logging;
-   public class TestLoggingFixture : LoggingFixture
+    public class TestLoggingFixture : LoggingFixture
     {
-        public TestLoggingFixture() : base("Backend.Fx")
+        public TestLoggingFixture() : base("Not.Important.Since.Backend.Fx.Is.Logging.By.Default")
         { }
     }
 }
