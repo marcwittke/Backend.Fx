@@ -3,6 +3,7 @@
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
 
     public class Errors : IReadOnlyDictionary<string, Error[]>
     {
@@ -90,6 +91,34 @@
         public int Count
         {
             get { return dictionaryImplementation.Count; }
+        }
+
+        public override string ToString()
+        {
+            StringBuilder b = new StringBuilder();
+            b.Append("Errors: ");
+            b.Append(Count.ToString());
+            b.AppendLine();
+
+            foreach (var keyValuePair in this)
+            {
+                b.Append("  ");
+                b.Append(keyValuePair.Key);
+                b.AppendLine();
+                for (var index = 0; index < keyValuePair.Value.Length; index++)
+                {
+                    var error = keyValuePair.Value[index];
+                    b.Append("    [");
+                    b.Append(index.ToString("00"));
+                    b.Append("] ");
+                    b.Append(error.Code);
+                    b.Append(":");
+                    b.Append(error.Message);
+                    b.AppendLine();
+                }
+            }
+
+            return b.ToString();
         }
     }
 }
