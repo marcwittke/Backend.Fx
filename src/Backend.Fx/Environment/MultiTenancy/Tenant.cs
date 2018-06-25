@@ -43,6 +43,8 @@
 
         public string DefaultCultureName { get; private set; }
 
+        public string UriMatchingExpression { get; set; }
+
         [NotMapped]
         public CultureInfo DefaultCulture
         {
