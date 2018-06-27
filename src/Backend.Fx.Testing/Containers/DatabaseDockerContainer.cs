@@ -53,8 +53,8 @@
 
         public override async Task DisposeAsync()
         {
+            await base.DisposeAsync();
             TcpPorts.Free(LocalTcpPort);
-            await Task.CompletedTask;
         }
     }
 }
