@@ -28,7 +28,7 @@ namespace Backend.Fx.Testing.AssemblyFixtures
             this.diagnosticMessageSink = diagnosticMessageSink;
         }
 
-        protected override Task<RunSummary> RunTestClassAsync(ITestClass testClass, IReflectionTypeInfo @class, IEnumerable<IXunitTestCase> testCases)
+        protected override async Task<RunSummary> RunTestClassAsync(ITestClass testClass, IReflectionTypeInfo @class, IEnumerable<IXunitTestCase> testCases)
         {
             // Don't want to use .Concat + .ToDictionary because of the possibility of overriding types,
             // so instead we'll just let collection fixtures override assembly fixtures.
@@ -37,15 +37,11 @@ namespace Backend.Fx.Testing.AssemblyFixtures
             {
                 combinedFixtures[kvp.Key] = kvp.Value;
             }
-            
-            return Task.Run(() =>
+
+            using (Logger.InfoDuration($"Running Test Class {testClass.Class.Name}"))
             {
-                using (Logger.InfoDuration($"Running Test Class {testClass.Class.Name}"))
-                {
-                    var xunitTestClassRunner = new XunitTestClassRunner(testClass, @class, testCases, diagnosticMessageSink, MessageBus, TestCaseOrderer, new ExceptionAggregator(Aggregator), CancellationTokenSource, combinedFixtures);
-                    return xunitTestClassRunner.RunAsync();
-                }
-            });
+                var xunitTestClassRunner = new XunitTestClassRunner(testClass, @class, testCases, diagnosticMessageSink, MessageBus, TestCaseOrderer, new ExceptionAggregator(Aggregator), CancellationTokenSource, combinedFixtures);
+                return await xunitTestClassRunner.RunAsync();
+            }
         }
-    }
-}
+    } }

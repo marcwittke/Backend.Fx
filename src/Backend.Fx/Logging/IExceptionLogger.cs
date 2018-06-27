@@ -1,7 +1,6 @@
 ﻿namespace Backend.Fx.Logging
 {
     using System;
-    using System.Linq;
     using Exceptions;
 
     public interface IExceptionLogger
@@ -22,12 +21,7 @@
         {
             if (exception is ClientException cex)
             {
-                string[] clientErrorStrings = cex.Errors
-                                                 .SelectMany(err => err.Value.Select(er => $"{Environment.NewLine}  {er.Code}:{er.Message}"))
-                                                 .ToArray();
-
-                var clientErrorString = string.Join("", clientErrorStrings);
-                logger.Warn(cex, cex.Message + clientErrorString);
+                logger.Warn(cex, cex.Message + Environment.NewLine + cex.Errors);
             }
             else
             {
