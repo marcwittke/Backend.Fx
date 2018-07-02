@@ -61,6 +61,7 @@
                     existingTenant.IsDemoTenant = tenant.IsDemoTenant;
                     existingTenant.Name = tenant.Name;
                     existingTenant.Description = tenant.Description;
+                    existingTenant.UriMatchingExpression = tenant.UriMatchingExpression;
                 }
 
                 if (tenant.IsDefault)
