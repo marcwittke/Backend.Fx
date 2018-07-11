@@ -19,8 +19,8 @@
         Tenant GetTenant(TenantId id);
         void EnsureTenantIsInitialized(TenantId tenantId);
         Tenant FindTenant(TenantId tenantId);
-        TenantId CreateDemonstrationTenant(string name, string description, bool isDefault, CultureInfo defaultCultureInfo);
-        TenantId CreateProductionTenant(string name, string description, bool isDefault, CultureInfo defaultCultureInfo);
+        TenantId CreateDemonstrationTenant(string name, string description, bool isDefault, CultureInfo defaultCultureInfo, string uriMatchingExpression = null);
+        TenantId CreateProductionTenant(string name, string description, bool isDefault, CultureInfo defaultCultureInfo, string uriMatchingExpression = null);
         TenantId GetDefaultTenantId();
     }
 
@@ -36,21 +36,21 @@
             this.tenantInitializer = tenantInitializer;
         }
 
-        public TenantId CreateDemonstrationTenant(string name, string description, bool isDefault, CultureInfo defaultCultureInfo)
+        public TenantId CreateDemonstrationTenant(string name, string description, bool isDefault, CultureInfo defaultCultureInfo, string uriMatchingExpression = null)
         {
             lock (syncLock)
             {
                 Logger.Info($"Creating demonstration tenant: {name}");
-                return CreateTenant(name, description, true, isDefault, defaultCultureInfo);
+                return CreateTenant(name, description, true, isDefault, defaultCultureInfo, uriMatchingExpression);
             }
         }
 
-        public TenantId CreateProductionTenant(string name, string description, bool isDefault, CultureInfo defaultCultureInfo)
+        public TenantId CreateProductionTenant(string name, string description, bool isDefault, CultureInfo defaultCultureInfo, string uriMatchingExpression = null)
         {
             Logger.Info($"Creating production tenant: {name}");
             lock (syncLock)
             {
-                return CreateTenant(name, description, false, isDefault, defaultCultureInfo);
+                return CreateTenant(name, description, false, isDefault, defaultCultureInfo, uriMatchingExpression);
             }
         }
 
@@ -122,7 +122,7 @@
 
         public abstract Tenant FindTenant(TenantId tenantId);
 
-        private TenantId CreateTenant([NotNull] string name, string description, bool isDemo, bool isDefault, CultureInfo defaultCultureInfo)
+        private TenantId CreateTenant([NotNull] string name, string description, bool isDemo, bool isDefault, CultureInfo defaultCultureInfo, string uriMatchingExpression)
         {
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Value cannot be null or whitespace.", nameof(name));
 
@@ -131,7 +131,7 @@
                 throw new ArgumentException($"There is already a tenant named {name}");
             }
 
-            Tenant tenant = new Tenant(name, description, isDemo, defaultCultureInfo) { State = TenantState.Created, IsDefault = isDefault };
+            Tenant tenant = new Tenant(name, description, isDemo, defaultCultureInfo) { State = TenantState.Created, IsDefault = isDefault, UriMatchingExpression = uriMatchingExpression};
             SaveTenant(tenant);
             return new TenantId(tenant.Id);
         }

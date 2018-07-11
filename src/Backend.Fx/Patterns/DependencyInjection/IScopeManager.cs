@@ -11,5 +11,7 @@
         /// the scope after finalization.
         /// </summary>
         IScope BeginScope(IIdentity identity, TenantId tenantId);
+
+        IScope GetCurrentScope();
     }
 }
