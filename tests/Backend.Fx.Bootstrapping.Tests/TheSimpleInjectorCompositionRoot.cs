@@ -191,7 +191,7 @@ namespace Backend.Fx.Bootstrapping.Tests
         {
             Assert.Throws<ActivationException>(() => sut.GetInstance<IClock>());
             Assert.Throws<ActivationException>(() => sut.GetInstance(typeof(IClock)));
-            Assert.Null(sut.GetCurrentScopeForTestsOnly());
+            Assert.Null(sut.GetCurrentScope());
 
             using (var scope = sut.BeginScope(new SystemIdentity(), new TenantId(null)))
             {
@@ -202,8 +202,7 @@ namespace Backend.Fx.Bootstrapping.Tests
                 Assert.Equal(sutClock, scopeClock);
             }
 
-
-            Assert.Null(sut.GetCurrentScopeForTestsOnly());
+            Assert.Null(sut.GetCurrentScope());
             Assert.Throws<ActivationException>(() => sut.GetInstance<IClock>());
             Assert.Throws<ActivationException>(() => sut.GetInstance(typeof(IClock)));
         }
@@ -211,8 +210,6 @@ namespace Backend.Fx.Bootstrapping.Tests
         [Fact]
         public void CanProvideEventHandlers()
         {
-            
-
             using (sut.BeginScope(new SystemIdentity(), new TenantId(1)))
             {
                 var handlers = sut.GetAllEventHandlers<ADomainEvent>().ToArray();

@@ -81,12 +81,15 @@ namespace Backend.Fx.Bootstrapping
             return scope;
         }
 
-        /// <summary>
-        ///     This should never be used in production code
-        /// </summary>
-        public Scope GetCurrentScopeForTestsOnly()
+        public IScope GetCurrentScope()
         {
-            return ScopedLifestyle.GetCurrentScope(Container);
+            var scope = ScopedLifestyle.GetCurrentScope(Container);
+            if (scope == null)
+            {
+                return null;
+            }
+
+            return new SimpleInjectorScope(scope, scope.GetInstance<ICurrentTHolder<IIdentity>>().Current, scope.GetInstance<ICurrentTHolder<TenantId>>().Current);
         }
         #endregion
 
