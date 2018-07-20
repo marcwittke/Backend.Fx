@@ -1,14 +1,14 @@
 ﻿namespace Backend.Fx.Patterns.EventAggregation.Domain
 {
     using System;
-    using System.Collections.Generic;
+    using System.Collections.Concurrent;
     using Logging;
 
     public class DomainEventAggregator : IDomainEventAggregator
     {
         private static readonly ILogger Logger = LogManager.Create<DomainEventAggregator>();
         private readonly IDomainEventHandlerProvider domainEventHandlerProvider;
-        private readonly List<(string, string, Action)> handleActions = new List<(string, string, Action)>();
+        private readonly ConcurrentQueue<(string, string, Action)> handleActions = new ConcurrentQueue<(string, string, Action)>();
 
         public DomainEventAggregator(IDomainEventHandlerProvider domainEventHandlerProvider)
         {
@@ -30,14 +30,14 @@
                                                             injectedHandler.GetType().Name,
                                                             () => injectedHandler.Handle(domainEvent));
 
-                handleActions.Add(handleAction);
+                handleActions.Enqueue(handleAction);
                 Logger.Debug($"Invocation of {injectedHandler.GetType().Name} for domain event {typeof(TDomainEvent).Name} registered. It will be executed on completion of unit of work");
             }
         }
 
         public void RaiseEvents()
         {
-            foreach (var handleAction in handleActions)
+            while (handleActions.TryDequeue(out var handleAction))
             {
                 try
                 {

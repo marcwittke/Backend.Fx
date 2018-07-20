@@ -8,26 +8,42 @@
 
     public class InMemoryEventBus : EventBus
     {
+        private readonly IExceptionLogger exceptionLogger;
+
         public InMemoryEventBus(IScopeManager scopeManager, IExceptionLogger exceptionLogger)
                 : base(scopeManager, exceptionLogger)
-        { }
+        {
+            this.exceptionLogger = exceptionLogger;
+        }
 
         public override void Connect()
         { }
 
         public override Task Publish(IIntegrationEvent integrationEvent)
         {
-            return Task.Run(
-                    () => Process(integrationEvent.GetType().FullName, new InMemoryProcessingContext(integrationEvent)));
+            // Processing is done on the thread pool and not being awaited. This emulates best the behavior of a real
+            // event bus, that incorporates network transfer and another system handling the event
+            Task.Run(() =>
+            {
+                try
+                {
+                    Process(integrationEvent.GetType().FullName, new InMemoryProcessingContext(integrationEvent));
+                }
+                catch (Exception ex)
+                {
+                    exceptionLogger.LogException(ex);
+                }
+            });
+            return Task.CompletedTask;
         }
 
         protected override void Subscribe(string eventName)
-        {}
+        { }
 
         protected override void Unsubscribe(string eventName)
-        {}
+        { }
 
-        private class InMemoryProcessingContext : EventProcessingContext 
+        private class InMemoryProcessingContext : EventProcessingContext
         {
             private readonly IIntegrationEvent integrationEvent;
 

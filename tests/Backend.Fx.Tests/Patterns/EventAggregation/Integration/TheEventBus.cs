@@ -1,6 +1,7 @@
 ﻿namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
 {
     using System;
+    using System.Diagnostics;
     using System.Security.Principal;
     using System.Threading.Tasks;
     using FakeItEasy;
@@ -12,9 +13,23 @@
 
     public sealed class TheInMemoryEventBus : TheEventBus
     {
+
         protected override IEventBus Create(IScopeManager scopeManager, IExceptionLogger exceptionLogger)
         {
             return new InMemoryEventBus(scopeManager, exceptionLogger);
+        }
+
+        [Fact]
+        public async Task HandlesEventsAsynchronously()
+        {
+            Sut.Subscribe<LongRunningEventHandler, TestIntegrationEvent>();
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            var integrationEvent = new TestIntegrationEvent(1,"a");
+            await Sut.Publish(integrationEvent);
+            Assert.True(sw.ElapsedMilliseconds < 100);
+            integrationEvent.Processed.Wait(1500);
+            Assert.True(sw.ElapsedMilliseconds > 1000);
         }
     }
 
@@ -29,12 +44,12 @@
     public abstract class TheEventBus
     {
         private readonly EventBusFakeInjection inj = new EventBusFakeInjection();
-        private readonly IEventBus sut;
+        public IEventBus Sut { get; }
 
         protected TheEventBus()
         {
             // ReSharper disable once VirtualMemberCallInConstructor
-            sut = Create(inj.ScopeManager, inj.ExceptionLogger);
+            Sut = Create(inj.ScopeManager, inj.ExceptionLogger);
         }
 
         protected abstract IEventBus Create(IScopeManager scopeManager, IExceptionLogger exceptionLogger);
@@ -42,9 +57,10 @@
         [Fact]
         public async Task CallsTypedEventHandler()
         {
-            sut.Subscribe<TypedEventHandler, TestIntegrationEvent>();
-            await sut.Publish(new TestIntegrationEvent(34, "gaga"));
-
+            Sut.Subscribe<TypedEventHandler, TestIntegrationEvent>();
+            var integrationEvent = new TestIntegrationEvent(34, "gaga");
+            await Sut.Publish(integrationEvent);
+            integrationEvent.Processed.Wait(1500);
             A.CallTo(() => inj.TypedHandler.Handle(A<TestIntegrationEvent>
                                                    .That
                                                    .Matches(evt => evt.IntParam == 34 && evt.StringParam == "gaga")))
@@ -56,8 +72,10 @@
         [Fact]
         public async void HandlesExceptionFromTypedEventHandler()
         {
-            sut.Subscribe<ThrowingTypedEventHandler, TestIntegrationEvent>();
-            await sut.Publish(new TestIntegrationEvent(34, "gaga"));
+            Sut.Subscribe<ThrowingTypedEventHandler, TestIntegrationEvent>();
+            var integrationEvent = new TestIntegrationEvent(34, "gaga");
+            await Sut.Publish(integrationEvent);
+            integrationEvent.Processed.Wait(1500);
 
             A.CallTo(() => inj.ExceptionLogger.LogException(A<InvalidOperationException>
                                                             .That
@@ -68,8 +86,11 @@
         [Fact]
         public async void CallsDynamicEventHandler()
         {
-            sut.Subscribe<DynamicEventHandler>(typeof(TestIntegrationEvent).FullName);
-            await sut.Publish(new TestIntegrationEvent(34, "gaga"));
+            Sut.Subscribe<DynamicEventHandler>(typeof(TestIntegrationEvent).FullName);
+            var integrationEvent = new TestIntegrationEvent(34, "gaga");
+            await Sut.Publish(integrationEvent);
+            integrationEvent.Processed.Wait(1500);
+
             A.CallTo(() => inj.TypedHandler.Handle(A<TestIntegrationEvent>._)).MustNotHaveHappened();
             A.CallTo(() => inj.DynamicHandler.Handle(A<object>._)).MustHaveHappenedOnceExactly();
         }
@@ -77,8 +98,10 @@
         [Fact]
         public async void HandlesExceptionFromDynamicEventHandler()
         {
-            sut.Subscribe<ThrowingDynamicEventHandler>(typeof(TestIntegrationEvent).FullName);
-            await sut.Publish(new TestIntegrationEvent(34, "gaga"));
+            Sut.Subscribe<ThrowingDynamicEventHandler>(typeof(TestIntegrationEvent).FullName);
+            var integrationEvent = new TestIntegrationEvent(34, "gaga");
+            await Sut.Publish(integrationEvent);
+            integrationEvent.Processed.Wait(1500);
 
             A.CallTo(() => inj.ExceptionLogger.LogException(A<InvalidOperationException>
                                                         .That
@@ -89,9 +112,12 @@
         [Fact]
         public async void CallsMixedEventHandlers()
         {
-            sut.Subscribe<DynamicEventHandler>(typeof(TestIntegrationEvent).FullName);
-            sut.Subscribe<TypedEventHandler, TestIntegrationEvent>();
-            await sut.Publish(new TestIntegrationEvent(34, "gaga"));
+            Sut.Subscribe<DynamicEventHandler>(typeof(TestIntegrationEvent).FullName);
+            Sut.Subscribe<TypedEventHandler, TestIntegrationEvent>();
+            var integrationEvent = new TestIntegrationEvent(34, "gaga");
+            await Sut.Publish(integrationEvent);
+            integrationEvent.Processed.Wait(1500);
+
             A.CallTo(() => inj.TypedHandler.Handle(A<TestIntegrationEvent>
                                                    .That
                                                    .Matches(evt => evt.IntParam == 34 && evt.StringParam == "gaga")))
@@ -115,6 +141,9 @@
 
                 A.CallTo(() => Scope.GetInstance(A<Type>.That.IsEqualTo(typeof(TypedEventHandler))))
                  .Returns(new TypedEventHandler(TypedHandler));
+
+                A.CallTo(() => Scope.GetInstance(A<Type>.That.IsEqualTo(typeof(LongRunningEventHandler))))
+                 .Returns(new LongRunningEventHandler());
 
                 A.CallTo(() => Scope.GetInstance(A<Type>.That.IsEqualTo(typeof(ThrowingTypedEventHandler))))
                  .Returns(new ThrowingTypedEventHandler());

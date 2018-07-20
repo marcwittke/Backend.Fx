@@ -14,6 +14,7 @@
         public void Handle(TestIntegrationEvent eventData)
         {
             integrationEventHandlerImplementation.Handle(eventData);
+            eventData.Processed.Set();
         }
     }
 }
