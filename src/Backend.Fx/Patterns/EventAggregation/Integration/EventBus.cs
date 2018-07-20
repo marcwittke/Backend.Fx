@@ -18,6 +18,14 @@
     {
         void Connect();
 
+        /// <summary>
+        /// Directly publishes an event on the event bus without delay.
+        /// In most cases you want to publish an event when the cause is considered as safely done, e.g. when the 
+        /// wrapping transaction is committed. Use <see cref="IEventBusScope"/> to let the framework raise all events
+        /// after committing the unit of work.
+        /// </summary>
+        /// <param name="integrationEvent"></param>
+        /// <returns></returns>
         Task Publish(IIntegrationEvent integrationEvent);
 
         /// <summary>

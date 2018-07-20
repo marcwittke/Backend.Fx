@@ -19,7 +19,7 @@
 
         protected Repository(ICurrentTHolder<TenantId> tenantIdHolder, IAggregateAuthorization<TAggregateRoot> aggregateAuthorization)
         {
-            Logger.Trace($"Instantiating a new Repository<{AggregateTypeName}> for tenant [{(this.tenantIdHolder.Current.HasValue ? this.tenantIdHolder.Current.Value.ToString() : "null")}]");
+            Logger.Trace($"Instantiating a new Repository<{AggregateTypeName}> for tenant [{(tenantIdHolder.Current.HasValue ? tenantIdHolder.Current.Value.ToString() : "null")}]");
             this.tenantIdHolder = tenantIdHolder;
             this.aggregateAuthorization = aggregateAuthorization;
         }

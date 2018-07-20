@@ -6,6 +6,12 @@
 
     public interface IEventBusScope : IDomainService
     { 
+        /// <summary>
+        /// Enqueues an event to be raised later. 
+        /// Intention is to let events bubble up after an operation has terminated, e.g. when a wrapping
+        /// unit of work has completed.
+        /// </summary>
+        /// <param name="integrationEvent"></param>
         void Publish(IIntegrationEvent integrationEvent);
         Task RaiseEvents();
     }
