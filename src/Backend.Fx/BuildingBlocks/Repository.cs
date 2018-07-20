@@ -6,6 +6,7 @@
     using Environment.MultiTenancy;
     using Exceptions;
     using Extensions;
+    using JetBrains.Annotations;
     using Logging;
     using Patterns.Authorization;
     using Patterns.DependencyInjection;
@@ -18,6 +19,7 @@
 
         protected Repository(ICurrentTHolder<TenantId> tenantIdHolder, IAggregateAuthorization<TAggregateRoot> aggregateAuthorization)
         {
+            Logger.Trace($"Instantiating a new Repository<{AggregateTypeName}> for tenant [{(this.tenantIdHolder.Current.HasValue ? this.tenantIdHolder.Current.Value.ToString() : "null")}]");
             this.tenantIdHolder = tenantIdHolder;
             this.aggregateAuthorization = aggregateAuthorization;
         }
@@ -45,7 +47,7 @@
 
         public TAggregateRoot Single(int id)
         {
-            Logger.Debug($"Removing {AggregateTypeName}[{id}]");
+            Logger.Debug($"Getting single {AggregateTypeName}[{id}]");
             var aggregateRoot = AggregateQueryable.FirstOrDefault(aggr => aggr.Id.Equals(id));
             if (aggregateRoot == null)
             {
@@ -57,6 +59,7 @@
 
         public TAggregateRoot SingleOrDefault(int id)
         {
+            Logger.Debug($"Getting single or default {AggregateTypeName}[{id}]");
             return AggregateQueryable.FirstOrDefault(aggr => aggr.Id.Equals(id));
         }
 
@@ -65,8 +68,14 @@
             return AggregateQueryable.ToArray();
         }
 
-        public void Delete(TAggregateRoot aggregateRoot)
+        public void Delete([NotNull] TAggregateRoot aggregateRoot)
         {
+            if (aggregateRoot == null)
+            {
+                throw new ArgumentNullException(nameof(aggregateRoot));
+            }
+
+            Logger.Debug($"Deleting {AggregateTypeName}[{aggregateRoot.Id}]");
             if (aggregateRoot.TenantId != tenantIdHolder.Current.Value || !aggregateAuthorization.CanDelete(aggregateRoot))
             {
                 throw new System.Security.SecurityException($"You are not allowed to delete {typeof(TAggregateRoot).Name}[{aggregateRoot.Id}]");
@@ -75,10 +84,16 @@
             DeletePersistent(aggregateRoot);
         }
 
-        public void Add(TAggregateRoot aggregateRoot)
+        public void Add([NotNull] TAggregateRoot aggregateRoot)
         {
+            if (aggregateRoot == null)
+            {
+                throw new ArgumentNullException(nameof(aggregateRoot));
+            }
+
             if (aggregateAuthorization.CanCreate(aggregateRoot))
             {
+                Logger.Debug($"Adding {AggregateTypeName}[{aggregateRoot.Id}]");
                 aggregateRoot.TenantId = tenantIdHolder.Current.Value;
                 AddPersistent(aggregateRoot);
             }
@@ -88,8 +103,13 @@
             }
         }
 
-        public void AddRange(TAggregateRoot[] aggregateRoots)
+        public void AddRange([NotNull] TAggregateRoot[] aggregateRoots)
         {
+            if (aggregateRoots == null)
+            {
+                throw new ArgumentNullException(nameof(aggregateRoots));
+            }
+
             aggregateRoots.ForAll(agg =>
             {
                 if (!aggregateAuthorization.CanCreate(agg))
@@ -97,6 +117,9 @@
                     throw new System.Security.SecurityException($"You are not allowed to create records of type {typeof(TAggregateRoot).Name}");
                 }
             });
+            
+            Logger.Debug($"Adding {aggregateRoots.Length} items of type {AggregateTypeName}");
+
             aggregateRoots.ForAll(agg => agg.TenantId = tenantIdHolder.Current.Value);
 
             AddRangePersistent(aggregateRoots);
