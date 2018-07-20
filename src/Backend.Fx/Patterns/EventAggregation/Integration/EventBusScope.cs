@@ -1,6 +1,6 @@
 ﻿namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
-    using System.Collections.Generic;
+    using System.Collections.Concurrent;
     using System.Threading.Tasks;
     using BuildingBlocks;
 
@@ -18,7 +18,7 @@
 
     public class EventBusScope : IEventBusScope
     {
-        private readonly List<IIntegrationEvent> integrationEvents = new List<IIntegrationEvent>();
+        private readonly ConcurrentQueue<IIntegrationEvent> integrationEvents = new ConcurrentQueue<IIntegrationEvent>();
         private readonly IEventBus eventBus;
 
         public EventBusScope(IEventBus eventBus)
@@ -28,12 +28,12 @@
         
         void IEventBusScope.Publish(IIntegrationEvent integrationEvent)
         {
-            integrationEvents.Add(integrationEvent);
+            integrationEvents.Enqueue(integrationEvent);
         }
 
         public async Task RaiseEvents()
         {
-            foreach (var integrationEvent in integrationEvents)
+            while (integrationEvents.TryDequeue(out var integrationEvent))
             {
                 await eventBus.Publish(integrationEvent);
             }
