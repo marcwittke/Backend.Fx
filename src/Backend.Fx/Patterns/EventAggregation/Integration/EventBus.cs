@@ -156,41 +156,11 @@
 
                                     if (handlerType.IsImplementationOfOpenGenericInterface(typeof(IIntegrationEventHandler<>)))
                                     {
-                                        Type interfaceType = handlerType.GetInterfaces().First(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IIntegrationEventHandler<>));
-                                        var eventType = interfaceType.GetGenericArguments().Single(t => typeof(IIntegrationEvent).IsAssignableFrom(t));
-                                        var integrationEvent = context.GetTypedEvent(eventType);
-                                        MethodInfo handleMethod = handlerType.GetRuntimeMethod("Handle", new[] { eventType });
-                                        Debug.Assert(handleMethod != null, $"No method with signature `Handle({eventName} event)` found on {handlerType.Name}");
-
-                                        object handlerInstance = scope.GetInstance(handlerType);
-
-                                        try
-                                        {
-                                            handleMethod.Invoke(handlerInstance, new object[] { integrationEvent });
-                                        }
-                                        catch (TargetInvocationException ex)
-                                        {
-                                            Logger.Info(ex, $"Handling of {eventName} by typed handler {handlerType} failed: {(ex.InnerException ?? ex).Message}");
-                                            exceptionLogger.LogException(ex.InnerException ?? ex);
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            Logger.Info(ex, $"Handling of {eventName} by typed handler {handlerType} failed: {ex.Message}");
-                                            exceptionLogger.LogException(ex);
-                                        }
+                                        ProcessTyped(eventName, context, handlerType, scope);
                                     }
                                     else
                                     {
-                                        object handlerInstance = scope.GetInstance(handlerType);
-                                        try
-                                        {
-                                            ((IIntegrationEventHandler)handlerInstance).Handle(context.DynamicEvent);
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            Logger.Info(ex, $"Handling of {eventName} by dynamic handler {handlerType} failed: {ex.Message}");
-                                            exceptionLogger.LogException(ex);
-                                        }
+                                        ProcessDynamic(eventName, context, scope, handlerType);
                                     }
                                 }
 
@@ -208,6 +178,46 @@
             else
             {
                 Logger.Info($"No handler registered. Ignoring {eventName} event");
+            }
+        }
+
+        private void ProcessDynamic(string eventName, EventProcessingContext context, IScope scope, Type handlerType)
+        {
+            object handlerInstance = scope.GetInstance(handlerType);
+            try
+            {
+                ((IIntegrationEventHandler) handlerInstance).Handle(context.DynamicEvent);
+            }
+            catch (Exception ex)
+            {
+                Logger.Info(ex, $"Handling of {eventName} by dynamic handler {handlerType} failed: {ex.Message}");
+                exceptionLogger.LogException(ex);
+            }
+        }
+
+        private void ProcessTyped(string eventName, EventProcessingContext context, Type handlerType, IScope scope)
+        {
+            Type interfaceType = handlerType.GetInterfaces().First(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IIntegrationEventHandler<>));
+            var eventType = interfaceType.GetGenericArguments().Single(t => typeof(IIntegrationEvent).IsAssignableFrom(t));
+            var integrationEvent = context.GetTypedEvent(eventType);
+            MethodInfo handleMethod = handlerType.GetRuntimeMethod("Handle", new[] {eventType});
+            Debug.Assert(handleMethod != null, $"No method with signature `Handle({eventName} event)` found on {handlerType.Name}");
+
+            object handlerInstance = scope.GetInstance(handlerType);
+
+            try
+            {
+                handleMethod.Invoke(handlerInstance, new object[] {integrationEvent});
+            }
+            catch (TargetInvocationException ex)
+            {
+                Logger.Info(ex, $"Handling of {eventName} by typed handler {handlerType} failed: {(ex.InnerException ?? ex).Message}");
+                exceptionLogger.LogException(ex.InnerException ?? ex);
+            }
+            catch (Exception ex)
+            {
+                Logger.Info(ex, $"Handling of {eventName} by typed handler {handlerType} failed: {ex.Message}");
+                exceptionLogger.LogException(ex);
             }
         }
 
