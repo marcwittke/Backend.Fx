@@ -68,10 +68,10 @@
             container.Collection.Register<InitialDataGenerator>(assemblies);
 
             // all jobs are dynamically registered
-            foreach (var scheduledJobType in container.GetTypesToRegister(typeof(IJob), assemblies))
+            foreach (var jobType in container.GetTypesToRegister(typeof(IJob), assemblies))
             {
-                Logger.Debug($"Registering {scheduledJobType.Name}");
-                container.Register(scheduledJobType);
+                Logger.Debug($"Registering {jobType.Name}");
+                container.Register(jobType);
             }
 
             container.Register(typeof(IJobExecutor<>), typeof(JobExecutor<>));

@@ -1,13 +1,13 @@
 ﻿namespace Backend.Fx.Bootstrapping
 {
-    using System.Globalization;
-    using System.Linq;
     using System.Threading.Tasks;
+    using Environment.Authentication;
     using Environment.MultiTenancy;
     using Environment.Persistence;
     using Logging;
     using Patterns.DependencyInjection;
-    
+    using Patterns.Jobs;
+
     public abstract class BackendFxDbApplication : BackendFxApplication
     {
         private static readonly ILogger Logger = LogManager.Create<BackendFxDbApplication>();
@@ -39,49 +39,24 @@
         /// </summary>
         public ITenantManager TenantManager { get; }
 
-
         public override async Task Boot()
         {
             await base.Boot();
             DatabaseManager.EnsureDatabaseExistence();
         }
 
-        public virtual async Task Boot(bool doEnsureDevelopmentTenantExistenceOnBoot)
+        protected void ExecuteJob<TJob>() where TJob : IJob
         {
-            await Boot();
-            
-            if (doEnsureDevelopmentTenantExistenceOnBoot)
+            foreach (var tenantId in TenantManager.GetTenantIds())
             {
-                EnsureDevelopmentTenantExistence();
-            }
-        }
-
-        /// <summary>
-        /// This is only supported in development environments. Running inside of an IIS host will result in timeouts during the first 
-        /// request, leaving the system in an unpredicted state. To achieve the same effect in a hosted demo environment, use the same
-        /// functionality via service endpoints.
-        /// </summary>
-        public virtual void EnsureDevelopmentTenantExistence()
-        {
-            const string devTenantCode = "dev";
-            if (DatabaseManager.DatabaseExists)
-            {
-                var tenants = TenantManager.GetTenants();
-                if (tenants.Any(t => t.IsDemoTenant && t.Name == devTenantCode))
+                using (Logger.InfoDuration($"Execution of {typeof(TJob).Name} for tenant[{(tenantId.HasValue ? tenantId.Value.ToString() : "null")}]"))
                 {
-                    return;
+                    using (ScopeManager.BeginScope(new SystemIdentity(), tenantId))
+                    {
+                        CompositionRoot.GetInstance<IJobExecutor<TJob>>().ExecuteJob();
+                    }
                 }
             }
-
-            Logger.Info("Creating dev tenant");
-
-            // This will create a demonstration tenant. Note that by using the TenantManager directly instead of the TenantsController
-            // there won't be any TenantCreated event published...
-            TenantId tenantId = TenantManager.CreateDemonstrationTenant(devTenantCode, "dev tenant", true, new CultureInfo("en-US"));
-
-            // ... therefore it's up to us to do the initialization. Which is fine, because we are not spinning of a background action
-            // but blocking in our thread.
-            TenantManager.EnsureTenantIsInitialized(tenantId);
         }
     }
 }
