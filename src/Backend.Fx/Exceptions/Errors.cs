@@ -108,9 +108,10 @@
                 for (var index = 0; index < keyValuePair.Value.Length; index++)
                 {
                     var error = keyValuePair.Value[index];
-                    b.Append("    [");
-                    b.Append(index.ToString("00"));
-                    b.Append("] ");
+                    string indexString = $"[{index}]".PadLeft(4);
+                    b.Append("    ");
+                    b.Append(indexString);
+                    b.Append(" ");
                     b.Append(error.Code);
                     b.Append(":");
                     b.Append(error.Message);
