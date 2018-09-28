@@ -4,16 +4,16 @@
 
     public class DynamicEventHandler : IIntegrationEventHandler
     {
-        private readonly IIntegrationEventHandler integrationEventHandlerImplementation;
+        private readonly IIntegrationEventHandler _integrationEventHandlerImplementation;
 
         public DynamicEventHandler(IIntegrationEventHandler integrationEventHandlerImplementation)
         {
-            this.integrationEventHandlerImplementation = integrationEventHandlerImplementation;
+            this._integrationEventHandlerImplementation = integrationEventHandlerImplementation;
         }
 
         public void Handle(dynamic eventData)
         {
-            integrationEventHandlerImplementation.Handle(eventData);
+            _integrationEventHandlerImplementation.Handle(eventData);
         }
     }
 }

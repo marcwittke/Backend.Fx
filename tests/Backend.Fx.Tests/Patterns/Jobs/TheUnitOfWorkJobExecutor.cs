@@ -17,69 +17,69 @@
             { }
         }
 
-        private readonly UnitOfWorkJobExecutor<MyJob> sut;
-        private readonly IUnitOfWork unitOfWork;
-        private readonly IJobExecutor<MyJob> jobExecutor;
+        private readonly UnitOfWorkJobExecutor<MyJob> _sut;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IJobExecutor<MyJob> _jobExecutor;
 
         public TheUnitOfWorkJobExecutor()
         {
-            unitOfWork = A.Fake<IUnitOfWork>();
-            jobExecutor = A.Fake<IJobExecutor<MyJob>>();
+            _unitOfWork = A.Fake<IUnitOfWork>();
+            _jobExecutor = A.Fake<IJobExecutor<MyJob>>();
 
-            sut = new UnitOfWorkJobExecutor<MyJob>(unitOfWork, jobExecutor);
+            _sut = new UnitOfWorkJobExecutor<MyJob>(_unitOfWork, _jobExecutor);
         }
 
         [Fact]
         public void BeginsAndCompletesUnitOfWork()
         {
-            sut.ExecuteJob();
-            A.CallTo(() => unitOfWork.Begin()).MustHaveHappenedOnceExactly();
-            A.CallTo(() => unitOfWork.Complete()).MustHaveHappenedOnceExactly();
-            A.CallTo(() => unitOfWork.Dispose()).MustHaveHappenedOnceExactly();
+            _sut.ExecuteJob();
+            A.CallTo(() => _unitOfWork.Begin()).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _unitOfWork.Complete()).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _unitOfWork.Dispose()).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
         public async Task BeginsAndCompletesUnitOfWorkAsync()
         {
-            await sut.ExecuteJobAsync();
-            A.CallTo(() => unitOfWork.Begin()).MustHaveHappenedOnceExactly();
-            A.CallTo(() => unitOfWork.Complete()).MustHaveHappenedOnceExactly();
-            A.CallTo(() => unitOfWork.Dispose()).MustHaveHappenedOnceExactly();
+            await _sut.ExecuteJobAsync();
+            A.CallTo(() => _unitOfWork.Begin()).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _unitOfWork.Complete()).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _unitOfWork.Dispose()).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
         public void CallsJobExecutor()
         {
-            sut.ExecuteJob();
-            A.CallTo(() => jobExecutor.ExecuteJob()).MustHaveHappenedOnceExactly();
+            _sut.ExecuteJob();
+            A.CallTo(() => _jobExecutor.ExecuteJob()).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
         public async Task CallsJobExecutorAsync()
         {
-            await sut.ExecuteJobAsync();
-            A.CallTo(() => jobExecutor.ExecuteJobAsync()).MustHaveHappenedOnceExactly();
+            await _sut.ExecuteJobAsync();
+            A.CallTo(() => _jobExecutor.ExecuteJobAsync()).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
         public void DoesNotCompleteUnitOfWorkOnException()
         {
-            A.CallTo(() => jobExecutor.ExecuteJob()).Throws<InvalidOperationException>();
-            Assert.Throws<InvalidOperationException>(() => sut.ExecuteJob());
-            A.CallTo(() => unitOfWork.Begin()).MustHaveHappenedOnceExactly();
-            A.CallTo(() => unitOfWork.Dispose()).MustHaveHappenedOnceExactly();
-            A.CallTo(() => unitOfWork.Complete()).MustNotHaveHappened();
+            A.CallTo(() => _jobExecutor.ExecuteJob()).Throws<InvalidOperationException>();
+            Assert.Throws<InvalidOperationException>(() => _sut.ExecuteJob());
+            A.CallTo(() => _unitOfWork.Begin()).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _unitOfWork.Dispose()).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _unitOfWork.Complete()).MustNotHaveHappened();
         }
 
         [Fact]
         public async Task DoesNotCompleteUnitOfWorkOnExceptionAsync()
         {
-            A.CallTo(() => jobExecutor.ExecuteJobAsync()).ThrowsAsync(new InvalidOperationException());
-            await Assert.ThrowsAsync<InvalidOperationException>(async () => await sut.ExecuteJobAsync());
-            A.CallTo(() => unitOfWork.Begin()).MustHaveHappenedOnceExactly();
-            A.CallTo(() => unitOfWork.Begin()).MustHaveHappenedOnceExactly();
-            A.CallTo(() => unitOfWork.Dispose()).MustHaveHappenedOnceExactly();
-            A.CallTo(() => unitOfWork.Complete()).MustNotHaveHappened();
+            A.CallTo(() => _jobExecutor.ExecuteJobAsync()).ThrowsAsync(new InvalidOperationException());
+            await Assert.ThrowsAsync<InvalidOperationException>(async () => await _sut.ExecuteJobAsync());
+            A.CallTo(() => _unitOfWork.Begin()).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _unitOfWork.Begin()).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _unitOfWork.Dispose()).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _unitOfWork.Complete()).MustNotHaveHappened();
         }
     }
 }

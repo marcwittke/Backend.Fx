@@ -9,18 +9,18 @@
 
     public class TheWallClock
     {
-        private readonly IEqualityComparer<DateTime?> tolerantDateTimeComparer = new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(10));
+        private readonly IEqualityComparer<DateTime?> _tolerantDateTimeComparer = new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(10));
 
         [Fact]
         public void IsTheSystemClock()
         {
             IClock sut = new WallClock();
             
-            Assert.Equal(DateTime.UtcNow, sut.UtcNow, tolerantDateTimeComparer);
+            Assert.Equal(DateTime.UtcNow, sut.UtcNow, _tolerantDateTimeComparer);
 
             Thread.Sleep(100);
 
-            Assert.Equal(DateTime.UtcNow, sut.UtcNow, tolerantDateTimeComparer);
+            Assert.Equal(DateTime.UtcNow, sut.UtcNow, _tolerantDateTimeComparer);
         }
     }
 }

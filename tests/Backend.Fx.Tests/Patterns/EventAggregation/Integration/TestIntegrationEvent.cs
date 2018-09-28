@@ -1,8 +1,8 @@
 ﻿namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
 {
     using System.Threading;
-    using Fx.Patterns.EventAggregation.Integration;
-
+    using Backend.Fx.Patterns.EventAggregation.Integration;
+    
     public class TestIntegrationEvent : IntegrationEvent
     {
         public int IntParam { get; }

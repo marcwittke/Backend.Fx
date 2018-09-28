@@ -8,7 +8,7 @@
 
     public class TheAggregateRoot
     {
-        private static int nextId;
+        private static int _nextId;
 
         public class TestAggregateRoot : AggregateRoot
         {
@@ -41,7 +41,7 @@
         public void CreatedByPropertyIsStoredCorrectly()
         {
             DateTime now = DateTime.Now;
-            var sut = new TestAggregateRoot(nextId++, "gaga");
+            var sut = new TestAggregateRoot(_nextId++, "gaga");
             sut.SetCreatedProperties("me", now);
             Assert.Equal("me", sut.CreatedBy);
             Assert.Null(sut.ChangedBy);
@@ -51,7 +51,7 @@
         public void CreatedOnPropertyIsStoredCorrectly()
         {
             DateTime now = DateTime.Now;
-            var sut = new TestAggregateRoot(nextId++, "gaga");
+            var sut = new TestAggregateRoot(_nextId++, "gaga");
             sut.SetCreatedProperties("me", now);
             Assert.Equal(now, sut.CreatedOn);
             Assert.Null(sut.ChangedOn);
@@ -61,7 +61,7 @@
         public void ChangedByPropertyIsStoredCorrectly()
         {
             DateTime now = DateTime.Now;
-            var sut = new TestAggregateRoot(nextId++, "gaga");
+            var sut = new TestAggregateRoot(_nextId++, "gaga");
             sut.SetModifiedProperties("me", now);
             Assert.Equal("me", sut.ChangedBy);
             Assert.Null(sut.CreatedBy);
@@ -71,7 +71,7 @@
         public void ChangedOnPropertyIsStoredCorrectly()
         {
             DateTime now = DateTime.Now;
-            var sut = new TestAggregateRoot(nextId++, "gaga");
+            var sut = new TestAggregateRoot(_nextId++, "gaga");
             sut.SetModifiedProperties("me", now);
             Assert.Equal(now, sut.ChangedOn);
             Assert.Equal(default(DateTime), sut.CreatedOn);
@@ -81,7 +81,7 @@
         public void CreatedByPropertyIsChoppedAt100Chars()
         {
             DateTime now = DateTime.Now;
-            var sut = new TestAggregateRoot(nextId++, "gaga");
+            var sut = new TestAggregateRoot(_nextId++, "gaga");
             var moreThanHundred = Letters.RandomLowerCase(110);
             sut.SetCreatedProperties(moreThanHundred, now);
             Assert.Equal(moreThanHundred.Substring(0, 99) + "…", sut.CreatedBy);
@@ -91,7 +91,7 @@
         public void ChangedByPropertyIsChoppedAt100Chars()
         {
             DateTime now = DateTime.Now;
-            var sut = new TestAggregateRoot(nextId++, "gaga");
+            var sut = new TestAggregateRoot(_nextId++, "gaga");
             var moreThanHundred = Letters.RandomLowerCase(110);
             sut.SetModifiedProperties(moreThanHundred, now);
             Assert.Equal(moreThanHundred.Substring(0, 99) + "…", sut.ChangedBy);
@@ -100,7 +100,7 @@
         [Fact]
         public void ThrowsGivenNullCreatedBy()
         {
-            var sut = new TestAggregateRoot(nextId++, "gaga");
+            var sut = new TestAggregateRoot(_nextId++, "gaga");
             // ReSharper disable once AssignNullToNotNullAttribute
             Assert.Throws<ArgumentNullException>(() => sut.SetCreatedProperties(null, DateTime.Now));
         }
@@ -108,7 +108,7 @@
         [Fact]
         public void ThrowsGivenNullChangedBy()
         {
-            var sut = new TestAggregateRoot(nextId++, "gaga");
+            var sut = new TestAggregateRoot(_nextId++, "gaga");
             // ReSharper disable once AssignNullToNotNullAttribute
             Assert.Throws<ArgumentNullException>(() => sut.SetModifiedProperties(null, DateTime.Now));
         }
@@ -116,7 +116,7 @@
         [Fact]
         public void ThrowsGivenEmptyCreatedBy()
         {
-            var sut = new TestAggregateRoot(nextId++, "gaga");
+            var sut = new TestAggregateRoot(_nextId++, "gaga");
             // ReSharper disable once AssignNullToNotNullAttribute
             Assert.Throws<ArgumentException>(() => sut.SetCreatedProperties("", DateTime.Now));
         }
@@ -124,7 +124,7 @@
         [Fact]
         public void ThrowsGivenEmptyChangedBy()
         {
-            var sut = new TestAggregateRoot(nextId++, "gaga");
+            var sut = new TestAggregateRoot(_nextId++, "gaga");
             // ReSharper disable once AssignNullToNotNullAttribute
             Assert.Throws<ArgumentException>(() => sut.SetModifiedProperties("", DateTime.Now));
         }

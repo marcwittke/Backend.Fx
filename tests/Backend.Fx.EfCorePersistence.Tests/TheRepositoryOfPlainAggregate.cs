@@ -1,3 +1,6 @@
+using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
+using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
+
 namespace Backend.Fx.EfCorePersistence.Tests
 {
     using System;

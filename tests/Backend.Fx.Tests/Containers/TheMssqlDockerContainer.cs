@@ -23,34 +23,34 @@
 
     public class TheMssqlDockerContainer : IAsyncLifetime
     {
-        private string dockerApiUri;
-        private string containerName;
-        private TestContainer container;
+        private string _dockerApiUri;
+        private string _containerName;
+        private TestContainer _container;
 
         [Fact]
         public async Task CanBeUsed()
         {
-            containerName = CreateContainerName("TheMssqlDockerContainer_CanBeUsed");
+            _containerName = CreateContainerName("TheMssqlDockerContainer_CanBeUsed");
             
-            container = new TestContainer(dockerApiUri, containerName);
-            await container.InitializeAsync();
-            await container.CreateAndStartAsync();
-            Assert.False(container.HealthCheck());
-            Assert.True(container.WaitUntilIsHealthy());
+            _container = new TestContainer(_dockerApiUri, _containerName);
+            await _container.InitializeAsync();
+            await _container.CreateAndStartAsync();
+            Assert.False(_container.HealthCheck());
+            Assert.True(_container.WaitUntilIsHealthy());
         }
 
         [Fact]
         public async Task CanRestore()
         {
-            containerName = CreateContainerName("TheMssqlDockerContainer_CanRestore");
-            await DockerUtilities.EnsureKilledAndRemoved(dockerApiUri, containerName);
-            container = new TestContainer(dockerApiUri, containerName);
+            _containerName = CreateContainerName("TheMssqlDockerContainer_CanRestore");
+            await DockerUtilities.EnsureKilledAndRemoved(_dockerApiUri, _containerName);
+            _container = new TestContainer(_dockerApiUri, _containerName);
 
-            await container.CreateAndStartAsync();
-            Assert.False(container.HealthCheck());
-            Assert.True(container.WaitUntilIsHealthy());
+            await _container.CreateAndStartAsync();
+            Assert.False(_container.HealthCheck());
+            Assert.True(_container.WaitUntilIsHealthy());
 
-            await container.Restore("Backup.bak", "RestoredDb");
+            await _container.Restore("Backup.bak", "RestoredDb");
         }
 
         private static string CreateContainerName(string name)
@@ -65,16 +65,16 @@
 
         public async Task InitializeAsync()
         {
-            dockerApiUri = await DockerUtilities.DetectDockerClientApi();
+            _dockerApiUri = await DockerUtilities.DetectDockerClientApi();
             if (Build.IsTfBuild)
             {
-                await DockerUtilities.KillAllOlderThan(dockerApiUri, TimeSpan.FromMinutes(30));
+                await DockerUtilities.KillAllOlderThan(_dockerApiUri, TimeSpan.FromMinutes(30));
             }
         }
 
         public async Task DisposeAsync()
         {
-            await container.EnsureKilledAsync();
+            await _container.EnsureKilledAsync();
         }
     }
 }

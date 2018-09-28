@@ -31,11 +31,11 @@
 
         private class SerializingProcessingContext : EventProcessingContext 
         {
-            private readonly string jsonString;
+            private readonly string _jsonString;
             
             public SerializingProcessingContext(string jsonString)
             {
-                this.jsonString = jsonString;
+                this._jsonString = jsonString;
                 var eventStub = JsonConvert.DeserializeAnonymousType(jsonString, new {tenantId = 0});
                 TenantId = new TenantId(eventStub.tenantId);
             }
@@ -44,12 +44,12 @@
             
             public override dynamic DynamicEvent
             {
-                get { return JObject.Parse(jsonString); }
+                get { return JObject.Parse(_jsonString); }
             }
 
             public override IIntegrationEvent GetTypedEvent(Type eventType)
             {
-                return (IIntegrationEvent) JsonConvert.DeserializeObject(jsonString, eventType);
+                return (IIntegrationEvent) JsonConvert.DeserializeObject(_jsonString, eventType);
             }
         }
     }

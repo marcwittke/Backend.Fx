@@ -1,4 +1,6 @@
-﻿namespace Backend.Fx.EfCorePersistence.Tests
+﻿using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
+
+namespace Backend.Fx.EfCorePersistence.Tests
 {
     using System.IO;
     using System.Linq;
@@ -10,35 +12,35 @@
 
     public class TheDatabaseManager
     {
-        private readonly IDatabaseManager sut;
-        private readonly DbContextOptions<TestDbContext> dbContextOptions;
-        private readonly string dbFilePath;
+        private readonly IDatabaseManager _sut;
+        private readonly DbContextOptions<TestDbContext> _dbContextOptions;
+        private readonly string _dbFilePath;
 
         public TheDatabaseManager()
         {
-            dbFilePath = Path.GetTempFileName();
-            dbContextOptions = new DbContextOptionsBuilder<TestDbContext>().UseSqlite("Data Source=" + dbFilePath).Options;
-            sut = new DatabaseManagerWithoutMigration<TestDbContext>(dbContextOptions);
+            _dbFilePath = Path.GetTempFileName();
+            _dbContextOptions = new DbContextOptionsBuilder<TestDbContext>().UseSqlite("Data Source=" + _dbFilePath).Options;
+            _sut = new DatabaseManagerWithoutMigration<TestDbContext>(_dbContextOptions);
         }
 
         [Fact]
         public void CreatesDatabase()
         {
-            Assert.Throws<SqliteException>(()=>new TestDbContext(dbContextOptions).Tenants.ToArray());
-            sut.EnsureDatabaseExistence();
-            Assert.Empty(new TestDbContext(dbContextOptions).Tenants);
+            Assert.Throws<SqliteException>(()=>new TestDbContext(_dbContextOptions).Tenants.ToArray());
+            _sut.EnsureDatabaseExistence();
+            Assert.Empty(new TestDbContext(_dbContextOptions).Tenants);
         }
 
         [Fact]
         public void DeletesDatabase()
         {
-            SqliteConnection connection = new SqliteConnection("Data Source=" + dbFilePath);
+            SqliteConnection connection = new SqliteConnection("Data Source=" + _dbFilePath);
             connection.Open();
             connection.Close();
-            Assert.True(File.Exists(dbFilePath));
+            Assert.True(File.Exists(_dbFilePath));
 
-            sut.DeleteDatabase();
-            Assert.False(File.Exists(dbFilePath));
+            _sut.DeleteDatabase();
+            Assert.False(File.Exists(_dbFilePath));
         }
     }
 }
