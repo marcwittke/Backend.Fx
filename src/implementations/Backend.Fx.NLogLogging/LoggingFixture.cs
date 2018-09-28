@@ -1,7 +1,7 @@
-﻿namespace Backend.Fx.Testing.Logging
-{
-    using System;
+﻿using System;
 
+namespace Backend.Fx.NLogLogging
+{
     /// <summary>
     /// To be implemented and used as AssemblyFixture
     /// Configures NLog and shuts down logging after test execution

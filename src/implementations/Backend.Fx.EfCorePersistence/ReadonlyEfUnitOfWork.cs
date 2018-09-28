@@ -17,9 +17,9 @@
 
         public ReadonlyEfUnitOfWork(DbContext dbContext, ICurrentTHolder<IIdentity> identityHolder) : base(identityHolder)
         {
-            this._dbContext = dbContext;
-            this._dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
-            this._dbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+            _dbContext = dbContext;
+            _dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
+            _dbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
         public override void Begin()

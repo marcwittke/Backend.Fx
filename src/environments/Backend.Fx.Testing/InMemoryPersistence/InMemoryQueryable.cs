@@ -13,7 +13,7 @@
 
         public InMemoryQueryable(IInMemoryStore<TAggregateRoot> store)
         {
-            this._queryableImplementation = store.Values.AsQueryable();
+            _queryableImplementation = store.Values.AsQueryable();
         }
 
 
@@ -27,19 +27,10 @@
             return ((IEnumerable) _queryableImplementation).GetEnumerator();
         }
 
-        public Type ElementType
-        {
-            get { return _queryableImplementation.ElementType; }
-        }
+        public Type ElementType => _queryableImplementation.ElementType;
 
-        public Expression Expression
-        {
-            get { return _queryableImplementation.Expression; }
-        }
+        public Expression Expression => _queryableImplementation.Expression;
 
-        public IQueryProvider Provider
-        {
-            get { return _queryableImplementation.Provider; }
-        }
+        public IQueryProvider Provider => _queryableImplementation.Provider;
     }
 }

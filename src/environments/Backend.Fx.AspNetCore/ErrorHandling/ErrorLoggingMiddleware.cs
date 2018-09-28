@@ -14,8 +14,8 @@
         [UsedImplicitly]
         public ErrorLoggingMiddleware(RequestDelegate next, IExceptionLogger exceptionLogger)
         {
-            this._next = next;
-            this._exceptionLogger = exceptionLogger;
+            _next = next;
+            _exceptionLogger = exceptionLogger;
         }
 
         [UsedImplicitly]

@@ -21,10 +21,7 @@
         }
 
         [UsedImplicitly]
-        public string DebuggerDisplay
-        {
-            get { return string.Format("{0}[{1}]", GetType().Name, Id); }
-        }
+        public string DebuggerDisplay => $"{GetType().Name}[{Id}]";
 
         public DateTime CreatedOn { get; protected set; }
 

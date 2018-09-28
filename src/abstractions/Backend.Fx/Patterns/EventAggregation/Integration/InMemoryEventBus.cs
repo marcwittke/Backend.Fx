@@ -13,7 +13,7 @@
         public InMemoryEventBus(IScopeManager scopeManager, IExceptionLogger exceptionLogger)
                 : base(scopeManager, exceptionLogger)
         {
-            this._exceptionLogger = exceptionLogger;
+            _exceptionLogger = exceptionLogger;
         }
 
         public override void Connect()
@@ -49,18 +49,12 @@
 
             public InMemoryProcessingContext(IIntegrationEvent integrationEvent)
             {
-                this._integrationEvent = integrationEvent;
+                _integrationEvent = integrationEvent;
             }
 
-            public override TenantId TenantId
-            {
-                get { return new TenantId(_integrationEvent.TenantId); }
-            }
+            public override TenantId TenantId => new TenantId(_integrationEvent.TenantId);
 
-            public override dynamic DynamicEvent
-            {
-                get { return _integrationEvent; }
-            }
+            public override dynamic DynamicEvent => _integrationEvent;
 
             public override IIntegrationEvent GetTypedEvent(Type eventType)
             {

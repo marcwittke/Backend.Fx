@@ -21,7 +21,7 @@
 
         protected DockerContainer([NotNull] string baseImage, string name, string dockerApiUrl, string containerId = null)
         {
-            this._dockerApiUrl = dockerApiUrl;
+            _dockerApiUrl = dockerApiUrl;
             BaseImage = baseImage ?? throw new ArgumentNullException(nameof(baseImage));
             Name = name;
             ContainerId = containerId;

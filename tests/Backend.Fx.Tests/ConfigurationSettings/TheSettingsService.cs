@@ -21,14 +21,14 @@
             }
             public int SmtpPort
             {
-                get { return ReadSetting<int?>(nameof(SmtpPort)) ?? 25; }
-                set { WriteSetting<int?>(nameof(SmtpPort), value); }
+                get => ReadSetting<int?>(nameof(SmtpPort)) ?? 25;
+                set => WriteSetting<int?>(nameof(SmtpPort), value);
             }
 
             public string SmtpHost
             {
-                get { return ReadSetting<string>(nameof(SmtpHost)); }
-                set { WriteSetting<string>(nameof(SmtpHost), value); }
+                get => ReadSetting<string>(nameof(SmtpHost));
+                set => WriteSetting<string>(nameof(SmtpHost), value);
             }
         }
 

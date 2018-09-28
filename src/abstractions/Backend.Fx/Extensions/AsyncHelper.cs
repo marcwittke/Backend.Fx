@@ -8,7 +8,7 @@
     public static class AsyncHelper
     {
         /// <summary>
-        /// Execute's an async Task method which has a void return value synchronously
+        /// Executes an async Task method which has a void return value synchronously
         /// </summary>
         /// <param name="task">Task method to execute</param>
         /// <remarks>
@@ -47,7 +47,7 @@
         }
 
         /// <summary>
-        /// Execute's an async Task&lt;T&gt; method which has a T return type synchronously
+        /// Executes an async Task&lt;T&gt; method which has a T return type synchronously
         /// </summary>
         /// <typeparam name="T">Return Type</typeparam>
         /// <param name="task">TaskTask&lt;T&gt; method to execute</param>
@@ -88,7 +88,7 @@
         private class ExclusiveSynchronizationContext : SynchronizationContext
         {
             private bool _done;
-            public Exception InnerException { get; set; }
+            public Exception InnerException { private get; set; }
             readonly AutoResetEvent _workItemsWaiting = new AutoResetEvent(false);
             readonly Queue<Tuple<SendOrPostCallback, object>> _items = new Queue<Tuple<SendOrPostCallback, object>>();
 
@@ -126,7 +126,7 @@
                     if (task != null)
                     {
                         task.Item1(task.Item2);
-                        if (InnerException != null) // the method threw an exeption
+                        if (InnerException != null) // the method threw an exception
                         {
                             throw new AggregateException("AsyncHelpers.Run method threw an exception.", InnerException);
                         }

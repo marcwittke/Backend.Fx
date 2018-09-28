@@ -10,7 +10,7 @@
 
         public DebugLogger(string type)
         {
-            this._type = type;
+            _type = type;
         }
 
         public Exception Fatal(Exception exception)
@@ -162,12 +162,12 @@
 
         private void PrintToDebug(Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine(ex);
+            System.Diagnostics.Debug.WriteLine($"{_type} {ex}");
         }
 
         private void PrintToDebug(string format, params object[] args)
         {
-            System.Diagnostics.Debug.WriteLine(format, args);
+            System.Diagnostics.Debug.WriteLine(_type + format, args);
         }
 
     }

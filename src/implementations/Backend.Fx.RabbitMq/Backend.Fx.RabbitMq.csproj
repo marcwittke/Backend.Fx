@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Backend.Fx\Backend.Fx.csproj" />
+    <ProjectReference Include="..\..\abstractions\Backend.Fx\Backend.Fx.csproj" />
   </ItemGroup>
 
 </Project>

@@ -9,11 +9,8 @@
 
         private DateTime? _utcNow;
 
-        public DateTime UtcNow
-        {
-            get { return _utcNow ?? DateTime.UtcNow; }
-        }
-        
+        public DateTime UtcNow => _utcNow ?? DateTime.UtcNow;
+
         public void OverrideUtcNow(DateTime overriddenUtcNow)
         {
             Logger.Debug("Freezing clock at {0:O}", overriddenUtcNow);

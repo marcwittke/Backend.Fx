@@ -15,7 +15,7 @@
 
         protected View(IQueryable<T> viewImplementation)
         {
-            this._viewImplementation = viewImplementation;
+            _viewImplementation = viewImplementation;
         }
 
         public IEnumerator<T> GetEnumerator()
@@ -28,19 +28,10 @@
             return ((IEnumerable) _viewImplementation).GetEnumerator();
         }
 
-        public Type ElementType
-        {
-            get { return _viewImplementation.ElementType; }
-        }
+        public Type ElementType => _viewImplementation.ElementType;
 
-        public Expression Expression
-        {
-            get { return _viewImplementation.Expression; }
-        }
+        public Expression Expression => _viewImplementation.Expression;
 
-        public IQueryProvider Provider
-        {
-            get { return _viewImplementation.Provider; }
-        }
+        public IQueryProvider Provider => _viewImplementation.Provider;
     }
 }

@@ -17,8 +17,8 @@
         [UsedImplicitly]
         public SecurityHeadersMiddleware(RequestDelegate next, IOptions<SecurityHeadersOptions> securityOptionsAccessor)
         {
-            this._next = next ?? throw new ArgumentNullException(nameof(next));
-            this._securityOptionsAccessor = securityOptionsAccessor;
+            _next = next ?? throw new ArgumentNullException(nameof(next));
+            _securityOptionsAccessor = securityOptionsAccessor;
         }
 
         [UsedImplicitly]

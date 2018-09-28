@@ -16,18 +16,12 @@
         protected MssqlDockerContainer(string dockerApiUrl, [NotNull] string saPassword, string name = null, string baseImage = null)
                 : base(baseImage ?? "microsoft/mssql-server-linux:latest", name, new[] { $"SA_PASSWORD={saPassword}", "ACCEPT_EULA=Y", "MSSQL_PID=Developer" }, dockerApiUrl)
         {
-            this._saPassword = saPassword ?? throw new ArgumentNullException(nameof(saPassword));
+            _saPassword = saPassword ?? throw new ArgumentNullException(nameof(saPassword));
         }
 
         protected override int DatabasePort { get; } = 1433;
 
-        public override string ConnectionString
-        {
-            get
-            {
-                return $"Server=localhost,{LocalTcpPort};User=sa;Password={_saPassword};";
-            }
-        }
+        public override string ConnectionString => $"Server=localhost,{LocalTcpPort};User=sa;Password={_saPassword};";
 
         public override bool HealthCheck()
         {

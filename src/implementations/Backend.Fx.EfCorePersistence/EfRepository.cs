@@ -22,9 +22,9 @@
             ICurrentTHolder<TenantId> currentTenantIdHolder, IAggregateAuthorization<TAggregateRoot> aggregateAuthorization)
             : base(currentTenantIdHolder, aggregateAuthorization)
         {
-            this._dbContext = dbContext;
-            this._aggregateMapping = aggregateMapping;
-            this._aggregateAuthorization = aggregateAuthorization;
+            _dbContext = dbContext;
+            _aggregateMapping = aggregateMapping;
+            _aggregateAuthorization = aggregateAuthorization;
 
             // somewhat hacky: using the internal EF Core services against advice
             var localViewListener = dbContext.GetService<ILocalViewListener>();

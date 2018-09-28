@@ -17,7 +17,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
         public SimpleInjectorScope(Scope scope, IIdentity identity, TenantId tenantId)
         {
             LogManager.BeginActivity();
-            this._scope = scope;
+            _scope = scope;
             Logger.Info($"Began new scope for identity [{identity.Name}] and tenant[{(tenantId.HasValue ? tenantId.Value.ToString() : "")}]");
         }
         

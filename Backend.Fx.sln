@@ -40,6 +40,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.Testing", "src\e
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.SimpleInjectorDependencyInjection.Tests", "tests\Backend.Fx.SimpleInjectorDependencyInjection.Tests\Backend.Fx.SimpleInjectorDependencyInjection.Tests.csproj", "{D98AED23-ABB8-4130-9612-54AEFE9D2272}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend.Fx.NetCore", "src\environments\Backend.Fx.NetCore\Backend.Fx.NetCore.csproj", "{45EC5987-1C85-4940-8E5E-3B4F0FA90AF8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -90,6 +92,10 @@ Global
 		{D98AED23-ABB8-4130-9612-54AEFE9D2272}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D98AED23-ABB8-4130-9612-54AEFE9D2272}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D98AED23-ABB8-4130-9612-54AEFE9D2272}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45EC5987-1C85-4940-8E5E-3B4F0FA90AF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45EC5987-1C85-4940-8E5E-3B4F0FA90AF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45EC5987-1C85-4940-8E5E-3B4F0FA90AF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45EC5987-1C85-4940-8E5E-3B4F0FA90AF8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -109,6 +115,7 @@ Global
 		{EDC67369-E388-4D7D-8D1F-9B3F86A35DE0} = {56ACAE69-F7F0-4FF2-BEE6-4B079481CF9A}
 		{BB89C55B-0010-40A0-96FF-160256E087CB} = {56ACAE69-F7F0-4FF2-BEE6-4B079481CF9A}
 		{D98AED23-ABB8-4130-9612-54AEFE9D2272} = {C7885592-A4B8-4BA8-8D3A-1EDA4025D17A}
+		{45EC5987-1C85-4940-8E5E-3B4F0FA90AF8} = {56ACAE69-F7F0-4FF2-BEE6-4B079481CF9A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {45648557-C751-44AD-9C87-0F12EB673969}

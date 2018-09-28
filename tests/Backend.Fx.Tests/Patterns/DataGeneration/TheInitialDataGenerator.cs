@@ -11,7 +11,7 @@
         public int ShouldRunCalled { get; private set; }
         public int InitializeCalled { get; private set; }
 
-        public override int Priority { get { return 12; } }
+        public override int Priority => 12;
 
         protected override void GenerateCore()
         {

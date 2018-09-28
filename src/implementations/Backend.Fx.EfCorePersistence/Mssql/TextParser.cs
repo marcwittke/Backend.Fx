@@ -21,18 +21,12 @@
         public string Text { get; private set; }
         public int Position { get; private set; }
 
-        public int Remaining
-        {
-            get { return Text.Length - Position; }
-        }
+        public int Remaining => Text.Length - Position;
 
         /// <summary>
         ///     Indicates if the current position is at the end of the current document
         /// </summary>
-        public bool EndOfText
-        {
-            get { return Position >= Text.Length; }
-        }
+        public bool EndOfText => Position >= Text.Length;
 
         /// <summary>
         ///     Extracts a substring from the specified position to the end of the text

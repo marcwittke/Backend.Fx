@@ -16,9 +16,9 @@
 
         public DurationLogger(Action<string> logAction, string beginMessage, string endMessage)
         {
-            this._logAction = logAction;
-            this._endMessage = endMessage;
-            this._logAction(beginMessage);
+            _logAction = logAction;
+            _endMessage = endMessage;
+            _logAction(beginMessage);
             _stopwatch.Start();
         }
 
@@ -32,15 +32,15 @@
         {
             if (duration.TotalMilliseconds < 1000)
             {
-                return string.Format("{0} - Duration: {1:0}ms", activity, duration.TotalMilliseconds);
+                return $"{activity} - Duration: {duration.TotalMilliseconds:0}ms";
             }
 
             if (duration.TotalSeconds < 60)
             {
-                return string.Format("{0} - Duration: {1:0.00}s", activity, duration.TotalSeconds);
+                return $"{activity} - Duration: {duration.TotalSeconds:0.00}s";
             }
 
-            return string.Format("{0} - Duration: {1:g}", activity, duration);
+            return $"{activity} - Duration: {duration:g}";
         }
     }
 }

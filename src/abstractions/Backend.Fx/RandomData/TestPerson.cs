@@ -83,7 +83,7 @@
 
         public TestPerson(string firstName, string middleName, string lastName, string title, Genders gender, DateTime dateOfBirth, string email = null)
         {
-            this._email = email;
+            _email = email;
             FirstName = firstName;
             MiddleName = middleName;
             LastName = lastName;
@@ -118,15 +118,9 @@
 
         public string Title { get; }
 
-        public string Email
-        {
-            get { return _email ?? string.Format("{0}@no-email.not", UserName); }
-        }
+        public string Email => _email ?? $"{UserName}@no-email.not";
 
-        public string UserName
-        {
-            get { return SanitizeForUserName(FirstName) + "." + SanitizeForUserName(LastName); }
-        }
+        public string UserName => SanitizeForUserName(FirstName) + "." + SanitizeForUserName(LastName);
 
         private static string SanitizeForUserName(string s)
         {

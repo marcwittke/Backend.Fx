@@ -8,7 +8,7 @@
 
         public TypedEventHandler(IIntegrationEventHandler<TestIntegrationEvent> integrationEventHandlerImplementation)
         {
-            this._integrationEventHandlerImplementation = integrationEventHandlerImplementation;
+            _integrationEventHandlerImplementation = integrationEventHandlerImplementation;
         }
 
         public void Handle(TestIntegrationEvent eventData)

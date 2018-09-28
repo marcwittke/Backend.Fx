@@ -21,8 +21,8 @@ namespace Backend.Fx.AspNetCore.Scoping
         [UsedImplicitly]
         protected ScopeMiddleware(RequestDelegate next, IBackendFxApplication application)
         {
-            this._next = next;
-            this._application = application;
+            _next = next;
+            _application = application;
         }
 
         /// <summary>

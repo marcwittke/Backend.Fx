@@ -29,10 +29,10 @@
 
         public RabbitMqChannel(IConnectionFactory connectionFactory, string brokerName, string queueName, int retryCount)
         {
-            this._connectionFactory = connectionFactory;
-            this._brokerName = brokerName;
-            this._queueName = queueName;
-            this._retryCount = retryCount;
+            _connectionFactory = connectionFactory;
+            _brokerName = brokerName;
+            _queueName = queueName;
+            _retryCount = retryCount;
         }
 
         public void Dispose()

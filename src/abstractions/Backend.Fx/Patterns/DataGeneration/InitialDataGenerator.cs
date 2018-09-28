@@ -7,14 +7,14 @@
     /// or <see cref="IProductiveDataGenerator"/> depending whether you want it to run in all environments
     /// or only on development environments.
     /// Any implementation is automatically picked up by the injection container, so no extra plumbing is required.
-    /// You can require any application or domain service including repositories via contructor parameter.
+    /// You can require any application or domain service including repositories via constructor parameter.
     /// </summary>
     public abstract class InitialDataGenerator
     {
         private static readonly ILogger Logger = LogManager.Create<InitialDataGenerator>();
 
         /// <summary>
-        /// simple way of ordering the execution of DataGenerators. Prio 0 will be executed first.
+        /// simple way of ordering the execution of DataGenerators. Priority 0 will be executed first.
         /// </summary>
         public abstract int Priority { get; }
 

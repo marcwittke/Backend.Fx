@@ -18,10 +18,7 @@
             Store = store;
         }
 
-        protected override IQueryable<T> RawAggregateQueryable
-        {
-            get { return Store.Values.AsQueryable(); }
-        }
+        protected override IQueryable<T> RawAggregateQueryable => Store.Values.AsQueryable();
 
         public void Clear()
         {

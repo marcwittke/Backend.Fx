@@ -4,7 +4,7 @@
 
     /// <summary>
     /// Abstracts the functionality of the framework to run a job in background. This can be triggered 
-    /// by a schedulter, or, also be done manually
+    /// by a scheduler, or, also be done manually
     /// </summary>
     public interface IJobExecutor
     {

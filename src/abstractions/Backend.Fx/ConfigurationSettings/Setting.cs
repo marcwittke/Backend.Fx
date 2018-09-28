@@ -13,7 +13,7 @@ namespace Backend.Fx.ConfigurationSettings
             Key = key;
         }
 
-        public string Key { get; private set; }
+        public string Key { get; [UsedImplicitly] private set; }
         public string SerializedValue { get; private set; }
 
         public T GetValue<T>(ISettingSerializer<T> serializer)

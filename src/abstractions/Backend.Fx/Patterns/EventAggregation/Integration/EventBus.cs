@@ -32,7 +32,7 @@
         /// Subscribes to an integration event with a dynamic event handler
         /// </summary>
         /// <typeparam name="THandler">The handler type</typeparam>
-        /// <param name="eventName">Th eevent name to subscribe to. (Should be Type.FullName to avoid namespace collisions)</param>
+        /// <param name="eventName">Th event name to subscribe to. (Should be Type.FullName to avoid namespace collisions)</param>
         void Subscribe<THandler>(string eventName)
             where THandler : IIntegrationEventHandler;
 
@@ -69,8 +69,8 @@
         protected EventBus(IScopeManager scopeManager, IExceptionLogger exceptionLogger)
         {
             Logger.Debug($"Instantiating {GetType()}");
-            this._scopeManager = scopeManager;
-            this._exceptionLogger = exceptionLogger;
+            _scopeManager = scopeManager;
+            _exceptionLogger = exceptionLogger;
         }
 
         public abstract void Connect();

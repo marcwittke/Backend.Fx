@@ -12,12 +12,12 @@
 
         public DomainEventAggregator(IDomainEventHandlerProvider domainEventHandlerProvider)
         {
-            this._domainEventHandlerProvider = domainEventHandlerProvider;
+            _domainEventHandlerProvider = domainEventHandlerProvider;
         }
 
         /// <summary>
         /// Publish a domain event that is handled by all handlers synchronously in the same scope/transaction.
-        /// Possible exceptions are not caught, so that your action might fail due to a failing evennt handler.
+        /// Possible exceptions are not caught, so that your action might fail due to a failing event handler.
         /// </summary>
         /// <typeparam name="TDomainEvent"></typeparam>
         /// <param name="domainEvent"></param>

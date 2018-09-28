@@ -1,15 +1,14 @@
-﻿namespace Backend.Fx.Testing.Logging
-{
-    using System;
-    using System.IO;
-    using System.Linq;
-    using NLog;
-    using NLog.Config;
-    using NLog.Layouts;
-    using NLog.Targets;
-    using System.Collections.Generic;
-    using NLogLogging;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using NLog;
+using NLog.Config;
+using NLog.Layouts;
+using NLog.Targets;
 
+namespace Backend.Fx.NLogLogging
+{
     public static class Configurations
     {
         private static readonly object SyncLock = new object();

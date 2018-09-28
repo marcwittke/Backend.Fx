@@ -24,10 +24,10 @@
             IAggregateMapping<TAggregateRoot> aggregateMapping,
             IAggregateAuthorization<TAggregateRoot> aggregateAuthorization)
         {
-            this._dbContext = dbContext;
-            this._currentTenantholder = currentTenantholder;
-            this._aggregateMapping = aggregateMapping;
-            this._aggregateAuthorization = aggregateAuthorization;
+            _dbContext = dbContext;
+            _currentTenantholder = currentTenantholder;
+            _aggregateMapping = aggregateMapping;
+            _aggregateAuthorization = aggregateAuthorization;
 
             var entityTypeRelational = dbContext.Model.FindEntityType(typeof(TAggregateRoot)).Relational();
             _schema = entityTypeRelational.Schema ?? "dbo";

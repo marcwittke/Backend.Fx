@@ -5287,7 +5287,7 @@
             var nr = TestRandom.Next(100);
             if (next < 10)
             {
-                return string.Format("{0} - {1}", nr, nr + TestRandom.Next(1, 5));
+                return $"{nr} - {nr + TestRandom.Next(1, 5)}";
             }
             if (next < 30)
             {

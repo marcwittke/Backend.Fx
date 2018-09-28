@@ -48,8 +48,8 @@
         [NotMapped]
         public CultureInfo DefaultCulture
         {
-            get { return new CultureInfo(DefaultCultureName); }
-            set { DefaultCultureName = value.Name; }
+            get => new CultureInfo(DefaultCultureName);
+            set => DefaultCultureName = value.Name;
         }
     }
 

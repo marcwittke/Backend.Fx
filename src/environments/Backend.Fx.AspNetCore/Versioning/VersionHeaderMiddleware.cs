@@ -17,7 +17,7 @@
         [UsedImplicitly]
         public VersionHeaderMiddleware(RequestDelegate next)
         {
-            this._next = next;
+            _next = next;
         }
 
         /// <summary>

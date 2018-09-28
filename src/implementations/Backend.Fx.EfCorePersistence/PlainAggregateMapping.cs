@@ -12,9 +12,6 @@
         public override void ApplyEfMapping(ModelBuilder modelBuilder)
         { }
         
-        public override IEnumerable<Expression<Func<TAggregateRoot, object>>> IncludeDefinitions
-        {
-            get { return new Expression<Func<TAggregateRoot, object>>[0]; }
-        }
+        public override IEnumerable<Expression<Func<TAggregateRoot, object>>> IncludeDefinitions => new Expression<Func<TAggregateRoot, object>>[0];
     }
 }

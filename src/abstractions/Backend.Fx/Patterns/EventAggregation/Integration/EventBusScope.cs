@@ -7,7 +7,7 @@
     public interface IEventBusScope : IDomainService
     { 
         /// <summary>
-        /// Enqueues an event to be raised later. 
+        /// Enqueue an event to be raised later. 
         /// Intention is to let events bubble up after an operation has terminated, e.g. when a wrapping
         /// unit of work has completed.
         /// </summary>
@@ -23,7 +23,7 @@
 
         public EventBusScope(IEventBus eventBus)
         {
-            this._eventBus = eventBus;
+            _eventBus = eventBus;
         }
         
         void IEventBusScope.Publish(IIntegrationEvent integrationEvent)

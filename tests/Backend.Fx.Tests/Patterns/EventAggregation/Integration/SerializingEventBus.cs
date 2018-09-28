@@ -35,17 +35,14 @@
             
             public SerializingProcessingContext(string jsonString)
             {
-                this._jsonString = jsonString;
+                _jsonString = jsonString;
                 var eventStub = JsonConvert.DeserializeAnonymousType(jsonString, new {tenantId = 0});
                 TenantId = new TenantId(eventStub.tenantId);
             }
 
             public override TenantId TenantId {get; }
             
-            public override dynamic DynamicEvent
-            {
-                get { return JObject.Parse(_jsonString); }
-            }
+            public override dynamic DynamicEvent => JObject.Parse(_jsonString);
 
             public override IIntegrationEvent GetTypedEvent(Type eventType)
             {

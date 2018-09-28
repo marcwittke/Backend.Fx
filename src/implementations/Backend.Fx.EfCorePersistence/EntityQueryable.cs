@@ -14,7 +14,7 @@
         
         public EntityQueryable(DbContext dbContext)
         {
-            this._dbContext = dbContext;
+            _dbContext = dbContext;
         }
 
         public IEnumerator<TEntity> GetEnumerator()
@@ -27,27 +27,12 @@
             return ((IEnumerable)InnerQueryable).GetEnumerator();
         }
 
-        public Type ElementType
-        {
-            get { return InnerQueryable.ElementType; }
-        }
+        public Type ElementType => InnerQueryable.ElementType;
 
-        public Expression Expression
-        {
-            get { return InnerQueryable.Expression; }
-        }
+        public Expression Expression => InnerQueryable.Expression;
 
-        public IQueryProvider Provider
-        {
-            get { return InnerQueryable.Provider; }
-        }
+        public IQueryProvider Provider => InnerQueryable.Provider;
 
-        private IQueryable<TEntity> InnerQueryable
-        {
-            get
-            {
-                return _dbContext.Set<TEntity>();
-            }
-        }
+        private IQueryable<TEntity> InnerQueryable => _dbContext.Set<TEntity>();
     }
 }

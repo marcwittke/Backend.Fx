@@ -4,10 +4,10 @@
 
     public class AnonymousIdentity : IIdentity
     {
-        public string Name { get { return "ANONYMOUS"; } }
+        public string Name => "ANONYMOUS";
 
-        public string AuthenticationType { get { return string.Empty; } }
+        public string AuthenticationType => string.Empty;
 
-        public bool IsAuthenticated { get { return false; } }
+        public bool IsAuthenticated => false;
     }
 }

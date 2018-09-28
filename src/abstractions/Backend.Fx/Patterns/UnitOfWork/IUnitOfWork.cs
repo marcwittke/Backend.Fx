@@ -33,9 +33,9 @@
         protected UnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder,
                              IDomainEventAggregator eventAggregator, IEventBusScope eventBusScope)
         {
-            this._clock = clock;
-            this._eventAggregator = eventAggregator;
-            this._eventBusScope = eventBusScope;
+            _clock = clock;
+            _eventAggregator = eventAggregator;
+            _eventBusScope = eventBusScope;
             IdentityHolder = identityHolder;
         }
 

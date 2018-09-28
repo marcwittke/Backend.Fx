@@ -29,10 +29,10 @@
     <PackageReference Include="SharpZipLib.NETStandard" Version="1.0.7" />
     <PackageReference Include="xunit" Version="2.4.0" />
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Backend.Fx.NLogLogging\Backend.Fx.NLogLogging.csproj" />
-    <ProjectReference Include="..\Backend.Fx\Backend.Fx.csproj" />
-  </ItemGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\..\abstractions\Backend.Fx\Backend.Fx.csproj" />
+      <ProjectReference Include="..\Backend.Fx.NetCore\Backend.Fx.NetCore.csproj" />
+    </ItemGroup>
 
 </Project>

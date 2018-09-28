@@ -13,8 +13,8 @@
         public UnitOfWorkJobExecutor(IUnitOfWork unitOfWork, IJobExecutor<TJob> jobExecutor)
         {
             Logger.Info($"Beginning unit of work for {typeof(TJob).Name}");
-            this._unitOfWork = unitOfWork;
-            this._jobExecutor = jobExecutor;
+            _unitOfWork = unitOfWork;
+            _jobExecutor = jobExecutor;
         }
 
         public void ExecuteJob()

@@ -12,7 +12,7 @@ namespace Backend.Fx.AspNetCore.Mvc.Validation
 
         public RedirectBackToGetActionModelValidationFilter(IModelMetadataProvider modelMetadataProvider)
         {
-            this._modelMetadataProvider = modelMetadataProvider;
+            _modelMetadataProvider = modelMetadataProvider;
         }
 
         public override void OnActionExecuting(ActionExecutingContext context)

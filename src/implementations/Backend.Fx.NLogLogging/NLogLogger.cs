@@ -15,7 +15,7 @@
 
         internal NLogLogger(NLogILogger nlogLogger)
         {
-            this._nlogLogger = nlogLogger;
+            _nlogLogger = nlogLogger;
         }
 
         #region fatal

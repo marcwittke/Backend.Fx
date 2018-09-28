@@ -14,7 +14,7 @@
 
         public ExceptionLogger(ILogger logger)
         {
-            this._logger = logger;
+            _logger = logger;
         }
 
         public void LogException(Exception exception)

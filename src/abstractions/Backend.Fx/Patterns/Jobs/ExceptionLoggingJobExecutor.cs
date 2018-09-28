@@ -12,8 +12,8 @@ namespace Backend.Fx.Patterns.Jobs
 
         public ExceptionLoggingJobExecutor(IExceptionLogger exceptionLogger, IJobExecutor<TJob> jobExecutor)
         {
-            this._exceptionLogger = exceptionLogger;
-            this._jobExecutor = jobExecutor;
+            _exceptionLogger = exceptionLogger;
+            _jobExecutor = jobExecutor;
         }
 
         public void ExecuteJob()

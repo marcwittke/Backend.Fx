@@ -1,7 +1,9 @@
-﻿namespace Backend.Fx.Logging
+﻿using System;
+using System.Diagnostics;
+using Backend.Fx.Logging;
+
+namespace Backend.Fx.NetCore.Logging
 {
-    using System;
-    using System.Diagnostics;
     using NetFxILogger = Microsoft.Extensions.Logging.ILogger;
     using NetFxLogLevel = Microsoft.Extensions.Logging.LogLevel;
 
@@ -12,7 +14,7 @@
         
         public FrameworkToBackendFxLogger(ILogger logger)
         {
-            this._logger = logger;
+            _logger = logger;
         }
 
         public void Log<TState>(NetFxLogLevel logLevel, Microsoft.Extensions.Logging.EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)

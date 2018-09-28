@@ -1,8 +1,9 @@
-﻿namespace Backend.Fx.Logging
-{
-    using System.Diagnostics;
-    using Microsoft.Extensions.Logging;
+﻿using System.Diagnostics;
+using Backend.Fx.Logging;
+using Microsoft.Extensions.Logging;
 
+namespace Backend.Fx.NetCore.Logging
+{
     [DebuggerStepThrough]
     public class BackendFxLoggerProvider : ILoggerProvider
     {

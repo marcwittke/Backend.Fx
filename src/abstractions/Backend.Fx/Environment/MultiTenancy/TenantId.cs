@@ -11,7 +11,7 @@
 
         public TenantId(int? id)
         {
-            this._id = id;
+            _id = id;
         }
 
         /// <summary>
@@ -30,10 +30,7 @@
             }
         }
 
-        public bool HasValue
-        {
-            get { return _id.HasValue; }
-        }
+        public bool HasValue => _id.HasValue;
 
         protected string DebuggerDisplay
         {

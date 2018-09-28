@@ -34,8 +34,8 @@
         [UsedImplicitly]
         public JsonErrorHandlingMiddleware(RequestDelegate next, IHostingEnvironment env)
         {
-            this._next = next;
-            this._env = env;
+            _next = next;
+            _env = env;
         }
 
         /// <summary>

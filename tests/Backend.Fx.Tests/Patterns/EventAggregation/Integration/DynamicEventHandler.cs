@@ -8,7 +8,7 @@
 
         public DynamicEventHandler(IIntegrationEventHandler integrationEventHandlerImplementation)
         {
-            this._integrationEventHandlerImplementation = integrationEventHandlerImplementation;
+            _integrationEventHandlerImplementation = integrationEventHandlerImplementation;
         }
 
         public void Handle(dynamic eventData)

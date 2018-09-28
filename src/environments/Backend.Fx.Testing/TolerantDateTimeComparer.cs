@@ -9,7 +9,7 @@
 
         public TolerantDateTimeOffsetComparer(TimeSpan epsilon)
         {
-            this._epsilon = epsilon;
+            _epsilon = epsilon;
         }
 
         public bool Equals(DateTimeOffset? x, DateTimeOffset? y)
@@ -33,7 +33,7 @@
 
         public TolerantDateTimeComparer(TimeSpan epsilon)
         {
-            this._epsilon = epsilon;
+            _epsilon = epsilon;
         }
 
         public bool Equals(DateTime? x, DateTime? y)

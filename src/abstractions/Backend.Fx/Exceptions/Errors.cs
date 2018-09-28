@@ -27,15 +27,9 @@
             return false;
         }
 
-        public Error[] this[string key]
-        {
-            get { return _dictionaryImplementation[key].ToArray(); }
-        }
+        public Error[] this[string key] => _dictionaryImplementation[key].ToArray();
 
-        public IEnumerable<string> Keys
-        {
-            get { return _dictionaryImplementation.Keys; }
-        }
+        public IEnumerable<string> Keys => _dictionaryImplementation.Keys;
 
         public IEnumerable<Error[]> Values
         {
@@ -88,10 +82,7 @@
             return GetEnumerator();
         }
 
-        public int Count
-        {
-            get { return _dictionaryImplementation.Count; }
-        }
+        public int Count => _dictionaryImplementation.Count;
 
         public override string ToString()
         {

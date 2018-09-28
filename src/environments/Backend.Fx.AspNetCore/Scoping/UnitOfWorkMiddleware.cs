@@ -19,8 +19,8 @@ namespace Backend.Fx.AspNetCore.Scoping
         [UsedImplicitly]
         public UnitOfWorkMiddleware(RequestDelegate next, IBackendFxApplication application)
         {
-            this._next = next;
-            this._application = application;
+            _next = next;
+            _application = application;
         }
 
         /// <summary>

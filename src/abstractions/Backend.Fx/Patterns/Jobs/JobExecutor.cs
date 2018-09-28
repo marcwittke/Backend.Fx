@@ -10,7 +10,7 @@
 
         public JobExecutor(TJob job)
         {
-            this._job = job;
+            _job = job;
         }
 
         public void ExecuteJob()

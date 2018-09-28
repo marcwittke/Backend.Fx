@@ -46,15 +46,9 @@ namespace Backend.Fx.Testing.InMemoryPersistence
             return _dictionaryImplementation.Remove(item);
         }
 
-        public int Count
-        {
-            get { return _dictionaryImplementation.Count; }
-        }
+        public int Count => _dictionaryImplementation.Count;
 
-        public bool IsReadOnly
-        {
-            get { return _dictionaryImplementation.IsReadOnly; }
-        }
+        public bool IsReadOnly => _dictionaryImplementation.IsReadOnly;
 
         public void Add(int key, T value)
         {
@@ -78,18 +72,12 @@ namespace Backend.Fx.Testing.InMemoryPersistence
 
         public T this[int key]
         {
-            get { return _dictionaryImplementation[key]; }
-            set { _dictionaryImplementation[key] = value; }
+            get => _dictionaryImplementation[key];
+            set => _dictionaryImplementation[key] = value;
         }
 
-        public ICollection<int> Keys
-        {
-            get { return _dictionaryImplementation.Keys; }
-        }
+        public ICollection<int> Keys => _dictionaryImplementation.Keys;
 
-        public ICollection<T> Values
-        {
-            get { return _dictionaryImplementation.Values; }
-        }
+        public ICollection<T> Values => _dictionaryImplementation.Values;
     }
 }

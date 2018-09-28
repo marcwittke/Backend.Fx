@@ -14,7 +14,7 @@
         public TenantManager(ITenantInitializer tenantInitializer, DbContextOptions<TDbContext> dbContextOptions) 
             : base(tenantInitializer)
         {
-            this._dbContextOptions = dbContextOptions;
+            _dbContextOptions = dbContextOptions;
         }
 
         public override TenantId[] GetTenantIds()

@@ -34,10 +34,7 @@
             return Errors.Any();
         }
 
-        public override string Message
-        {
-            get { return base.Message + Environment.NewLine + Errors; }
-        }
+        public override string Message => base.Message + Environment.NewLine + Errors;
 
         /// <inheritdoc />
         public override string ToString()

@@ -12,7 +12,7 @@
         private readonly IList<T> _list;
         public InMemoryView(IList<T> list)
         {
-            this._list = list;
+            _list = list;
         }
         public IEnumerator<T> GetEnumerator()
         {

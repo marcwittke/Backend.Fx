@@ -20,14 +20,11 @@
         protected Repository(ICurrentTHolder<TenantId> tenantIdHolder, IAggregateAuthorization<TAggregateRoot> aggregateAuthorization)
         {
             Logger.Trace($"Instantiating a new Repository<{AggregateTypeName}> for tenant [{(tenantIdHolder.Current.HasValue ? tenantIdHolder.Current.Value.ToString() : "null")}]");
-            this._tenantIdHolder = tenantIdHolder;
-            this._aggregateAuthorization = aggregateAuthorization;
+            _tenantIdHolder = tenantIdHolder;
+            _aggregateAuthorization = aggregateAuthorization;
         }
 
-        protected static string AggregateTypeName
-        {
-            get { return typeof(TAggregateRoot).Name; }
-        }
+        protected static string AggregateTypeName => typeof(TAggregateRoot).Name;
 
         protected abstract IQueryable<TAggregateRoot> RawAggregateQueryable { get; }
 

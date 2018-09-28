@@ -33,7 +33,7 @@
 
         protected TenantManager(ITenantInitializer tenantInitializer)
         {
-            this._tenantInitializer = tenantInitializer;
+            _tenantInitializer = tenantInitializer;
         }
 
         public TenantId CreateDemonstrationTenant(string name, string description, bool isDefault, CultureInfo defaultCultureInfo, string uriMatchingExpression = null)

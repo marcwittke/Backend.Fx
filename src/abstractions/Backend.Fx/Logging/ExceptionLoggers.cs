@@ -60,14 +60,8 @@
             return _collectionImplementation.Remove(item);
         }
 
-        public int Count
-        {
-            get { return _collectionImplementation.Count; }
-        }
+        public int Count => _collectionImplementation.Count;
 
-        public bool IsReadOnly
-        {
-            get { return _collectionImplementation.IsReadOnly; }
-        }
+        public bool IsReadOnly => _collectionImplementation.IsReadOnly;
     }
 }

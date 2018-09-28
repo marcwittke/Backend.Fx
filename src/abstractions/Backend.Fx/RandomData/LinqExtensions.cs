@@ -48,7 +48,8 @@
             {
                 if (count == 0)
                 {
-                    throw new ArgumentException(string.Format("The enumerable of {0} does not contain any items, therefore no random item can be returned.", typeof(T).Name), nameof(source));
+                    throw new ArgumentException(
+                        $"The enumerable of {typeof(T).Name} does not contain any items, therefore no random item can be returned.", nameof(source));
                 }
                 
                 return sourceQueryable.Skip(TestRandom.Next(count - 1)).First();
@@ -58,7 +59,8 @@
             var sourceArray = source as T[] ?? source.ToArray();
             if (sourceArray.Length == 0)
             {
-                throw new ArgumentException(string.Format("The enumerable of {0} does not contain any items, therefore no random item can be returned.", typeof(T).Name), nameof(source));
+                throw new ArgumentException(
+                    $"The enumerable of {typeof(T).Name} does not contain any items, therefore no random item can be returned.", nameof(source));
             }
             return sourceArray.ElementAt(TestRandom.Next(sourceArray.Length));
         }

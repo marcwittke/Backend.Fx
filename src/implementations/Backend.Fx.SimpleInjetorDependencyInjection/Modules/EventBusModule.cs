@@ -16,8 +16,8 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
 
         public EventBusModule(IEventBus eventBus, params Assembly[] assemblies)
         {
-            this._eventBus = eventBus;
-            this._assemblies = assemblies;
+            _eventBus = eventBus;
+            _assemblies = assemblies;
             _assembliesForLogging = string.Join(",", assemblies.Select(ass => ass.GetName().Name));
         }
 

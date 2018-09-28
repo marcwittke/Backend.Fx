@@ -95,10 +95,7 @@
 
             public override TenantId TenantId { get; }
 
-            public override dynamic DynamicEvent
-            {
-                get { return JObject.Parse(_jsonString); }
-            }
+            public override dynamic DynamicEvent => JObject.Parse(_jsonString);
 
             public override IIntegrationEvent GetTypedEvent(Type eventType)
             {

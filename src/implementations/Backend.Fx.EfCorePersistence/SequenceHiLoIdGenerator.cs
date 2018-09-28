@@ -10,8 +10,8 @@
 
         protected SequenceHiLoIdGenerator(ISequence sequence, DbContextOptions<TDbContext> dbContextOptions)
         {
-            this._sequence = sequence;
-            this._dbContextOptions = dbContextOptions;
+            _sequence = sequence;
+            _dbContextOptions = dbContextOptions;
         }
 
         protected override int GetNextBlockStart()
@@ -22,9 +22,6 @@
             }
         }
 
-        protected override int Increment
-        {
-            get { return _sequence.Increment; }
-        }
+        protected override int Increment => _sequence.Increment;
     }
 }

@@ -26,12 +26,15 @@ namespace Backend.Fx.BuildingBlocks
 
         public override int GetHashCode()
         {
+            // ReSharper disable NonReadonlyMemberInGetHashCode
             if (Id != 0)
             {
                 return Id.GetHashCode();
             }
+            // ReSharper enable NonReadonlyMemberInGetHashCode
 
-            return base.GetHashCode();
+            // ReSharper disable once BaseObjectGetHashCodeCallInGetHashCode
+            return base.GetHashCode();            
         }
 
         public static bool operator ==(Identitfied x, Identitfied y)

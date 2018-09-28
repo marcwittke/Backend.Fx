@@ -35,7 +35,7 @@ namespace Backend.Fx.Environment.MultiTenancy
 
         public TenantInitializer(IScopeManager scopeManager)
         {
-            this._scopeManager = scopeManager;
+            _scopeManager = scopeManager;
         }
 
         /// <inheritdoc />

@@ -17,11 +17,11 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl
     public class ProductiveGenerator : InitialDataGenerator, IProductiveDataGenerator
     {
         private readonly IRepository<AnAggregate> _repository;
-        public override int Priority { get { return 1; } }
+        public override int Priority => 1;
 
         public ProductiveGenerator(IRepository<AnAggregate> repository)
         {
-            this._repository = repository;
+            _repository = repository;
         }
 
         protected override void GenerateCore()
@@ -43,11 +43,11 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl
     public class DemonstrationGenerator : InitialDataGenerator, IDemoDataGenerator
     {
         private readonly IRepository<AnAggregate> _repository;
-        public override int Priority { get { return 1; } }
+        public override int Priority => 1;
 
         public DemonstrationGenerator(IRepository<AnAggregate> repository)
         {
-            this._repository = repository;
+            _repository = repository;
         }
 
         protected override void GenerateCore()

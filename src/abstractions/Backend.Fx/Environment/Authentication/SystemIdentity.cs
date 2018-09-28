@@ -4,10 +4,10 @@
 
     public class SystemIdentity : IIdentity
     {
-        public string Name { get { return "SYSTEM"; } }
+        public string Name => "SYSTEM";
 
-        public string AuthenticationType { get { return "system internal"; } }
+        public string AuthenticationType => "system internal";
 
-        public bool IsAuthenticated { get { return true; } }
+        public bool IsAuthenticated => true;
     }
 }

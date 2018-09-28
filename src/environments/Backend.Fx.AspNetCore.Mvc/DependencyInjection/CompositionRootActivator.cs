@@ -9,7 +9,7 @@ namespace Backend.Fx.AspNetCore.Mvc.DependencyInjection
         
         protected CompositionRootActivator(ICompositionRoot compositionRoot)
         {
-            this._compositionRoot = compositionRoot;
+            _compositionRoot = compositionRoot;
         }
 
         public object GetInstance(Type t)

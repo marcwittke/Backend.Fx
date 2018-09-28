@@ -13,10 +13,10 @@ namespace Backend.Fx.ConfigurationSettings
 
         protected SettingsService(string category, IEntityIdGenerator idGenerator, IRepository<Setting> settingRepository, ISettingSerializerFactory settingSerializerFactory)
         {
-            this._category = category;
-            this._idGenerator = idGenerator;
-            this._settingRepository = settingRepository;
-            this._settingSerializerFactory = settingSerializerFactory;
+            _category = category;
+            _idGenerator = idGenerator;
+            _settingRepository = settingRepository;
+            _settingSerializerFactory = settingSerializerFactory;
         }
 
         protected T ReadSetting<T>(string key)

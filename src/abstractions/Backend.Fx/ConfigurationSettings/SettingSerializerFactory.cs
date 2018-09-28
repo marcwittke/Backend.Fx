@@ -38,7 +38,8 @@ namespace Backend.Fx.ConfigurationSettings
                 return (ISettingSerializer<T>) Serializers[typeof(T)];
             }
 
-            throw new ArgumentOutOfRangeException(nameof(T), string.Format("No Serializer for Setting Type {0} available", typeof(T).Name));
+            throw new ArgumentOutOfRangeException(nameof(T),
+                $"No Serializer for Setting Type {typeof(T).Name} available");
         }
     }
 }

@@ -13,7 +13,7 @@
         protected DatabaseDockerContainer(string baseImage, string name, string[] env, string dockerApiUrl)
                 : base(baseImage, name, dockerApiUrl)
         {
-            this._env = env;
+            _env = env;
         }
 
         protected abstract int DatabasePort { get; }
@@ -22,32 +22,26 @@
 
         public abstract string ConnectionString { get; }
 
-        protected override CreateContainerParameters CreateParameters
+        protected override CreateContainerParameters CreateParameters => new CreateContainerParameters
         {
-            get
+            Image = BaseImage,
+            AttachStderr = true,
+            AttachStdin = true,
+            AttachStdout = true,
+            Env = _env,
+            ExposedPorts = new Dictionary<string, EmptyStruct> { { DatabasePort.ToString(CultureInfo.InvariantCulture), new EmptyStruct() } },
+            HostConfig = new HostConfig
             {
-                return new CreateContainerParameters
+                PortBindings = new Dictionary<string, IList<PortBinding>>
                 {
-                    Image = BaseImage,
-                    AttachStderr = true,
-                    AttachStdin = true,
-                    AttachStdout = true,
-                    Env = _env,
-                    ExposedPorts = new Dictionary<string, EmptyStruct> { { DatabasePort.ToString(CultureInfo.InvariantCulture), new EmptyStruct() } },
-                    HostConfig = new HostConfig
                     {
-                        PortBindings = new Dictionary<string, IList<PortBinding>>
-                                {
-                                        {
-                                                DatabasePort.ToString(CultureInfo.InvariantCulture),
-                                                new List<PortBinding> {new PortBinding {HostPort = LocalTcpPort.ToString(CultureInfo.InvariantCulture)}}
-                                        }
-                                }
-                    },
-                    Name = Name,
-                };
-            }
-        }
+                        DatabasePort.ToString(CultureInfo.InvariantCulture),
+                        new List<PortBinding> {new PortBinding {HostPort = LocalTcpPort.ToString(CultureInfo.InvariantCulture)}}
+                    }
+                }
+            },
+            Name = Name,
+        };
 
         public abstract IDbConnection CreateConnection();
 
