@@ -197,7 +197,7 @@
 
         private void ProcessTyped(string eventName, EventProcessingContext context, Type handlerType, IScope scope)
         {
-            Type interfaceType = handlerType.GetInterfaces().First(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IIntegrationEventHandler<>));
+            Type interfaceType = handlerType.GetInterfaces().First(x => x.GetTypeInfo().IsGenericType && x.GetGenericTypeDefinition() == typeof(IIntegrationEventHandler<>));
             var eventType = interfaceType.GetGenericArguments().Single(t => typeof(IIntegrationEvent).IsAssignableFrom(t));
             var integrationEvent = context.GetTypedEvent(eventType);
             MethodInfo handleMethod = handlerType.GetRuntimeMethod("Handle", new[] {eventType});

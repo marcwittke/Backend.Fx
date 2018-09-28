@@ -6,9 +6,23 @@
 
     public class DomainEventAggregator : IDomainEventAggregator
     {
+        private class HandleAction
+        {
+            public HandleAction(string domainEventName, string handlerTypeName, Action action)
+            {
+                DomainEventName = domainEventName;
+                HandlerTypeName = handlerTypeName;
+                Action = action;
+            }
+
+            public string DomainEventName { get; }
+            public string HandlerTypeName { get; }
+            public Action Action { get; }
+        }
+
         private static readonly ILogger Logger = LogManager.Create<DomainEventAggregator>();
         private readonly IDomainEventHandlerProvider _domainEventHandlerProvider;
-        private readonly ConcurrentQueue<(string, string, Action)> _handleActions = new ConcurrentQueue<(string, string, Action)>();
+        private readonly ConcurrentQueue<HandleAction> _handleActions = new ConcurrentQueue<HandleAction>();
 
         public DomainEventAggregator(IDomainEventHandlerProvider domainEventHandlerProvider)
         {
@@ -25,7 +39,7 @@
         {
             foreach (var injectedHandler in _domainEventHandlerProvider.GetAllEventHandlers<TDomainEvent>())
             {
-                (string, string, Action) handleAction = (
+                HandleAction handleAction = new HandleAction (
                                                             typeof(TDomainEvent).Name,
                                                             injectedHandler.GetType().Name,
                                                             () => injectedHandler.Handle(domainEvent));
@@ -41,11 +55,11 @@
             {
                 try
                 {
-                    handleAction.Item3.Invoke();
+                    handleAction.Action.Invoke();
                 }
                 catch (Exception ex)
                 {
-                    Logger.Error(ex, $"Handling of {handleAction.Item1} by {handleAction.Item2} failed.");
+                    Logger.Error(ex, $"Handling of {handleAction.DomainEventName} by {handleAction.HandlerTypeName} failed.");
                     throw;
                 }
             }

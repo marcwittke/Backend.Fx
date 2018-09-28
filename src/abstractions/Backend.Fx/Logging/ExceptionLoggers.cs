@@ -12,17 +12,18 @@
 
         public void LogException(Exception ex)
         {
-            _collectionImplementation.AsParallel().ForAll(exceptionLogger =>
-                                                         {
-                                                             try
-                                                             {
-                                                                 exceptionLogger.LogException(ex);
-                                                             }
-                                                             catch (Exception ex2)
-                                                             {
-                                                                 Logger.Error(ex, $"{exceptionLogger.GetType().Name} failed to log the {ex2.GetType()} mith message {ex.Message}");
-                                                             }
-                                                         });
+            foreach (var exceptionLogger in _collectionImplementation)
+            {
+                try
+                {
+                    exceptionLogger.LogException(ex);
+                }
+                catch (Exception ex2)
+                {
+                    Logger.Error(ex,
+                        $"{exceptionLogger.GetType().Name} failed to log the {ex2.GetType()} mith message {ex.Message}");
+                }
+            }
         }
 
         public IEnumerator<IExceptionLogger> GetEnumerator()
