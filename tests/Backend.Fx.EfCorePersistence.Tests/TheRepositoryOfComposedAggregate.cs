@@ -1,5 +1,6 @@
 ﻿using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
+using Xunit;
 
 namespace Backend.Fx.EfCorePersistence.Tests
 {
@@ -17,7 +18,6 @@ namespace Backend.Fx.EfCorePersistence.Tests
     using Patterns.EventAggregation.Domain;
     using Patterns.EventAggregation.Integration;
     using Patterns.IdGeneration;
-    using Testing;
     using Xunit;
 
     public class TheRepositoryOfComposedAggregate : TestWithInMemorySqliteDbContext

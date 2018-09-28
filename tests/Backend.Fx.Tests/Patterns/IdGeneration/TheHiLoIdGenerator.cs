@@ -1,8 +1,9 @@
-﻿namespace Backend.Fx.Tests.Patterns.IdGeneration
+﻿using Xunit;
+
+namespace Backend.Fx.Tests.Patterns.IdGeneration
 {
     using System.Linq;
     using Fx.Patterns.IdGeneration;
-    using Xunit;
 
     public class TheHiLoIdGenerator
     {

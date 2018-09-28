@@ -1,10 +1,11 @@
-﻿namespace Backend.Fx.Tests.Environment.DateAndTime
+﻿using Xunit;
+
+namespace Backend.Fx.Tests.Environment.DateAndTime
 {
     using System;
     using System.Collections.Generic;
     using System.Threading;
     using Fx.Environment.DateAndTime;
-    using Testing;
     using Xunit;
 
     public class TheWallClock

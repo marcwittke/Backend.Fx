@@ -1,8 +1,9 @@
-﻿namespace Backend.Fx.Tests.Extensions
+﻿using Xunit;
+
+namespace Backend.Fx.Tests.Extensions
 {
     using System;
     using Fx.Extensions;
-    using Xunit;
 
     public class TheDateTimeEx
     {

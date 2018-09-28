@@ -8,7 +8,7 @@ using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using Backend.Fx.SimpleInjectorDependencyInjection.Modules;
 using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl;
-using Backend.Fx.Testing.InMemoryPersistence;
+using Backend.Fx.Xunit.InMemoryPersistence;
 using FakeItEasy;
 using SimpleInjector;
 using Xunit;

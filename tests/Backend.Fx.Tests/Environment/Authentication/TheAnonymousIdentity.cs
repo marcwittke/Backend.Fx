@@ -1,7 +1,8 @@
-﻿namespace Backend.Fx.Tests.Environment.Authentication
+﻿using Xunit;
+
+namespace Backend.Fx.Tests.Environment.Authentication
 {
     using Fx.Environment.Authentication;
-    using Xunit;
 
     public class TheAnonymousIdentity
     {

@@ -1,4 +1,5 @@
 ﻿using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
+using Xunit;
 
 namespace Backend.Fx.EfCorePersistence.Tests
 {
@@ -6,7 +7,6 @@ namespace Backend.Fx.EfCorePersistence.Tests
     using Environment.MultiTenancy;
     using FakeItEasy;
     using Microsoft.EntityFrameworkCore;
-    using Xunit;
 
     public class TheTenantManager : TestWithInMemorySqliteDbContext
     {

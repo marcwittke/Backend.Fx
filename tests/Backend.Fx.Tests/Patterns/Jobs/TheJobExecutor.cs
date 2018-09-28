@@ -1,9 +1,10 @@
-﻿namespace Backend.Fx.Tests.Patterns.Jobs
+﻿using Xunit;
+
+namespace Backend.Fx.Tests.Patterns.Jobs
 {
     using System.Threading.Tasks;
     using Fx.Patterns.Jobs;
     using JetBrains.Annotations;
-    using Xunit;
 
     public class TheJobExecutor
     {

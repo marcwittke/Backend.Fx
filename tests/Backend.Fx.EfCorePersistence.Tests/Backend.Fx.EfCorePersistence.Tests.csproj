@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\abstractions\Backend.Fx\Backend.Fx.csproj" />
-    <ProjectReference Include="..\..\src\environments\Backend.Fx.Testing\Backend.Fx.Testing.csproj" />
+    <ProjectReference Include="..\..\src\environments\Backend.Fx.Xunit\Backend.Fx.Xunit.csproj" />
     <ProjectReference Include="..\..\src\implementations\Backend.Fx.EfCorePersistence\Backend.Fx.EfCorePersistence.csproj" />
     <ProjectReference Include="..\..\src\implementations\Backend.Fx.NLogLogging\Backend.Fx.NLogLogging.csproj" />
   </ItemGroup>

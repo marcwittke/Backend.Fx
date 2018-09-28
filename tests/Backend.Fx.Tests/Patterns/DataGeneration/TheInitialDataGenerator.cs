@@ -1,7 +1,8 @@
-﻿namespace Backend.Fx.Tests.Patterns.DataGeneration
+﻿using Xunit;
+
+namespace Backend.Fx.Tests.Patterns.DataGeneration
 {
     using Fx.Patterns.DataGeneration;
-    using Xunit;
 
     public class AnInitialDataGenerator : InitialDataGenerator
     {

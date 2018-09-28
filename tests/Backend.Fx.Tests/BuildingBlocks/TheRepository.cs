@@ -1,4 +1,7 @@
-﻿namespace Backend.Fx.Tests.BuildingBlocks
+﻿using Backend.Fx.Xunit.InMemoryPersistence;
+using Xunit;
+
+namespace Backend.Fx.Tests.BuildingBlocks
 {
     using System;
     using System.Linq;
@@ -7,8 +10,6 @@
     using Fx.Environment.MultiTenancy;
     using Fx.Exceptions;
     using Fx.Patterns.Authorization;
-    using Testing.InMemoryPersistence;
-    using Xunit;
 
     public class TheRepository
     {

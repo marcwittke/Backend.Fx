@@ -1,4 +1,5 @@
 ﻿using JetBrains.Annotations;
+using Xunit;
 
 namespace Backend.Fx.Tests.BuildingBlocks
 {
@@ -6,7 +7,6 @@ namespace Backend.Fx.Tests.BuildingBlocks
     using System.Collections.Generic;
     using Fx.BuildingBlocks;
     using RandomData;
-    using Xunit;
 
     public class TheAggregateRoot
     {

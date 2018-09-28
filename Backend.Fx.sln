@@ -6,6 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6B64354E-D95B-4711-BAF6-B32049C90CD9}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		D:\marc\source\repos\Backend.Fx\README.md = D:\marc\source\repos\Backend.Fx\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{53D4501E-953C-4A7C-97C4-1F9DE04BD092}"
@@ -36,7 +37,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.AspNetCore", "sr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.AspNetCore.Mvc", "src\environments\Backend.Fx.AspNetCore.Mvc\Backend.Fx.AspNetCore.Mvc.csproj", "{EDC67369-E388-4D7D-8D1F-9B3F86A35DE0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.Testing", "src\environments\Backend.Fx.Testing\Backend.Fx.Testing.csproj", "{BB89C55B-0010-40A0-96FF-160256E087CB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.Xunit", "src\environments\Backend.Fx.Xunit\Backend.Fx.Xunit.csproj", "{BB89C55B-0010-40A0-96FF-160256E087CB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.SimpleInjectorDependencyInjection.Tests", "tests\Backend.Fx.SimpleInjectorDependencyInjection.Tests\Backend.Fx.SimpleInjectorDependencyInjection.Tests.csproj", "{D98AED23-ABB8-4130-9612-54AEFE9D2272}"
 EndProject

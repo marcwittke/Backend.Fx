@@ -1,4 +1,5 @@
 ﻿using JetBrains.Annotations;
+using Xunit;
 
 namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
 {
@@ -11,7 +12,6 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
     using Fx.Logging;
     using Fx.Patterns.DependencyInjection;
     using Fx.Patterns.EventAggregation.Integration;
-    using Xunit;
 
     public sealed class TheInMemoryEventBus : TheEventBus
     {

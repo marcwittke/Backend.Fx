@@ -1,5 +1,6 @@
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
+using Xunit;
 
 namespace Backend.Fx.EfCorePersistence.Tests
 {
@@ -9,7 +10,6 @@ namespace Backend.Fx.EfCorePersistence.Tests
     using Patterns.Authorization;
     using Patterns.EventAggregation.Domain;
     using Patterns.EventAggregation.Integration;
-    using Testing;
     using Xunit;
 
     public class TheRepositoryOfPlainAggregate : TestWithInMemorySqliteDbContext

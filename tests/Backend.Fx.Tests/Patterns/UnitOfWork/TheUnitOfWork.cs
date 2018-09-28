@@ -1,11 +1,12 @@
-﻿namespace Backend.Fx.Tests.Patterns.UnitOfWork
+﻿using Xunit;
+
+namespace Backend.Fx.Tests.Patterns.UnitOfWork
 {
     using FakeItEasy;
     using Fx.Environment.Authentication;
     using Fx.Environment.DateAndTime;
     using Fx.Patterns.EventAggregation.Domain;
     using Fx.Patterns.EventAggregation.Integration;
-    using Xunit;
 
     public class TheUnitOfWork
     {

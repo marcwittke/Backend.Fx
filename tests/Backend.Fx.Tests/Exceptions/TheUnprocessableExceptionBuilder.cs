@@ -1,9 +1,10 @@
-﻿namespace Backend.Fx.Tests.Exceptions
+﻿using Xunit;
+
+namespace Backend.Fx.Tests.Exceptions
 {
     using System;
     using BuildingBlocks;
     using Fx.Exceptions;
-    using Xunit;
 
     public class TheUnprocessableExceptionBuilder
     {

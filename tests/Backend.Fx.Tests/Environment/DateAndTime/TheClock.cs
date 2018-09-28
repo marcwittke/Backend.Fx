@@ -1,9 +1,10 @@
+using Xunit;
+
 namespace Backend.Fx.Tests.Environment.DateAndTime
 {
     using System;
     using System.Threading;
     using Fx.Environment.DateAndTime;
-    using Xunit;
 
     public class TheClock
     {

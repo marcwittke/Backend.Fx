@@ -1,8 +1,9 @@
 ﻿using Backend.Fx.NLogLogging;
 using Backend.Fx.SimpleInjectorDependencyInjection.Tests;
+using Backend.Fx.Xunit.AssemblyFixtures;
 
 [assembly: Xunit.TestFramework("Backend.Fx.Testing.AssemblyFixtures.XunitTestFrameworkWithAssemblyFixture", "Backend.Fx.Testing")]
-[assembly: Backend.Fx.Testing.AssemblyFixtures.AssemblyFixture(typeof(TestLoggingFixture))]
+[assembly: AssemblyFixture(typeof(TestLoggingFixture))]
 
 namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
 {

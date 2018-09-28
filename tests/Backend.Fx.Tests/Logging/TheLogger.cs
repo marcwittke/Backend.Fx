@@ -1,9 +1,10 @@
+using Xunit;
+
 namespace Backend.Fx.Tests.Logging
 {
     using System;
     using FakeItEasy;
     using Fx.Logging;
-    using Xunit;
 
     public class TheLogger
     {

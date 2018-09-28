@@ -1,4 +1,5 @@
 ﻿using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
+using Xunit;
 
 namespace Backend.Fx.EfCorePersistence.Tests
 {
@@ -7,7 +8,6 @@ namespace Backend.Fx.EfCorePersistence.Tests
     using Environment.Persistence;
     using Microsoft.Data.Sqlite;
     using Microsoft.EntityFrameworkCore;
-    using Xunit;
 
     public class TheDatabaseManager
     {

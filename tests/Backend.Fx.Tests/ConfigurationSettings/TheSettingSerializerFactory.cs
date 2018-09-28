@@ -1,8 +1,9 @@
-﻿namespace Backend.Fx.Tests.ConfigurationSettings
+﻿using Xunit;
+
+namespace Backend.Fx.Tests.ConfigurationSettings
 {
     using System;
     using Fx.ConfigurationSettings;
-    using Xunit;
 
     public class TheSettingSerializerFactory
     {

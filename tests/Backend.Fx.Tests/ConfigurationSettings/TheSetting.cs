@@ -1,4 +1,5 @@
 ﻿using JetBrains.Annotations;
+using Xunit;
 
 namespace Backend.Fx.Tests.ConfigurationSettings
 {
@@ -6,7 +7,6 @@ namespace Backend.Fx.Tests.ConfigurationSettings
     using Fx.BuildingBlocks;
     using Fx.ConfigurationSettings;
     using Fx.Patterns.IdGeneration;
-    using Xunit;
 
     public class TheSetting
     {

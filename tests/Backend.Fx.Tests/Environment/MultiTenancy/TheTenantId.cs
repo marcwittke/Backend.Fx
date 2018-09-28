@@ -1,8 +1,9 @@
-﻿namespace Backend.Fx.Tests.Environment.MultiTenancy
+﻿using Xunit;
+
+namespace Backend.Fx.Tests.Environment.MultiTenancy
 {
     using System;
     using Fx.Environment.MultiTenancy;
-    using Xunit;
 
     public class TheTenantId
     {

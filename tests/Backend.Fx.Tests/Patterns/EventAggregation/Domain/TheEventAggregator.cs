@@ -1,9 +1,10 @@
-﻿namespace Backend.Fx.Tests.Patterns.EventAggregation.Domain
+﻿using Xunit;
+
+namespace Backend.Fx.Tests.Patterns.EventAggregation.Domain
 {
     using System;
     using FakeItEasy;
     using Fx.Patterns.EventAggregation.Domain;
-    using Xunit;
 
     public class TheEventAggregator
     {

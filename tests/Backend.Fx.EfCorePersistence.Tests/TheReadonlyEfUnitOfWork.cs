@@ -1,10 +1,10 @@
 ﻿using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
+using Xunit;
 
 namespace Backend.Fx.EfCorePersistence.Tests
 {
     using Environment.Authentication;
-    using Xunit;
 
     public class TheReadonlyEfUnitOfWork : TestWithInMemorySqliteDbContext
     {

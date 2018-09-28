@@ -1,13 +1,14 @@
-﻿namespace Backend.Fx.Tests.Containers
+﻿using Backend.Fx.Xunit.BuildEnv;
+using Backend.Fx.Xunit.Containers;
+using Xunit;
+
+namespace Backend.Fx.Tests.Containers
 {
     using System;
     using System.Data;
     using System.Data.SqlClient;
     using System.Threading.Tasks;
     using RandomData;
-    using Testing.BuildEnv;
-    using Testing.Containers;
-    using Xunit;
 
     public class TestContainer : MssqlDockerContainer
     {

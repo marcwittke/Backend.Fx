@@ -1,4 +1,7 @@
-﻿namespace Backend.Fx.Tests.ConfigurationSettings
+﻿using Backend.Fx.Xunit.InMemoryPersistence;
+using Xunit;
+
+namespace Backend.Fx.Tests.ConfigurationSettings
 {
     using System.Linq;
     using FakeItEasy;
@@ -7,8 +10,6 @@
     using Fx.Environment.MultiTenancy;
     using Fx.Patterns.Authorization;
     using Fx.Patterns.IdGeneration;
-    using Testing;
-    using Testing.InMemoryPersistence;
     using Xunit;
 
     public class TheSettingsService

@@ -1,10 +1,11 @@
-﻿namespace Backend.Fx.Tests.Logging
+﻿using Xunit;
+
+namespace Backend.Fx.Tests.Logging
 {
     using System;
     using System.Security;
     using FakeItEasy;
     using Fx.Logging;
-    using Xunit;
 
     public class TheLogManager
     {
