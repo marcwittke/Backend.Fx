@@ -22,7 +22,7 @@ namespace Backend.Fx.NLogLogging
                 Backend.Fx.Logging.LogManager.Initialize(new NLogLoggerFactory());
                 var config = new LoggingConfiguration();
 
-                var consoleTarget = new ColoredConsoleTarget
+                var consoleTarget = new ConsoleTarget
                 {
                     Layout = @"${level:uppercase=true:padding=5} ${mdc:item=Activity} ${time} ${logger} ${message} ${exception}"
                 };

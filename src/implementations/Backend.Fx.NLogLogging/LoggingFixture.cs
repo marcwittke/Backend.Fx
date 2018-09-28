@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 
 namespace Backend.Fx.NLogLogging
 {
@@ -12,7 +13,7 @@ namespace Backend.Fx.NLogLogging
 
         protected LoggingFixture(string appRootNamespace)
         {
-            Configurations.ForTests(appRootNamespace, GetType().Assembly.GetName().Name + ".xlog");
+            Configurations.ForTests(appRootNamespace, GetType().GetTypeInfo().Assembly.GetName().Name + ".xlog");
 
             _lifetimeLogger = Backend.Fx.Logging.LogManager.Create<LoggingFixture>().InfoDuration("Test run started", "Test run finished");
         }
