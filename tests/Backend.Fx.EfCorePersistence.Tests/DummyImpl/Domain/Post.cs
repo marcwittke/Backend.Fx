@@ -15,8 +15,8 @@ namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain
             Name = name;
         }
 
-        public int BlogId { get; private set; }
-        public Blog Blog { get; private set; }
+        public int BlogId { get; [UsedImplicitly] private set; }
+        public Blog Blog { get; [UsedImplicitly] private set; }
         public string Name { get; private set; }
 
         public void SetName(string name)

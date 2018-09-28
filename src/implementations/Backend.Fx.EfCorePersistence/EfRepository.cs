@@ -26,7 +26,7 @@
             _aggregateMapping = aggregateMapping;
             _aggregateAuthorization = aggregateAuthorization;
 
-            // somewhat hacky: using the internal EF Core services against advice
+            // somewhat a hack: using the internal EF Core services against advice
             var localViewListener = dbContext.GetService<ILocalViewListener>();
             localViewListener.RegisterView(AuthorizeChanges);
         }

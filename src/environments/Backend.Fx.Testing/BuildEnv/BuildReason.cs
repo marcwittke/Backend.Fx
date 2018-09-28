@@ -24,7 +24,7 @@
         Schedule,
 
         /// <summary>
-        ///     A user manually queued the build of a specific TFVC shelveset.
+        ///     A user manually queued the build of a specific TFVC shelve set.
         /// </summary>
         ValidateShelveset,
 

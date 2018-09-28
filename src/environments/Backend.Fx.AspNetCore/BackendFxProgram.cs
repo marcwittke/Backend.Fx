@@ -2,6 +2,7 @@
 {
     using System;
     using Logging;
+    using Backend.Fx.NetCore.Logging;
     using Microsoft.AspNetCore;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.DependencyInjection;

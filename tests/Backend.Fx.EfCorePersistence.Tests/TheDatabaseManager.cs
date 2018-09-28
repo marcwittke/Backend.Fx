@@ -4,7 +4,6 @@ namespace Backend.Fx.EfCorePersistence.Tests
 {
     using System.IO;
     using System.Linq;
-    using DummyImpl;
     using Environment.Persistence;
     using Microsoft.Data.Sqlite;
     using Microsoft.EntityFrameworkCore;

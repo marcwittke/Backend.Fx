@@ -26,7 +26,10 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
                                        .SelectMany(type =>
                                                        type.GetTypeInfo()
                                                            .ImplementedInterfaces
-                                                           .Where(i => typeof(IDomainService) != i && typeof(IApplicationService) != i && (i.Namespace.StartsWith("Backend") || assemblies.Contains(i.GetTypeInfo().Assembly)))
+                                                           .Where(i => typeof(IDomainService) != i 
+                                                                       && typeof(IApplicationService) != i 
+                                                                       && (i.Namespace != null && i.Namespace.StartsWith("Backend") 
+                                                                           || assemblies.Contains(i.GetTypeInfo().Assembly)))
                                                            .Select(service => new
                                                            {
                                                                    Service = service,

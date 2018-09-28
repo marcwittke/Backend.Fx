@@ -34,7 +34,7 @@
         public static string Number => global::System.Environment.GetEnvironmentVariable("BUILD_BUILDNUMBER");
 
         /// <summary>
-        ///     The URI for the build. For example: vstfs:///Build/Build/1430.
+        ///     The URI for the build. For example: tfs:///Build/Build/1430.
         /// </summary>
         public static string Uri => global::System.Environment.GetEnvironmentVariable("BUILD_BUILDURI");
 
@@ -120,7 +120,7 @@
         ///     Git repo pull request: refs/pull/1/merge
         ///     TFVC repo branch: $/teamproject/main
         ///     TFVC repo gated check-in: Gated_2016-06-06_05.20.51.4369;username@live.com
-        ///     TFVC repo shelveset build: myshelveset;username@live.com
+        ///     TFVC repo shelve set build: myshelveset;username@live.com
         /// </summary>
         public static string SourceBranch => global::System.Environment.GetEnvironmentVariable("BUILD_SOURCEBRANCH");
 
@@ -130,9 +130,9 @@
         ///     master.
         ///     TFVC repo branch: The last path segment in the root server path for the workspace. For example in
         ///     $/teamproject/main this value is main.
-        ///     TFVC repo gated check-in or shelveset build is the name of the shelveset. For example,
+        ///     TFVC repo gated check-in or shelve set build is the name of the shelve set. For example,
         ///     Gated_2016-06-06_05.20.51.4369;username@live.com or myshelveset;username@live.com.
-        ///     Note: In TFVC, if you are running a gated check-in build or manually building a shelveset, you cannot use this
+        ///     Note: In TFVC, if you are running a gated check-in build or manually building a shelve set, you cannot use this
         ///     variable in your build number format.
         /// </summary>
         public static string SourceBranchName => global::System.Environment.GetEnvironmentVariable("BUILD_SOURCEBRANCHNAME");
@@ -147,7 +147,7 @@
         /// <summary>
         ///     The latest version control change that is included in this build.
         ///     Git: The commit ID.
-        ///     TFVC: the changeset.
+        ///     TFVC: the change set.
         /// </summary>
         public static string SourceVersion => global::System.Environment.GetEnvironmentVariable("BUILD_SOURCEVERSION");
 
@@ -170,7 +170,7 @@
 
         /// <summary>
         ///     Defined if your repository is Team Foundation Version Control.
-        ///     If you are running a gated build or a shelveset build, this is set to the name of the shelveset you are building.
+        ///     If you are running a gated build or a shelve set build, this is set to the name of the shelve set you are building.
         ///     Note: This variable yields a value that is invalid for build use in a build number format
         /// </summary>
         public static string SourceTfvcShelveSet => global::System.Environment.GetEnvironmentVariable("BUILD_SOURCETFVCSHELVESET");

@@ -1,4 +1,6 @@
-﻿namespace Backend.Fx.Tests.BuildingBlocks
+﻿using JetBrains.Annotations;
+
+namespace Backend.Fx.Tests.BuildingBlocks
 {
     using System;
     using System.Collections.Generic;
@@ -20,7 +22,7 @@
                 Children.Add(new TestEntity("Child 3", this));
             }
 
-            public string Name { get; private set; }
+            public string Name { get; [UsedImplicitly] private set; }
 
             public ISet<TestEntity> Children { get;  } = new HashSet<TestEntity>();
         }

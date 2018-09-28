@@ -179,7 +179,7 @@
         }
 
         /// <summary>
-        ///     Determines if the specified node is invalid on either side of a NEAR conjuction.
+        ///     Determines if the specified node is invalid on either side of a NEAR conjunction.
         /// </summary>
         /// <param name="node">Node to test</param>
         protected bool IsInvalidWithNear(INode node)
@@ -442,17 +442,14 @@
         /// </summary>
         private class TerminalNode : INode
         {
-            // Class members
-            public string Term { get; set; }
+            public string Term { private get; set; }
 
             public TermForms TermForm { get; set; }
 
-            // Interface members
             public bool Exclude { get; set; }
 
             public bool Grouped { get; set; }
 
-            // Convert node to string
             public override string ToString()
             {
                 var fmt = string.Empty;
@@ -479,25 +476,22 @@
         /// </summary>
         private class InternalNode : INode
         {
-            // Class members
             public INode Child1 { get; set; }
 
             public INode Child2 { get; set; }
 
             public ConjunctionTypes Conjunction { get; set; }
 
-            // Interface members
             public bool Exclude { get; set; }
 
             public bool Grouped { get; set; }
 
-            // Convert node to string
             public override string ToString()
             {
                 return string.Format(Grouped ? "({0} {1} {2})" : "{0} {1} {2}",
-                                     Child1.ToString(),
+                                     Child1,
                                      Conjunction.ToString().ToUpper(),
-                                     Child2.ToString());
+                                     Child2);
             }
         }
     }

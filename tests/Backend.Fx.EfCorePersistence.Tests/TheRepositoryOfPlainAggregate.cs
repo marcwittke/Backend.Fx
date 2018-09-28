@@ -4,7 +4,6 @@ using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
 namespace Backend.Fx.EfCorePersistence.Tests
 {
     using System;
-    using DummyImpl;
     using Environment.Authentication;
     using FakeItEasy;
     using Patterns.Authorization;

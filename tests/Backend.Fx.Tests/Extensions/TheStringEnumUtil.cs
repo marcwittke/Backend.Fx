@@ -1,4 +1,6 @@
-﻿namespace Backend.Fx.Tests.Extensions
+﻿using JetBrains.Annotations;
+
+namespace Backend.Fx.Tests.Extensions
 {
     using System;
     using Fx.Extensions;
@@ -7,7 +9,9 @@
     public enum AnEnum
     {
         One,
+        [UsedImplicitly]
         Two,
+        [UsedImplicitly]
         Three
     }
 

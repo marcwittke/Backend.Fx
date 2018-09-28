@@ -28,7 +28,7 @@
             public string SmtpHost
             {
                 get => ReadSetting<string>(nameof(SmtpHost));
-                set => WriteSetting<string>(nameof(SmtpHost), value);
+                set => WriteSetting(nameof(SmtpHost), value);
             }
         }
 

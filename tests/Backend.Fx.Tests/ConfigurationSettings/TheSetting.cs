@@ -1,4 +1,6 @@
-﻿namespace Backend.Fx.Tests.ConfigurationSettings
+﻿using JetBrains.Annotations;
+
+namespace Backend.Fx.Tests.ConfigurationSettings
 {
     using System;
     using Fx.BuildingBlocks;
@@ -8,6 +10,7 @@
 
     public class TheSetting
     {
+        [UsedImplicitly]
         public class TestSettingsService : SettingsService
         {
 

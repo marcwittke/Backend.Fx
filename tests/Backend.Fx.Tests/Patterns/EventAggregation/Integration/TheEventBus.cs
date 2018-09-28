@@ -1,4 +1,6 @@
-﻿namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
+﻿using JetBrains.Annotations;
+
+namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
 {
     using System;
     using System.Diagnostics;
@@ -33,6 +35,7 @@
         }
     }
 
+    [UsedImplicitly]
     public sealed class TheSerializingEventBus : TheEventBus
     {
         protected override IEventBus Create(IScopeManager scopeManager, IExceptionLogger exceptionLogger)

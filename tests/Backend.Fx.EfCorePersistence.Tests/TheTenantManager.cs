@@ -3,7 +3,6 @@
 namespace Backend.Fx.EfCorePersistence.Tests
 {
     using System.Globalization;
-    using DummyImpl;
     using Environment.MultiTenancy;
     using FakeItEasy;
     using Microsoft.EntityFrameworkCore;

@@ -118,7 +118,7 @@
         {
             if (ContainerId == null)
             {
-                throw new InvalidOperationException($"Container has not been created.");
+                throw new InvalidOperationException("Container has not been created.");
             }
 
             Logger.Info($"Killing container {ContainerId}");

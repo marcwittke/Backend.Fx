@@ -1,7 +1,10 @@
-﻿namespace Backend.Fx.Tests.Patterns.EventAggregation.Domain
+﻿using JetBrains.Annotations;
+
+namespace Backend.Fx.Tests.Patterns.EventAggregation.Domain
 {
     using Fx.Patterns.EventAggregation.Integration;
 
+    [UsedImplicitly]
     public class TestIntegrationEvent : IntegrationEvent
     {
         public int Whatever { get; }

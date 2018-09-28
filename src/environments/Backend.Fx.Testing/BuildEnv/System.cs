@@ -40,7 +40,7 @@
         public static string PullRequestNumber => global::System.Environment.GetEnvironmentVariable("SYSTEM_PULLREQUEST_PULLREQUESTNUMBER");
 
         /// <summary>
-        /// The branch that is being reviewed in a pull request. For example: refs/heads/users/raisa/new-feature. (This variable is initialized only if the build ran because of a Git PR affected by a branch policy.)
+        /// The branch that is being reviewed in a pull request. For example: refs/heads/users/me/new-feature. (This variable is initialized only if the build ran because of a Git PR affected by a branch policy.)
         /// </summary>
         public static string PullRequestSourceBranch => global::System.Environment.GetEnvironmentVariable("SYSTEM_PULLREQUEST_SOURCEBRANCH");
 

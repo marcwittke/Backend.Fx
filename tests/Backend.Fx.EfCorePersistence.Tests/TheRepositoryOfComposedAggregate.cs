@@ -7,7 +7,6 @@ namespace Backend.Fx.EfCorePersistence.Tests
     using System.Collections.Generic;
     using System.Linq;
     using BuildingBlocks;
-    using DummyImpl;
     using Environment.Authentication;
     using Environment.DateAndTime;
     using Environment.MultiTenancy;

@@ -8,6 +8,7 @@ using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.DateAndTime;
 using Backend.Fx.Patterns.EventAggregation.Domain;
 using Backend.Fx.Patterns.EventAggregation.Integration;
+using Backend.Fx.Patterns.IdGeneration;
 using Backend.Fx.Patterns.UnitOfWork;
 using Backend.Fx.SimpleInjectorDependencyInjection.Modules;
 using Backend.Fx.Testing.InMemoryPersistence;
@@ -56,12 +57,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl
             container.Register(A.Fake<IReadonlyUnitOfWork>);
             container.Register(A.Fake<ICanInterruptTransaction>);
 
-            container.RegisterInstance(new InMemoryEntityIdGenerator());
-        }
-
-        public Dictionary<Type, TAggregateRoot> GetStore<TAggregateRoot>() where TAggregateRoot : AggregateRoot
-        {
-            return (Dictionary<Type, TAggregateRoot>)Stores[typeof(TAggregateRoot)];
+            container.RegisterInstance<IEntityIdGenerator>(new InMemoryEntityIdGenerator());
         }
     }
 }

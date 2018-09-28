@@ -19,7 +19,7 @@
         public void CatchesExceptionInFunc()
         {
             var sut = UnprocessableException.UseBuilder();
-            sut.CatchPossibleException<int>(() => { throw new InvalidOperationException("hello"); });
+            sut.CatchPossibleException<int>(() => throw new InvalidOperationException("hello"));
             Assert.Throws<UnprocessableException>(() => sut.Dispose());
         }
 

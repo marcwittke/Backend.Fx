@@ -1,6 +1,7 @@
 ﻿using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Patterns.Authorization;
 using Backend.Fx.Patterns.DataGeneration;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl
 {
@@ -14,6 +15,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl
         public string Name { get; set; }
     }
 
+    [UsedImplicitly]
     public class ProductiveGenerator : InitialDataGenerator, IProductiveDataGenerator
     {
         private readonly IRepository<AnAggregate> _repository;
@@ -38,8 +40,10 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl
         }
     }
 
+    [UsedImplicitly]
     public class AnAggregateAuthorization : AllowAll<AnAggregate> { }
 
+    [UsedImplicitly]
     public class DemonstrationGenerator : InitialDataGenerator, IDemoDataGenerator
     {
         private readonly IRepository<AnAggregate> _repository;
