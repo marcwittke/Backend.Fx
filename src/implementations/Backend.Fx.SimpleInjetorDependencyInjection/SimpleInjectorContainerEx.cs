@@ -3,8 +3,6 @@ using System.Linq;
 using System.Reflection;
 using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Logging;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
 using SimpleInjector;
 
 namespace Backend.Fx.SimpleInjectorDependencyInjection
@@ -42,17 +40,5 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
                 container.Register(reg.Service, reg.Implementation);
             }
         }
-
-        public static void Configure<TOptions>(this Container container, Action<TOptions> configure) where TOptions : class
-        {
-            container.RegisterInstance<IConfigureOptions<TOptions>>(new ConfigureOptions<TOptions>(configure));
-        }
-
-        public static void Configure<TOptions>(this Container container, IConfiguration configuration) where TOptions : class
-        {
-            container.RegisterInstance<IOptionsChangeTokenSource<TOptions>>(new ConfigurationChangeTokenSource<TOptions>(Options.DefaultName, configuration));
-            container.RegisterInstance<IConfigureOptions<TOptions>>(new NamedConfigureFromConfigurationOptions<TOptions>(Options.DefaultName, configuration));
-        }
-
     }
 }
