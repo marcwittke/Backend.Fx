@@ -13,7 +13,6 @@ Environment | .Net Standard | NuGet
 Backend.Fx.AspNetCore | 2.0 | [![NuGet](https://img.shields.io/nuget/v/Backend.Fx.AspNetCore.svg)](https://www.nuget.org/packages/Backend.Fx.AspNetCore)
 Backend.Fx.AspNetCore.Mvc | 2.0 | [![NuGet](https://img.shields.io/nuget/v/Backend.Fx.AspNetCore.Mvc.svg)](https://www.nuget.org/packages/Backend.Fx.AspNetCore.Mvc)
 Backend.Fx.NetCore | 1.3 | [![NuGet](https://img.shields.io/nuget/v/Backend.Fx.NetCore.svg)](https://www.nuget.org/packages/Backend.Fx.NetCore)
-Backend.Fx.Xunit | 2.0 | [![NuGet](https://img.shields.io/nuget/v/Backend.Fx.Xunit.svg)](https://www.nuget.org/packages/Backend.Fx.Xunit)
  
 ## What does "opinionated" mean?
 You get vendor locked to a set of abstractions, like my DDD building blocks and some architecture [patterns](https://github.com/marcwittke/Backend.Fx/tree/master/src/abstractions/Backend.Fx/Patterns) defined as interfaces
@@ -23,6 +22,7 @@ You get vendor locked to a set of abstractions, like my DDD building blocks and 
 Vendor | Library | .NET Standard | NuGet
 --- | --- | --- | ---
 [Entity Framework Core 2.1](https://github.com/aspnet/EntityFramework) as persitence mechanism | Backend.Fx.EfCorePersistence | 2.0 | [![NuGet](https://img.shields.io/nuget/v/Backend.Fx.EfCorePersistence.svg)](https://www.nuget.org/packages/Backend.Fx.EfCorePersistence)
+InMemory Persistence implemntation  | Backend.Fx.InMemoryPersistence | 1.3 | [![NuGet](https://img.shields.io/nuget/v/Backend.Fx.InMemoryPersistence.svg)](https://www.nuget.org/packages/Backend.Fx.InMemoryPersistence)
 [NLog](https://github.com/NLog/NLog) logging | Backend.Fx.NLogLogging | 1.6 | [![NuGet](https://img.shields.io/nuget/v/Backend.Fx.NLogLogging.svg)](https://www.nuget.org/packages/Backend.Fx.NLogLogging)
 [RabbitMq](https://www.rabbitmq.com/) Event Bus | Backend.Fx.RabbitMq | 1.5 | [![NuGet](https://img.shields.io/nuget/v/Backend.Fx.RabbitMq.svg)](https://www.nuget.org/packages/Backend.Fx.RabbitMq)
-[Simple Injector](https://github.com/simpleinjector/SimpleInjector) as DI container: Backend.Fx.SimpleInjectorDependencyInjection | 1.3 | [![NuGet](https://img.shields.io/nuget/v/Backend.Fx.AspNetCore.svg)](https://www.nuget.org/packages/Backend.Fx.SimpleInjectorDependencyInjection)
+[Simple Injector](https://github.com/simpleinjector/SimpleInjector) as DI container | Backend.Fx.SimpleInjectorDependencyInjection | 1.3 | [![NuGet](https://img.shields.io/nuget/v/Backend.Fx.AspNetCore.svg)](https://www.nuget.org/packages/Backend.Fx.SimpleInjectorDependencyInjection)
