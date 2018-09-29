@@ -9,9 +9,7 @@ namespace Backend.Fx.Tests.Extensions
     public enum AnEnum
     {
         One,
-        [UsedImplicitly]
         Two,
-        [UsedImplicitly]
         Three
     }
 
@@ -27,11 +25,11 @@ namespace Backend.Fx.Tests.Extensions
         }
 
         [Fact]
-        public void ParsesCaseSensitive()
+        public void ParsesCaseInsensitive()
         {
             Assert.Equal(AnEnum.One, "One".Parse<AnEnum>());
-            Assert.Throws<ArgumentException>(() => "one".Parse<AnEnum>());
-            Assert.Throws<ArgumentException>(() => "ONE".Parse<AnEnum>());
+            Assert.Equal(AnEnum.Two, "two".Parse<AnEnum>());
+            Assert.Equal(AnEnum.Three, "THREE".Parse<AnEnum>());
         }
 
         [Fact]
