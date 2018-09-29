@@ -10,7 +10,7 @@
     /// https://en.wikipedia.org/wiki/Domain-driven_design#Building_blocks
     /// </summary>
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
-    public abstract class Entity : Identitfied
+    public abstract class Entity : Identified
     {
         protected Entity()
         { }

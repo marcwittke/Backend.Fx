@@ -3,13 +3,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Backend.Fx.BuildingBlocks
 {
-    public abstract class Identitfied : IEquatable<Identitfied>
+    public abstract class Identified : IEquatable<Identified>
     {
         [Key]
         public int Id { get; set; }
 
 
-        public bool Equals(Identitfied other)
+        public bool Equals(Identified other)
         {
             if (other == null || !(other.GetType() == GetType()))
                 return false;
@@ -18,7 +18,7 @@ namespace Backend.Fx.BuildingBlocks
 
         public override bool Equals(object obj)
         {
-            Identitfied other = obj as Identitfied;
+            Identified other = obj as Identified;
             if (other == null)
                 return false;
             return Equals(other);
@@ -37,12 +37,12 @@ namespace Backend.Fx.BuildingBlocks
             return base.GetHashCode();            
         }
 
-        public static bool operator ==(Identitfied x, Identitfied y)
+        public static bool operator ==(Identified x, Identified y)
         {
             return Equals(x, y);
         }
 
-        public static bool operator !=(Identitfied x, Identitfied y)
+        public static bool operator !=(Identified x, Identified y)
         {
             return !(x == y);
         }

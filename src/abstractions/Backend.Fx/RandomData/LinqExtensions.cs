@@ -106,10 +106,10 @@
                     return true;
                 }
                 
-                var idProperty = typeof(T).GetProperty(nameof(Entity.Id), BindingFlags.Instance | BindingFlags.Public);
+                var idProperty = typeof(T).GetProperty(nameof(Identified.Id), BindingFlags.Instance | BindingFlags.Public);
                 if (idProperty != null)
                 {
-                    sourceQueryable = sourceQueryable.OrderBy(nameof(Entity.Id));
+                    sourceQueryable = sourceQueryable.OrderBy(nameof(Identified.Id));
                 }
 
                 outQueryable = sourceQueryable;
