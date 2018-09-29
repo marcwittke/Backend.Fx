@@ -6,7 +6,7 @@ using Backend.Fx.Patterns.Authorization;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.RandomData;
 
-namespace Backend.Fx.Xunit.InMemoryPersistence
+namespace Backend.Fx.InMemoryPersistence
 {
     public class InMemoryRepository<T> : Repository<T> where T : AggregateRoot
     {

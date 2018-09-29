@@ -1,7 +1,7 @@
 ﻿using Backend.Fx.NLogLogging;
-using Backend.Fx.Xunit.AssemblyFixtures;
+using MarcWittke.Xunit.AssemblyFixture;
 
-[assembly: Xunit.TestFramework("Backend.Fx.Testing.AssemblyFixtures.XunitTestFrameworkWithAssemblyFixture", "Backend.Fx.Testing")]
+[assembly: Xunit.TestFramework("MarcWittke.Xunit.AssemblyFixture.XunitTestFrameworkWithAssemblyFixture", "MarcWittke.Xunit.AssemblyFixture")]
 [assembly: AssemblyFixture(typeof(Backend.Fx.EfCorePersistence.Tests.TestLoggingFixture))]
 
 namespace Backend.Fx.EfCorePersistence.Tests

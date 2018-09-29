@@ -1,4 +1,5 @@
-﻿using Backend.Fx.Xunit.InMemoryPersistence;
+﻿using Backend.Fx.Hacking;
+using Backend.Fx.InMemoryPersistence;
 using Xunit;
 
 namespace Backend.Fx.Tests.ConfigurationSettings

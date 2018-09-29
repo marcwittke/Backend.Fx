@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Backend.Fx.Xunit
+namespace Backend.Fx.Extensions
 {
     public class TolerantDateTimeOffsetComparer : IEqualityComparer<DateTimeOffset?>
     {

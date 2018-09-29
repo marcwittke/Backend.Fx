@@ -11,7 +11,7 @@ using Backend.Fx.Patterns.EventAggregation.Integration;
 using Backend.Fx.Patterns.IdGeneration;
 using Backend.Fx.Patterns.UnitOfWork;
 using Backend.Fx.SimpleInjectorDependencyInjection.Modules;
-using Backend.Fx.Xunit.InMemoryPersistence;
+using Backend.Fx.InMemoryPersistence;
 using FakeItEasy;
 using SimpleInjector;
 

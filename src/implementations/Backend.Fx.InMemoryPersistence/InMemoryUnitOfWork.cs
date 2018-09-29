@@ -6,7 +6,7 @@ using Backend.Fx.Patterns.EventAggregation.Domain;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using Backend.Fx.Patterns.UnitOfWork;
 
-namespace Backend.Fx.Xunit.InMemoryPersistence
+namespace Backend.Fx.InMemoryPersistence
 {
     public class InMemoryUnitOfWork : UnitOfWork
     {

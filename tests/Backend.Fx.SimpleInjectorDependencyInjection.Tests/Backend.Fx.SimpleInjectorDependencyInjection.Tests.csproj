@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="FakeItEasy" Version="4.7.1" />
+    <PackageReference Include="MarcWittke.Xunit.AssemblyFixture" Version="1.0.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
     <PackageReference Include="System.Security.Claims" Version="4.3.0" />
     <PackageReference Include="xunit" Version="2.4.0" />
@@ -14,7 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\abstractions\Backend.Fx\Backend.Fx.csproj" />
-    <ProjectReference Include="..\..\src\environments\Backend.Fx.Xunit\Backend.Fx.Xunit.csproj" />
+    <ProjectReference Include="..\..\src\implementations\Backend.Fx.InMemoryPersistence\Backend.Fx.InMemoryPersistence.csproj" />
     <ProjectReference Include="..\..\src\implementations\Backend.Fx.NLogLogging\Backend.Fx.NLogLogging.csproj" />
     <ProjectReference Include="..\..\src\implementations\Backend.Fx.SimpleInjetorDependencyInjection\Backend.Fx.SimpleInjectorDependencyInjection.csproj" />
   </ItemGroup>

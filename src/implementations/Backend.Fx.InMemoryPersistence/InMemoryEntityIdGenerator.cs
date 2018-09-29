@@ -1,6 +1,6 @@
 ﻿using Backend.Fx.Patterns.IdGeneration;
 
-namespace Backend.Fx.Xunit.InMemoryPersistence
+namespace Backend.Fx.InMemoryPersistence
 {
     public class InMemoryEntityIdGenerator : IEntityIdGenerator
     {

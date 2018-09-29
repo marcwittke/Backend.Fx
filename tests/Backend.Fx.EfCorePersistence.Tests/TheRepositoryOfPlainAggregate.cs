@@ -1,5 +1,6 @@
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
+using Backend.Fx.Extensions;
 using Xunit;
 
 namespace Backend.Fx.EfCorePersistence.Tests

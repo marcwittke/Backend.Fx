@@ -3,7 +3,7 @@ using System.Linq;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Extensions;
 
-namespace Backend.Fx.Xunit.InMemoryPersistence
+namespace Backend.Fx.InMemoryPersistence
 {
     public class InMemoryTenantManager : TenantManager
     {

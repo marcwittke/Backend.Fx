@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Backend.Fx.Xunit
+namespace Backend.Fx.Hacking
 {
     public static class PrivateSetterCaller
     {

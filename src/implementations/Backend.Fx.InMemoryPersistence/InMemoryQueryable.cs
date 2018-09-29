@@ -5,7 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using Backend.Fx.BuildingBlocks;
 
-namespace Backend.Fx.Xunit.InMemoryPersistence
+namespace Backend.Fx.InMemoryPersistence
 {
     public class InMemoryQueryable<TAggregateRoot> : IQueryable<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
