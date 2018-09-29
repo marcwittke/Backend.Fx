@@ -75,7 +75,7 @@
             Logger.Debug($"Deleting {AggregateTypeName}[{aggregateRoot.Id}]");
             if (aggregateRoot.TenantId != _tenantIdHolder.Current.Value || !_aggregateAuthorization.CanDelete(aggregateRoot))
             {
-                throw new System.Security.SecurityException($"You are not allowed to delete {typeof(TAggregateRoot).Name}[{aggregateRoot.Id}]");
+                throw new UnauthorizedException($"You are not allowed to delete {typeof(TAggregateRoot).Name}[{aggregateRoot.Id}]");
             }
 
             DeletePersistent(aggregateRoot);
@@ -96,7 +96,7 @@
             }
             else
             {
-                throw new System.Security.SecurityException($"You are not allowed to create records of type {typeof(TAggregateRoot).Name}");
+                throw new UnauthorizedException($"You are not allowed to create records of type {typeof(TAggregateRoot).Name}");
             }
         }
 
@@ -111,7 +111,7 @@
             {
                 if (!_aggregateAuthorization.CanCreate(agg))
                 {
-                    throw new System.Security.SecurityException($"You are not allowed to create records of type {typeof(TAggregateRoot).Name}");
+                    throw new UnauthorizedException($"You are not allowed to create records of type {typeof(TAggregateRoot).Name}");
                 }
             });
             

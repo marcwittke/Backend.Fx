@@ -1,4 +1,6 @@
-﻿namespace Backend.Fx.BuildingBlocks
+﻿using Backend.Fx.Extensions;
+
+namespace Backend.Fx.BuildingBlocks
 {
     using System;
     using System.ComponentModel.DataAnnotations;
@@ -43,7 +45,7 @@
             {
                 throw new ArgumentException(nameof(createdBy));
             }
-            CreatedBy = createdBy.Length > 100 ? createdBy.Substring(0, 99) + "…" : createdBy;
+            CreatedBy = createdBy.Cut(100);
             CreatedOn = createdOn;
         }
 
@@ -57,7 +59,7 @@
             {
                 throw new ArgumentException(nameof(changedBy));
             }
-            ChangedBy = changedBy.Length > 100 ? changedBy.Substring(0, 99) + "…" : changedBy;
+            ChangedBy = changedBy.Cut(100);
             ChangedOn = changedOn;
         }
     }
