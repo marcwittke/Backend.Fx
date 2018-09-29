@@ -2,6 +2,23 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+	<GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>  
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <Authors>Marc Wittke</Authors>
+    <Company>anic GmbH</Company>
+    <Copyright>All rights reserved. Distributed under the terms of the MIT License.</Copyright>
+    <Description>Integration of Backend.Fx abstraction and implementation into ASP.NET Core applications</Description>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+    <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/marcwittke/Backend.Fx</PackageProjectUrl>
+    <Product>Backend.Fx</Product>
+    <RepositoryType>Git</RepositoryType>
+    <RepositoryUrl>https://github.com/marcwittke/Backend.Fx.git</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
