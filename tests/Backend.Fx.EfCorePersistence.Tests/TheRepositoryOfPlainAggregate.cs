@@ -1,13 +1,16 @@
+using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
+using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
+using Backend.Fx.Extensions;
+using Xunit;
+
 namespace Backend.Fx.EfCorePersistence.Tests
 {
     using System;
-    using DummyImpl;
     using Environment.Authentication;
     using FakeItEasy;
     using Patterns.Authorization;
     using Patterns.EventAggregation.Domain;
     using Patterns.EventAggregation.Integration;
-    using Testing;
     using Xunit;
 
     public class TheRepositoryOfPlainAggregate : TestWithInMemorySqliteDbContext

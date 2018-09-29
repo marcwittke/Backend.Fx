@@ -1,8 +1,10 @@
 ﻿using System;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Backend.Fx.EfCorePersistence.Tests.Migrations
 {
+    [UsedImplicitly]
     public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)

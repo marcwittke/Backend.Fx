@@ -1,14 +1,14 @@
-﻿namespace Backend.Fx.Tests.BuildingBlocks
+﻿using Backend.Fx.InMemoryPersistence;
+using Xunit;
+
+namespace Backend.Fx.Tests.BuildingBlocks
 {
     using System;
     using System.Linq;
-    using System.Security;
     using FakeItEasy;
     using Fx.Environment.MultiTenancy;
     using Fx.Exceptions;
     using Fx.Patterns.Authorization;
-    using Testing.InMemoryPersistence;
-    using Xunit;
 
     public class TheRepository
     {
@@ -102,7 +102,7 @@
             // even when I don't have permissions
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => false);
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(false);
-            Assert.Throws<SecurityException>(() => sut.Add(new TheAggregateRoot.TestAggregateRoot(78, "whatever")));
+            Assert.Throws<UnauthorizedException>(() => sut.Add(new TheAggregateRoot.TestAggregateRoot(78, "whatever")));
         }
 
         [Fact]
@@ -135,7 +135,7 @@
             var agg1 = new TheAggregateRoot.TestAggregateRoot(12123123, "whatever") { TenantId = 234 };
             sut.Store.Add(agg1.Id, agg1);
 
-            Assert.Throws<SecurityException>(() => sut.Delete(agg1));
+            Assert.Throws<UnauthorizedException>(() => sut.Delete(agg1));
         }
 
         [Fact]
@@ -335,7 +335,7 @@
             sut.Store.Add(agg3.Id, agg3);
             sut.Store.Add(agg4.Id, agg4);
 
-            Assert.Throws<SecurityException>(() => sut.Delete(agg4));
+            Assert.Throws<UnauthorizedException>(() => sut.Delete(agg4));
         }
 
         [Fact]
@@ -347,7 +347,7 @@
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
             A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._)).ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(false);
-            Assert.Throws<SecurityException>(() => sut.Add(new TheAggregateRoot.TestAggregateRoot(44, "whatever")));
+            Assert.Throws<UnauthorizedException>(() => sut.Add(new TheAggregateRoot.TestAggregateRoot(44, "whatever")));
         }
 
         [Fact]

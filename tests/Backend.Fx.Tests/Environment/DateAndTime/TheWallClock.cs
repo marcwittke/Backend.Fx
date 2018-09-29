@@ -1,26 +1,28 @@
-﻿namespace Backend.Fx.Tests.Environment.DateAndTime
+﻿using Backend.Fx.Extensions;
+using Xunit;
+
+namespace Backend.Fx.Tests.Environment.DateAndTime
 {
     using System;
     using System.Collections.Generic;
     using System.Threading;
     using Fx.Environment.DateAndTime;
-    using Testing;
     using Xunit;
 
     public class TheWallClock
     {
-        private readonly IEqualityComparer<DateTime?> tolerantDateTimeComparer = new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(10));
+        private readonly IEqualityComparer<DateTime?> _tolerantDateTimeComparer = new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(10));
 
         [Fact]
         public void IsTheSystemClock()
         {
             IClock sut = new WallClock();
             
-            Assert.Equal(DateTime.UtcNow, sut.UtcNow, tolerantDateTimeComparer);
+            Assert.Equal(DateTime.UtcNow, sut.UtcNow, _tolerantDateTimeComparer);
 
             Thread.Sleep(100);
 
-            Assert.Equal(DateTime.UtcNow, sut.UtcNow, tolerantDateTimeComparer);
+            Assert.Equal(DateTime.UtcNow, sut.UtcNow, _tolerantDateTimeComparer);
         }
     }
 }

@@ -1,12 +1,14 @@
-﻿namespace Backend.Fx.EfCorePersistence.Tests
+﻿using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
+using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
+using Xunit;
+
+namespace Backend.Fx.EfCorePersistence.Tests
 {
-    using DummyImpl;
     using Environment.Authentication;
     using Environment.DateAndTime;
     using FakeItEasy;
     using Patterns.EventAggregation.Domain;
     using Patterns.EventAggregation.Integration;
-    using Xunit;
 
     public class TheEfUnitOfWork : TestWithInMemorySqliteDbContext
     {

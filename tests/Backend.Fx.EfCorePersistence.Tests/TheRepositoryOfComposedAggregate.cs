@@ -1,10 +1,14 @@
-﻿namespace Backend.Fx.EfCorePersistence.Tests
+﻿using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
+using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
+using Backend.Fx.Extensions;
+using Xunit;
+
+namespace Backend.Fx.EfCorePersistence.Tests
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using BuildingBlocks;
-    using DummyImpl;
     using Environment.Authentication;
     using Environment.DateAndTime;
     using Environment.MultiTenancy;
@@ -15,19 +19,18 @@
     using Patterns.EventAggregation.Domain;
     using Patterns.EventAggregation.Integration;
     using Patterns.IdGeneration;
-    using Testing;
     using Xunit;
 
     public class TheRepositoryOfComposedAggregate : TestWithInMemorySqliteDbContext
     {
-        private readonly IEqualityComparer<DateTime?> tolerantDateTimeComparer = new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(500));
-        private readonly IEntityIdGenerator idGenerator = A.Fake<IEntityIdGenerator>();
-        private int nextId = 1;
+        private readonly IEqualityComparer<DateTime?> _tolerantDateTimeComparer = new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(500));
+        private readonly IEntityIdGenerator _idGenerator = A.Fake<IEntityIdGenerator>();
+        private int _nextId = 1;
 
         public TheRepositoryOfComposedAggregate()
         {
             CreateDatabase();
-            A.CallTo(() => idGenerator.NextId()).ReturnsLazily(() => nextId++);
+            A.CallTo(() => _idGenerator.NextId()).ReturnsLazily(() => _nextId++);
         }
 
         [Fact]
@@ -43,7 +46,7 @@
             {
                 var repository = sut.Repository;
                 var blog = new Blog(123, "my blog");
-                blog.AddPost(idGenerator, "my post");
+                blog.AddPost(_idGenerator, "my post");
                 repository.Add(blog);
             }
 
@@ -147,7 +150,7 @@
             using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantIdHolder))
             {
                 var blog = sut.Repository.Single(id);
-                blog.Posts.Add(new Post(idGenerator.NextId(), blog, "added"));
+                blog.Posts.Add(new Post(_idGenerator.NextId(), blog, "added"));
             }
 
 
@@ -163,11 +166,11 @@
             {
                 var blog = sut.Repository.Single(id);
                 blog.Posts.Clear();
-                blog.Posts.Add(new Post(idGenerator.NextId(), blog, "new name 1"));
-                blog.Posts.Add(new Post(idGenerator.NextId(), blog, "new name 2"));
-                blog.Posts.Add(new Post(idGenerator.NextId(), blog, "new name 3"));
-                blog.Posts.Add(new Post(idGenerator.NextId(), blog, "new name 4"));
-                blog.Posts.Add(new Post(idGenerator.NextId(), blog, "new name 5"));
+                blog.Posts.Add(new Post(_idGenerator.NextId(), blog, "new name 1"));
+                blog.Posts.Add(new Post(_idGenerator.NextId(), blog, "new name 2"));
+                blog.Posts.Add(new Post(_idGenerator.NextId(), blog, "new name 3"));
+                blog.Posts.Add(new Post(_idGenerator.NextId(), blog, "new name 4"));
+                blog.Posts.Add(new Post(_idGenerator.NextId(), blog, "new name 5"));
             }
 
             long count = ExecuteScalar<long>("SELECT count(*) FROM Posts");
@@ -194,20 +197,20 @@
             {
                 var blog = sut.DbContext.Blogs.Find(id);
                 Assert.NotNull(blog.ChangedOn);
-                Assert.Equal(expectedModifiedOn, blog.ChangedOn.Value, tolerantDateTimeComparer);
+                Assert.Equal(expectedModifiedOn, blog.ChangedOn.Value, _tolerantDateTimeComparer);
             }
         }
 
         private int CreateBlogWithPost(int postCount = 1)
         {
-            long blogId = nextId++;
+            long blogId = _nextId++;
             ExecuteNonQuery($"INSERT INTO Blogs (Id, TenantId, Name, CreatedOn, CreatedBy) VALUES ({blogId}, {TenantIdHolder.Current.Value}, 'my blog', CURRENT_TIMESTAMP, 'persistence test')");
             long count = ExecuteScalar<long>("SELECT count(*) FROM Blogs");
             Assert.Equal(1, count);
             
             for (int i = 0; i < postCount; i++)
             {
-                ExecuteNonQuery($"INSERT INTO Posts (Id, BlogId, Name, CreatedOn, CreatedBy) VALUES ({nextId++}, {blogId}, 'my post {i:00}', CURRENT_TIMESTAMP, 'persistence test')");
+                ExecuteNonQuery($"INSERT INTO Posts (Id, BlogId, Name, CreatedOn, CreatedBy) VALUES ({_nextId++}, {blogId}, 'my post {i:00}', CURRENT_TIMESTAMP, 'persistence test')");
             }
 
             return (int)blogId;

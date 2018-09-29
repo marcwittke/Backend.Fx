@@ -1,7 +1,7 @@
-﻿namespace Backend.Fx.Tests.Patterns.UnitOfWork
-{
-    using Xunit;
+﻿using Xunit;
 
+namespace Backend.Fx.Tests.Patterns.UnitOfWork
+{
     public class TheReadonlyUnitOfWork
     {
         [Fact]

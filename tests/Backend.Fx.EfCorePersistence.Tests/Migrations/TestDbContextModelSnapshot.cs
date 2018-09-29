@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Backend.Fx.EfCorePersistence.Tests.DummyImpl;
+using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
 
 namespace Backend.Fx.EfCorePersistence.Tests.Migrations
 {

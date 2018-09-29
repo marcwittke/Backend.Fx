@@ -1,21 +1,22 @@
-﻿namespace Backend.Fx.Tests.Logging
+﻿using Xunit;
+
+namespace Backend.Fx.Tests.Logging
 {
     using System;
     using System.Security;
     using FakeItEasy;
     using Fx.Logging;
-    using Xunit;
 
     public class TheLogManager
     {
-        private readonly ILoggerFactory loggerFactory;
+        private readonly ILoggerFactory _loggerFactory;
 
         public TheLogManager()
         {
-            loggerFactory = A.Fake<ILoggerFactory>();
+            _loggerFactory = A.Fake<ILoggerFactory>();
             var logger = A.Fake<ILogger>();
 
-            A.CallTo(() => loggerFactory.Create(A<string>.Ignored)).Returns(logger);
+            A.CallTo(() => _loggerFactory.Create(A<string>.Ignored)).Returns(logger);
         }
 
         [Fact]
@@ -52,9 +53,9 @@
         [Fact]
         public void TakesTypeFullNameAsLoggerName()
         {
-            LogManager.Initialize(loggerFactory);
+            LogManager.Initialize(_loggerFactory);
             LogManager.Create<TheLogManager>();
-            A.CallTo(() => loggerFactory.Create(A<string>.That.Matches(s => s == "Backend.Fx.Tests.Logging.TheLogManager"))).MustHaveHappened(Repeated.Exactly.Once);
+            A.CallTo(() => _loggerFactory.Create(A<string>.That.Matches(s => s == "Backend.Fx.Tests.Logging.TheLogManager"))).MustHaveHappened(Repeated.Exactly.Once);
         }
     }
 }

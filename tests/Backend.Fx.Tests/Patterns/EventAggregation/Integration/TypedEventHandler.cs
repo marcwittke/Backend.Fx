@@ -4,16 +4,16 @@
 
     public class TypedEventHandler : IIntegrationEventHandler<TestIntegrationEvent>
     {
-        private readonly IIntegrationEventHandler<TestIntegrationEvent> integrationEventHandlerImplementation;
+        private readonly IIntegrationEventHandler<TestIntegrationEvent> _integrationEventHandlerImplementation;
 
         public TypedEventHandler(IIntegrationEventHandler<TestIntegrationEvent> integrationEventHandlerImplementation)
         {
-            this.integrationEventHandlerImplementation = integrationEventHandlerImplementation;
+            _integrationEventHandlerImplementation = integrationEventHandlerImplementation;
         }
 
         public void Handle(TestIntegrationEvent eventData)
         {
-            integrationEventHandlerImplementation.Handle(eventData);
+            _integrationEventHandlerImplementation.Handle(eventData);
             eventData.Processed.Set();
         }
     }

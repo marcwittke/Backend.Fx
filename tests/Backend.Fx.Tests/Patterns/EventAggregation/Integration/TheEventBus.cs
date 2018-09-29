@@ -1,4 +1,7 @@
-﻿namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
+﻿using JetBrains.Annotations;
+using Xunit;
+
+namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
 {
     using System;
     using System.Diagnostics;
@@ -9,7 +12,6 @@
     using Fx.Logging;
     using Fx.Patterns.DependencyInjection;
     using Fx.Patterns.EventAggregation.Integration;
-    using Xunit;
 
     public sealed class TheInMemoryEventBus : TheEventBus
     {
@@ -33,6 +35,7 @@
         }
     }
 
+    [UsedImplicitly]
     public sealed class TheSerializingEventBus : TheEventBus
     {
         protected override IEventBus Create(IScopeManager scopeManager, IExceptionLogger exceptionLogger)
@@ -43,13 +46,13 @@
 
     public abstract class TheEventBus
     {
-        private readonly EventBusFakeInjection inj = new EventBusFakeInjection();
+        private readonly EventBusFakeInjection _inj = new EventBusFakeInjection();
         public IEventBus Sut { get; }
 
         protected TheEventBus()
         {
             // ReSharper disable once VirtualMemberCallInConstructor
-            Sut = Create(inj.ScopeManager, inj.ExceptionLogger);
+            Sut = Create(_inj.ScopeManager, _inj.ExceptionLogger);
         }
 
         protected abstract IEventBus Create(IScopeManager scopeManager, IExceptionLogger exceptionLogger);
@@ -61,12 +64,12 @@
             var integrationEvent = new TestIntegrationEvent(34, "gaga");
             await Sut.Publish(integrationEvent);
             integrationEvent.Processed.Wait(1500);
-            A.CallTo(() => inj.TypedHandler.Handle(A<TestIntegrationEvent>
+            A.CallTo(() => _inj.TypedHandler.Handle(A<TestIntegrationEvent>
                                                    .That
                                                    .Matches(evt => evt.IntParam == 34 && evt.StringParam == "gaga")))
              .MustHaveHappenedOnceExactly();
 
-            A.CallTo(() => inj.DynamicHandler.Handle(A<object>._)).MustNotHaveHappened();
+            A.CallTo(() => _inj.DynamicHandler.Handle(A<object>._)).MustNotHaveHappened();
         }
 
         [Fact]
@@ -77,7 +80,7 @@
             await Sut.Publish(integrationEvent);
             integrationEvent.Processed.Wait(1500);
 
-            A.CallTo(() => inj.ExceptionLogger.LogException(A<InvalidOperationException>
+            A.CallTo(() => _inj.ExceptionLogger.LogException(A<InvalidOperationException>
                                                             .That
                                                             .Matches(ex => ex.Message == ThrowingTypedEventHandler.ExceptionMessage)))
              .MustHaveHappenedOnceExactly();
@@ -91,8 +94,8 @@
             await Sut.Publish(integrationEvent);
             integrationEvent.Processed.Wait(1500);
 
-            A.CallTo(() => inj.TypedHandler.Handle(A<TestIntegrationEvent>._)).MustNotHaveHappened();
-            A.CallTo(() => inj.DynamicHandler.Handle(A<object>._)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _inj.TypedHandler.Handle(A<TestIntegrationEvent>._)).MustNotHaveHappened();
+            A.CallTo(() => _inj.DynamicHandler.Handle(A<object>._)).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
@@ -103,7 +106,7 @@
             await Sut.Publish(integrationEvent);
             integrationEvent.Processed.Wait(1500);
 
-            A.CallTo(() => inj.ExceptionLogger.LogException(A<InvalidOperationException>
+            A.CallTo(() => _inj.ExceptionLogger.LogException(A<InvalidOperationException>
                                                         .That
                                                         .Matches(ex => ex.Message == ThrowingDynamicEventHandler.ExceptionMessage)))
              .MustHaveHappenedOnceExactly();
@@ -118,12 +121,12 @@
             await Sut.Publish(integrationEvent);
             integrationEvent.Processed.Wait(1500);
 
-            A.CallTo(() => inj.TypedHandler.Handle(A<TestIntegrationEvent>
+            A.CallTo(() => _inj.TypedHandler.Handle(A<TestIntegrationEvent>
                                                    .That
                                                    .Matches(evt => evt.IntParam == 34 && evt.StringParam == "gaga")))
              .MustHaveHappenedOnceExactly();
 
-            A.CallTo(() => inj.DynamicHandler.Handle(A<object>._)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _inj.DynamicHandler.Handle(A<object>._)).MustHaveHappenedOnceExactly();
         }
 
         private class EventBusFakeInjection

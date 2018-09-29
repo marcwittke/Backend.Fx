@@ -1,7 +1,8 @@
-﻿namespace Backend.Fx.Tests.Patterns.DataGeneration
+﻿using Xunit;
+
+namespace Backend.Fx.Tests.Patterns.DataGeneration
 {
     using Fx.Patterns.DataGeneration;
-    using Xunit;
 
     public class AnInitialDataGenerator : InitialDataGenerator
     {
@@ -11,7 +12,7 @@
         public int ShouldRunCalled { get; private set; }
         public int InitializeCalled { get; private set; }
 
-        public override int Priority { get { return 12; } }
+        public override int Priority => 12;
 
         protected override void GenerateCore()
         {
@@ -32,25 +33,25 @@
 
     public class TheInitialDataGenerator
     {
-        private readonly AnInitialDataGenerator sut = new AnInitialDataGenerator();
+        private readonly AnInitialDataGenerator _sut = new AnInitialDataGenerator();
 
         [Fact]
         public void RespectsNegativeShouldRunMethodResult()
         {
-            sut.Generate();
-            Assert.Equal(1, sut.ShouldRunCalled);
-            Assert.Equal(0, sut.GenerateCoreCalled);
-            Assert.Equal(0, sut.InitializeCalled);
+            _sut.Generate();
+            Assert.Equal(1, _sut.ShouldRunCalled);
+            Assert.Equal(0, _sut.GenerateCoreCalled);
+            Assert.Equal(0, _sut.InitializeCalled);
         }
 
         [Fact]
         public void RespectsPositiveShouldRunMethodResult()
         {
-            sut.ShouldRunOverride = true;
-            sut.Generate();
-            Assert.Equal(1, sut.ShouldRunCalled);
-            Assert.Equal(1, sut.GenerateCoreCalled);
-            Assert.Equal(1, sut.InitializeCalled);
+            _sut.ShouldRunOverride = true;
+            _sut.Generate();
+            Assert.Equal(1, _sut.ShouldRunCalled);
+            Assert.Equal(1, _sut.GenerateCoreCalled);
+            Assert.Equal(1, _sut.InitializeCalled);
         }
     }
 }

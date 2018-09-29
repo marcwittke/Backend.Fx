@@ -1,9 +1,10 @@
-﻿namespace Backend.Fx.Tests.Extensions
+﻿using Xunit;
+
+namespace Backend.Fx.Tests.Extensions
 {
     using System.Collections.Generic;
     using System.Linq;
     using Fx.Extensions;
-    using Xunit;
 
     public class TheEnumerableEx
     {

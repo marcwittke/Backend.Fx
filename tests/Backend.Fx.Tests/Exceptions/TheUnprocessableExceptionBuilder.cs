@@ -1,9 +1,10 @@
-﻿namespace Backend.Fx.Tests.Exceptions
+﻿using Xunit;
+
+namespace Backend.Fx.Tests.Exceptions
 {
     using System;
     using BuildingBlocks;
     using Fx.Exceptions;
-    using Xunit;
 
     public class TheUnprocessableExceptionBuilder
     {
@@ -19,7 +20,7 @@
         public void CatchesExceptionInFunc()
         {
             var sut = UnprocessableException.UseBuilder();
-            sut.CatchPossibleException<int>(() => { throw new InvalidOperationException("hello"); });
+            sut.CatchPossibleException<int>(() => throw new InvalidOperationException("hello"));
             Assert.Throws<UnprocessableException>(() => sut.Dispose());
         }
 

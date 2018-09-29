@@ -1,13 +1,16 @@
-﻿namespace Backend.Fx.Tests.ConfigurationSettings
+﻿using JetBrains.Annotations;
+using Xunit;
+
+namespace Backend.Fx.Tests.ConfigurationSettings
 {
     using System;
     using Fx.BuildingBlocks;
     using Fx.ConfigurationSettings;
     using Fx.Patterns.IdGeneration;
-    using Xunit;
 
     public class TheSetting
     {
+        [UsedImplicitly]
         public class TestSettingsService : SettingsService
         {
 

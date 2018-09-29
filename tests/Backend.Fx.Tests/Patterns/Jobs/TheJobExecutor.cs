@@ -1,9 +1,10 @@
-﻿namespace Backend.Fx.Tests.Patterns.Jobs
+﻿using Xunit;
+
+namespace Backend.Fx.Tests.Patterns.Jobs
 {
     using System.Threading.Tasks;
     using Fx.Patterns.Jobs;
     using JetBrains.Annotations;
-    using Xunit;
 
     public class TheJobExecutor
     {
@@ -17,26 +18,26 @@
             }
         }
 
-        private readonly MyJob myJob = new MyJob();
-        private readonly JobExecutor<MyJob> sut;
+        private readonly MyJob _myJob = new MyJob();
+        private readonly JobExecutor<MyJob> _sut;
 
         public TheJobExecutor()
         {
-            sut = new JobExecutor<MyJob>(myJob);
+            _sut = new JobExecutor<MyJob>(_myJob);
         }
 
         [Fact]
         public void RunsTheJob()
         {
-            sut.ExecuteJob();
-            Assert.Equal(1, myJob.ExecutionCount);
+            _sut.ExecuteJob();
+            Assert.Equal(1, _myJob.ExecutionCount);
         }
 
         [Fact]
         public async Task RunsTheJobAsynchronously()
         {
-            await sut.ExecuteJobAsync();
-            Assert.Equal(1, myJob.ExecutionCount);
+            await _sut.ExecuteJobAsync();
+            Assert.Equal(1, _myJob.ExecutionCount);
         }
     }
 }

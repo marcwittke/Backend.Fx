@@ -1,9 +1,10 @@
-﻿namespace Backend.Fx.Tests.Environment.MultiTenancy
+﻿using Xunit;
+
+namespace Backend.Fx.Tests.Environment.MultiTenancy
 {
     using System;
     using System.Globalization;
     using Fx.Environment.MultiTenancy;
-    using Xunit;
 
     public class TheTenant
     {
@@ -20,6 +21,7 @@
         public void CannotBeInitializedWithoutName()
         {
             Assert.Throws<ArgumentException>(() => new Tenant("", "", false, CultureInfo.CurrentCulture));
+            // ReSharper disable once AssignNullToNotNullAttribute - testing null case exception
             Assert.Throws<ArgumentException>(() => new Tenant(null, "", false, CultureInfo.CurrentCulture));
             Assert.Throws<ArgumentException>(() => new Tenant("   ", "", false, CultureInfo.CurrentCulture));
         }

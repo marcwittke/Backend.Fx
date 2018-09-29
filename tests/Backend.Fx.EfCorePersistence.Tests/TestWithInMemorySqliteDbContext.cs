@@ -1,9 +1,11 @@
+using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
+using JetBrains.Annotations;
+
 namespace Backend.Fx.EfCorePersistence.Tests
 {
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using DummyImpl;
     using Environment.DateAndTime;
     using Environment.MultiTenancy;
     using Microsoft.Data.Sqlite;
@@ -51,6 +53,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
             }
         }
 
+        [UsedImplicitly]
         protected IEnumerable<T> ExecuteScalar<T>(string cmd, Func<IDataReader, T> forEachResultFunc)
         {
             using (var command = Connection.CreateCommand())

@@ -1,19 +1,20 @@
-﻿namespace Backend.Fx.Tests.Patterns.IdGeneration
+﻿using Xunit;
+
+namespace Backend.Fx.Tests.Patterns.IdGeneration
 {
     using System.Linq;
     using Fx.Patterns.IdGeneration;
-    using Xunit;
 
     public class TheHiLoIdGenerator
     {
-        private readonly HiLoIdGenerator sut = new InMemoryHiLoIdGenerator(1, 100);
+        private readonly HiLoIdGenerator _sut = new InMemoryHiLoIdGenerator(1, 100);
 
         [Fact]
         public void StartsWithInitialValueAndCountsUp()
         {
             for (int i = 1; i < 1000; i++)
             {
-                Assert.Equal(i, sut.NextId());
+                Assert.Equal(i, _sut.NextId());
             }
         }
 
@@ -29,12 +30,12 @@
                 idConsuments[i] = new IdConsument();
             }
             
-            idConsuments.AsParallel().ForAll(idConsument=> { idConsument.GetIds(idCountPerConsument, sut); });
+            idConsuments.AsParallel().ForAll(idConsument=> { idConsument.GetIds(idCountPerConsument, _sut); });
 
             int[] allIds = idConsuments.SelectMany(idConsument => idConsument.Ids).ToArray();
             Assert.Equal(consumentCount*idCountPerConsument, allIds.Length);
             Assert.Equal(consumentCount*idCountPerConsument, allIds.Distinct().Count());
-            Assert.Equal(consumentCount * idCountPerConsument + 1,sut.NextId());
+            Assert.Equal(consumentCount * idCountPerConsument + 1,_sut.NextId());
         }
 
         private class IdConsument
@@ -54,22 +55,22 @@
 
     public class InMemoryHiLoIdGenerator : HiLoIdGenerator
     {
-        private readonly object synclock = new object();
-        private int nextBlockStart;
+        private readonly object _synclock = new object();
+        private int _nextBlockStart;
 
         public InMemoryHiLoIdGenerator(int start, int increment)
         {
-            nextBlockStart = start;
+            _nextBlockStart = start;
             Increment = increment;
         }
 
         protected override int GetNextBlockStart()
         {
-            lock (synclock)
+            lock (_synclock)
             {
                 // this simulates the behavior of a SQL sequence for example
-                int result = nextBlockStart;
-                nextBlockStart += Increment;
+                int result = _nextBlockStart;
+                _nextBlockStart += Increment;
                 return result;
             }
         }
