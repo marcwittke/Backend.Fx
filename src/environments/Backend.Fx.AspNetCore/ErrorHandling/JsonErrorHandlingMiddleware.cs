@@ -52,6 +52,10 @@
                 {
                     await _next.Invoke(context);
                 }
+                catch (TooManyRequestsException tmrex)
+                {
+                    await HandleClientError(context, 429, "TooManyRequests", tmrex);
+                }
                 catch (UnprocessableException uex)
                 {
                     await HandleClientError(context, 422, "Unprocessable", uex);
