@@ -1,4 +1,6 @@
-﻿namespace Backend.Fx.AspNetCore.ErrorHandling
+﻿using System.Globalization;
+
+namespace Backend.Fx.AspNetCore.ErrorHandling
 {
     using System;
     using System.Collections.Generic;
@@ -52,6 +54,15 @@
                 {
                     await _next.Invoke(context);
                 }
+                catch (TooManyRequestsException tmrex)
+                {
+                    if (tmrex.RetryAfter > 0)
+                    {
+                        context.Response.Headers.Add("Retry-After", tmrex.RetryAfter.ToString(CultureInfo.InvariantCulture));
+                    }
+
+                    await HandleClientError(context, 429, "TooManyRequests", tmrex);
+                }
                 catch (UnprocessableException uex)
                 {
                     await HandleClientError(context, 422, "Unprocessable", uex);
@@ -63,6 +74,10 @@
                 catch (ConflictedException confex)
                 {
                     await HandleClientError(context, (int)HttpStatusCode.Conflict, HttpStatusCode.Conflict.ToString(), confex);
+                }
+                catch (ForbiddenException uex)
+                {
+                    await HandleClientError(context, (int)HttpStatusCode.Forbidden, HttpStatusCode.Forbidden.ToString(), uex);
                 }
                 catch (UnauthorizedException uex)
                 {

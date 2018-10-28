@@ -102,7 +102,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
             // even when I don't have permissions
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => false);
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(false);
-            Assert.Throws<UnauthorizedException>(() => sut.Add(new TheAggregateRoot.TestAggregateRoot(78, "whatever")));
+            Assert.Throws<ForbiddenException>(() => sut.Add(new TheAggregateRoot.TestAggregateRoot(78, "whatever")));
         }
 
         [Fact]
@@ -135,7 +135,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
             var agg1 = new TheAggregateRoot.TestAggregateRoot(12123123, "whatever") { TenantId = 234 };
             sut.Store.Add(agg1.Id, agg1);
 
-            Assert.Throws<UnauthorizedException>(() => sut.Delete(agg1));
+            Assert.Throws<ForbiddenException>(() => sut.Delete(agg1));
         }
 
         [Fact]
@@ -335,7 +335,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
             sut.Store.Add(agg3.Id, agg3);
             sut.Store.Add(agg4.Id, agg4);
 
-            Assert.Throws<UnauthorizedException>(() => sut.Delete(agg4));
+            Assert.Throws<ForbiddenException>(() => sut.Delete(agg4));
         }
 
         [Fact]
@@ -347,7 +347,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
             A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._)).ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(false);
-            Assert.Throws<UnauthorizedException>(() => sut.Add(new TheAggregateRoot.TestAggregateRoot(44, "whatever")));
+            Assert.Throws<ForbiddenException>(() => sut.Add(new TheAggregateRoot.TestAggregateRoot(44, "whatever")));
         }
 
         [Fact]

@@ -21,7 +21,7 @@
         {
             if (exception is ClientException cex)
             {
-                _logger.Warn(cex, cex.Message + Environment.NewLine + cex.Errors);
+                _logger.Warn(cex);
             }
             else
             {
