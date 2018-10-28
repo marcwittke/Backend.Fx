@@ -1,4 +1,6 @@
-﻿namespace Backend.Fx.AspNetCore.ErrorHandling
+﻿using System.Globalization;
+
+namespace Backend.Fx.AspNetCore.ErrorHandling
 {
     using System;
     using System.Collections.Generic;
@@ -54,6 +56,11 @@
                 }
                 catch (TooManyRequestsException tmrex)
                 {
+                    if (tmrex.RetryAfter > 0)
+                    {
+                        context.Response.Headers.Add("Retry-After", tmrex.RetryAfter.ToString(CultureInfo.InvariantCulture));
+                    }
+
                     await HandleClientError(context, 429, "TooManyRequests", tmrex);
                 }
                 catch (UnprocessableException uex)
