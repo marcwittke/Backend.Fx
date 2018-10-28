@@ -5,7 +5,7 @@
     public class ConflictedException : ClientException
     {
         public ConflictedException()
-                : base("Conflicted.")
+                : base("Conflicted")
         { }
 
         public ConflictedException(params Error[] errors)

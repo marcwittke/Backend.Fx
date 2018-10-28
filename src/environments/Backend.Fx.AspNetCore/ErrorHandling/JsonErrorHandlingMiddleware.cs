@@ -68,6 +68,10 @@
                 {
                     await HandleClientError(context, (int)HttpStatusCode.Conflict, HttpStatusCode.Conflict.ToString(), confex);
                 }
+                catch (ForbiddenException uex)
+                {
+                    await HandleClientError(context, (int)HttpStatusCode.Forbidden, HttpStatusCode.Forbidden.ToString(), uex);
+                }
                 catch (UnauthorizedException uex)
                 {
                     await HandleClientError(context, (int)HttpStatusCode.Unauthorized, HttpStatusCode.Unauthorized.ToString(), uex);
