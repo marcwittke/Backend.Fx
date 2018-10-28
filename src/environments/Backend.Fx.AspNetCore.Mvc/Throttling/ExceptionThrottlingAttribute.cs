@@ -32,7 +32,7 @@ namespace Backend.Fx.AspNetCore.Mvc.Throttling
 
         protected override int CalculateRepeatedTimeoutFactor(int repetition)
         {
-            return repetition ^ 2;
+            return repetition * repetition;
         }
     }
 }
