@@ -5,6 +5,7 @@
     using Backend.Fx.NetCore.Logging;
     using Microsoft.AspNetCore;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
 
@@ -64,6 +65,7 @@
                             builder.ClearProviders();
                             builder.AddProvider(new BackendFxLoggerProvider());
                             builder.AddDebug();
+                            builder.SetMinimumLevel(LogLevel.Debug);
                         })
                         .UseStartup<TStartup>();
 
