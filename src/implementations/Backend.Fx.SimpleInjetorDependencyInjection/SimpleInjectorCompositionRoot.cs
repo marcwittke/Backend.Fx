@@ -48,7 +48,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             }
             catch (Exception ex)
             {
-                Logger.Fatal(ex, "container configuration invalid");
+                Logger.Warn(ex, "container configuration invalid");
                 throw;
             }
         }
