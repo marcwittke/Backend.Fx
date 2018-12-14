@@ -21,8 +21,7 @@
         #region fatal
         public Exception Fatal(Exception exception)
         {
-            var exceptionMessages = GetExceptionMessages(exception);
-            _nlogLogger.Fatal(exception, CultureInfo.InvariantCulture, exceptionMessages);
+            _nlogLogger.Fatal(exception, CultureInfo.InvariantCulture, exception.Message);
             return exception;
         }
 
@@ -41,8 +40,7 @@
         #region error
         public Exception Error(Exception exception)
         {
-            var exceptionMessages = GetExceptionMessages(exception);
-            _nlogLogger.Error(exception, CultureInfo.InvariantCulture, exceptionMessages);
+            _nlogLogger.Error(exception, CultureInfo.InvariantCulture, exception.Message);
             return exception;
         }
 
@@ -61,8 +59,7 @@
         #region warn
         public Exception Warn(Exception exception)
         {
-            var exceptionMessages = GetExceptionMessages(exception);
-            _nlogLogger.Warn(exception, CultureInfo.InvariantCulture, exceptionMessages);
+            _nlogLogger.Warn(exception, CultureInfo.InvariantCulture, exception.Message);
             return exception;
         }
 
@@ -81,8 +78,7 @@
         #region info
         public Exception Info(Exception exception)
         {
-            var exceptionMessages = GetExceptionMessages(exception);
-            _nlogLogger.Info(exception, CultureInfo.InvariantCulture, exceptionMessages);
+            _nlogLogger.Info(exception, CultureInfo.InvariantCulture, exception.Message);
             return exception;
         }
 
@@ -116,7 +112,7 @@
 
         public Exception Debug(Exception exception)
         {
-            _nlogLogger.Warn(exception, CultureInfo.InvariantCulture, GetExceptionMessages(exception));
+            _nlogLogger.Warn(exception, CultureInfo.InvariantCulture, exception.Message);
             return exception;
         }
 
@@ -151,7 +147,7 @@
 
         public Exception Trace(Exception exception)
         {
-            _nlogLogger.Trace(exception, CultureInfo.InvariantCulture, GetExceptionMessages(exception));
+            _nlogLogger.Trace(exception, CultureInfo.InvariantCulture, exception.Message);
             return exception;
         }
 
@@ -184,18 +180,5 @@
             return exception;
         }
         #endregion
-
-        private string GetExceptionMessages(Exception ex)
-        {
-            var message = ex.Message;
-            while (ex.InnerException != null)
-            {
-                ex = ex.InnerException;
-                message += Environment.NewLine;
-                message += "\t" + ex.Message;
-            }
-
-            return message;
-        }
     }
 }

@@ -55,7 +55,8 @@ namespace Backend.Fx.AspNetCore.ErrorHandling
                 : new Errors().Add($"HTTP{httpStatusCode}: {message}");
 
             context.Response.StatusCode = httpStatusCode;
-            string responseContent = JsonConvert.SerializeObject(new { errors }, _jsonSerializerSettings);
+            var errorsDictionaryForJson = errors.ToDictionary(kvp => kvp.Key == "" ? "_error" : kvp.Key, kvp => kvp.Value);
+            string responseContent = JsonConvert.SerializeObject(new { errorsDictionaryForJson }, _jsonSerializerSettings);
             context.Response.ContentType = "application/json; charset=utf-8";
             await context.Response.WriteAsync(responseContent);
         }
