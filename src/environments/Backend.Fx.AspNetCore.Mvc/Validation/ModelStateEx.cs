@@ -20,8 +20,7 @@ namespace Backend.Fx.AspNetCore.Mvc.Validation
             Errors errors = new Errors();
             foreach (var keyValuePair in modelState)
             {
-                errors.Add(keyValuePair.Key, keyValuePair.Value.Errors.Select(
-                                   err => new Error(keyValuePair.Value.ValidationState, err.ErrorMessage)));
+                errors.Add(keyValuePair.Key, keyValuePair.Value.Errors.Select(err => err.ErrorMessage));
             }
 
             return errors;
@@ -32,13 +31,9 @@ namespace Backend.Fx.AspNetCore.Mvc.Validation
         {
             foreach (var keyValuePair in errors)
             {
-                foreach (var error in keyValuePair.Value)
+                foreach (var errorMessage in keyValuePair.Value)
                 {
-                    modelState.AddModelError(
-                            keyValuePair.Key == Errors.GenericErrorKey 
-                                    ? string.Empty 
-                                    : keyValuePair.Key,
-                            error.Message);
+                    modelState.AddModelError(keyValuePair.Key, errorMessage);
                 }
             }
         }

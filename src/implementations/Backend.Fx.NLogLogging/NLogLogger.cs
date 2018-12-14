@@ -187,7 +187,7 @@
 
         private string GetExceptionMessages(Exception ex)
         {
-            var message = "";
+            var message = ex.Message;
             while (ex.InnerException != null)
             {
                 ex = ex.InnerException;

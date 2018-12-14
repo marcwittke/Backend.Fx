@@ -2,8 +2,8 @@
 {
     public class NotFoundException<TEntity> : NotFoundException
     {
-        public NotFoundException(object id, params Error[] errors) 
-                : base(typeof(TEntity).Name, id, errors)
+        public NotFoundException(object id) 
+                : base(typeof(TEntity).Name, id)
         {}
     }
 
@@ -16,13 +16,9 @@
         public NotFoundException()
                 : base("Not found.") 
         {}
-
-        public NotFoundException(params Error[] errors) 
-                : base("Not found.", errors) 
-        {}
-
-        public NotFoundException(string entityName, object id, params Error[] errors)
-                : base($"No {entityName}[{id}] found.", errors)
+        
+        public NotFoundException(string entityName, object id)
+                : base($"No {entityName}[{id}] found.")
         {
             EntityName = entityName;
             Id = id;

@@ -79,7 +79,7 @@
 
         protected abstract Task<bool> ShouldHandle(HttpContext context);
 
-        protected abstract Task HandleClientError(HttpContext context, int httpStatusCode, string code, ClientException exception);
+        protected abstract Task HandleClientError(HttpContext context, int httpStatusCode, string message, ClientException exception);
 
         protected abstract Task HandleServerError(HttpContext context, Exception exception);
     }

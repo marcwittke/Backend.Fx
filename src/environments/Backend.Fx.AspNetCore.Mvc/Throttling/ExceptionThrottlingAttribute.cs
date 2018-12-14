@@ -23,7 +23,7 @@ namespace Backend.Fx.AspNetCore.Mvc.Throttling
             {
                 var retryAfter = Math.Max(1, CalculateRepeatedTimeoutFactor(repetition)) * Seconds;
                 cache.Set(key, ++repetition, TimeSpan.FromSeconds(retryAfter));
-                throw new TooManyRequestsException(retryAfter,"Request canceled due to throttling", new Error("Throttled", string.Format(Message, retryAfter)));
+                throw new TooManyRequestsException(retryAfter).AddError(string.Format(Message, retryAfter));
             }
 
             cache.Set(key, 1, TimeSpan.FromSeconds(Seconds));

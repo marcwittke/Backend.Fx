@@ -40,7 +40,7 @@ namespace Backend.Fx.AspNetCore.ErrorHandling
             return Task.FromResult(accept?.Any(mth => mth.Type == "application" && mth.SubType == "json") == true);
         }
 
-        protected override async Task HandleClientError(HttpContext context, int httpStatusCode, string code, ClientException exception)
+        protected override async Task HandleClientError(HttpContext context, int httpStatusCode, string message, ClientException exception)
         {
             if (context.Response.HasStarted)
             {
@@ -51,8 +51,8 @@ namespace Backend.Fx.AspNetCore.ErrorHandling
             // convention: only the errors array will be transmitted to the client, allowing technical (possibly
             // revealing) information in the exception message.
             Errors errors = exception.HasErrors()
-                                    ? exception.Errors
-                                    : new Errors { new Error($"HTTP{httpStatusCode}", code) };
+                ? exception.Errors
+                : new Errors().Add($"HTTP{httpStatusCode}: {message}");
 
             context.Response.StatusCode = httpStatusCode;
             string responseContent = JsonConvert.SerializeObject(new { errors }, _jsonSerializerSettings);
