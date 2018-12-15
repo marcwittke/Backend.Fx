@@ -25,14 +25,6 @@
             return Errors.Any();
         }
 
-        public override string Message
-        {
-            get
-            {
-                return string.Join(Environment.NewLine, new[] { base.Message, Errors.ToString() }.Where(s => !string.IsNullOrWhiteSpace(s)));
-            }
-        }
-
         /// <inheritdoc />
         public override string ToString()
         {
