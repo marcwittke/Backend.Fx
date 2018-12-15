@@ -1,6 +1,4 @@
-﻿
-
-namespace Backend.Fx.AspNetCore.ErrorHandling
+﻿namespace Backend.Fx.AspNetCore.ErrorHandling
 {
     using System;
     using System.Collections.Generic;

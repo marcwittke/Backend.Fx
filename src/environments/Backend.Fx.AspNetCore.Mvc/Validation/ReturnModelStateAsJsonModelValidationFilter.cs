@@ -12,10 +12,15 @@ namespace Backend.Fx.AspNetCore.Mvc.Validation
             {
                 Errors errors = context.ModelState.ToErrorsDictionary();
                 LogErrors(context, context.Controller.ToString(), errors);
-                context.Result = new BadRequestObjectResult(new { errors });
+                context.Result = CreateResult(errors);
             }
         }
-        
+
+        protected virtual IActionResult CreateResult(Errors errors)
+        {
+            return new BadRequestObjectResult(errors);
+        }
+
         public override void OnActionExecuted(ActionExecutedContext context)
         {}
     }
