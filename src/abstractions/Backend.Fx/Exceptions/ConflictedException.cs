@@ -8,16 +8,12 @@
                 : base("Conflicted")
         { }
 
-        public ConflictedException(params Error[] errors)
-                : base("Conflicted", errors)
+        public ConflictedException(string message)
+                : base(message)
         { }
 
-        public ConflictedException(string message, params Error[] errors)
-                : base(message, errors)
-        { }
-
-        public ConflictedException(string message, Exception innerException, params Error[] errors)
-                : base(message, innerException, errors)
+        public ConflictedException(string message, Exception innerException)
+                : base(message, innerException)
         { }
 
         public static IExceptionBuilder UseBuilder()

@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+﻿
 
 namespace Backend.Fx.AspNetCore.ErrorHandling
 {
@@ -8,7 +8,6 @@ namespace Backend.Fx.AspNetCore.ErrorHandling
     using System.Net;
     using System.Threading.Tasks;
     using Exceptions;
-    using JetBrains.Annotations;
     using Logging;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
@@ -16,12 +15,10 @@ namespace Backend.Fx.AspNetCore.ErrorHandling
     using Newtonsoft.Json;
     using Newtonsoft.Json.Serialization;
 
-    public class JsonErrorHandlingMiddleware
+    public class JsonErrorHandlingMiddleware : ErrorHandlingMiddleware
     {
-        private static readonly ILogger Logger = LogManager.Create<JsonErrorHandlingMiddleware>();
-        private readonly RequestDelegate _next;
         private readonly IHostingEnvironment _env;
-
+        private static readonly ILogger Logger = LogManager.Create<JsonErrorHandlingMiddleware>();
         private readonly JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings
         {
             ContractResolver = new DefaultContractResolver
@@ -30,75 +27,20 @@ namespace Backend.Fx.AspNetCore.ErrorHandling
             },
         };
 
-        /// <summary>
-        ///     This constructor is being called by the framework DI container
-        /// </summary>
-        [UsedImplicitly]
-        public JsonErrorHandlingMiddleware(RequestDelegate next, IHostingEnvironment env)
+        public JsonErrorHandlingMiddleware(RequestDelegate next, IHostingEnvironment env) 
+            : base(next)
         {
-            _next = next;
             _env = env;
         }
 
-        /// <summary>
-        ///     This method is being called by the previous middleware in the HTTP pipeline
-        /// </summary>
-        [UsedImplicitly]
-        public async Task Invoke(HttpContext context)
+        protected override Task<bool> ShouldHandle(HttpContext context)
         {
             // this middleware only handles requests that accept json as response
             IList<MediaTypeHeaderValue> accept = context.Request.GetTypedHeaders().Accept;
-            if (accept?.Any(mth => mth.Type == "application" && mth.SubType == "json") == true) 
-            {
-                try
-                {
-                    await _next.Invoke(context);
-                }
-                catch (TooManyRequestsException tmrex)
-                {
-                    if (tmrex.RetryAfter > 0)
-                    {
-                        context.Response.Headers.Add("Retry-After", tmrex.RetryAfter.ToString(CultureInfo.InvariantCulture));
-                    }
-
-                    await HandleClientError(context, 429, "TooManyRequests", tmrex);
-                }
-                catch (UnprocessableException uex)
-                {
-                    await HandleClientError(context, 422, "Unprocessable", uex);
-                }
-                catch (NotFoundException nfex)
-                {
-                    await HandleClientError(context, (int)HttpStatusCode.NotFound, HttpStatusCode.NotFound.ToString(), nfex);
-                }
-                catch (ConflictedException confex)
-                {
-                    await HandleClientError(context, (int)HttpStatusCode.Conflict, HttpStatusCode.Conflict.ToString(), confex);
-                }
-                catch (ForbiddenException uex)
-                {
-                    await HandleClientError(context, (int)HttpStatusCode.Forbidden, HttpStatusCode.Forbidden.ToString(), uex);
-                }
-                catch (UnauthorizedException uex)
-                {
-                    await HandleClientError(context, (int)HttpStatusCode.Unauthorized, HttpStatusCode.Unauthorized.ToString(), uex);
-                }
-                catch (ClientException cex)
-                {
-                    await HandleClientError(context, (int)HttpStatusCode.BadRequest, HttpStatusCode.BadRequest.ToString(), cex);
-                }
-                catch (Exception ex)
-                {
-                    await HandleServerError(context, ex);
-                }
-            }
-            else
-            {
-                await _next.Invoke(context);
-            }
+            return Task.FromResult(accept?.Any(mth => mth.Type == "application" && mth.SubType == "json") == true);
         }
-        
-        private async Task HandleClientError(HttpContext context, int httpStatusCode, string code, ClientException exception)
+
+        protected override async Task HandleClientError(HttpContext context, int httpStatusCode, string message, ClientException exception)
         {
             if (context.Response.HasStarted)
             {
@@ -109,16 +51,17 @@ namespace Backend.Fx.AspNetCore.ErrorHandling
             // convention: only the errors array will be transmitted to the client, allowing technical (possibly
             // revealing) information in the exception message.
             Errors errors = exception.HasErrors()
-                                    ? exception.Errors
-                                    : new Errors { new Error($"HTTP{httpStatusCode}", code) };
+                ? exception.Errors
+                : new Errors().Add($"HTTP{httpStatusCode}: {message}");
 
             context.Response.StatusCode = httpStatusCode;
-            string responseContent = JsonConvert.SerializeObject(new { errors }, _jsonSerializerSettings);
+            var errorsDictionaryForJson = errors.ToDictionary(kvp => kvp.Key == "" ? "_error" : kvp.Key, kvp => kvp.Value);
+            string responseContent = JsonConvert.SerializeObject(errorsDictionaryForJson, _jsonSerializerSettings);
             context.Response.ContentType = "application/json; charset=utf-8";
             await context.Response.WriteAsync(responseContent);
         }
 
-        private async Task HandleServerError(HttpContext context, Exception exception)
+        protected override async Task HandleServerError(HttpContext context, Exception exception)
         {
             if (context.Response.HasStarted)
             {

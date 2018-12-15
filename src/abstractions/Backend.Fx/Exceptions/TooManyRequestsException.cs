@@ -5,21 +5,17 @@ namespace Backend.Fx.Exceptions
     public class TooManyRequestsException : ClientException
     {
         public TooManyRequestsException(int retryAfter)
+            : base("TooManyRequests")
         {
             RetryAfter = retryAfter;
         }
 
-        public TooManyRequestsException(int retryAfter, params Error[] errors) : base(errors)
+        public TooManyRequestsException(int retryAfter, string message) : base(message)
         {
             RetryAfter = retryAfter;
         }
 
-        public TooManyRequestsException(int retryAfter, string message, params Error[] errors) : base(message, errors)
-        {
-            RetryAfter = retryAfter;
-        }
-
-        public TooManyRequestsException(int retryAfter, string message, Exception innerException, params Error[] errors) : base(message, innerException, errors)
+        public TooManyRequestsException(int retryAfter, string message, Exception innerException) : base(message, innerException)
         {
             RetryAfter = retryAfter;
         }

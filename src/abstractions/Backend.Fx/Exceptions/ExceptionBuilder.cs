@@ -1,33 +1,26 @@
 ﻿namespace Backend.Fx.Exceptions
 {
     using System;
-    using Logging;
 
     public interface IExceptionBuilder : IDisposable
     {
-        void Add(Error error);
-        void Add(string key, Error error);
+        void Add(string error);
+        void Add(string key, string error);
         void AddNotFoundWhenNull<T>(object id, T t);
-        void AddNotFoundWhenNull<T>(string key, object id, T t);
-        void AddIf(bool condition, Error error);
-        void AddIf(string key, bool condition, Error error);
-        T CatchPossibleException<T>(Func<T> function);
-        T CatchPossibleException<T>(string key, Func<T> function);
-        void CatchPossibleException(Action action);
-        void CatchPossibleException(string key, Action action);
+        void AddIf(bool condition, string error);
+        void AddIf(string key, bool condition, string error);
     }
 
     public class ExceptionBuilder<TEx> : IExceptionBuilder where TEx : ClientException, new()
     {
-        private static readonly ILogger Logger = LogManager.Create<ExceptionBuilder<TEx>>();
         private readonly TEx _clientException = new TEx();
 
-        public void Add(Error error)
+        public void Add(string error)
         {
-            _clientException.Errors.Add(Errors.GenericErrorKey, error);
+            _clientException.Errors.Add(error);
         }
 
-        public void Add(string key, Error error)
+        public void Add(string key, string error)
         {
             _clientException.Errors.Add(key, error);
         }
@@ -36,15 +29,7 @@
         {
             if (t == null)
             {
-                _clientException.Errors.Add(Errors.GenericErrorKey, new Error("NotFound", $"{typeof(T).Name} [{id}] not found"));
-            }
-        }
-
-        public void AddNotFoundWhenNull<T>(string key, object id, T t)
-        {
-            if (t == null)
-            {
-                _clientException.Errors.Add(key, new Error("NotFound", $"{typeof(T).Name} [{id}] not found"));
+                _clientException.Errors.Add("NotFound", $"{typeof(T).Name} [{id}] not found");
             }
         }
 
@@ -56,75 +41,19 @@
             }
         }
 
-        public void AddIf(bool condition, Error error)
+        public void AddIf(bool condition, string error)
         {
             if (condition)
             {
-                _clientException.Errors.Add(Errors.GenericErrorKey, error);
+                _clientException.Errors.Add(error);
             }
         }
 
-        public void AddIf(string key, bool condition, Error error)
+        public void AddIf(string key, bool condition, string error)
         {
             if (condition)
             {
                 _clientException.Errors.Add(key, error);
-            }
-        }
-
-        public T CatchPossibleException<T>(Func<T> function)
-        {
-            T t = default(T);
-            try
-            {
-                t = function();
-            }
-            catch (Exception ex)
-            {
-                Logger.Info(ex, $"Exception of type {ex.GetType().Name} will be appended to an {nameof(UnprocessableException)}.");
-                _clientException.Errors.Add(Errors.GenericErrorKey, new Error(ex.GetType().Name, ex.Message));
-            }
-            return t;
-        }
-
-        public T CatchPossibleException<T>(string key, Func<T> function)
-        {
-            T t = default(T);
-            try
-            {
-                t = function();
-            }
-            catch (Exception ex)
-            {
-                Logger.Info(ex, $"Exception of type {ex.GetType().Name} will be appended to an {nameof(UnprocessableException)}.");
-                _clientException.Errors.Add(key, new Error(ex.GetType().Name, ex.Message));
-            }
-            return t;
-        }
-
-        public void CatchPossibleException(Action action)
-        {
-            try
-            {
-                action();
-            }
-            catch (Exception ex)
-            {
-                Logger.Info(ex, $"Exception of type {ex.GetType().Name} will be appended to an {nameof(UnprocessableException)}.");
-                _clientException.Errors.Add(Errors.GenericErrorKey, new Error(ex.GetType().Name, ex.Message));
-            }
-        }
-
-        public void CatchPossibleException(string key, Action action)
-        {
-            try
-            {
-                action();
-            }
-            catch (Exception ex)
-            {
-                Logger.Info(ex, $"Exception of type {ex.GetType().Name} will be appended to an {nameof(UnprocessableException)}.");
-                _clientException.Errors.Add(key, new Error(ex.GetType().Name, ex.Message));
             }
         }
     }

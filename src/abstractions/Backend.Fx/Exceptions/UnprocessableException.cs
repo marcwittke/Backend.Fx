@@ -8,16 +8,12 @@
                 : base("The provided arguments could not be processed.")
         {}
 
-        public UnprocessableException(params Error[] errors) 
-                : base("The provided arguments could not be processed.", errors)
+        public UnprocessableException(string message) 
+                : base(message)
         { }
 
-        public UnprocessableException(string message, params Error[] errors) 
-                : base(message, errors)
-        { }
-
-        public UnprocessableException(string message, Exception innerException, params Error[] errors) 
-                : base(message, innerException, errors)
+        public UnprocessableException(string message, Exception innerException) 
+                : base(message, innerException)
         { }
 
         public static IExceptionBuilder UseBuilder()

@@ -1,18 +1,16 @@
 ﻿namespace Backend.Fx.NLogLogging
 {
     using System.Diagnostics;
-    using BackendFxILogger = Backend.Fx.Logging.ILogger;
-    using BackendFxILoggerFactory = Backend.Fx.Logging.ILoggerFactory;
-
+    
     [DebuggerStepThrough]
-    public class NLogLoggerFactory : BackendFxILoggerFactory
+    public class NLogLoggerFactory : Backend.Fx.Logging.ILoggerFactory
     {
         public NLogLoggerFactory()
         {
             BeginActivity(0);
         }
 
-        public BackendFxILogger Create(string s)
+        public Backend.Fx.Logging.ILogger Create(string s)
         {
             return new NLogLogger(NLog.LogManager.GetLogger(s));
         }
@@ -25,6 +23,12 @@
         public void Shutdown()
         {
             NLog.LogManager.Shutdown();
+        }
+
+        public static void Configure(string nlogConfigPath)
+        {
+            Backend.Fx.Logging.LogManager.Initialize(new NLogLoggerFactory());
+            NLog.LogManager.Configuration = new NLog.Config.XmlLoggingConfiguration(nlogConfigPath);
         }
     }
 }

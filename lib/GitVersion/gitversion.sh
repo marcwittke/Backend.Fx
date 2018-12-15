@@ -1,7 +1,7 @@
 #!/bin/bash
 
 scriptDir=$(dirname -- "$(readlink -f -- "$BASH_SOURCE")")
-mono  ${scriptDir}/GitVersion.exe /updateassemblyinfo /output buildserver
+dotnet ${scriptDir}/GitVersion.dll /updateassemblyinfo /output buildserver
 
 echo "$GitVersion_Major"
 echo "$GitVersion_Minor"

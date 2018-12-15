@@ -17,7 +17,7 @@ namespace Backend.Fx.AspNetCore.Mvc.Validation
         {
             ILogger logger = LogManager.Create(controllerName);
             logger.Warn($"Model validation failed during {context.HttpContext.Request.Method} {context.HttpContext.Request.PathBase}: " +
-                        string.Join(System.Environment.NewLine, errors.SelectMany(err => err.Value.Select(er => $"    {er.Code}:{er.Message}"))));
+                        string.Join(System.Environment.NewLine, errors));
         }
 
         protected bool AcceptsJson(FilterContext context)

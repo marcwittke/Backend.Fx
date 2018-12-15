@@ -7,17 +7,13 @@ namespace Backend.Fx.Exceptions
         public UnauthorizedException()
             : base("Unauthorized")
         { }
-
-        public UnauthorizedException(params Error[] errors)
-            : base("Unauthorized", errors)
+        
+        public UnauthorizedException(string message)
+            : base(message)
         { }
 
-        public UnauthorizedException(string message, params Error[] errors)
-            : base(message, errors)
-        { }
-
-        public UnauthorizedException(string message, Exception innerException, params Error[] errors)
-            : base(message, innerException, errors)
+        public UnauthorizedException(string message, Exception innerException)
+            : base(message, innerException)
         { }
     }
 }
