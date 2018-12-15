@@ -21,7 +21,7 @@
         #region fatal
         public Exception Fatal(Exception exception)
         {
-            _nlogLogger.Fatal(exception, CultureInfo.InvariantCulture, exception.Message);
+            _nlogLogger.Fatal(exception);
             return exception;
         }
 
@@ -40,7 +40,7 @@
         #region error
         public Exception Error(Exception exception)
         {
-            _nlogLogger.Error(exception, CultureInfo.InvariantCulture, exception.Message);
+            _nlogLogger.Error(exception);
             return exception;
         }
 
@@ -59,7 +59,7 @@
         #region warn
         public Exception Warn(Exception exception)
         {
-            _nlogLogger.Warn(exception, CultureInfo.InvariantCulture, exception.Message);
+            _nlogLogger.Warn(exception);
             return exception;
         }
 
@@ -78,7 +78,7 @@
         #region info
         public Exception Info(Exception exception)
         {
-            _nlogLogger.Info(exception, CultureInfo.InvariantCulture, exception.Message);
+            _nlogLogger.Info(exception);
             return exception;
         }
 
@@ -112,7 +112,7 @@
 
         public Exception Debug(Exception exception)
         {
-            _nlogLogger.Warn(exception, CultureInfo.InvariantCulture, exception.Message);
+            _nlogLogger.Warn(exception);
             return exception;
         }
 
@@ -147,7 +147,7 @@
 
         public Exception Trace(Exception exception)
         {
-            _nlogLogger.Trace(exception, CultureInfo.InvariantCulture, exception.Message);
+            _nlogLogger.Trace(exception);
             return exception;
         }
 

@@ -16,7 +16,7 @@ namespace Backend.Fx.Log4NetLogging
 
         public Exception Fatal(Exception exception)
         {
-            _log4NetLogger.Fatal(GetExceptionMessages(exception), exception);
+            _log4NetLogger.Fatal(exception);
             return exception;
         }
 
@@ -33,7 +33,7 @@ namespace Backend.Fx.Log4NetLogging
 
         public Exception Error(Exception exception)
         {
-            _log4NetLogger.Error(GetExceptionMessages(exception), exception);
+            _log4NetLogger.Error(exception);
             return exception;
         }
 
@@ -50,7 +50,7 @@ namespace Backend.Fx.Log4NetLogging
 
         public Exception Warn(Exception exception)
         {
-            _log4NetLogger.Warn(GetExceptionMessages(exception), exception);
+            _log4NetLogger.Warn(exception);
             return exception;
         }
 
@@ -67,7 +67,7 @@ namespace Backend.Fx.Log4NetLogging
 
         public Exception Info(Exception exception)
         {
-            _log4NetLogger.Info(GetExceptionMessages(exception), exception);
+            _log4NetLogger.Info(exception);
             return exception;
         }
 
@@ -105,7 +105,7 @@ namespace Backend.Fx.Log4NetLogging
 
         public Exception Debug(Exception exception)
         {
-            _log4NetLogger.Debug(GetExceptionMessages(exception), exception);
+            _log4NetLogger.Debug(exception);
             return exception;
         }
 
@@ -143,7 +143,7 @@ namespace Backend.Fx.Log4NetLogging
 
         public Exception Trace(Exception exception)
         {
-            _log4NetLogger.Logger.Log(null, Level.Trace, exception.Message, exception);
+            _log4NetLogger.Logger.Log(null, Level.Trace, null, exception);
             return exception;
         }
 
@@ -174,18 +174,5 @@ namespace Backend.Fx.Log4NetLogging
         }
 
         private Level Level => ((log4net.Repository.Hierarchy.Logger)_log4NetLogger.Logger).EffectiveLevel;
-
-        private string GetExceptionMessages(Exception ex)
-        {
-            string message = ex.Message;
-            while (ex.InnerException != null)
-            {
-                ex = ex.InnerException;
-                message += System.Environment.NewLine;
-                message += "\t" + ex.Message;
-            }
-
-            return message;
-        }
     }
 }
