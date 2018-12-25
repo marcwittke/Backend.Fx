@@ -1,4 +1,6 @@
-﻿namespace Backend.Fx.Environment.MultiTenancy
+﻿using System.Collections.Generic;
+
+namespace Backend.Fx.Environment.MultiTenancy
 {
     using System;
     using System.Diagnostics;
@@ -44,6 +46,11 @@
 
                 return "TenantId: null";
             }
+        }
+
+        protected override IEnumerable<object> GetEqualityComponents()
+        {
+            yield return _id;
         }
     }
 }
