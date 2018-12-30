@@ -5,20 +5,18 @@
     using Backend.Fx.NetCore.Logging;
     using Microsoft.AspNetCore;
     using Microsoft.AspNetCore.Hosting;
-    using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
 
     public class BackendFxProgram<TStartup> where TStartup : class
     {
-        private static Logging.ILogger _logger = new DebugLogger(nameof(BackendFxProgram<TStartup>));
+        private static Backend.Fx.Logging.ILogger _logger = new DebugLogger(nameof(BackendFxProgram<TStartup>));
 
         public virtual void Main(string[] args)
         {
             IWebHost webHost;
             try
             {
-                webHost = BuildWebHost(args);
+                webHost = CreateWebHostBuilder(args).Build();
             }
             catch (Exception ex)
             {
@@ -36,13 +34,17 @@
             catch (Exception ex)
             {
                 _logger.Fatal(ex, "Web host died unexpectedly");
-                LogManager.Shutdown();
                 throw;
+            }
+            finally
+            {
+                LogManager.Shutdown();
             }
         }
 
-        public virtual IWebHost BuildWebHost(string[] args)
+        public IWebHostBuilder CreateWebHostBuilder(string[] args)
         {
+
             try
             {
                 _logger = LogManager.Create<BackendFxProgram<TStartup>>();
@@ -56,7 +58,6 @@
 
             try
             {
-                IWebHost host;
                 using (_logger.InfoDuration("Building web host"))
                 {
                     var webHostBuilder = WebHost.CreateDefaultBuilder(args)
@@ -71,21 +72,18 @@
 
                     ConfigureWebHost(webHostBuilder);
 
-                    host = webHostBuilder.Build();
-                    host.Services.GetRequiredService<IApplicationLifetime>().ApplicationStopped.Register(LogManager.Shutdown);
+                    return webHostBuilder;
                 }
-
-                return host;
             }
             catch (Exception ex)
             {
-                _logger.Fatal(ex, "Web host could not be built.");
+                _logger.Fatal(ex, "Web host builder could not be created.");
                 LogManager.Shutdown();
                 throw;
             }
         }
 
         protected virtual void ConfigureWebHost(IWebHostBuilder builder)
-        {}
+        { }
     }
 }
