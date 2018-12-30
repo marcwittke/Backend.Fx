@@ -17,11 +17,12 @@
     {
         private readonly IHostingEnvironment _env;
         private static readonly ILogger Logger = LogManager.Create<JsonErrorHandlingMiddleware>();
-        private readonly JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings
+
+        protected JsonSerializerSettings JsonSerializerSettings { get; } = new JsonSerializerSettings
         {
             ContractResolver = new DefaultContractResolver
             {
-                NamingStrategy = new CamelCaseNamingStrategy { ProcessDictionaryKeys = true }
+                NamingStrategy = new CamelCaseNamingStrategy {ProcessDictionaryKeys = true}
             },
         };
 
@@ -53,10 +54,9 @@
                 : new Errors().Add($"HTTP{httpStatusCode}: {message}");
 
             context.Response.StatusCode = httpStatusCode;
-            var errorsDictionaryForJson = errors.ToDictionary(kvp => kvp.Key == "" ? "_error" : kvp.Key, kvp => kvp.Value);
-            string responseContent = JsonConvert.SerializeObject(errorsDictionaryForJson, _jsonSerializerSettings);
+            string serializedErrors = SerializeErrors(errors);
             context.Response.ContentType = "application/json; charset=utf-8";
-            await context.Response.WriteAsync(responseContent);
+            await context.Response.WriteAsync(serializedErrors);
         }
 
         protected override async Task HandleServerError(HttpContext context, Exception exception)
@@ -68,10 +68,16 @@
             }
             context.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
             var responseContent = _env.IsDevelopment()
-                                          ? JsonConvert.SerializeObject(new { message = exception.Message, stackTrace = exception.StackTrace }, _jsonSerializerSettings)
-                                          : JsonConvert.SerializeObject(new { message = "An internal error occured" }, _jsonSerializerSettings);
+                                          ? JsonConvert.SerializeObject(new { message = exception.Message, stackTrace = exception.StackTrace }, JsonSerializerSettings)
+                                          : JsonConvert.SerializeObject(new { message = "An internal error occured" }, JsonSerializerSettings);
             context.Response.ContentType = "application/json; charset=utf-8";
             await context.Response.WriteAsync(responseContent);
+        }
+
+        protected virtual string SerializeErrors(Errors errors)
+        {
+            var errorsDictionaryForJson = errors.ToDictionary(kvp => kvp.Key == "" ? "_error" : kvp.Key, kvp => kvp.Value);
+            return JsonConvert.SerializeObject(errorsDictionaryForJson, JsonSerializerSettings);
         }
     }
 }

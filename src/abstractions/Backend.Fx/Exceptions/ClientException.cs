@@ -3,6 +3,8 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using JetBrains.Annotations;
+
 
     public class ClientException : Exception
     {
@@ -48,21 +50,28 @@
 
     public static class ClientExceptionEx
     {
-        public static TEx AddError<TEx>(this TEx clientException, string errorMessage) where TEx : ClientException
+        public static TEx AddError<TEx>(this TEx clientException, [LocalizationRequired] string errorMessage) where TEx : ClientException
         {
             clientException.Errors.Add(errorMessage);
             return clientException;
         }
 
-        public static TEx AddError<TEx>(this TEx clientException, string key, string errorMessage) where TEx : ClientException
+        public static TEx AddError<TEx>(this TEx clientException, string key, [LocalizationRequired] string errorMessage) where TEx : ClientException
         {
             clientException.Errors.Add(key, errorMessage);
             return clientException;
         }
 
-        public static TEx AddErrors<TEx>(this TEx clientException, string key, IEnumerable<string> errorMessage) where TEx : ClientException
+        public static TEx AddErrors<TEx>(this TEx clientException, [LocalizationRequired] IEnumerable<string> errorMessages) where TEx : ClientException
         {
-            clientException.Errors.Add(key, errorMessage);
+            clientException.Errors.Add(errorMessages);
+            return clientException;
+        }
+
+
+        public static TEx AddErrors<TEx>(this TEx clientException, string key, [LocalizationRequired] IEnumerable<string> errorMessages) where TEx : ClientException
+        {
+            clientException.Errors.Add(key, errorMessages);
             return clientException;
         }
     }
