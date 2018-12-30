@@ -42,6 +42,12 @@
             return this;
         }
 
+        public Errors Add(IEnumerable<string> errorMessages)
+        {
+            Add(GenericErrorKey, errorMessages);
+            return this;
+        }
+
         public Errors Add(string key, IEnumerable<string> errorMessages)
         {
             if (!_dictionaryImplementation.ContainsKey(key))
