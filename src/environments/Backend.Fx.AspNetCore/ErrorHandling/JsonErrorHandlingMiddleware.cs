@@ -53,10 +53,9 @@
                 : new Errors().Add($"HTTP{httpStatusCode}: {message}");
 
             context.Response.StatusCode = httpStatusCode;
-            var errorsDictionaryForJson = errors.ToDictionary(kvp => kvp.Key == "" ? "_error" : kvp.Key, kvp => kvp.Value);
-            string responseContent = JsonConvert.SerializeObject(errorsDictionaryForJson, _jsonSerializerSettings);
+            string serializedErrors = SerializeErrors(errors);
             context.Response.ContentType = "application/json; charset=utf-8";
-            await context.Response.WriteAsync(responseContent);
+            await context.Response.WriteAsync(serializedErrors);
         }
 
         protected override async Task HandleServerError(HttpContext context, Exception exception)
@@ -72,6 +71,12 @@
                                           : JsonConvert.SerializeObject(new { message = "An internal error occured" }, _jsonSerializerSettings);
             context.Response.ContentType = "application/json; charset=utf-8";
             await context.Response.WriteAsync(responseContent);
+        }
+
+        protected virtual string SerializeErrors(Errors errors)
+        {
+            var errorsDictionaryForJson = errors.ToDictionary(kvp => kvp.Key == "" ? "_error" : kvp.Key, kvp => kvp.Value);
+            return JsonConvert.SerializeObject(errorsDictionaryForJson, _jsonSerializerSettings);
         }
     }
 }
