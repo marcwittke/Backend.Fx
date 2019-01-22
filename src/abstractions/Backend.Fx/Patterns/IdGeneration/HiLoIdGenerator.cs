@@ -34,12 +34,12 @@ namespace Backend.Fx.Patterns.IdGeneration
             {
                 // first fetch from sequence in life time
                 _lowId = GetNextBlockStart();
-                _highId = _lowId + Increment- 1;
+                _highId = _lowId + BlockSize- 1;
             }
         }
 
         protected abstract int GetNextBlockStart();
 
-        protected abstract int Increment { get; }
+        protected abstract int BlockSize { get; }
     }
 }
