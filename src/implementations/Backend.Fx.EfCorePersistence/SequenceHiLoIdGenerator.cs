@@ -1,4 +1,6 @@
-﻿namespace Backend.Fx.EfCorePersistence
+﻿using System;
+
+namespace Backend.Fx.EfCorePersistence
 {
     using Microsoft.EntityFrameworkCore;
     using Patterns.IdGeneration;
@@ -6,17 +8,17 @@
     public abstract class SequenceHiLoIdGenerator<TDbContext> : HiLoIdGenerator, IEntityIdGenerator where TDbContext : DbContext
     {
         private readonly ISequence _sequence;
-        private readonly DbContextOptions<TDbContext> _dbContextOptions;
+        private readonly Func<TDbContext> _dbContextFactory;
 
-        protected SequenceHiLoIdGenerator(ISequence sequence, DbContextOptions<TDbContext> dbContextOptions)
+        protected SequenceHiLoIdGenerator(ISequence sequence, Func<TDbContext> dbContextFactory)
         {
             _sequence = sequence;
-            _dbContextOptions = dbContextOptions;
+            _dbContextFactory = dbContextFactory;
         }
 
         protected override int GetNextBlockStart()
         {
-            using (var dbContext = _dbContextOptions.CreateDbContext())
+            using (var dbContext = _dbContextFactory())
             {
                 return _sequence.GetNextValue(dbContext);
             }

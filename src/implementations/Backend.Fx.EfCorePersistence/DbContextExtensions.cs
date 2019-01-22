@@ -196,12 +196,7 @@
                 }
             }
         }
-
-        public static TDbContext CreateDbContext<TDbContext>(this DbContextOptions<TDbContext> options) where TDbContext : DbContext
-        {
-            return (TDbContext)Activator.CreateInstance(typeof(TDbContext), options);
-        }
-
+        
         private static string GetPrimaryKeyValue(EntityEntry entry)
         {
             return (entry.Entity as Entity)?.Id.ToString(CultureInfo.InvariantCulture) ?? "?";
