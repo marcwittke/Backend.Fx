@@ -1,4 +1,5 @@
 ﻿using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
+using FakeItEasy;
 using Xunit;
 
 namespace Backend.Fx.EfCorePersistence.Tests
@@ -19,7 +20,9 @@ namespace Backend.Fx.EfCorePersistence.Tests
         {
             _dbFilePath = Path.GetTempFileName();
             _dbContextOptions = new DbContextOptionsBuilder<TestDbContext>().UseSqlite("Data Source=" + _dbFilePath).Options;
-            _sut = new DatabaseManagerWithoutMigration<TestDbContext>(() => new TestDbContext(_dbContextOptions));
+
+            var testCompRoot = new TestCompositionRoot(new TestDbContext(_dbContextOptions));
+            _sut = new DatabaseManagerWithoutMigration<TestDbContext>(testCompRoot);
         }
 
         [Fact]

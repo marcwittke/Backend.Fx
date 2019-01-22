@@ -1,3 +1,5 @@
+using Backend.Fx.Patterns.DependencyInjection;
+
 namespace Backend.Fx.EfCorePersistence
 {
     using System;
@@ -8,7 +10,7 @@ namespace Backend.Fx.EfCorePersistence
     {
         private static readonly ILogger Logger = LogManager.Create<DatabaseManagerWithMigration<TDbContext>>();
 
-        public DatabaseManagerWithMigration(Func<TDbContext> dbContextFactory) : base(dbContextFactory)
+        public DatabaseManagerWithMigration(ICompositionRoot compositionRoot) : base(compositionRoot)
         { }
         
         protected override void ExecuteCreationStrategy(DbContext dbContext)
