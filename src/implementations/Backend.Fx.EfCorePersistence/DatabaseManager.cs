@@ -68,7 +68,7 @@
                 foreach (var sequenceType in sequenceTypes)
                 {
                     ISequence sequence = (ISequence)Activator.CreateInstance(sequenceType.AsType());
-                    sequence.EnsureSequence(dbContext);
+                    sequence.EnsureSequence(dbContext.Database.GetDbConnection());
                 }
             }
             

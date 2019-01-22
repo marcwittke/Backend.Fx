@@ -20,7 +20,7 @@ namespace Backend.Fx.EfCorePersistence
         {
             using (var dbContext = _dbContextFactory())
             {
-                return _sequence.GetNextValue(dbContext);
+                return _sequence.GetNextValue(dbContext.Database.GetDbConnection());
             }
         }
 
