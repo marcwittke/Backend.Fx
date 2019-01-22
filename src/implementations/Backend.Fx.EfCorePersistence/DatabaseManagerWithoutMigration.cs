@@ -1,5 +1,6 @@
 ﻿namespace Backend.Fx.EfCorePersistence
 {
+    using System;
     using Logging;
     using Microsoft.EntityFrameworkCore;
 
@@ -7,7 +8,7 @@
     {
         private static readonly ILogger Logger = LogManager.Create<DatabaseManagerWithoutMigration<TDbContext>>();
 
-        public DatabaseManagerWithoutMigration(DbContextOptions<TDbContext> options) : base(options)
+        public DatabaseManagerWithoutMigration(Func<TDbContext> dbContextFactory) : base(dbContextFactory)
         { }
 
         protected override void ExecuteCreationStrategy(DbContext dbContext)

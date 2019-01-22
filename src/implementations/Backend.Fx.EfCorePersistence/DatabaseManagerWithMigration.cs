@@ -1,5 +1,6 @@
 namespace Backend.Fx.EfCorePersistence
 {
+    using System;
     using Logging;
     using Microsoft.EntityFrameworkCore;
 
@@ -7,9 +8,9 @@ namespace Backend.Fx.EfCorePersistence
     {
         private static readonly ILogger Logger = LogManager.Create<DatabaseManagerWithMigration<TDbContext>>();
 
-        public DatabaseManagerWithMigration(DbContextOptions<TDbContext> dbContextOptions) : base(dbContextOptions)
+        public DatabaseManagerWithMigration(Func<TDbContext> dbContextFactory) : base(dbContextFactory)
         { }
-
+        
         protected override void ExecuteCreationStrategy(DbContext dbContext)
         {
             Logger.Info("Migrating database to latest schema version");

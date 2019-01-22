@@ -1,27 +1,24 @@
 ﻿namespace Backend.Fx.EfCorePersistence
 {
-    using Microsoft.EntityFrameworkCore;
+    using System.Data;
     using Patterns.IdGeneration;
 
-    public abstract class SequenceHiLoIdGenerator<TDbContext> : HiLoIdGenerator, IEntityIdGenerator where TDbContext : DbContext
+    public abstract class SequenceHiLoIdGenerator : HiLoIdGenerator, IEntityIdGenerator
     {
         private readonly ISequence _sequence;
-        private readonly DbContextOptions<TDbContext> _dbContextOptions;
-
-        protected SequenceHiLoIdGenerator(ISequence sequence, DbContextOptions<TDbContext> dbContextOptions)
+        private readonly IDbConnection _dbConnection;
+        
+        protected SequenceHiLoIdGenerator(ISequence sequence, IDbConnection dbConnection)
         {
             _sequence = sequence;
-            _dbContextOptions = dbContextOptions;
+            _dbConnection = dbConnection;
         }
 
         protected override int GetNextBlockStart()
         {
-            using (var dbContext = _dbContextOptions.CreateDbContext())
-            {
-                return _sequence.GetNextValue(dbContext);
-            }
+            return _sequence.GetNextValue(_dbConnection);
         }
 
-        protected override int Increment => _sequence.Increment;
+        protected override int BlockSize => _sequence.Increment;
     }
 }

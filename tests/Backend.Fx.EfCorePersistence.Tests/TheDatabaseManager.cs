@@ -19,13 +19,13 @@ namespace Backend.Fx.EfCorePersistence.Tests
         {
             _dbFilePath = Path.GetTempFileName();
             _dbContextOptions = new DbContextOptionsBuilder<TestDbContext>().UseSqlite("Data Source=" + _dbFilePath).Options;
-            _sut = new DatabaseManagerWithoutMigration<TestDbContext>(_dbContextOptions);
+            _sut = new DatabaseManagerWithoutMigration<TestDbContext>(() => new TestDbContext(_dbContextOptions));
         }
 
         [Fact]
         public void CreatesDatabase()
         {
-            Assert.Throws<SqliteException>(()=>new TestDbContext(_dbContextOptions).Tenants.ToArray());
+            Assert.Throws<SqliteException>(() => new TestDbContext(_dbContextOptions).Tenants.ToArray());
             _sut.EnsureDatabaseExistence();
             Assert.Empty(new TestDbContext(_dbContextOptions).Tenants);
         }

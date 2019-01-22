@@ -61,7 +61,7 @@ namespace Backend.Fx.Tests.Patterns.IdGeneration
         public InMemoryHiLoIdGenerator(int start, int increment)
         {
             _nextBlockStart = start;
-            Increment = increment;
+            BlockSize = increment;
         }
 
         protected override int GetNextBlockStart()
@@ -70,11 +70,11 @@ namespace Backend.Fx.Tests.Patterns.IdGeneration
             {
                 // this simulates the behavior of a SQL sequence for example
                 int result = _nextBlockStart;
-                _nextBlockStart += Increment;
+                _nextBlockStart += BlockSize;
                 return result;
             }
         }
 
-        protected override int Increment { get; }
+        protected override int BlockSize { get; }
     }
 }

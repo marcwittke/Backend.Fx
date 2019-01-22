@@ -63,7 +63,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
             Assert.Contains(tenants, t => t.Id == 4711);
             Assert.Contains(tenants, t => t.Id == 4712);
             Assert.Contains(tenants, t => t.Id == 4713);
-            
+
             Assert.Contains(tenants, t => t.Id == 4714);
         }
 
@@ -85,7 +85,8 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
         private class MyTenantManager : TenantManager<TestDbContext>
         {
-            public MyTenantManager(ITenantInitializer tenantInitializer, DbContextOptions<TestDbContext> dbContextOptions) : base(tenantInitializer, dbContextOptions)
+            public MyTenantManager(ITenantInitializer tenantInitializer, DbContextOptions<TestDbContext> dbContextOptions) 
+                : base(tenantInitializer, () => new TestDbContext(dbContextOptions))
             { }
 
             public Tenant FindTenantX(TenantId tenantId)

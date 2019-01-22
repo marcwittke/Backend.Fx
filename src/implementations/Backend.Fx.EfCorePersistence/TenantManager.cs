@@ -1,25 +1,26 @@
-﻿namespace Backend.Fx.EfCorePersistence
+﻿using System.Linq;
+using Backend.Fx.Extensions;
+
+namespace Backend.Fx.EfCorePersistence
 {
     using System;
-    using System.Linq;
     using Environment.MultiTenancy;
-    using Extensions;
     using JetBrains.Annotations;
     using Microsoft.EntityFrameworkCore;
 
     public class TenantManager<TDbContext> : TenantManager where TDbContext : DbContext
     {
-        private readonly DbContextOptions<TDbContext> _dbContextOptions;
+        private readonly Func<TDbContext> _dbContextFactory;
 
-        public TenantManager(ITenantInitializer tenantInitializer, DbContextOptions<TDbContext> dbContextOptions) 
+        public TenantManager(ITenantInitializer tenantInitializer, Func<TDbContext> dbContextFactory) 
             : base(tenantInitializer)
         {
-            _dbContextOptions = dbContextOptions;
+            _dbContextFactory = dbContextFactory;
         }
 
         public override TenantId[] GetTenantIds()
         {
-            using (var dbContext = _dbContextOptions.CreateDbContext())
+            using (var dbContext = _dbContextFactory())
             {
                 return dbContext.Set<Tenant>().Select(t => new TenantId(t.Id)).ToArray();
             }
@@ -27,7 +28,7 @@
 
         public override Tenant[] GetTenants()
         {
-            using (var dbContext = _dbContextOptions.CreateDbContext())
+            using (var dbContext = _dbContextFactory())
             {
                 return dbContext.Set<Tenant>().ToArray();
             }
@@ -36,7 +37,7 @@
         [CanBeNull]
         public override Tenant FindTenant(TenantId tenantId)
         {
-            using (var dbContext = _dbContextOptions.CreateDbContext())
+            using (var dbContext = _dbContextFactory())
             {
                 return dbContext.Set<Tenant>().Find(tenantId.Value);
             }
@@ -44,7 +45,7 @@
 
         protected override void SaveTenant(Tenant tenant)
         {
-            using (var dbContext = _dbContextOptions.CreateDbContext())
+            using (var dbContext = _dbContextFactory())
             {
                 var existingTenant = dbContext.Set<Tenant>().Find(tenant.Id);
                 if (existingTenant == null)

@@ -9,21 +9,20 @@
 
     public abstract class DatabaseManager<TDbContext> : IDatabaseManager where TDbContext : DbContext
     {
+        private readonly Func<TDbContext> _dbContextFactory;
         private static readonly ILogger Logger = LogManager.Create<DatabaseManager<TDbContext>>();
-
-        protected DatabaseManager(DbContextOptions<TDbContext> dbContextOptions)
+        
+        protected DatabaseManager(Func<TDbContext> dbContextFactory)
         {
-            DbContextOptions = dbContextOptions;
+            _dbContextFactory = dbContextFactory;
         }
-
+        
         public bool DatabaseExists { get; protected set; }
-
-        public DbContextOptions<TDbContext> DbContextOptions { get; }
 
         public void EnsureDatabaseExistence()
         {
             Logger.Info("Ensuring database existence");
-            using (var dbContext = DbContextOptions.CreateDbContext())
+            using (var dbContext = _dbContextFactory())
             {
                 ExecuteCreationStrategy(dbContext);
             }
@@ -44,7 +43,7 @@
                     .Select(t => t.GetTypeInfo())
                     .Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericType && typeof(IFullTextSearchIndex).GetTypeInfo().IsAssignableFrom(t));
 
-            using (var dbContext = DbContextOptions.CreateDbContext())
+            using (var dbContext = _dbContextFactory())
             {
                 foreach (var fullTextSearchIndexType in fullTextSearchIndexTypes)
                 {
@@ -64,12 +63,12 @@
                     .Select(t => t.GetTypeInfo())
                     .Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericType && typeof(ISequence).GetTypeInfo().IsAssignableFrom(t));
 
-            using (var dbContext = DbContextOptions.CreateDbContext())
+            using (var dbContext = _dbContextFactory())
             {
                 foreach (var sequenceType in sequenceTypes)
                 {
                     ISequence sequence = (ISequence)Activator.CreateInstance(sequenceType.AsType());
-                    sequence.EnsureSequence(dbContext);
+                    sequence.EnsureSequence(dbContext.Database.GetDbConnection());
                 }
             }
             
@@ -79,7 +78,7 @@
 
         public virtual void DeleteDatabase()
         {
-            using (var dbContext = DbContextOptions.CreateDbContext())
+            using (var dbContext = _dbContextFactory())
             {
                 Logger.Warn("Database is being deleted!");
                 dbContext.Database.EnsureDeleted();
