@@ -30,7 +30,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
             A.CallTo(() => _instanceProvider.GetAllSearchIndizes()).Returns(new[] {_aSearchIndex});
             A.CallTo(() => _instanceProvider.GetAllSequences()).Returns(new [] {_aSequence});
 
-            _sut = new EfCreationDatabaseBootstrapper<TestDbContext>(new TestDbContext(_dbContextOptions), _instanceProvider);
+            _sut = new EfCreationDatabaseBootstrapper<TestDbContext>(()=>new TestDbContext(_dbContextOptions), _instanceProvider);
         }
 
         [Fact]

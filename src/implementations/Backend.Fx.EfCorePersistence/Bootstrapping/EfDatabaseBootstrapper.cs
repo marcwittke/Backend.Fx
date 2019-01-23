@@ -1,4 +1,5 @@
-﻿using Backend.Fx.Environment.Persistence;
+﻿using System;
+using Backend.Fx.Environment.Persistence;
 using Backend.Fx.Logging;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,39 +7,42 @@ namespace Backend.Fx.EfCorePersistence.Bootstrapping
 {
     public abstract class EfDatabaseBootstrapper<TDbContext> : IDatabaseBootstrapper where TDbContext : DbContext
     {
-        private readonly TDbContext _dbContext;
+        private readonly Func<TDbContext> _dbContextFactory;
         private readonly IDatabaseBootstrapperInstanceProvider _instanceProvider;
         private static readonly ILogger Logger = LogManager.Create<EfDatabaseBootstrapper<TDbContext>>();
 
-        protected EfDatabaseBootstrapper(TDbContext dbContext, IDatabaseBootstrapperInstanceProvider instanceProvider)
+        protected EfDatabaseBootstrapper(Func<TDbContext> dbContextFactoryFactory, IDatabaseBootstrapperInstanceProvider instanceProvider)
         {
-            _dbContext = dbContext;
+            _dbContextFactory = dbContextFactoryFactory;
             _instanceProvider = instanceProvider;
         }
 
         public void EnsureDatabaseExistence()
         {
             Logger.Info("Ensuring database existence");
-            ExecuteCreationStrategy(_dbContext);
-            EnsureSearchIndexExistence();
-            EnsureSequenceExistence();
+            using (var dbContext = _dbContextFactory())
+            {
+                ExecuteCreationStrategy(dbContext);
+                EnsureSearchIndexExistence(dbContext);
+                EnsureSequenceExistence(dbContext);
+            }
         }
 
-        private void EnsureSearchIndexExistence()
+        private void EnsureSearchIndexExistence(TDbContext dbContext)
         {
             Logger.Info("Ensuring existence of full text search indizes");
             foreach (var fullTextSearchIndex in _instanceProvider.GetAllSearchIndizes())
             {
-                fullTextSearchIndex.EnsureIndex(_dbContext);
+                fullTextSearchIndex.EnsureIndex(dbContext);
             }
         }
 
-        private void EnsureSequenceExistence()
+        private void EnsureSequenceExistence(TDbContext dbContext)
         {
             Logger.Info("Ensuring existence of sequences");
             foreach (var sequence in _instanceProvider.GetAllSequences())
             {
-                sequence.EnsureSequence(_dbContext.Database.GetDbConnection());
+                sequence.EnsureSequence(dbContext.Database.GetDbConnection());
             }
         }
 

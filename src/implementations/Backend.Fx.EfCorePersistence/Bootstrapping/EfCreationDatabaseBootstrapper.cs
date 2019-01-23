@@ -1,4 +1,5 @@
-﻿using Backend.Fx.Logging;
+﻿using System;
+using Backend.Fx.Logging;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Fx.EfCorePersistence.Bootstrapping
@@ -7,8 +8,8 @@ namespace Backend.Fx.EfCorePersistence.Bootstrapping
     {
         private static readonly ILogger Logger = LogManager.Create<EfCreationDatabaseBootstrapper<TDbContext>>();
 
-        public EfCreationDatabaseBootstrapper(TDbContext dbContext, IDatabaseBootstrapperInstanceProvider instanceProvider) 
-            : base(dbContext, instanceProvider)
+        public EfCreationDatabaseBootstrapper(Func<TDbContext> dbContextFactory, IDatabaseBootstrapperInstanceProvider instanceProvider) 
+            : base(dbContextFactory, instanceProvider)
         {}
 
         protected override void ExecuteCreationStrategy(TDbContext dbContext)
