@@ -18,7 +18,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
     /// <summary>
     /// Wires all injected domain services: Current <see cref="IIdentity"/> and current <see cref="TenantId"/> as set while 
     /// beginning the scope. All <see cref="IDomainService"/>s, <see cref="IApplicationService"/>s, <see cref="IAggregateAuthorization{TAggregateRoot}"/>s 
-    /// the collections of <see cref="IDomainEventHandler{TDomainEvent}"/>s, <see cref="IJob"/>s and <see cref="InitialDataGenerator"/>s 
+    /// the collections of <see cref="IDomainEventHandler{TDomainEvent}"/>s, <see cref="IJob"/>s and <see cref="DataGenerator"/>s 
     /// found in the given list of domain assemblies.
     /// </summary>
     public abstract class DomainModule : SimpleInjectorModule
@@ -65,7 +65,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
 
             // initial data generation subsystem
             Logger.Debug($"Registering initial data generators from {_assembliesForLogging}");
-            container.Collection.Register<InitialDataGenerator>(_assemblies);
+            container.Collection.Register<DataGenerator>(_assemblies);
 
             // all jobs are dynamically registered
             foreach (var jobType in container.GetTypesToRegister(typeof(IJob), _assemblies))

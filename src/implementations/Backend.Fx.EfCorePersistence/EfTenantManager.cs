@@ -1,35 +1,37 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using Backend.Fx.Environment.Authentication;
+using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Extensions;
+using Backend.Fx.Patterns.DependencyInjection;
+using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Fx.EfCorePersistence
 {
-    using System;
-    using Environment.MultiTenancy;
-    using JetBrains.Annotations;
-    using Microsoft.EntityFrameworkCore;
-
-    public class TenantManager<TDbContext> : TenantManager where TDbContext : DbContext
+    public class EfTenantManager<TDbContext> : TenantManager where TDbContext : DbContext
     {
-        private readonly Func<TDbContext> _dbContextFactory;
-
-        public TenantManager(ITenantInitializer tenantInitializer, Func<TDbContext> dbContextFactory) 
-            : base(tenantInitializer)
+        private readonly IScopeManager _scopeManager;
+        
+        public EfTenantManager(IScopeManager scopeManager)
         {
-            _dbContextFactory = dbContextFactory;
+            _scopeManager = scopeManager;
         }
 
         public override TenantId[] GetTenantIds()
         {
-            using (var dbContext = _dbContextFactory())
+            using (var scope = _scopeManager.BeginScope(new SystemIdentity(), new TenantId(null)))
             {
+                var dbContext = scope.GetInstance<TDbContext>();
                 return dbContext.Set<Tenant>().Select(t => new TenantId(t.Id)).ToArray();
             }
         }
 
         public override Tenant[] GetTenants()
         {
-            using (var dbContext = _dbContextFactory())
+            using (var scope = _scopeManager.BeginScope(new SystemIdentity(), new TenantId(null)))
             {
+                var dbContext = scope.GetInstance<TDbContext>();
                 return dbContext.Set<Tenant>().ToArray();
             }
         }
@@ -37,16 +39,18 @@ namespace Backend.Fx.EfCorePersistence
         [CanBeNull]
         public override Tenant FindTenant(TenantId tenantId)
         {
-            using (var dbContext = _dbContextFactory())
+            using (var scope = _scopeManager.BeginScope(new SystemIdentity(), new TenantId(null)))
             {
+                var dbContext = scope.GetInstance<TDbContext>();
                 return dbContext.Set<Tenant>().Find(tenantId.Value);
             }
         }
 
-        protected override void SaveTenant(Tenant tenant)
+        public override void SaveTenant(Tenant tenant)
         {
-            using (var dbContext = _dbContextFactory())
+            using (var scope = _scopeManager.BeginScope(new SystemIdentity(), new TenantId(null)))
             {
+                var dbContext = scope.GetInstance<TDbContext>();
                 var existingTenant = dbContext.Set<Tenant>().Find(tenant.Id);
                 if (existingTenant == null)
                 {

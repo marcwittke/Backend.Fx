@@ -4,7 +4,7 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
 {
     using Fx.Patterns.DataGeneration;
 
-    public class AnInitialDataGenerator : InitialDataGenerator
+    public class ADataGenerator : DataGenerator
     {
 
         public bool ShouldRunOverride { get; set; }
@@ -33,7 +33,7 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
 
     public class TheInitialDataGenerator
     {
-        private readonly AnInitialDataGenerator _sut = new AnInitialDataGenerator();
+        private readonly ADataGenerator _sut = new ADataGenerator();
 
         [Fact]
         public void RespectsNegativeShouldRunMethodResult()

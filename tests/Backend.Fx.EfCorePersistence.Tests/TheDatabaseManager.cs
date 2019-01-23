@@ -1,4 +1,8 @@
-﻿using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
+﻿using System.Data;
+using System.Runtime.InteropServices.ComTypes;
+using Backend.Fx.EfCorePersistence.Bootstrapping;
+using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
+using Backend.Fx.Patterns.DependencyInjection;
 using FakeItEasy;
 using Xunit;
 
@@ -12,17 +16,22 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
     public class TheDatabaseManager
     {
-        private readonly IDatabaseManager _sut;
+        private readonly IDatabaseBootstrapper _sut;
         private readonly DbContextOptions<TestDbContext> _dbContextOptions;
         private readonly string _dbFilePath;
 
         public TheDatabaseManager()
         {
             _dbFilePath = Path.GetTempFileName();
-            _dbContextOptions = new DbContextOptionsBuilder<TestDbContext>().UseSqlite("Data Source=" + _dbFilePath).Options;
+            string connectionString = "Data Source=" + _dbFilePath;
+            _dbContextOptions = new DbContextOptionsBuilder<TestDbContext>().UseSqlite(connectionString).Options;
 
-            var testCompRoot = new TestCompositionRoot(new TestDbContext(_dbContextOptions));
-            _sut = new DatabaseManagerWithoutMigration<TestDbContext>(testCompRoot);
+            TestCompositionRoot testCompRoot = new TestCompositionRoot();
+            testCompRoot.Register<TestDbContext>(() => new TestDbContext(_dbContextOptions));
+            testCompRoot.RegisterCollection<ISequence>(typeof(TheDatabaseManager).Assembly);
+            testCompRoot.RegisterCollection<IFullTextSearchIndex>(typeof(TheDatabaseManager).Assembly);
+            testCompRoot.Register<IDbConnection>(()=>new SqliteConnection(connectionString));
+            _sut = new EfCreationDatabaseBootstrapper<TestDbContext>(testCompRoot);
         }
 
         [Fact]
@@ -31,18 +40,6 @@ namespace Backend.Fx.EfCorePersistence.Tests
             Assert.Throws<SqliteException>(() => new TestDbContext(_dbContextOptions).Tenants.ToArray());
             _sut.EnsureDatabaseExistence();
             Assert.Empty(new TestDbContext(_dbContextOptions).Tenants);
-        }
-
-        [Fact]
-        public void DeletesDatabase()
-        {
-            SqliteConnection connection = new SqliteConnection("Data Source=" + _dbFilePath);
-            connection.Open();
-            connection.Close();
-            Assert.True(File.Exists(_dbFilePath));
-
-            _sut.DeleteDatabase();
-            Assert.False(File.Exists(_dbFilePath));
         }
     }
 }

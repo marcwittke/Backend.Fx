@@ -1,6 +1,5 @@
 ﻿namespace Backend.Fx.Patterns.Jobs
 {
-    using System.Threading.Tasks;
     using Logging;
     using UnitOfWork;
 
@@ -23,26 +22,6 @@
             {
                 _unitOfWork.Begin();
                 _jobExecutor.ExecuteJob();
-                Logger.Info($"Completing unit of work for {typeof(TJob).Name}");
-                _unitOfWork.Complete();
-            } 
-            catch
-            {
-                Logger.Info($"Aborting unit of work for {typeof(TJob).Name}");
-                throw;
-            }
-            finally
-            {
-                _unitOfWork.Dispose();
-            }
-        }
-
-        public async Task ExecuteJobAsync()
-        {
-            try
-            {
-                _unitOfWork.Begin();
-                await _jobExecutor.ExecuteJobAsync();
                 Logger.Info($"Completing unit of work for {typeof(TJob).Name}");
                 _unitOfWork.Complete();
             } 

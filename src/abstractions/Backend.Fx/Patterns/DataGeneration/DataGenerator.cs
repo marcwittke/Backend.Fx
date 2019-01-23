@@ -9,9 +9,9 @@
     /// Any implementation is automatically picked up by the injection container, so no extra plumbing is required.
     /// You can require any application or domain service including repositories via constructor parameter.
     /// </summary>
-    public abstract class InitialDataGenerator
+    public abstract class DataGenerator
     {
-        private static readonly ILogger Logger = LogManager.Create<InitialDataGenerator>();
+        private static readonly ILogger Logger = LogManager.Create<DataGenerator>();
 
         /// <summary>
         /// simple way of ordering the execution of DataGenerators. Priority 0 will be executed first.

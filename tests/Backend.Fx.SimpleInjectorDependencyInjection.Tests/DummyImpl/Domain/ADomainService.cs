@@ -1,6 +1,6 @@
 ﻿using Backend.Fx.BuildingBlocks;
 
-namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl
+namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Domain
 {
     public interface ITestDomainService : IDomainService
     { }
@@ -8,6 +8,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl
     public interface IAnotherTestDomainService : IDomainService
     { }
 
-    public class TestDomainService : ITestDomainService, IAnotherTestDomainService
+    public class ADomainService : ITestDomainService, IAnotherTestDomainService
     { }
 }

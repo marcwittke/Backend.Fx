@@ -40,15 +40,6 @@ namespace Backend.Fx.Tests.Patterns.Jobs
         }
 
         [Fact]
-        public async Task BeginsAndCompletesUnitOfWorkAsync()
-        {
-            await _sut.ExecuteJobAsync();
-            A.CallTo(() => _unitOfWork.Begin()).MustHaveHappenedOnceExactly();
-            A.CallTo(() => _unitOfWork.Complete()).MustHaveHappenedOnceExactly();
-            A.CallTo(() => _unitOfWork.Dispose()).MustHaveHappenedOnceExactly();
-        }
-
-        [Fact]
         public void CallsJobExecutor()
         {
             _sut.ExecuteJob();
@@ -56,28 +47,10 @@ namespace Backend.Fx.Tests.Patterns.Jobs
         }
 
         [Fact]
-        public async Task CallsJobExecutorAsync()
-        {
-            await _sut.ExecuteJobAsync();
-            A.CallTo(() => _jobExecutor.ExecuteJobAsync()).MustHaveHappenedOnceExactly();
-        }
-
-        [Fact]
         public void DoesNotCompleteUnitOfWorkOnException()
         {
             A.CallTo(() => _jobExecutor.ExecuteJob()).Throws<InvalidOperationException>();
             Assert.Throws<InvalidOperationException>(() => _sut.ExecuteJob());
-            A.CallTo(() => _unitOfWork.Begin()).MustHaveHappenedOnceExactly();
-            A.CallTo(() => _unitOfWork.Dispose()).MustHaveHappenedOnceExactly();
-            A.CallTo(() => _unitOfWork.Complete()).MustNotHaveHappened();
-        }
-
-        [Fact]
-        public async Task DoesNotCompleteUnitOfWorkOnExceptionAsync()
-        {
-            A.CallTo(() => _jobExecutor.ExecuteJobAsync()).ThrowsAsync(new InvalidOperationException());
-            await Assert.ThrowsAsync<InvalidOperationException>(async () => await _sut.ExecuteJobAsync());
-            A.CallTo(() => _unitOfWork.Begin()).MustHaveHappenedOnceExactly();
             A.CallTo(() => _unitOfWork.Begin()).MustHaveHappenedOnceExactly();
             A.CallTo(() => _unitOfWork.Dispose()).MustHaveHappenedOnceExactly();
             A.CallTo(() => _unitOfWork.Complete()).MustNotHaveHappened();
