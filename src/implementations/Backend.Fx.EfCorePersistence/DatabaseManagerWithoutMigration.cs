@@ -1,14 +1,14 @@
 ﻿namespace Backend.Fx.EfCorePersistence
 {
-    using System;
     using Logging;
     using Microsoft.EntityFrameworkCore;
+    using Backend.Fx.Patterns.DependencyInjection;
 
     public class DatabaseManagerWithoutMigration<TDbContext> : DatabaseManager<TDbContext> where TDbContext : DbContext
     {
         private static readonly ILogger Logger = LogManager.Create<DatabaseManagerWithoutMigration<TDbContext>>();
 
-        public DatabaseManagerWithoutMigration(Func<TDbContext> dbContextFactory) : base(dbContextFactory)
+        public DatabaseManagerWithoutMigration(ICompositionRoot compositionRoot) : base(compositionRoot)
         { }
 
         protected override void ExecuteCreationStrategy(DbContext dbContext)
