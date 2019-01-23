@@ -1,13 +1,12 @@
 ﻿using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
+using Backend.Fx.Patterns.DependencyInjection;
 using Xunit;
 
 namespace Backend.Fx.EfCorePersistence.Tests
 {
     using System.Globalization;
     using Environment.MultiTenancy;
-    using FakeItEasy;
-    using Microsoft.EntityFrameworkCore;
-
+    
     public class TheTenantManager : TestWithInMemorySqliteDbContext
     {
         private readonly MyTenantManager _sut;
@@ -15,7 +14,9 @@ namespace Backend.Fx.EfCorePersistence.Tests
         public TheTenantManager()
         {
             CreateDatabase();
-            _sut = new MyTenantManager(A.Fake<ITenantInitializer>(), DbContextOptions);
+            var testCompositionRoot = new TestCompositionRoot();
+            testCompositionRoot.Register(()=>new TestDbContext(DbContextOptions));
+            _sut = new MyTenantManager(testCompositionRoot);
         }
 
         [Fact]
@@ -63,7 +64,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
             Assert.Contains(tenants, t => t.Id == 4711);
             Assert.Contains(tenants, t => t.Id == 4712);
             Assert.Contains(tenants, t => t.Id == 4713);
-            
+
             Assert.Contains(tenants, t => t.Id == 4714);
         }
 
@@ -83,9 +84,9 @@ namespace Backend.Fx.EfCorePersistence.Tests
             Assert.Contains(tenants, t => t.Value == 4714);
         }
 
-        private class MyTenantManager : TenantManager<TestDbContext>
+        private class MyTenantManager : EfTenantManager<TestDbContext>
         {
-            public MyTenantManager(ITenantInitializer tenantInitializer, DbContextOptions<TestDbContext> dbContextOptions) : base(tenantInitializer, dbContextOptions)
+            public MyTenantManager(IScopeManager scopeManager) : base(scopeManager)
             { }
 
             public Tenant FindTenantX(TenantId tenantId)
@@ -97,6 +98,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
             {
                 SaveTenant(tenant);
             }
+
         }
     }
 }

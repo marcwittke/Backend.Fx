@@ -36,6 +36,9 @@
 
         public IQueryable<TAggregateRoot> Search(string searchQuery)
         {
+            // mitigate SQL injection
+            searchQuery = searchQuery.Replace("\'", "");
+
             string ftsQuery = _easyFts.ToFtsQuery(searchQuery);
 
             IQueryable<TAggregateRoot> queryable;

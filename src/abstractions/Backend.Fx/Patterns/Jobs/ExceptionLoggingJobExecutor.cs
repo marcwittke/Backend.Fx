@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace Backend.Fx.Patterns.Jobs
+﻿namespace Backend.Fx.Patterns.Jobs
 {
-    using System.Threading.Tasks;
+    using System;
     using Logging;
 
     public class ExceptionLoggingJobExecutor<TJob> : IJobExecutor<TJob>
@@ -21,19 +19,6 @@ namespace Backend.Fx.Patterns.Jobs
             try
             {
                 _jobExecutor.ExecuteJob();
-            } 
-            catch(Exception ex)
-            {
-                _exceptionLogger.LogException(ex);
-                throw;
-            }
-        }
-
-        public async Task ExecuteJobAsync()
-        {
-            try
-            {
-                await _jobExecutor.ExecuteJobAsync();
             } 
             catch(Exception ex)
             {

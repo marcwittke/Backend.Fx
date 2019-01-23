@@ -1,12 +1,12 @@
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using JetBrains.Annotations;
 
-namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl
+namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Domain
 {
     [UsedImplicitly]
-    public class TheIntegrationEvent : IntegrationEvent
+    public class AnIntegrationEvent : IntegrationEvent
     {
-        public TheIntegrationEvent(int tenantId, int whatever) : base(tenantId)
+        public AnIntegrationEvent(int tenantId, int whatever) : base(tenantId)
         {
             Whatever = whatever;
         }

@@ -11,7 +11,8 @@ using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using Backend.Fx.Patterns.IdGeneration;
 using Backend.Fx.SimpleInjectorDependencyInjection.Modules;
-using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl;
+using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Bootstrapping;
+using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Domain;
 using FakeItEasy;
 using SimpleInjector;
 using Xunit;
@@ -59,7 +60,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
             using (var scope = _sut.BeginScope(new SystemIdentity(), new TenantId(100)))
             {
                 var testDomainService = scope.GetInstance<ITestDomainService>();
-                Assert.IsType<TestDomainService>(testDomainService);
+                Assert.IsType<ADomainService>(testDomainService);
             }
         }
 
@@ -69,10 +70,10 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
             using (var scope = _sut.BeginScope(new SystemIdentity(), new TenantId(100)))
             {
                 var testDomainService = scope.GetInstance<ITestDomainService>();
-                Assert.IsType<TestDomainService>(testDomainService);
+                Assert.IsType<ADomainService>(testDomainService);
 
                 var anotherTestDomainService = scope.GetInstance<IAnotherTestDomainService>();
-                Assert.IsType<TestDomainService>(anotherTestDomainService);
+                Assert.IsType<ADomainService>(anotherTestDomainService);
 
                 Assert.True(Equals(testDomainService, anotherTestDomainService));
             }
@@ -83,7 +84,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         {
             using (var scope = _sut.BeginScope(new SystemIdentity(), new TenantId(100)))
             {
-                Assert.IsType<TestApplicationService>(scope.GetInstance<ITestApplicationService>());
+                Assert.IsType<AnApplicationService>(scope.GetInstance<ITestApplicationService>());
             }
         }
 

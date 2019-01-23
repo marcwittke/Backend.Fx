@@ -6,16 +6,16 @@ using Backend.Fx.BuildingBlocks;
 using Backend.Fx.ConfigurationSettings;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.DateAndTime;
+using Backend.Fx.InMemoryPersistence;
 using Backend.Fx.Patterns.EventAggregation.Domain;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using Backend.Fx.Patterns.IdGeneration;
 using Backend.Fx.Patterns.UnitOfWork;
 using Backend.Fx.SimpleInjectorDependencyInjection.Modules;
-using Backend.Fx.InMemoryPersistence;
 using FakeItEasy;
 using SimpleInjector;
 
-namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl
+namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Bootstrapping
 {
     public class APersistenceModule : SimpleInjectorModule
     {

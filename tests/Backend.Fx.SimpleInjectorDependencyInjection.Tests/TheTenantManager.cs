@@ -9,6 +9,8 @@ using Backend.Fx.Patterns.EventAggregation.Integration;
 using Backend.Fx.SimpleInjectorDependencyInjection.Modules;
 using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl;
 using Backend.Fx.InMemoryPersistence;
+using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Bootstrapping;
+using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Domain;
 using FakeItEasy;
 using SimpleInjector;
 using Xunit;
@@ -44,7 +46,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
 
             compositionRoot.Verify();
 
-            _sut = new InMemoryTenantManager(new TenantInitializer(compositionRoot));
+            _sut = new InMemoryTenantManager();
             _scopeManager = compositionRoot;
         }
 
@@ -58,37 +60,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
                 IRepository<AnAggregate> repository = scope.GetInstance<IRepository<AnAggregate>>();
                 AnAggregate[] allAggregates = repository.GetAll();
                 Assert.Empty(allAggregates);
-            }
-        }
-
-        [Fact]
-        public void RunsProductiveDataGeneratorsOnTenantInitialization()
-        {
-            TenantId tenantId = _sut.CreateProductionTenant("prod", "unit test created", true, new CultureInfo("en-US"));
-            _sut.EnsureTenantIsInitialized(tenantId);
-
-            using (var scope = _scopeManager.BeginScope(new SystemIdentity(), tenantId))
-            {
-                IRepository<AnAggregate> repository = scope.GetInstance<IRepository<AnAggregate>>();
-                AnAggregate[] allAggregates = repository.GetAll();
-                Assert.Single(allAggregates);
-                Assert.Equal("Productive record", allAggregates[0].Name);
-            }
-        }
-
-        [Fact]
-        public void RunsProductiveAndDemonstrationDataGeneratorsOnDemoTenantInitialization()
-        {
-            TenantId tenantId = _sut.CreateDemonstrationTenant("demo", "unit test created", true, new CultureInfo("en-US"));
-            _sut.EnsureTenantIsInitialized(tenantId);
-
-            using (var scope = _scopeManager.BeginScope(new SystemIdentity(), tenantId))
-            {
-                IRepository<AnAggregate> repository = scope.GetInstance<IRepository<AnAggregate>>();
-                AnAggregate[] allAggregates = repository.GetAll();
-                Assert.Equal(2, allAggregates.Length);
-                Assert.Equal("Productive record", allAggregates[0].Name);
-                Assert.Equal("Demo record", allAggregates[1].Name);
             }
         }
     }

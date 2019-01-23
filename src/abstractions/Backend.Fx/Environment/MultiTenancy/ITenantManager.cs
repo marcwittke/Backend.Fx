@@ -1,10 +1,8 @@
 ﻿namespace Backend.Fx.Environment.MultiTenancy
 {
     using System;
-    using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
-    using Exceptions;
     using JetBrains.Annotations;
     using Logging;
 
@@ -17,25 +15,18 @@
         TenantId[] GetTenantIds();
         Tenant[] GetTenants();
         Tenant GetTenant(TenantId id);
-        void EnsureTenantIsInitialized(TenantId tenantId);
         Tenant FindTenant(TenantId tenantId);
         TenantId CreateDemonstrationTenant(string name, string description, bool isDefault, CultureInfo defaultCultureInfo, string uriMatchingExpression = null);
         TenantId CreateProductionTenant(string name, string description, bool isDefault, CultureInfo defaultCultureInfo, string uriMatchingExpression = null);
         TenantId GetDefaultTenantId();
+        void SaveTenant(Tenant tenant);
     }
 
     public abstract class TenantManager : ITenantManager
     {
         private static readonly ILogger Logger = LogManager.Create<TenantManager>();
-        private readonly ITenantInitializer _tenantInitializer;
         private readonly object _syncLock = new object();
-        private readonly HashSet<int> _initializedTenants = new HashSet<int>();
-
-        protected TenantManager(ITenantInitializer tenantInitializer)
-        {
-            _tenantInitializer = tenantInitializer;
-        }
-
+        
         public TenantId CreateDemonstrationTenant(string name, string description, bool isDefault, CultureInfo defaultCultureInfo, string uriMatchingExpression = null)
         {
             lock (_syncLock)
@@ -47,9 +38,9 @@
 
         public TenantId CreateProductionTenant(string name, string description, bool isDefault, CultureInfo defaultCultureInfo, string uriMatchingExpression = null)
         {
-            Logger.Info($"Creating production tenant: {name}");
             lock (_syncLock)
             {
+                Logger.Info($"Creating production tenant: {name}");
                 return CreateTenant(name, description, false, isDefault, defaultCultureInfo, uriMatchingExpression);
             }
         }
@@ -62,33 +53,12 @@
                        : new TenantId(defaultTenant.Id);
         }
 
-        protected void InitializeTenant(Tenant tenant)
-        {
-            switch (tenant.State)
-            {
-                case TenantState.Inactive: throw new UnprocessableException($"Cannot initialize inactive Tenant[{tenant.Id}]");
-                case TenantState.Created:
-                    tenant.State = TenantState.Initializing;
-                    SaveTenant(tenant);
-
-                    Logger.Info($"Initializing {(tenant.IsDemoTenant ? "demonstration" : "production")} tenant[{tenant.Id}] ({tenant.Name})");
-                    var tenantId = new TenantId(tenant.Id);
-                    _tenantInitializer.RunProductiveInitialDataGenerators(tenantId);
-                    if (tenant.IsDemoTenant)
-                    {
-                        _tenantInitializer.RunDemoInitialDataGenerators(tenantId);
-                    }
-                    tenant.State = TenantState.Active;
-                    break;
-                default:
-                    return;
-            }
-            
-        }
+        public abstract void SaveTenant(Tenant tenant);
 
         public abstract TenantId[] GetTenantIds();
 
         public abstract Tenant[] GetTenants();
+
         public Tenant GetTenant(TenantId tenantId)
         {
             Tenant tenant = FindTenant(tenantId);
@@ -100,26 +70,7 @@
 
             return tenant;
         }
-
-        public void EnsureTenantIsInitialized(TenantId tenantId)
-        {
-            if (_initializedTenants.Contains(tenantId.Value))
-            {
-                return;
-            }
-
-            Tenant tenant = FindTenant(tenantId);
-
-            if (tenant == null)
-            {
-                throw new ArgumentException($"Invalid tenant Id [{tenantId.Value}]", nameof(tenantId));
-            }
-
-            InitializeTenant(tenant);
-            SaveTenant(tenant);
-            _initializedTenants.Add(tenantId.Value);
-        }
-
+        
         public abstract Tenant FindTenant(TenantId tenantId);
 
         private TenantId CreateTenant([NotNull] string name, string description, bool isDemo, bool isDefault, CultureInfo defaultCultureInfo, string uriMatchingExpression)
@@ -135,7 +86,5 @@
             SaveTenant(tenant);
             return new TenantId(tenant.Id);
         }
-
-        protected abstract void SaveTenant(Tenant tenant);
     }
 }

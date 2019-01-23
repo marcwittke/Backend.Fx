@@ -29,7 +29,7 @@ namespace Backend.Fx.AspNetCore.Scoping
         [UsedImplicitly]
         public async Task Invoke(HttpContext context)
         {
-            while (!_application.IsBooted.Wait(3000))
+            while (!await _application.WaitForBootAsync(3000))
             {
                 Logger.Info("Queuing Request while application is booting...");
             }
