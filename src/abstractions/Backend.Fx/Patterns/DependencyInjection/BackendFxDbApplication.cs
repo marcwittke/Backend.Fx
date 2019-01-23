@@ -29,9 +29,12 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
         protected sealed override async Task OnBoot()
         {
+            WaitForDatabase();
             DatabaseBootstrapper.EnsureDatabaseExistence();
             await OnDatabaseBoot();
         }
+
+        protected virtual void WaitForDatabase() { }
 
         /// <summary>
         /// Extension point to do additional initialization after existence of database is ensured
