@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Backend.Fx.EfCorePersistence.Tests
 {
-    public class TheDatabaseManager
+    public class TheDatabaseBootstrapper
     {
         private readonly IDatabaseBootstrapper _sut;
         private readonly DbContextOptions<TestDbContext> _dbContextOptions;
@@ -19,7 +19,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
         private readonly ISequence _aSequence;
         private readonly IFullTextSearchIndex _aSearchIndex;
 
-        public TheDatabaseManager()
+        public TheDatabaseBootstrapper()
         {
             var dbFilePath = Path.GetTempFileName();
             _dbContextOptions = new DbContextOptionsBuilder<TestDbContext>().UseSqlite("Data Source=" + dbFilePath).Options;
