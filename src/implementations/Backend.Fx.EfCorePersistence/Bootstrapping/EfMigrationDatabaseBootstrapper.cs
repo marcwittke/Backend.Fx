@@ -1,5 +1,4 @@
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Fx.EfCorePersistence.Bootstrapping
@@ -8,10 +7,11 @@ namespace Backend.Fx.EfCorePersistence.Bootstrapping
     {
         private static readonly ILogger Logger = LogManager.Create<EfMigrationDatabaseBootstrapper<TDbContext>>();
 
-        public EfMigrationDatabaseBootstrapper(IScopeManager scopeManager) : base(scopeManager)
-        { }
-        
-        protected override void ExecuteCreationStrategy(DbContext dbContext)
+        public EfMigrationDatabaseBootstrapper(TDbContext dbContext, IDatabaseBootstrapperInstanceProvider instanceProvider)
+            : base(dbContext, instanceProvider)
+        {}
+
+        protected override void ExecuteCreationStrategy(TDbContext dbContext)
         {
             Logger.Info("Migrating database to latest schema version");
             dbContext.Database.Migrate();
