@@ -10,7 +10,7 @@ namespace Backend.Fx.EfCorePersistence.Bootstrapping
         private readonly IDatabaseBootstrapperInstanceProvider _instanceProvider;
         private static readonly ILogger Logger = LogManager.Create<EfDatabaseBootstrapper<TDbContext>>();
 
-        protected EfDatabaseBootstrapper(TDbContext dbContext,IDatabaseBootstrapperInstanceProvider instanceProvider)
+        protected EfDatabaseBootstrapper(TDbContext dbContext, IDatabaseBootstrapperInstanceProvider instanceProvider)
         {
             _dbContext = dbContext;
             _instanceProvider = instanceProvider;
