@@ -64,30 +64,38 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
         private void InitializeTenants()
         {
-            var tenantDataGenerator = new TenantDataGenerator(ScopeManager);
             foreach (var tenant in TenantManager.GetTenants())
             {
-                switch (tenant.State)
-                {
-                    case TenantState.Inactive: throw new UnprocessableException($"Cannot initialize inactive Tenant[{tenant.Id}]");
+                InitializeTenant(tenant);
+            }
+        }
 
-                    case TenantState.Active:
-                    case TenantState.Created:
-                        tenant.State = TenantState.Initializing;
-                        TenantManager.SaveTenant(tenant);
+        private void InitializeTenant(Tenant tenant)
+        {
+            var tenantDataGenerator = new TenantDataGenerator(ScopeManager);
+            switch (tenant.State)
+            {
+                case TenantState.Inactive:
+                    throw new UnprocessableException($"Cannot initialize inactive Tenant[{tenant.Id}]");
 
-                        Logger.Info($"Initializing {(tenant.IsDemoTenant ? "demonstration" : "production")} tenant[{tenant.Id}] ({tenant.Name})");
-                        tenantDataGenerator.RunProductiveDataGenerators(tenant);
-                        if (tenant.IsDemoTenant)
-                        {
-                            tenantDataGenerator.RunDemoDataGenerators(tenant);
-                        }
-                        tenant.State = TenantState.Active;
-                        break;
+                case TenantState.Active:
+                case TenantState.Created:
+                    tenant.State = TenantState.Initializing;
+                    TenantManager.SaveTenant(tenant);
 
-                    default:
-                        return;
-                }
+                    Logger.Info(
+                        $"Initializing {(tenant.IsDemoTenant ? "demonstration" : "production")} tenant[{tenant.Id}] ({tenant.Name})");
+                    tenantDataGenerator.RunProductiveDataGenerators(tenant);
+                    if (tenant.IsDemoTenant)
+                    {
+                        tenantDataGenerator.RunDemoDataGenerators(tenant);
+                    }
+
+                    tenant.State = TenantState.Active;
+                    return;
+
+                default:
+                    return;
             }
         }
 

@@ -2,10 +2,10 @@
 {
     using System;
     using System.Security.Principal;
+    using System.Data;
     using Environment.DateAndTime;
     using Logging;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Storage;
     using Patterns.DependencyInjection;
     using Patterns.EventAggregation.Domain;
     using Patterns.EventAggregation.Integration;
@@ -13,13 +13,15 @@
 
     public class EfUnitOfWork : UnitOfWork, ICanInterruptTransaction
     {
+        private readonly IDbConnection _dbConnection;
         private static readonly ILogger Logger = LogManager.Create<EfUnitOfWork>();
         private IDisposable _transactionLifetimeLogger;
-        private IDbContextTransaction _currentTransaction;
+        private IDbTransaction _currentTransaction;
 
-        public EfUnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder, IDomainEventAggregator eventAggregator, IEventBusScope eventBusScope, DbContext dbContext)
+        public EfUnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder, IDomainEventAggregator eventAggregator, IEventBusScope eventBusScope, DbContext dbContext, IDbConnection dbConnection)
             : base(clock, identityHolder, eventAggregator, eventBusScope)
         {
+            _dbConnection = dbConnection;
             DbContext = dbContext;
         }
 
@@ -63,7 +65,7 @@
             }
             catch (Exception ex)
             {
-                Logger.Warn(ex, "Rollback failed");
+                Logger.Error(ex, "Rollback failed");
             }
             _transactionLifetimeLogger?.Dispose();
             _transactionLifetimeLogger = null;
@@ -95,7 +97,7 @@
 
         private void BeginTransaction()
         {
-            _currentTransaction = DbContext.Database.BeginTransaction();
+            _currentTransaction = _dbConnection.BeginTransaction();
             _transactionLifetimeLogger = Logger.DebugDuration("Transaction open");
         }
     }
