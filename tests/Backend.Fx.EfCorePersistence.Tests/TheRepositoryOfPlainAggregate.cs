@@ -1,18 +1,16 @@
+using System;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
+using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Extensions;
+using Backend.Fx.Patterns.Authorization;
+using Backend.Fx.Patterns.EventAggregation.Domain;
+using Backend.Fx.Patterns.EventAggregation.Integration;
+using FakeItEasy;
 using Xunit;
 
 namespace Backend.Fx.EfCorePersistence.Tests
 {
-    using System;
-    using Environment.Authentication;
-    using FakeItEasy;
-    using Patterns.Authorization;
-    using Patterns.EventAggregation.Domain;
-    using Patterns.EventAggregation.Integration;
-    using Xunit;
-
     public class TheRepositoryOfPlainAggregate : TestWithInMemorySqliteDbContext
     {
         public TheRepositoryOfPlainAggregate()
@@ -23,10 +21,10 @@ namespace Backend.Fx.EfCorePersistence.Tests
         [Fact]
         public void CanCreate()
         {
-            using (var dbContext = new TestDbContext(DbContextOptions))
+            using (var dbContext = new TestDbContext(DbContextOptions()))
             {
                 using (var uow = new EfUnitOfWork(Clock, CurrentIdentityHolder.CreateSystem(), A.Fake<IDomainEventAggregator>(), 
-                                                  A.Fake<IEventBusScope>(), dbContext))
+                                                  A.Fake<IEventBusScope>(), dbContext, Connection))
                 {
                     uow.Begin();
                     var repo = new EfRepository<Blogger>(dbContext, new BloggerMapping(), TenantIdHolder, new AllowAll<Blogger>());
@@ -54,10 +52,10 @@ namespace Backend.Fx.EfCorePersistence.Tests
                               "VALUES (444, 12, '2012-05-12 23:12:09', 'the test', 'Bratislav', 'Metulsky', 'whatever')";
             cmd.ExecuteNonQuery();
             
-            using (var dbContext = new TestDbContext(DbContextOptions))
+            using (var dbContext = new TestDbContext(DbContextOptions()))
             {
                 using (var uow = new EfUnitOfWork(Clock, CurrentIdentityHolder.CreateSystem(), A.Fake<IDomainEventAggregator>(), 
-                                                  A.Fake<IEventBusScope>(), dbContext))
+                                                  A.Fake<IEventBusScope>(), dbContext, Connection))
                 {
                     uow.Begin();
                     var repo = new EfRepository<Blogger>(dbContext, new BloggerMapping(), TenantIdHolder, new AllowAll<Blogger>());
@@ -81,10 +79,10 @@ namespace Backend.Fx.EfCorePersistence.Tests
                               "VALUES (555, 12, '2012-05-12 23:12:09', 'the test', 'Bratislav', 'Metulsky', 'whatever')";
             cmd.ExecuteNonQuery();
 
-            using (var dbContext = new TestDbContext(DbContextOptions))
+            using (var dbContext = new TestDbContext(DbContextOptions()))
             {
                 using (var uow = new EfUnitOfWork(Clock, CurrentIdentityHolder.CreateSystem(), A.Fake<IDomainEventAggregator>(), 
-                                                  A.Fake<IEventBusScope>(), dbContext))
+                                                  A.Fake<IEventBusScope>(), dbContext, Connection))
                 {
                     uow.Begin();
                     var repo = new EfRepository<Blogger>(dbContext, new BloggerMapping(), TenantIdHolder, new AllowAll<Blogger>());
@@ -108,10 +106,10 @@ namespace Backend.Fx.EfCorePersistence.Tests
                               "VALUES (456, 12, '2012-05-12 23:12:09', 'the test', 'Bratislav', 'Metulsky', 'whatever')";
             cmd.ExecuteNonQuery();
 
-            using (var dbContext = new TestDbContext(DbContextOptions))
+            using (var dbContext = new TestDbContext(DbContextOptions()))
             {
                 using (var uow = new EfUnitOfWork(Clock, CurrentIdentityHolder.CreateSystem(), A.Fake<IDomainEventAggregator>(), 
-                                                  A.Fake<IEventBusScope>(), dbContext))
+                                                  A.Fake<IEventBusScope>(), dbContext, Connection))
                 {
                     uow.Begin();
                     var repo = new EfRepository<Blogger>(dbContext, new BloggerMapping(), TenantIdHolder, new AllowAll<Blogger>());
@@ -128,10 +126,10 @@ namespace Backend.Fx.EfCorePersistence.Tests
             var count = (long)cmd.ExecuteScalar();
             Assert.Equal(1L, count);
 
-            using (var dbContext = new TestDbContext(DbContextOptions))
+            using (var dbContext = new TestDbContext(DbContextOptions()))
             {
                 using (var uow = new EfUnitOfWork(Clock, CurrentIdentityHolder.CreateSystem(), A.Fake<IDomainEventAggregator>(), 
-                                                  A.Fake<IEventBusScope>(), dbContext))
+                                                  A.Fake<IEventBusScope>(), dbContext, Connection))
                 {
                     uow.Begin();
                     var repo = new EfRepository<Blogger>(dbContext, new BloggerMapping(), TenantIdHolder, new AllowAll<Blogger>());

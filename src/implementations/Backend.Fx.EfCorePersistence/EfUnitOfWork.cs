@@ -1,28 +1,25 @@
-﻿namespace Backend.Fx.EfCorePersistence
-{
-    using System;
-    using System.Security.Principal;
-    using System.Data;
-    using Environment.DateAndTime;
-    using Logging;
-    using Microsoft.EntityFrameworkCore;
-    using Patterns.DependencyInjection;
-    using Patterns.EventAggregation.Domain;
-    using Patterns.EventAggregation.Integration;
-    using Patterns.UnitOfWork;
+﻿using System;
+using System.Data;
+using System.Security.Principal;
+using Backend.Fx.Environment.DateAndTime;
+using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.Patterns.EventAggregation.Domain;
+using Backend.Fx.Patterns.EventAggregation.Integration;
+using Backend.Fx.Patterns.UnitOfWork;
+using Microsoft.EntityFrameworkCore;
 
+namespace Backend.Fx.EfCorePersistence
+{
     public class EfUnitOfWork : UnitOfWork, ICanInterruptTransaction
     {
-        private readonly IDbConnection _dbConnection;
-        private static readonly ILogger Logger = LogManager.Create<EfUnitOfWork>();
-        private IDisposable _transactionLifetimeLogger;
-        private IDbTransaction _currentTransaction;
-
-        public EfUnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder, IDomainEventAggregator eventAggregator, IEventBusScope eventBusScope, DbContext dbContext, IDbConnection dbConnection)
+        private readonly EfTransactionManager _transactionManager;
+        
+        public EfUnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder, IDomainEventAggregator eventAggregator,
+            IEventBusScope eventBusScope, DbContext dbContext, IDbConnection dbConnection)
             : base(clock, identityHolder, eventAggregator, eventBusScope)
         {
-            _dbConnection = dbConnection;
             DbContext = dbContext;
+            _transactionManager = new EfTransactionManager(dbConnection, dbContext);
         }
 
         public DbContext DbContext { get; }
@@ -30,7 +27,7 @@
         public override void Begin()
         {
             base.Begin();
-            BeginTransaction();
+            _transactionManager.Begin();
         }
 
         public override void Flush()
@@ -46,29 +43,12 @@
 
         protected override void Commit()
         {
-            DbContext.SaveChanges();
-            _currentTransaction.Commit();
-            _currentTransaction.Dispose();
-            _currentTransaction = null;
-            _transactionLifetimeLogger?.Dispose();
-            _transactionLifetimeLogger = null;
+            _transactionManager.Commit();
         }
 
         protected override void Rollback()
         {
-            Logger.Info("Rolling back transaction");
-            try
-            {
-                _currentTransaction?.Rollback();
-                _currentTransaction?.Dispose();
-                _currentTransaction = null;
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex, "Rollback failed");
-            }
-            _transactionLifetimeLogger?.Dispose();
-            _transactionLifetimeLogger = null;
+            _transactionManager.Rollback();
         }
 
         /// <inheritdoc />
@@ -76,7 +56,8 @@
         {
             Commit();
             action.Invoke();
-            BeginTransaction();
+            _transactionManager.ResetTransactions();
+            _transactionManager.Begin();
         }
 
         /// <inheritdoc />
@@ -84,7 +65,8 @@
         {
             Commit();
             T result = func.Invoke();
-            BeginTransaction();
+            _transactionManager.ResetTransactions();
+            _transactionManager.Begin();
             return result;
         }
 
@@ -92,13 +74,9 @@
         public void CompleteCurrentTransaction_BeginNewTransaction()
         {
             Commit();
-            BeginTransaction();
+            _transactionManager.ResetTransactions();
+            _transactionManager.Begin();
         }
 
-        private void BeginTransaction()
-        {
-            _currentTransaction = _dbConnection.BeginTransaction();
-            _transactionLifetimeLogger = Logger.DebugDuration("Transaction open");
-        }
     }
 }

@@ -1,26 +1,25 @@
-﻿using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using Backend.Fx.BuildingBlocks;
+using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
+using Backend.Fx.Environment.Authentication;
+using Backend.Fx.Environment.DateAndTime;
+using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Extensions;
+using Backend.Fx.Patterns.Authorization;
+using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.Patterns.EventAggregation.Domain;
+using Backend.Fx.Patterns.EventAggregation.Integration;
+using Backend.Fx.Patterns.IdGeneration;
+using FakeItEasy;
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace Backend.Fx.EfCorePersistence.Tests
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using BuildingBlocks;
-    using Environment.Authentication;
-    using Environment.DateAndTime;
-    using Environment.MultiTenancy;
-    using FakeItEasy;
-    using Microsoft.EntityFrameworkCore;
-    using Patterns.Authorization;
-    using Patterns.DependencyInjection;
-    using Patterns.EventAggregation.Domain;
-    using Patterns.EventAggregation.Integration;
-    using Patterns.IdGeneration;
-    using Xunit;
-
     public class TheRepositoryOfComposedAggregate : TestWithInMemorySqliteDbContext
     {
         private readonly IEqualityComparer<DateTime?> _tolerantDateTimeComparer = new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(500));
@@ -42,7 +41,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
             count = ExecuteScalar<long>("SELECT count(*) FROM Posts");
             Assert.Equal(0, count);
 
-            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantIdHolder))
+            using (var sut = new SystemUnderTest(DbContextOptions(), Clock, TenantIdHolder, Connection))
             {
                 var repository = sut.Repository;
                 var blog = new Blog(123, "my blog");
@@ -62,7 +61,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
         {
             var id = CreateBlogWithPost();
             Blog blog;
-            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantIdHolder))
+            using (var sut = new SystemUnderTest(DbContextOptions(), Clock, TenantIdHolder, Connection))
             {
                 blog = sut.Repository.Single(id);
             }
@@ -78,7 +77,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
         {
             var id = CreateBlogWithPost();
 
-            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantIdHolder))
+            using (var sut = new SystemUnderTest(DbContextOptions(), Clock, TenantIdHolder, Connection))
             {
                 var blog = sut.Repository.Single(id);
                 blog.Modify("modified");
@@ -95,7 +94,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
         {
             var id = CreateBlogWithPost();
 
-            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantIdHolder))
+            using (var sut = new SystemUnderTest(DbContextOptions(), Clock, TenantIdHolder, Connection))
             {
                 var blog = sut.Repository.Single(id);
                 sut.Repository.Delete(blog);
@@ -115,7 +114,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
             long count = ExecuteScalar<long>("SELECT count(*) FROM Posts");
             Assert.Equal(10, count);
 
-            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantIdHolder))
+            using (var sut = new SystemUnderTest(DbContextOptions(), Clock, TenantIdHolder, Connection))
             {
                 var blog = sut.Repository.Single(id);
                 var firstPost = blog.Posts.First();
@@ -132,7 +131,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
         {
             int id = CreateBlogWithPost(10);
             Post post;
-            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantIdHolder))
+            using (var sut = new SystemUnderTest(DbContextOptions(), Clock, TenantIdHolder, Connection))
             {
                 var blog = sut.Repository.Single(id);
                 post = blog.Posts.First();
@@ -147,7 +146,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
         public void CanAddDependant()
         {
             int id = CreateBlogWithPost(10);
-            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantIdHolder))
+            using (var sut = new SystemUnderTest(DbContextOptions(), Clock, TenantIdHolder, Connection))
             {
                 var blog = sut.Repository.Single(id);
                 blog.Posts.Add(new Post(_idGenerator.NextId(), blog, "added"));
@@ -162,7 +161,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
         public void CanReplaceDependentCollection()
         {
             var id = CreateBlogWithPost(10);
-            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantIdHolder))
+            using (var sut = new SystemUnderTest(DbContextOptions(), Clock, TenantIdHolder, Connection))
             {
                 var blog = sut.Repository.Single(id);
                 blog.Posts.Clear();
@@ -185,7 +184,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
             var expectedModifiedOn = Clock.UtcNow.AddHours(1);
             Clock.OverrideUtcNow(expectedModifiedOn);
 
-            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantIdHolder))
+            using (var sut = new SystemUnderTest(DbContextOptions(), Clock, TenantIdHolder, Connection))
             {
                 var blog = sut.Repository.Single(id);
                 blog.Posts.Remove(blog.Posts.First());
@@ -193,7 +192,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             Clock.OverrideUtcNow(Clock.UtcNow.AddHours(1));
 
-            using (var sut = new SystemUnderTest(DbContextOptions, Clock, TenantIdHolder))
+            using (var sut = new SystemUnderTest(DbContextOptions(), Clock, TenantIdHolder, Connection))
             {
                 var blog = sut.DbContext.Blogs.Find(id);
                 Assert.NotNull(blog.ChangedOn);
@@ -222,11 +221,12 @@ namespace Backend.Fx.EfCorePersistence.Tests
             public EfUnitOfWork UnitOfWork { get; }
             public IRepository<Blog> Repository { get; }
 
-            public SystemUnderTest(DbContextOptions<TestDbContext> dbContextOptions, IClock clock, ICurrentTHolder<TenantId> tenantIdHolder)
+            public SystemUnderTest(DbContextOptions<TestDbContext> dbContextOptions, IClock clock,
+                ICurrentTHolder<TenantId> tenantIdHolder, IDbConnection connection)
             {
                 DbContext = new TestDbContext(dbContextOptions);
                 UnitOfWork = new EfUnitOfWork(clock, CurrentIdentityHolder.CreateSystem(), A.Fake<IDomainEventAggregator>(), 
-                                              A.Fake<IEventBusScope>(), DbContext);
+                                              A.Fake<IEventBusScope>(), DbContext, connection);
                 UnitOfWork.Begin();
                 Repository = new EfRepository<Blog>(DbContext, new BlogMapping(), tenantIdHolder, new AllowAll<Blog>());
             }

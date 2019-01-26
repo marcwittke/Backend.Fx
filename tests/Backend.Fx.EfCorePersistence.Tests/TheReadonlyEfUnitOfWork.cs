@@ -1,5 +1,5 @@
-﻿using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
-using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
+﻿using System;
+using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
 using Xunit;
 
 namespace Backend.Fx.EfCorePersistence.Tests
@@ -16,28 +16,32 @@ namespace Backend.Fx.EfCorePersistence.Tests
         [Fact]
         public void OpensTransaction()
         {
-            using(var dbContext = new TestDbContext(DbContextOptions))
+            using(var dbContext = UseDbContext())
             {
-                var sut = new ReadonlyEfUnitOfWork(dbContext, CurrentIdentityHolder.CreateSystem());
+                var sut = new ReadonlyEfUnitOfWork(Connection, dbContext, CurrentIdentityHolder.CreateSystem());
                 
                 Assert.Null(dbContext.Database.CurrentTransaction);
                 sut.Begin();
                 Assert.NotNull(dbContext.Database.CurrentTransaction);
                 sut.Complete();
-                Assert.Null(dbContext.Database.CurrentTransaction);
+                Assert.Throws<InvalidOperationException>(() => dbContext.Database.CurrentTransaction.Commit());
             }
         }
 
         [Fact]
         public void RollbacksTransactionOnComplete()
         {
-            using (var dbContext = new TestDbContext(DbContextOptions))
+            using (var dbContext = UseDbContext())
             {
-                var sut = new ReadonlyEfUnitOfWork(dbContext, CurrentIdentityHolder.CreateSystem());
+                var sut = new ReadonlyEfUnitOfWork(Connection, dbContext, CurrentIdentityHolder.CreateSystem());
                 sut.Begin();
                 dbContext.Add(new Blogger(334, "Bratislav", "Metulsky"));
                 sut.Complete();
-                Assert.Null(dbContext.Database.CurrentTransaction);
+                Assert.Throws<InvalidOperationException>(() => dbContext.Database.CurrentTransaction.Commit());
+            }
+
+            using (var dbContext = UseDbContext())
+            {
                 Assert.Empty(dbContext.Bloggers);
             }
         }
@@ -45,13 +49,17 @@ namespace Backend.Fx.EfCorePersistence.Tests
         [Fact]
         public void RollbacksTransactionOnDisposal()
         {
-            using (var dbContext = new TestDbContext(DbContextOptions))
+            using (var dbContext = UseDbContext())
             {
-                var sut = new ReadonlyEfUnitOfWork(dbContext, CurrentIdentityHolder.CreateSystem());
+                var sut = new ReadonlyEfUnitOfWork(Connection, dbContext, CurrentIdentityHolder.CreateSystem());
                 sut.Begin();
                 dbContext.Add(new Blogger(335, "Bratislav", "Metulsky"));
                 sut.Dispose();
-                Assert.Null(dbContext.Database.CurrentTransaction);
+                Assert.Throws<InvalidOperationException>(() => dbContext.Database.CurrentTransaction.Commit());
+            }
+
+            using (var dbContext = UseDbContext())
+            {
                 Assert.Empty(dbContext.Bloggers);
             }
         }

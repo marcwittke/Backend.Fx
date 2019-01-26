@@ -1,54 +1,32 @@
-﻿namespace Backend.Fx.EfCorePersistence
-{
-    using System;
-    using System.Security.Principal;
-    using Logging;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Storage;
-    using Patterns.DependencyInjection;
-    using Patterns.UnitOfWork;
+﻿using System.Data;
+using System.Security.Principal;
+using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.Patterns.UnitOfWork;
+using Microsoft.EntityFrameworkCore;
 
+namespace Backend.Fx.EfCorePersistence
+{
     public class ReadonlyEfUnitOfWork : ReadonlyUnitOfWork
     {
-        private static readonly ILogger Logger = LogManager.Create<EfUnitOfWork>();
-        private readonly DbContext _dbContext;
-        private IDisposable _transactionLifetimeLogger;
-        private IDbContextTransaction _currentTransaction;
+        private readonly EfTransactionManager _transactionManager;
 
-        public ReadonlyEfUnitOfWork(DbContext dbContext, ICurrentTHolder<IIdentity> identityHolder) : base(identityHolder)
+        public ReadonlyEfUnitOfWork(IDbConnection dbConnection, DbContext dbContext, ICurrentTHolder<IIdentity> identityHolder)
+            : base(identityHolder)
         {
-            _dbContext = dbContext;
-            _dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
-            _dbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+            dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
+            dbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+            _transactionManager = new EfTransactionManager(dbConnection, dbContext);
         }
 
         public override void Begin()
         {
             base.Begin();
-            BeginTransaction();
+            _transactionManager.Begin();
         }
         
         protected override void Rollback()
         {
-            Logger.Info("Rolling back transaction");
-            try
-            {
-                _currentTransaction?.Rollback();
-                _currentTransaction?.Dispose();
-                _currentTransaction = null;
-            }
-            catch (Exception ex)
-            {
-                Logger.Warn(ex, "Rollback failed");
-            }
-            _transactionLifetimeLogger?.Dispose();
-            _transactionLifetimeLogger = null;
-        }
-
-        private void BeginTransaction()
-        {
-            _currentTransaction = _dbContext.Database.BeginTransaction();
-            _transactionLifetimeLogger = Logger.InfoDuration("Transaction open");
+            _transactionManager.Rollback();
         }
     }
 }

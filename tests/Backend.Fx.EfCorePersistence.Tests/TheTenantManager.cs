@@ -15,7 +15,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
         {
             CreateDatabase();
             var testCompositionRoot = new TestCompositionRoot();
-            testCompositionRoot.Register(()=>new TestDbContext(DbContextOptions));
+            testCompositionRoot.Register(()=>new TestDbContext(DbContextOptions()));
             _sut = new MyTenantManager(testCompositionRoot);
         }
 
