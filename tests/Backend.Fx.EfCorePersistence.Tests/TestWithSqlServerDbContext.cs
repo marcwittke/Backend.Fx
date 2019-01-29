@@ -24,8 +24,10 @@ namespace Backend.Fx.EfCorePersistence.Tests
         public TestWithSqlServerDbContext(string dbName, string connectionString = "Server=.\\SQLExpress;Trusted_Connection=True") 
             : base(BuildConnection(connectionString, dbName))
         {
-            
+            ConnectionString = new SqlConnectionStringBuilder(connectionString) {InitialCatalog = dbName}.ConnectionString;
         }
+
+        public string ConnectionString { get; }
 
         private static IDbConnection BuildConnection(string connectionString, string dbName)
         {
