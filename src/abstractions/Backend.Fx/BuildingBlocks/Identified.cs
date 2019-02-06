@@ -11,8 +11,11 @@ namespace Backend.Fx.BuildingBlocks
 
         public bool Equals(Identified other)
         {
-            if (other == null || !(other.GetType() == GetType()))
+            if (other == null || other.GetType() != GetType())
+            {
                 return false;
+            }
+
             return Id.Equals(other.Id);
         }
 
@@ -20,7 +23,10 @@ namespace Backend.Fx.BuildingBlocks
         {
             Identified other = obj as Identified;
             if (other == null)
+            {
                 return false;
+            }
+
             return Equals(other);
         }
 
