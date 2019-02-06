@@ -68,7 +68,7 @@
     public enum TenantState
     {
         Created = 0,
-        Initializing = 1,
+        Seeding = 1,
         Active = 2,
         Inactive = int.MaxValue
     }

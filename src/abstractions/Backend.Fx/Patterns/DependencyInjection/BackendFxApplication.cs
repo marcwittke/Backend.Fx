@@ -58,38 +58,39 @@ namespace Backend.Fx.Patterns.DependencyInjection
             Logger.Info("Booting application");
             CompositionRoot.Verify();
             await OnBoot();
-            InitializeTenants();
+            SeedTenants();
             _isBooted.Set();
         }
 
-        private void InitializeTenants()
+        private void SeedTenants()
         {
             foreach (var tenant in TenantManager.GetTenants())
             {
-                InitializeTenant(tenant);
+                SeedTenant(tenant);
             }
         }
 
-        private void InitializeTenant(Tenant tenant)
+        private void SeedTenant(Tenant tenant)
         {
-            var tenantDataGenerator = new TenantDataGenerator(ScopeManager);
             switch (tenant.State)
             {
                 case TenantState.Inactive:
-                    throw new UnprocessableException($"Cannot initialize inactive Tenant[{tenant.Id}]");
+                    throw new UnprocessableException($"Cannot seed inactive Tenant[{tenant.Id}]");
 
                 case TenantState.Active:
                 case TenantState.Created:
-                    tenant.State = TenantState.Initializing;
+                    tenant.State = TenantState.Seeding;
                     TenantManager.SaveTenant(tenant);
 
-                    Logger.Info(
-                        $"Initializing {(tenant.IsDemoTenant ? "demonstration" : "production")} tenant[{tenant.Id}] ({tenant.Name})");
+                {
+                    Logger.Info($"Seeding {(tenant.IsDemoTenant ? "demonstration" : "production")} tenant[{tenant.Id}] ({tenant.Name})");
+                    var tenantDataGenerator = new TenantDataGenerator(ScopeManager);
                     tenantDataGenerator.RunProductiveDataGenerators(tenant);
                     if (tenant.IsDemoTenant)
                     {
                         tenantDataGenerator.RunDemoDataGenerators(tenant);
                     }
+                }
 
                     tenant.State = TenantState.Active;
                     return;
