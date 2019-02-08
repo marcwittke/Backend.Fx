@@ -78,5 +78,13 @@ namespace Backend.Fx.EfCorePersistence
             _transactionManager.Begin();
         }
 
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            if (disposing)
+            {
+                _transactionManager?.Dispose();
+            }
+        }
     }
 }

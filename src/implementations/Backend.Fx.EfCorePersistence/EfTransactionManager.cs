@@ -40,6 +40,10 @@ namespace Backend.Fx.EfCorePersistence
                 _currentTransaction?.Rollback();
                 _currentTransaction?.Dispose();
                 _currentTransaction = null;
+                if (_dbConnection.State == ConnectionState.Open)
+                {
+                    _dbConnection.Close();
+                }
             }
             catch (Exception ex)
             {
@@ -56,6 +60,7 @@ namespace Backend.Fx.EfCorePersistence
             _currentTransaction = null;
             _transactionLifetimeLogger?.Dispose();
             _transactionLifetimeLogger = null;
+            _dbConnection.Close();
         }
 
         public void ResetTransactions()
@@ -69,7 +74,6 @@ namespace Backend.Fx.EfCorePersistence
 
         public void Dispose()
         {
-            _dbConnection.Close();
             _transactionLifetimeLogger?.Dispose();
             _currentTransaction?.Dispose();
         }
