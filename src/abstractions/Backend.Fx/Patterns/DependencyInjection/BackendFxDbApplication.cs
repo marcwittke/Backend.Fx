@@ -44,5 +44,14 @@ namespace Backend.Fx.Patterns.DependencyInjection
         {
             await Task.CompletedTask;
         }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            if (disposing)
+            {
+                DatabaseBootstrapper?.Dispose();
+            }
+        }
     }
 }

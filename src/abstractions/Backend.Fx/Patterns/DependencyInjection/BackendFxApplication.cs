@@ -115,6 +115,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
             {
                 Logger.Info("Application shut down initialized");
                 CompositionRoot?.Dispose();
+                TenantManager?.Dispose();
             }
         }
 

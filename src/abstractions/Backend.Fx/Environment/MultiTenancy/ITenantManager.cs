@@ -10,7 +10,7 @@
     /// Encapsulates the management of tenants
     /// Note that this should not use repositories and other building blocks, but access the persistence layer directly
     /// </summary>
-    public interface ITenantManager
+    public interface ITenantManager  : IDisposable
     {
         TenantId[] GetTenantIds();
         Tenant[] GetTenants();
@@ -85,6 +85,14 @@
             Tenant tenant = new Tenant(name, description, isDemo, defaultCultureInfo) { State = TenantState.Created, IsDefault = isDefault, UriMatchingExpression = uriMatchingExpression};
             SaveTenant(tenant);
             return new TenantId(tenant.Id);
+        }
+
+        protected abstract void Dispose(bool disposing);
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

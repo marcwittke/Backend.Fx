@@ -24,6 +24,9 @@ namespace Backend.Fx.InMemoryPersistence
             return _store[tenantId.Value];
         }
 
+        protected override void Dispose(bool disposing)
+        {}
+
         public override void SaveTenant(Tenant tenant)
         {
             if (tenant.Id == 0)
