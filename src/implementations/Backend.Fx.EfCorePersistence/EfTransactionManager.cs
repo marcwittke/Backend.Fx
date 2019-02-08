@@ -26,6 +26,7 @@ namespace Backend.Fx.EfCorePersistence
 
         public void Begin()
         {
+            _dbConnection.Open();
             _currentTransaction = _dbConnection.BeginTransaction();
             _dbContext.Database.UseTransaction((DbTransaction)_currentTransaction);
             _transactionLifetimeLogger = Logger.DebugDuration("Transaction open");
@@ -68,6 +69,7 @@ namespace Backend.Fx.EfCorePersistence
 
         public void Dispose()
         {
+            _dbConnection.Close();
             _transactionLifetimeLogger?.Dispose();
             _currentTransaction?.Dispose();
         }
