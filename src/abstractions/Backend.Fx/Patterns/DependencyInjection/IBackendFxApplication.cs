@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Threading;
 using System.Threading.Tasks;
+using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Patterns.Jobs;
 
 namespace Backend.Fx.Patterns.DependencyInjection
 {
@@ -17,10 +18,19 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// </summary>
         ICompositionRoot CompositionRoot { get; }
 
+        IJobEngine JobEngine { get; }
+
         /// <summary>
         /// allows asynchronously awaiting application startup
         /// </summary>
-        ManualResetEventSlim IsBooted { get; }
+        Task<bool> WaitForBootAsync(int timeoutMilliSeconds = int.MaxValue);
+
+        /// <summary>
+        /// allows synchronously awaiting application startup
+        /// </summary>
+        bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue);
+
+        ITenantManager TenantManager { get; }
 
         /// <summary>
         /// Initializes ans starts the application (async)

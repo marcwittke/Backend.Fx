@@ -32,12 +32,5 @@ namespace Backend.Fx.Tests.Patterns.Jobs
             _sut.ExecuteJob();
             Assert.Equal(1, _myJob.ExecutionCount);
         }
-
-        [Fact]
-        public async Task RunsTheJobAsynchronously()
-        {
-            await _sut.ExecuteJobAsync();
-            Assert.Equal(1, _myJob.ExecutionCount);
-        }
     }
 }

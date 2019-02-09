@@ -27,6 +27,18 @@
             DefaultCulture = defaultCulture;
         }
 
+        public Tenant(int id, string name, string description, bool isDemoTenant, TenantState state, bool isDefault, string defaultCultureName, string uriMatchingExpression)
+        {
+            Id = id;
+            Name = name;
+            Description = description;
+            IsDemoTenant = isDemoTenant;
+            State = state;
+            IsDefault = isDefault;
+            DefaultCultureName = defaultCultureName;
+            UriMatchingExpression = uriMatchingExpression;
+        }
+
         [Key]
         public int Id { get; set; }
 
@@ -41,7 +53,7 @@
 
         public bool IsDefault { get; set; }
 
-        public string DefaultCultureName { get; private set; }
+        public string DefaultCultureName { get; set; }
 
         public string UriMatchingExpression { get; set; }
 
@@ -56,7 +68,7 @@
     public enum TenantState
     {
         Created = 0,
-        Initializing = 1,
+        Seeding = 1,
         Active = 2,
         Inactive = int.MaxValue
     }

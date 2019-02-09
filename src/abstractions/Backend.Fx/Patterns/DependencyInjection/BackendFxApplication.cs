@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Exceptions;
 using Backend.Fx.Logging;
+using Backend.Fx.Patterns.Jobs;
 
 namespace Backend.Fx.Patterns.DependencyInjection
 {
@@ -11,38 +14,99 @@ namespace Backend.Fx.Patterns.DependencyInjection
     public abstract class BackendFxApplication : IBackendFxApplication
     {
         private static readonly ILogger Logger = LogManager.Create<BackendFxApplication>();
+        private readonly ManualResetEventSlim _isBooted = new ManualResetEventSlim(false);
 
         /// <summary>
         /// Initializes the application's runtime instance
         /// </summary>
         /// <param name="compositionRoot">The composition root of the dependency injection framework</param>
         /// <param name="scopeManager">The scope manager for the current application</param>
-        protected BackendFxApplication(ICompositionRoot compositionRoot, IScopeManager scopeManager)
+        /// <param name="tenantManager">The tenant manager for the current appliastion</param>
+        protected BackendFxApplication(ICompositionRoot compositionRoot, IScopeManager scopeManager, ITenantManager tenantManager)
         {
             CompositionRoot = compositionRoot;
             ScopeManager = scopeManager;
+            TenantManager = tenantManager;
+            JobEngine = new JobEngine(scopeManager);
         }
 
         /// <inheritdoc />
         public IScopeManager ScopeManager { get; }
 
         /// <inheritdoc />
+        public IJobEngine JobEngine { get; }
+
+        public Task<bool> WaitForBootAsync(int timeoutMilliSeconds = int.MaxValue)
+        {
+            return Task.Run(() => WaitForBoot(timeoutMilliSeconds));
+        }
+
+        public bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue)
+        {
+            return _isBooted.Wait(timeoutMilliSeconds);
+        }
+
+        /// <inheritdoc />
+        public ITenantManager TenantManager { get; }
+
+        /// <inheritdoc />
         public ICompositionRoot CompositionRoot { get; }
 
         /// <inheritdoc />
-        public ManualResetEventSlim IsBooted { get; } = new ManualResetEventSlim(false);
-
-        /// <inheritdoc />
-        public virtual async Task Boot()
+        public async Task Boot()
         {
             Logger.Info("Booting application");
             CompositionRoot.Verify();
-            await Task.CompletedTask;
+            await OnBoot();
+            SeedTenants();
+            _isBooted.Set();
         }
 
-        protected void BootFinished()
+        private void SeedTenants()
         {
-            IsBooted.Set();
+            foreach (var tenant in TenantManager.GetTenants())
+            {
+                SeedTenant(tenant);
+            }
+        }
+
+        private void SeedTenant(Tenant tenant)
+        {
+            switch (tenant.State)
+            {
+                case TenantState.Inactive:
+                    throw new UnprocessableException($"Cannot seed inactive Tenant[{tenant.Id}]");
+
+                case TenantState.Active:
+                case TenantState.Created:
+                    tenant.State = TenantState.Seeding;
+                    TenantManager.SaveTenant(tenant);
+
+                {
+                    Logger.Info($"Seeding {(tenant.IsDemoTenant ? "demonstration" : "production")} tenant[{tenant.Id}] ({tenant.Name})");
+                    var tenantDataGenerator = new TenantDataGenerator(ScopeManager);
+                    tenantDataGenerator.RunProductiveDataGenerators(tenant);
+                    if (tenant.IsDemoTenant)
+                    {
+                        tenantDataGenerator.RunDemoDataGenerators(tenant);
+                    }
+                }
+
+                    tenant.State = TenantState.Active;
+                    return;
+
+                default:
+                    return;
+            }
+        }
+
+        /// <summary>
+        /// Extension point to do additional initialization after composition root is initialized
+        /// </summary>
+        /// <returns></returns>
+        protected virtual async Task OnBoot()
+        {
+            await Task.CompletedTask;
         }
 
         protected virtual void Dispose(bool disposing)
@@ -51,6 +115,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
             {
                 Logger.Info("Application shut down initialized");
                 CompositionRoot?.Dispose();
+                TenantManager?.Dispose();
             }
         }
 

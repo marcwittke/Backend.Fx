@@ -9,9 +9,6 @@ namespace Backend.Fx.InMemoryPersistence
     {
         private readonly Dictionary<int, Tenant> _store = new Dictionary<int, Tenant>();
 
-        public InMemoryTenantManager(ITenantInitializer tenantInitializer) : base(tenantInitializer)
-        {}
-
         public override TenantId[] GetTenantIds()
         {
             return _store.Keys.Select(id => new TenantId(id)).ToArray();
@@ -27,7 +24,10 @@ namespace Backend.Fx.InMemoryPersistence
             return _store[tenantId.Value];
         }
 
-        protected override void SaveTenant(Tenant tenant)
+        protected override void Dispose(bool disposing)
+        {}
+
+        public override void SaveTenant(Tenant tenant)
         {
             if (tenant.Id == 0)
             {

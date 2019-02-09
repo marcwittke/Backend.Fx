@@ -1,6 +1,5 @@
 ﻿namespace Backend.Fx.Patterns.Jobs
 {
-    using System.Threading.Tasks;
     using Logging;
 
     public class JobExecutor<TJob> : IJobExecutor<TJob> where TJob : IJob
@@ -17,12 +16,6 @@
         {
             Logger.Info($"Executing {typeof(TJob).Name}");
             _job.Run();
-        }
-
-        public async Task ExecuteJobAsync()
-        {
-            Logger.Info($"Starting {typeof(TJob).Name} asynchronously");
-            await Task.Run(() => _job.Run());
         }
     }
 }

@@ -1,60 +1,56 @@
 ﻿using System.Threading.Tasks;
-using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Environment.Persistence;
-using Backend.Fx.Logging;
-using Backend.Fx.Patterns.Jobs;
 
 namespace Backend.Fx.Patterns.DependencyInjection
 {
     public abstract class BackendFxDbApplication : BackendFxApplication
     {
-        private static readonly ILogger Logger = LogManager.Create<BackendFxDbApplication>();
-
         /// <summary>
         /// Initializes the application's runtime instance
         /// </summary>
         /// <param name="compositionRoot">The composition root of the dependency injection framework</param>
-        /// <param name="databaseManager">The database manager for the current application</param>
+        /// <param name="databaseBootstrapper">The database manager for the current application</param>
         /// <param name="tenantManager">The tenant manager for the current application</param>
         /// <param name="scopeManager">The scope manager for the current application</param>
         protected BackendFxDbApplication(
                           ICompositionRoot compositionRoot,
-                          IDatabaseManager databaseManager,
+                          IDatabaseBootstrapper databaseBootstrapper,
                           ITenantManager tenantManager,
-                          IScopeManager scopeManager) : base(compositionRoot,scopeManager)
+                          IScopeManager scopeManager) : base(compositionRoot, scopeManager, tenantManager)
         {
-            DatabaseManager = databaseManager;
-            TenantManager = tenantManager;
+            DatabaseBootstrapper = databaseBootstrapper;
         }
 
         /// <summary>
-        /// The utility instance for database management
+        /// The utility instance for database bootstrapping
         /// </summary>
-        public IDatabaseManager DatabaseManager { get; }
+        public IDatabaseBootstrapper DatabaseBootstrapper { get; }
 
-        /// <summary>
-        /// Access and maintains application tenants
-        /// </summary>
-        public ITenantManager TenantManager { get; }
-
-        public override async Task Boot()
+        protected sealed override async Task OnBoot()
         {
-            await base.Boot();
-            DatabaseManager.EnsureDatabaseExistence();
+            WaitForDatabase();
+            DatabaseBootstrapper.EnsureDatabaseExistence();
+            await OnDatabaseBoot();
         }
 
-        protected void ExecuteJob<TJob>() where TJob : IJob
+        protected virtual void WaitForDatabase() { }
+
+        /// <summary>
+        /// Extension point to do additional initialization after existence of database is ensured
+        /// </summary>
+        /// <returns></returns>
+        protected virtual async Task OnDatabaseBoot()
         {
-            foreach (var tenantId in TenantManager.GetTenantIds())
+            await Task.CompletedTask;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            if (disposing)
             {
-                using (Logger.InfoDuration($"Execution of {typeof(TJob).Name} for tenant[{(tenantId.HasValue ? tenantId.Value.ToString() : "null")}]"))
-                {
-                    using (ScopeManager.BeginScope(new SystemIdentity(), tenantId))
-                    {
-                        CompositionRoot.GetInstance<IJobExecutor<TJob>>().ExecuteJob();
-                    }
-                }
+                DatabaseBootstrapper?.Dispose();
             }
         }
     }

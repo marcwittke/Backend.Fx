@@ -63,19 +63,30 @@
             _isCompleted = true;
         }
 
-        public void Dispose()
-        {
-            if (_isCompleted == false)
-            {
-                Logger.Info($"Canceling unit of work #{_instanceId} because the instance is being disposed although it did not complete before. This should only occur during cleanup after errors.");
-                Rollback();
-            }
-            _lifetimeLogger?.Dispose();
-            _lifetimeLogger = null;
-        }
+        
 
         protected abstract void UpdateTrackingProperties(string userId, DateTime utcNow);
         protected abstract void Commit();
         protected abstract void Rollback();
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_isCompleted == false)
+                {
+                    Logger.Info($"Canceling unit of work #{_instanceId} because the instance is being disposed although it did not complete before. This should only occur during cleanup after errors.");
+                    Rollback();
+                }
+                _lifetimeLogger?.Dispose();
+                _lifetimeLogger = null;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
     }
 }
