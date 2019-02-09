@@ -3,6 +3,7 @@ using System.Data.Common;
 using System.Linq;
 using System.Reflection;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
+using Backend.Fx.EfCorePersistence.Tests.Fixtures;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.DateAndTime;
 using Backend.Fx.Patterns.EventAggregation.Domain;
@@ -15,114 +16,121 @@ using Xunit;
 
 namespace Backend.Fx.EfCorePersistence.Tests
 {
-    //public class TheEfUnitOfWork : TestWithSqlServerDbContext
-    public class TheEfUnitOfWork : TestWithInMemorySqliteDbContext
+    public class TheEfUnitOfWork
     {
+        private readonly DatabaseFixture _fixture;
+
         public TheEfUnitOfWork()
         {
-            CreateDatabase();
+            _fixture = new SqliteDatabaseFixture();
+            //_fixture = new SqlServerDatabaseFixture();
+            _fixture.CreateDatabase();
         }
 
         [Fact]
         public void OpensTransaction()
         {
-            using(var dbContext = UseDbContext())
+            using(var dbs = _fixture.UseDbSession())
             {
                 using (var sut = new EfUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), 
-                    A.Fake<IDomainEventAggregator>(), A.Fake<IEventBusScope>(), dbContext, Connection))
+                    A.Fake<IDomainEventAggregator>(), A.Fake<IEventBusScope>(), dbs.DbContext, dbs.Connection))
                 {
-                    Assert.Null(dbContext.Database.CurrentTransaction);
+                    Assert.Null(dbs.DbContext.Database.CurrentTransaction);
                     sut.Begin();
-                    Assert.NotNull(dbContext.Database.CurrentTransaction);
-                    Assert.Equal(Connection, dbContext.Database.CurrentTransaction.GetDbTransaction().Connection);
+                    Assert.NotNull(dbs.DbContext.Database.CurrentTransaction);
+                    Assert.Equal(dbs.Connection, dbs.DbContext.Database.CurrentTransaction.GetDbTransaction().Connection);
 
-                    dbContext.Add(new Blogger(333, "Metulsky", "Bratislav"));
+                    dbs.DbContext.Add(new Blogger(333, "Metulsky", "Bratislav"));
                     sut.Complete();
                 }
 
-                Assert.Throws<InvalidOperationException>(()=> dbContext.Database.CurrentTransaction.Commit());
+                Assert.Throws<InvalidOperationException>(()=> dbs.DbContext.Database.CurrentTransaction.Commit());
             }
 
-            using (var dbContext = UseDbContext())
+            using (var dbs = _fixture.UseDbSession())
             {
-                Assert.NotNull(dbContext.Bloggers.SingleOrDefault(b => b.Id == 333 && b.FirstName == "Bratislav" && b.LastName == "Metulsky"));
+                Assert.NotNull(dbs.DbContext.Bloggers.SingleOrDefault(b => b.Id == 333 && b.FirstName == "Bratislav" && b.LastName == "Metulsky"));
             }
         }
 
         [Fact]
         public void RollsBackTransactionOnDisposal()
         {
-            using (var dbContext = UseDbContext())
+            using (var dbs = _fixture.UseDbSession())
             {
-                using (var sut = new EfUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), A.Fake<IDomainEventAggregator>(), A.Fake<IEventBusScope>(), dbContext, Connection))
+                using (var sut = new EfUnitOfWork(new FrozenClock(), 
+                    CurrentIdentityHolder.CreateSystem(), 
+                    A.Fake<IDomainEventAggregator>(), 
+                    A.Fake<IEventBusScope>(),
+                    dbs.DbContext,
+                    dbs.Connection))
                 {
                     sut.Begin();
-                    dbContext.Add(new Blogger(333, "Metulsky", "Bratislav"));
-                    dbContext.SaveChanges();
+                    dbs.DbContext.Add(new Blogger(333, "Metulsky", "Bratislav"));
+                    dbs.DbContext.SaveChanges();
                 }
 
-                Assert.Throws<InvalidOperationException>(() => dbContext.Database.CurrentTransaction.Commit());
+                Assert.Throws<InvalidOperationException>(() => dbs.DbContext.Database.CurrentTransaction.Commit());
             }
 
-            using (var dbContext = UseDbContext())
+            using (var dbs = _fixture.UseDbSession())
             {
-                Assert.Null(dbContext.Bloggers.SingleOrDefault(b => b.Id == 333 && b.FirstName == "Bratislav" && b.LastName == "Metulsky"));
+                Assert.Null(dbs.DbContext.Bloggers.SingleOrDefault(b => b.Id == 333 && b.FirstName == "Bratislav" && b.LastName == "Metulsky"));
             }
         }
 
         [Fact]
         public void CanInterruptTransaction()
         {
-            using (var dbContext = UseDbContext())
+            using (var dbs = _fixture.UseDbSession())
             {
                 using (var sut = new EfUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(),
-                    A.Fake<IDomainEventAggregator>(), A.Fake<IEventBusScope>(), dbContext, Connection))
+                    A.Fake<IDomainEventAggregator>(), A.Fake<IEventBusScope>(), dbs.DbContext, dbs.Connection))
                 {
                     sut.Begin();
-                    dbContext.Add(new Blogger(333, "Metulsky", "Bratislav"));
+                    dbs.DbContext.Add(new Blogger(333, "Metulsky", "Bratislav"));
                     sut.CompleteCurrentTransaction_BeginNewTransaction();
-                    dbContext.Add(new Blogger(334, "Flash", "Johnny"));
+                    dbs.DbContext.Add(new Blogger(334, "Flash", "Johnny"));
                     sut.Complete();
                 }
 
-                Assert.Throws<InvalidOperationException>(() => dbContext.Database.CurrentTransaction.Commit());
+                Assert.Throws<InvalidOperationException>(() => dbs.DbContext.Database.CurrentTransaction.Commit());
             }
 
-            using (var dbContext = UseDbContext())
+            using (var dbs = _fixture.UseDbSession())
             {
-                Assert.NotNull(dbContext.Bloggers.SingleOrDefault(b => b.Id == 333 && b.FirstName == "Bratislav" && b.LastName == "Metulsky"));
-                Assert.NotNull(dbContext.Bloggers.SingleOrDefault(b => b.Id == 334 && b.FirstName == "Johnny" && b.LastName == "Flash"));
+                Assert.NotNull(dbs.DbContext.Bloggers.SingleOrDefault(b => b.Id == 333 && b.FirstName == "Bratislav" && b.LastName == "Metulsky"));
+                Assert.NotNull(dbs.DbContext.Bloggers.SingleOrDefault(b => b.Id == 334 && b.FirstName == "Johnny" && b.LastName == "Flash"));
             }
         }
 
         [Fact]
         public void ClearingTransactionOnRelationalConnectionViaReflectionWorks()
         {
-            var connection = Connection;
-            
-            using (var dbContext = UseDbContext())
+            using (var dbs = _fixture.UseDbSession())
             {
-                
-                using (var tx = connection.BeginTransaction())
+                using (dbs.Connection.OpenDisposable())
                 {
-                    dbContext.Database.UseTransaction((DbTransaction) tx);
-                    dbContext.Bloggers.Add(new Blogger(1, "bbb", "fff"));
-                    dbContext.SaveChanges();
-                    tx.Commit();
-                    dbContext.Database.CloseConnection();
-                }
+                    using (var tx = dbs.Connection.BeginTransaction())
+                    {
+                        dbs.DbContext.Database.UseTransaction((DbTransaction) tx);
+                        dbs.DbContext.Bloggers.Add(new Blogger(1, "bbb", "fff"));
+                        dbs.DbContext.SaveChanges();
+                        tx.Commit();
+                    }
 
-                // see EfUnitOfWork.cs ClearTransactions()
-                RelationalConnection txman = (RelationalConnection)dbContext.Database.GetService<IDbContextTransactionManager>();
-                var methodInfo = typeof(RelationalConnection).GetMethod("ClearTransactions", BindingFlags.Instance | BindingFlags.NonPublic);
-                methodInfo.Invoke(txman, new object[0]);
+                    // see EfUnitOfWork.cs ClearTransactions()
+                    RelationalConnection txman = (RelationalConnection) dbs.DbContext.Database.GetService<IDbContextTransactionManager>();
+                    var methodInfo = typeof(RelationalConnection).GetMethod("ClearTransactions", BindingFlags.Instance | BindingFlags.NonPublic);
+                    methodInfo.Invoke(txman, new object[0]);
 
-                using (var tx = connection.BeginTransaction())
-                {
-                    dbContext.Database.UseTransaction((DbTransaction) tx);
-                    dbContext.Bloggers.Add(new Blogger(2, "bbb", "fff"));
-                    dbContext.SaveChanges();
-                    tx.Commit();
+                    using (var tx = dbs.Connection.BeginTransaction())
+                    {
+                        dbs.DbContext.Database.UseTransaction((DbTransaction) tx);
+                        dbs.DbContext.Bloggers.Add(new Blogger(2, "bbb", "fff"));
+                        dbs.DbContext.SaveChanges();
+                        tx.Commit();
+                    }
                 }
             }
         }
