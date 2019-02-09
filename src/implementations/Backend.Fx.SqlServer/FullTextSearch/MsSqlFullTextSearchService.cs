@@ -1,13 +1,13 @@
-﻿namespace Backend.Fx.EfCorePersistence.Mssql
-{
-    using System.Linq;
-    using BuildingBlocks;
-    using EfCorePersistence;
-    using Environment.MultiTenancy;
-    using Microsoft.EntityFrameworkCore;
-    using Patterns.Authorization;
-    using Patterns.DependencyInjection;
+﻿using System.Linq;
+using Backend.Fx.BuildingBlocks;
+using Backend.Fx.EfCorePersistence;
+using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Patterns.Authorization;
+using Backend.Fx.Patterns.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
 
+namespace Backend.Fx.SqlServer.FullTextSearch
+{
     public class MsSqlFullTextSearchService<TAggregateRoot> : IFullTextSearchService<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
         private readonly EasyFts _easyFts = new EasyFts();

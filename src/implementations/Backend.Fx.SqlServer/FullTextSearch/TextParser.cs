@@ -1,7 +1,7 @@
-﻿namespace Backend.Fx.EfCorePersistence.Mssql
-{
-    using System;
+﻿using System;
 
+namespace Backend.Fx.SqlServer.FullTextSearch
+{
     // borrowed from http://www.blackbeltcoder.com/articles/strings/a-text-parsing-helper-class
     // licensed under the CPOL
     public class TextParser

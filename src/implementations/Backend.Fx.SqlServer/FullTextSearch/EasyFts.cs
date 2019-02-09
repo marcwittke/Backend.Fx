@@ -1,8 +1,8 @@
-﻿namespace Backend.Fx.EfCorePersistence.Mssql
-{
-    using System;
-    using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
+namespace Backend.Fx.SqlServer.FullTextSearch
+{
     // borrowed from http://www.blackbeltcoder.com/Articles/data/easy-full-text-search-queries
     // licensed under the CPOL
     public class EasyFts

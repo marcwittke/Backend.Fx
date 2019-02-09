@@ -1,9 +1,10 @@
-﻿namespace Backend.Fx.EfCorePersistence.Mssql
-{
-    using System;
-    using System.Data;
-    using Logging;
+﻿using System;
+using System.Data;
+using Backend.Fx.EfCorePersistence;
+using Backend.Fx.Logging;
 
+namespace Backend.Fx.SqlServer
+{
     public abstract class MsSqlSequence : ISequence
     {
         private static readonly ILogger Logger = LogManager.Create<MsSqlSequence>();

@@ -1,13 +1,14 @@
-﻿namespace Backend.Fx.EfCorePersistence.Mssql
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Linq;
-    using System.Linq.Expressions;
-    using BuildingBlocks;
-    using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Linq.Expressions;
+using Backend.Fx.BuildingBlocks;
+using Backend.Fx.EfCorePersistence;
+using Microsoft.EntityFrameworkCore;
 
+namespace Backend.Fx.SqlServer.FullTextSearch
+{
     public abstract class MsSqlFullTextSearchIndex<TAggregateRoot> : IFullTextSearchIndex where TAggregateRoot : AggregateRoot
     {
         private const string FullTextCatalogName = "FullTextSearch";

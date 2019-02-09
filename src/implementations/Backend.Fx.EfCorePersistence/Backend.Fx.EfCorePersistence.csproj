@@ -29,5 +29,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\abstractions\Backend.Fx\Backend.Fx.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Mssql\" />
+  </ItemGroup>
 
 </Project>
