@@ -26,6 +26,10 @@
                 Logger.Info($"{GetType().FullName} is now generating initial data");
                 GenerateCore();
             }
+            else
+            {
+                Logger.Info($"No need to run {GetType().FullName}");
+            }
         }
 
         /// <summary>
