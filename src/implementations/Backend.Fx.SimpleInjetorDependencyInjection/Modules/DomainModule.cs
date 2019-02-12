@@ -23,13 +23,15 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
     /// </summary>
     public abstract class DomainModule : SimpleInjectorModule
     {
+        private readonly IExceptionLogger _exceptionLogger;
         private static readonly ILogger Logger = LogManager.Create<DomainModule>();
         private readonly Assembly[] _assemblies;
         private Func<DomainEventAggregator> _domainEventAggregatorFactory;
         private readonly string _assembliesForLogging;
 
-        protected DomainModule(params Assembly[] domainAssemblies)
+        protected DomainModule(IExceptionLogger exceptionLogger, params Assembly[] domainAssemblies)
         {
+            _exceptionLogger = exceptionLogger;
             _assemblies = domainAssemblies.Concat(new[] {
                 typeof(Entity).GetTypeInfo().Assembly,
             }).ToArray();
@@ -45,6 +47,8 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
 
         protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
         {
+            container.RegisterInstance(_exceptionLogger);
+
             // the current IIdentity is resolved using the scoped CurrentIdentityHolder that is maintained when opening a scope
             Logger.Debug($"Registering {nameof(CurrentIdentityHolder)} as {nameof(ICurrentTHolder<IIdentity>)}");
             container.Register<ICurrentTHolder<IIdentity>, CurrentIdentityHolder>();

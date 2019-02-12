@@ -12,6 +12,8 @@
     /// </summary>
     public interface ITenantManager  : IDisposable
     {
+        event EventHandler<TenantId> TenantCreated;
+
         TenantId[] GetTenantIds();
         Tenant[] GetTenants();
         Tenant GetTenant(TenantId id);
@@ -55,6 +57,8 @@
 
         public abstract void SaveTenant(Tenant tenant);
 
+        public event EventHandler<TenantId> TenantCreated;
+
         public abstract TenantId[] GetTenantIds();
 
         public abstract Tenant[] GetTenants();
@@ -70,7 +74,7 @@
 
             return tenant;
         }
-        
+
         public abstract Tenant FindTenant(TenantId tenantId);
 
         private TenantId CreateTenant([NotNull] string name, string description, bool isDemo, bool isDefault, CultureInfo defaultCultureInfo, string uriMatchingExpression)
@@ -84,7 +88,9 @@
 
             Tenant tenant = new Tenant(name, description, isDemo, defaultCultureInfo) { State = TenantState.Created, IsDefault = isDefault, UriMatchingExpression = uriMatchingExpression};
             SaveTenant(tenant);
-            return new TenantId(tenant.Id);
+            var tenantId = new TenantId(tenant.Id);
+            TenantCreated?.Invoke(this, tenantId);
+            return tenantId;
         }
 
         protected abstract void Dispose(bool disposing);

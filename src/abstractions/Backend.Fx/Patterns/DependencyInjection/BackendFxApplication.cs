@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Exceptions;
 using Backend.Fx.Logging;
+using Backend.Fx.Patterns.DataGeneration;
 using Backend.Fx.Patterns.Jobs;
+using Backend.Fx.Patterns.UnitOfWork;
 
 namespace Backend.Fx.Patterns.DependencyInjection
 {
@@ -22,12 +25,13 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// <param name="compositionRoot">The composition root of the dependency injection framework</param>
         /// <param name="scopeManager">The scope manager for the current application</param>
         /// <param name="tenantManager">The tenant manager for the current appliastion</param>
-        protected BackendFxApplication(ICompositionRoot compositionRoot, IScopeManager scopeManager, ITenantManager tenantManager)
+        protected BackendFxApplication(ICompositionRoot compositionRoot, IScopeManager scopeManager,
+            ITenantManager tenantManager)
         {
             CompositionRoot = compositionRoot;
             ScopeManager = scopeManager;
-            TenantManager = tenantManager;
             JobEngine = new JobEngine(scopeManager);
+            TenantManager = tenantManager;
         }
 
         /// <inheritdoc />
@@ -59,19 +63,43 @@ namespace Backend.Fx.Patterns.DependencyInjection
             CompositionRoot.Verify();
             await OnBoot();
             SeedTenants();
+
+            TenantManager.TenantCreated += async (sender, tenantId) =>
+            {
+                try
+                {
+                    if (TenantManager.GetTenant(tenantId).IsDemoTenant)
+                    {
+                        await JobEngine.ExecuteJobAsync<DemoDataGenerationJob>(tenantId);
+                    }
+                    else
+                    {
+                        await JobEngine.ExecuteJobAsync<DemoDataGenerationJob>(tenantId);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, "Handling TenantCreated event failed");
+                }
+            };
+
             _isBooted.Set();
         }
 
         private void SeedTenants()
         {
-            foreach (var tenant in TenantManager.GetTenants())
+            Logger.Info("Beginning startup seeding");
+            foreach (var tenant in TenantManager.GetTenantIds())
             {
+                Logger.Debug($"Startup seeding of tenant[{tenant.Value}]");
                 SeedTenant(tenant);
             }
         }
 
-        private void SeedTenant(Tenant tenant)
+        private void SeedTenant(TenantId tenantId)
         {
+            var tenant = TenantManager.GetTenant(tenantId);
+
             switch (tenant.State)
             {
                 case TenantState.Inactive:
@@ -81,16 +109,16 @@ namespace Backend.Fx.Patterns.DependencyInjection
                 case TenantState.Created:
                     tenant.State = TenantState.Seeding;
                     TenantManager.SaveTenant(tenant);
-
-                {
                     Logger.Info($"Seeding {(tenant.IsDemoTenant ? "demonstration" : "production")} tenant[{tenant.Id}] ({tenant.Name})");
-                    var tenantDataGenerator = new TenantDataGenerator(ScopeManager);
-                    tenantDataGenerator.RunProductiveDataGenerators(tenant);
-                    if (tenant.IsDemoTenant)
+                    using (var scope = ScopeManager.BeginScope(new SystemIdentity(), tenantId))
                     {
-                        tenantDataGenerator.RunDemoDataGenerators(tenant);
+                        var dataGeneratorContext = new DataGeneratorContext(scope.GetAllInstances<DataGenerator>(), scope.GetInstance<ICanFlush>());
+                        dataGeneratorContext.RunProductiveDataGenerators();
+                        if (tenant.IsDemoTenant)
+                        {
+                            dataGeneratorContext.RunDemoDataGenerators();
+                        }
                     }
-                }
 
                     tenant.State = TenantState.Active;
                     return;
@@ -99,7 +127,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
                     return;
             }
         }
-
+        
         /// <summary>
         /// Extension point to do additional initialization after composition root is initialized
         /// </summary>
