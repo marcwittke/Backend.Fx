@@ -69,7 +69,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
 
             // initial data generation subsystem
             Logger.Debug($"Registering initial data generators from {_assembliesForLogging}");
-            container.Collection.Register<DataGenerator>(_assemblies);
+            container.Collection.Register<IDataGenerator>(_assemblies);
 
             // all jobs are dynamically registered
             foreach (var jobType in container.GetTypesToRegister(typeof(IJob), _assemblies))

@@ -74,7 +74,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
                     }
                     else
                     {
-                        await JobEngine.ExecuteJobAsync<DemoDataGenerationJob>(tenantId);
+                        await JobEngine.ExecuteJobAsync<ProdDataGenerationJob>(tenantId);
                     }
                 }
                 catch (Exception ex)
@@ -112,7 +112,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
                     Logger.Info($"Seeding {(tenant.IsDemoTenant ? "demonstration" : "production")} tenant[{tenant.Id}] ({tenant.Name})");
                     using (var scope = ScopeManager.BeginScope(new SystemIdentity(), tenantId))
                     {
-                        var dataGeneratorContext = new DataGeneratorContext(scope.GetAllInstances<DataGenerator>(), scope.GetInstance<ICanFlush>());
+                        var dataGeneratorContext = new DataGeneratorContext(scope.GetAllInstances<IDataGenerator>(), scope.GetInstance<ICanFlush>());
                         dataGeneratorContext.RunProductiveDataGenerators();
                         if (tenant.IsDemoTenant)
                         {

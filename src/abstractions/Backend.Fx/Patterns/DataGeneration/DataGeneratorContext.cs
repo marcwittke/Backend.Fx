@@ -8,10 +8,10 @@
     public class DataGeneratorContext
     {
         private static readonly ILogger Logger = LogManager.Create<DataGeneratorContext>();
-        private readonly IEnumerable<DataGenerator> _dataGenerators;
+        private readonly IEnumerable<IDataGenerator> _dataGenerators;
         private readonly ICanFlush _canFlush;
 
-        public DataGeneratorContext(IEnumerable<DataGenerator> dataGenerators, ICanFlush canFlush)
+        public DataGeneratorContext(IEnumerable<IDataGenerator> dataGenerators, ICanFlush canFlush)
         {
             _dataGenerators = dataGenerators;
             _canFlush = canFlush;

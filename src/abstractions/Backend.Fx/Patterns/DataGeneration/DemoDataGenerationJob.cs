@@ -6,10 +6,10 @@ namespace Backend.Fx.Patterns.DataGeneration
 {
     public class DemoDataGenerationJob : IJob
     {
-        private readonly IEnumerable<DataGenerator> _dataGenerators;
+        private readonly IEnumerable<IDataGenerator> _dataGenerators;
         private readonly ICanFlush _canFlush;
 
-        public DemoDataGenerationJob(IEnumerable<DataGenerator> dataGenerators, ICanFlush canFlush)
+        public DemoDataGenerationJob(IEnumerable<IDataGenerator> dataGenerators, ICanFlush canFlush)
         {
             _dataGenerators = dataGenerators;
             _canFlush = canFlush;
