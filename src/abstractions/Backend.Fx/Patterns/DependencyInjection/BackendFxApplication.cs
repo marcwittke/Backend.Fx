@@ -68,13 +68,20 @@ namespace Backend.Fx.Patterns.DependencyInjection
             {
                 try
                 {
-                    if (TenantManager.GetTenant(tenantId).IsDemoTenant)
+                    var tenant = TenantManager.GetTenant(tenantId);
+                    tenant.State = TenantState.Seeding;
+                    TenantManager.SaveTenant(tenant);
+                    if (tenant.IsDemoTenant)
                     {
                         await JobEngine.ExecuteJobAsync<DemoDataGenerationJob>(tenantId);
+                        tenant.State = TenantState.Active;
+                        TenantManager.SaveTenant(tenant);
                     }
                     else
                     {
                         await JobEngine.ExecuteJobAsync<ProdDataGenerationJob>(tenantId);
+                        tenant.State = TenantState.Active;
+                        TenantManager.SaveTenant(tenant);
                     }
                 }
                 catch (Exception ex)
