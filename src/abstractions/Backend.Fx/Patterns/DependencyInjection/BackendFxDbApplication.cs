@@ -29,18 +29,28 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
         protected sealed override async Task OnBoot()
         {
+            await OnDatabaseBoot();
             WaitForDatabase();
             DatabaseBootstrapper.EnsureDatabaseExistence();
-            await OnDatabaseBoot();
+            await OnDatabaseBooted();
         }
 
         protected virtual void WaitForDatabase() { }
 
         /// <summary>
-        /// Extension point to do additional initialization after existence of database is ensured
+        /// Extension point to do additional initialization before existence of database is ensured
         /// </summary>
         /// <returns></returns>
         protected virtual async Task OnDatabaseBoot()
+        {
+            await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Extension point to do additional initialization after existence of database is ensured
+        /// </summary>
+        /// <returns></returns>
+        protected virtual async Task OnDatabaseBooted()
         {
             await Task.CompletedTask;
         }

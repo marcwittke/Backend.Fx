@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.Exceptions;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DataGeneration;
 using Backend.Fx.Patterns.Jobs;
@@ -60,8 +59,8 @@ namespace Backend.Fx.Patterns.DependencyInjection
         public async Task Boot()
         {
             Logger.Info("Booting application");
-            CompositionRoot.Verify();
             await OnBoot();
+            CompositionRoot.Verify();
             SeedTenants();
 
             TenantManager.TenantCreated += async (sender, tenantId) =>
@@ -90,6 +89,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
                 }
             };
 
+            await OnBooted();
             _isBooted.Set();
         }
 
@@ -110,11 +110,12 @@ namespace Backend.Fx.Patterns.DependencyInjection
             switch (tenant.State)
             {
                 case TenantState.Inactive:
-                    throw new UnprocessableException($"Cannot seed inactive Tenant[{tenant.Id}]");
+                    Logger.Info($"Skipping seeding for inactive Tenant[{tenant.Id}]");
+                    return;
 
+                case TenantState.Created:                    
                 case TenantState.Active:
-                case TenantState.Created:
-                    tenant.State = TenantState.Seeding;
+                tenant.State = TenantState.Seeding;
                     TenantManager.SaveTenant(tenant);
                     Logger.Info($"Seeding {(tenant.IsDemoTenant ? "demonstration" : "production")} tenant[{tenant.Id}] ({tenant.Name})");
                     using (var scope = ScopeManager.BeginScope(new SystemIdentity(), tenantId))
@@ -136,10 +137,19 @@ namespace Backend.Fx.Patterns.DependencyInjection
         }
         
         /// <summary>
-        /// Extension point to do additional initialization after composition root is initialized
+        /// Extension point to do additional initialization before composition root is initialized
         /// </summary>
         /// <returns></returns>
         protected virtual async Task OnBoot()
+        {
+            await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Extension point to do additional initialization after composition root is initialized
+        /// </summary>
+        /// <returns></returns>
+        protected virtual async Task OnBooted()
         {
             await Task.CompletedTask;
         }
