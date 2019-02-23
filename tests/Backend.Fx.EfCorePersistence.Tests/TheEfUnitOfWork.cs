@@ -19,7 +19,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
     public class TheEfUnitOfWork
     {
         private readonly DatabaseFixture _fixture;
-
+        
         public TheEfUnitOfWork()
         {
             _fixture = new SqliteDatabaseFixture();

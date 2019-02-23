@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.Exceptions;
 using Backend.Fx.Logging;
+using Backend.Fx.Patterns.DataGeneration;
 using Backend.Fx.Patterns.Jobs;
+using Backend.Fx.Patterns.UnitOfWork;
 
 namespace Backend.Fx.Patterns.DependencyInjection
 {
@@ -22,12 +24,13 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// <param name="compositionRoot">The composition root of the dependency injection framework</param>
         /// <param name="scopeManager">The scope manager for the current application</param>
         /// <param name="tenantManager">The tenant manager for the current appliastion</param>
-        protected BackendFxApplication(ICompositionRoot compositionRoot, IScopeManager scopeManager, ITenantManager tenantManager)
+        protected BackendFxApplication(ICompositionRoot compositionRoot, IScopeManager scopeManager,
+            ITenantManager tenantManager)
         {
             CompositionRoot = compositionRoot;
             ScopeManager = scopeManager;
-            TenantManager = tenantManager;
             JobEngine = new JobEngine(scopeManager);
+            TenantManager = tenantManager;
         }
 
         /// <inheritdoc />
@@ -56,41 +59,74 @@ namespace Backend.Fx.Patterns.DependencyInjection
         public async Task Boot()
         {
             Logger.Info("Booting application");
-            CompositionRoot.Verify();
             await OnBoot();
+            CompositionRoot.Verify();
             SeedTenants();
+
+            TenantManager.TenantCreated += async (sender, tenantId) =>
+            {
+                try
+                {
+                    var tenant = TenantManager.GetTenant(tenantId);
+                    tenant.State = TenantState.Seeding;
+                    TenantManager.SaveTenant(tenant);
+                    if (tenant.IsDemoTenant)
+                    {
+                        await JobEngine.ExecuteJobAsync<DemoDataGenerationJob>(tenantId);
+                        tenant.State = TenantState.Active;
+                        TenantManager.SaveTenant(tenant);
+                    }
+                    else
+                    {
+                        await JobEngine.ExecuteJobAsync<ProdDataGenerationJob>(tenantId);
+                        tenant.State = TenantState.Active;
+                        TenantManager.SaveTenant(tenant);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, "Handling TenantCreated event failed");
+                }
+            };
+
+            await OnBooted();
             _isBooted.Set();
         }
 
         private void SeedTenants()
         {
-            foreach (var tenant in TenantManager.GetTenants())
+            Logger.Info("Beginning startup seeding");
+            foreach (var tenant in TenantManager.GetTenantIds())
             {
+                Logger.Debug($"Startup seeding of tenant[{tenant.Value}]");
                 SeedTenant(tenant);
             }
         }
 
-        private void SeedTenant(Tenant tenant)
+        private void SeedTenant(TenantId tenantId)
         {
+            var tenant = TenantManager.GetTenant(tenantId);
+
             switch (tenant.State)
             {
                 case TenantState.Inactive:
-                    throw new UnprocessableException($"Cannot seed inactive Tenant[{tenant.Id}]");
+                    Logger.Info($"Skipping seeding for inactive Tenant[{tenant.Id}]");
+                    return;
 
+                case TenantState.Created:                    
                 case TenantState.Active:
-                case TenantState.Created:
-                    tenant.State = TenantState.Seeding;
+                tenant.State = TenantState.Seeding;
                     TenantManager.SaveTenant(tenant);
-
-                {
                     Logger.Info($"Seeding {(tenant.IsDemoTenant ? "demonstration" : "production")} tenant[{tenant.Id}] ({tenant.Name})");
-                    var tenantDataGenerator = new TenantDataGenerator(ScopeManager);
-                    tenantDataGenerator.RunProductiveDataGenerators(tenant);
-                    if (tenant.IsDemoTenant)
+                    using (var scope = ScopeManager.BeginScope(new SystemIdentity(), tenantId))
                     {
-                        tenantDataGenerator.RunDemoDataGenerators(tenant);
+                        var dataGeneratorContext = new DataGeneratorContext(scope.GetAllInstances<IDataGenerator>(), scope.GetInstance<ICanFlush>());
+                        dataGeneratorContext.RunProductiveDataGenerators();
+                        if (tenant.IsDemoTenant)
+                        {
+                            dataGeneratorContext.RunDemoDataGenerators();
+                        }
                     }
-                }
 
                     tenant.State = TenantState.Active;
                     return;
@@ -99,12 +135,21 @@ namespace Backend.Fx.Patterns.DependencyInjection
                     return;
             }
         }
+        
+        /// <summary>
+        /// Extension point to do additional initialization before composition root is initialized
+        /// </summary>
+        /// <returns></returns>
+        protected virtual async Task OnBoot()
+        {
+            await Task.CompletedTask;
+        }
 
         /// <summary>
         /// Extension point to do additional initialization after composition root is initialized
         /// </summary>
         /// <returns></returns>
-        protected virtual async Task OnBoot()
+        protected virtual async Task OnBooted()
         {
             await Task.CompletedTask;
         }

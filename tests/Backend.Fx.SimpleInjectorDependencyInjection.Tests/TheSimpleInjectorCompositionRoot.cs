@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.DateAndTime;
 using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using Backend.Fx.Patterns.IdGeneration;
@@ -25,7 +26,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         
         private class ADomainModule  : DomainModule 
         {
-            public ADomainModule(params Assembly[] domainAssemblies) : base(domainAssemblies)
+            public ADomainModule(params Assembly[] domainAssemblies) : base(new DebugExceptionLogger(), domainAssemblies)
             { }
 
             protected override void Register(Container container, ScopedLifestyle scopedLifestyle)

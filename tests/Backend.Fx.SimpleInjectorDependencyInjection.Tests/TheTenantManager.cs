@@ -7,8 +7,8 @@ using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using Backend.Fx.SimpleInjectorDependencyInjection.Modules;
-using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl;
 using Backend.Fx.InMemoryPersistence;
+using Backend.Fx.Logging;
 using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Bootstrapping;
 using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Domain;
 using FakeItEasy;
@@ -24,7 +24,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
 
         private class ADomainModule  : DomainModule 
         {
-            public ADomainModule(params Assembly[] domainAssemblies) : base(domainAssemblies)
+            public ADomainModule(params Assembly[] domainAssemblies) : base(new DebugExceptionLogger(), domainAssemblies)
             { }
 
             protected override void Register(Container container, ScopedLifestyle scopedLifestyle)

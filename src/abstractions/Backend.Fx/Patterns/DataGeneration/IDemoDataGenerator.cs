@@ -3,5 +3,5 @@
     /// <summary>
     /// Marks an <see cref="DataGenerator"/> as active in development environments only
     /// </summary>
-    public interface IDemoDataGenerator { }
+    public interface IDemoDataGenerator : IDataGenerator { }
 }
