@@ -1,19 +1,16 @@
-﻿namespace Backend.Fx.Patterns.EventAggregation.Integration
+﻿using Backend.Fx.Patterns.DependencyInjection;
+
+namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
     using System;
     using System.Threading.Tasks;
-    using DependencyInjection;
     using Environment.MultiTenancy;
-    using Logging;
 
     public class InMemoryEventBus : EventBus
     {
-        private readonly IExceptionLogger _exceptionLogger;
-
-        public InMemoryEventBus(IScopeManager scopeManager, IExceptionLogger exceptionLogger)
-                : base(scopeManager, exceptionLogger)
+        public InMemoryEventBus(IBackendFxApplication application)
+                : base(application)
         {
-            _exceptionLogger = exceptionLogger;
         }
 
         public override void Connect()
@@ -21,19 +18,11 @@
 
         public override Task Publish(IIntegrationEvent integrationEvent)
         {
+#pragma warning disable 4014
             // Processing is done on the thread pool and not being awaited. This emulates best the behavior of a real
             // event bus, that incorporates network transfer and another system handling the event
-            Task.Run(() =>
-            {
-                try
-                {
-                    Process(integrationEvent.GetType().FullName, new InMemoryProcessingContext(integrationEvent));
-                }
-                catch (Exception ex)
-                {
-                    _exceptionLogger.LogException(ex);
-                }
-            });
+            ProcessAsync(integrationEvent.GetType().FullName, new InMemoryProcessingContext(integrationEvent));
+#pragma warning restore 4014
             return Task.CompletedTask;
         }
 

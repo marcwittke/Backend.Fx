@@ -1,4 +1,6 @@
-﻿namespace Backend.Fx.RabbitMq
+﻿using Backend.Fx.Patterns.DependencyInjection;
+
+namespace Backend.Fx.RabbitMq
 {
     using System;
     using System.Text;
@@ -7,7 +9,6 @@
     using Logging;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
-    using Patterns.DependencyInjection;
     using Patterns.EventAggregation.Integration;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
@@ -17,13 +18,12 @@
         private static readonly ILogger Logger = LogManager.Create<RabbitMqEventBus>();
         private readonly RabbitMqChannel _channel;
         
-        public RabbitMqEventBus(IScopeManager scopeManager,
+        public RabbitMqEventBus(IBackendFxApplication application,
                                 IConnectionFactory connectionFactory,
-                                IExceptionLogger exceptionLogger,
                                 int retryCount,
                                 string brokerName,
                                 string queueName)
-                : base(scopeManager, exceptionLogger)
+                : base(application)
         {
             _channel = new RabbitMqChannel(connectionFactory, brokerName, queueName, retryCount);
         }
@@ -36,9 +36,9 @@
             }
         }
         
-        private void ChannelOnMessageReceived(object sender, BasicDeliverEventArgs args)
+        private async void ChannelOnMessageReceived(object sender, BasicDeliverEventArgs args)
         {
-            Process(args.RoutingKey, new RabbitMqEventProcessingContext(args.Body));
+            await ProcessAsync(args.RoutingKey, new RabbitMqEventProcessingContext(args.Body));
         }
 
         public override Task Publish(IIntegrationEvent integrationEvent)

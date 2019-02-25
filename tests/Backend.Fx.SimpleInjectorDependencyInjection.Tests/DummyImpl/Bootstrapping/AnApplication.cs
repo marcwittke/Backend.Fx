@@ -2,14 +2,17 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 
 namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Bootstrapping
 {
     public class AnApplication : BackendFxApplication
     {
-        public AnApplication(ICompositionRoot compositionRoot, IScopeManager scopeManager, ITenantManager tenantManager)
-            : base(compositionRoot, scopeManager, tenantManager)
+        private static readonly ILogger Logger = LogManager.Create<AnApplication>();
+
+        public AnApplication(ICompositionRoot compositionRoot, ITenantManager tenantManager)
+            : base(compositionRoot, tenantManager, new ExceptionLogger(Logger))
         {
         }
 

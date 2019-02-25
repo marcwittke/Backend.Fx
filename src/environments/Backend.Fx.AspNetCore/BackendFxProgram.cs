@@ -44,7 +44,6 @@
 
         public IWebHostBuilder CreateWebHostBuilder(string[] args)
         {
-
             try
             {
                 _logger = LogManager.Create<BackendFxProgram<TStartup>>();

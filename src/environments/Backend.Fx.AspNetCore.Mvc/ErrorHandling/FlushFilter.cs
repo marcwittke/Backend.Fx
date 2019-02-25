@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Backend.Fx.AspNetCore.UnitOfWork;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.UnitOfWork;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -10,7 +11,7 @@ namespace Backend.Fx.AspNetCore.Mvc.ErrorHandling
     /// are raised before the http response starts, and our exception handling can still change the response.
     /// </summary>
     /// <remarks>This cannot be done in a middleware. MVC will start the response as soon as the controller
-    /// action returns. The <see cref="Backend.Fx.AspNetCore.Scoping.UnitOfWorkMiddleware"/> would commit changes
+    /// action returns. The <see cref="UnitOfWorkMiddleware"/> would commit changes
     /// too late for the <see cref="Backend.Fx.AspNetCore.ErrorHandling.JsonErrorHandlingMiddleware"/> to
     /// manipulate the response status.</remarks>
     [DebuggerStepThrough]

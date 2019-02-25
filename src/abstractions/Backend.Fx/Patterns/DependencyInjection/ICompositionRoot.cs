@@ -1,6 +1,7 @@
 ﻿namespace Backend.Fx.Patterns.DependencyInjection
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using EventAggregation.Domain;
 
@@ -12,6 +13,10 @@
     /// </summary>
     public interface ICompositionRoot : IDisposable, IDomainEventHandlerProvider
     {
+        void Verify();
+
+        void RegisterModules(params IModule[] modules);
+
         /// <summary>
         /// Gets a service instance by providing its type
         /// </summary>
@@ -20,16 +25,26 @@
         object GetInstance(Type serviceType);
 
         /// <summary>
+        /// Gets all service instances by providing their type
+        /// </summary>
+        /// <param name="serviceType"></param>
+        /// <returns></returns>
+        IEnumerable GetInstances(Type serviceType);
+
+        /// <summary>
         /// Gets a service instance by providing its type via generic type parameter
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         T GetInstance<T>() where T : class;
 
+        /// <summary>
+        /// Gets all service instances by providing their type via generic type parameter
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         IEnumerable<T> GetInstances<T>() where T : class;
 
-        void Verify();
-
-        void RegisterModules(params IModule[] modules);
+        IDisposable BeginScope();
     }
 }

@@ -1,14 +1,11 @@
 using System;
 using System.Linq;
 using System.Reflection;
-using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
-using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.DateAndTime;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using Backend.Fx.Patterns.IdGeneration;
 using Backend.Fx.SimpleInjectorDependencyInjection.Modules;
@@ -58,9 +55,9 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         [Fact]
         public void ProvidesAutoRegisteredDomainServices()
         {
-            using (var scope = _sut.BeginScope(new SystemIdentity(), new TenantId(100)))
+            using (_sut.BeginScope())
             {
-                var testDomainService = scope.GetInstance<ITestDomainService>();
+                var testDomainService = _sut.GetInstance<ITestDomainService>();
                 Assert.IsType<ADomainService>(testDomainService);
             }
         }
@@ -68,12 +65,12 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         [Fact]
         public void ProvidesAutoRegisteredDomainServicesThatImplementTwoInterfaces()
         {
-            using (var scope = _sut.BeginScope(new SystemIdentity(), new TenantId(100)))
+            using (_sut.BeginScope())
             {
-                var testDomainService = scope.GetInstance<ITestDomainService>();
+                var testDomainService = _sut.GetInstance<ITestDomainService>();
                 Assert.IsType<ADomainService>(testDomainService);
 
-                var anotherTestDomainService = scope.GetInstance<IAnotherTestDomainService>();
+                var anotherTestDomainService = _sut.GetInstance<IAnotherTestDomainService>();
                 Assert.IsType<ADomainService>(anotherTestDomainService);
 
                 Assert.True(Equals(testDomainService, anotherTestDomainService));
@@ -83,38 +80,13 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         [Fact]
         public void ProvidesAutoRegisteredApplicationServices()
         {
-            using (var scope = _sut.BeginScope(new SystemIdentity(), new TenantId(100)))
+            using (_sut.BeginScope())
             {
-                Assert.IsType<AnApplicationService>(scope.GetInstance<ITestApplicationService>());
+                Assert.IsType<AnApplicationService>(_sut.GetInstance<ITestApplicationService>());
             }
         }
 
-        [Fact]
-        public void MaintainsTenantIdWhenBeginningScopes()
-        {
-            Enumerable.Range(1, 100).AsParallel().ForAll(i =>
-            {
-                using (var scope = _sut.BeginScope(new SystemIdentity(), new TenantId(i)))
-                {
-                    var insideScopeTenantId = scope.GetInstance<ICurrentTHolder<TenantId>>().Current;
-                    Assert.True(insideScopeTenantId.HasValue);
-                    Assert.Equal(i, insideScopeTenantId.Value);
-                }
-            });
-        }
-
-        [Fact]
-        public void MaintainsIdentityWhenBeginningScopes()
-        {
-            Enumerable.Range(1, 100).AsParallel().ForAll(i =>
-            {
-                using (var scope = _sut.BeginScope(new GenericIdentity(i.ToString()), new TenantId(100)))
-                {
-                    var insideScopeIdentity = scope.GetInstance<ICurrentTHolder<IIdentity>>().Current;
-                    Assert.Equal(i.ToString(), insideScopeIdentity.Name);
-                }
-            });
-        }
+        
 
         [Fact]
         public void ProvidesScopedInstancesWhenScopeHasBeenStarted()
@@ -122,15 +94,15 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
             IClock scope1Clock;
             IClock scope2Clock;
 
-            using (var scope = _sut.BeginScope(new SystemIdentity(), new TenantId(null)))
+            using (_sut.BeginScope())
             {
-                scope1Clock = scope.GetInstance<IClock>();
+                scope1Clock = _sut.GetInstance<IClock>();
                 Assert.NotNull(scope1Clock);
             }
 
-            using (var scope = _sut.BeginScope(new SystemIdentity(), new TenantId(null)))
+            using (_sut.BeginScope())
             {
-                scope2Clock = scope.GetInstance<IClock>();
+                scope2Clock = _sut.GetInstance<IClock>();
                 Assert.NotNull(scope2Clock);
             }
 
@@ -156,10 +128,10 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
                 {
                     // using the reset event to enforce a maximum grade of parallelism
                     waiter.WaitOne();
-                    using (var scope = _sut.BeginScope(new SystemIdentity(), new TenantId(null)))
+                    using (_sut.BeginScope())
                     {
-                        scopedInstances[indexClosure] = scope.GetInstance<IClock>();
-                        singletonInstances[indexClosure] = scope.GetInstance<IEntityIdGenerator>();
+                        scopedInstances[indexClosure] = _sut.GetInstance<IClock>();
+                        singletonInstances[indexClosure] = _sut.GetInstance<IEntityIdGenerator>();
                     }
                 });
             }
@@ -193,10 +165,10 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
             Assert.Throws<ActivationException>(() => _sut.GetInstance(typeof(IClock)));
             Assert.Null(_sut.GetCurrentScope());
 
-            using (var scope = _sut.BeginScope(new SystemIdentity(), new TenantId(null)))
+            using (_sut.BeginScope())
             {
                 var sutClock = _sut.GetInstance<IClock>();
-                var scopeClock = scope.GetInstance<IClock>();
+                var scopeClock = _sut.GetInstance<IClock>();
                 Assert.NotNull(sutClock);
                 Assert.NotNull(scopeClock);
                 Assert.Equal(sutClock, scopeClock);
@@ -210,7 +182,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         [Fact]
         public void CanProvideEventHandlers()
         {
-            using (_sut.BeginScope(new SystemIdentity(), new TenantId(1)))
+            using (_sut.BeginScope())
             {
                 var handlers = _sut.GetAllEventHandlers<ADomainEvent>().ToArray();
                 

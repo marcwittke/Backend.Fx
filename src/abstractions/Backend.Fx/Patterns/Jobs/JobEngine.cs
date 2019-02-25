@@ -9,27 +9,57 @@ namespace Backend.Fx.Patterns.Jobs
     public class JobEngine : IJobEngine
     {
         private static readonly ILogger Logger = LogManager.Create<JobEngine>();
-        private readonly IScopeManager _scopeManager;
-        
-        public JobEngine(IScopeManager scopeManager)
+        private readonly IBackendFxApplication _application;
+
+        public JobEngine(IBackendFxApplication application)
         {
-            _scopeManager = scopeManager;
+            _application = application;
+        }
+
+        public void ExecuteJob<TJob>() where TJob : IJob
+        {
+            var tenants = _application.TenantManager.GetTenants();
+            foreach (var tenant in tenants)
+            {
+                if (tenant.State == TenantState.Active)
+                {
+                    ExecuteJob<TJob>(new TenantId(tenant.Id));
+                }
+            }
+        }
+
+        public async Task ExecuteJobAsync<TJob>() where TJob : IJob
+        {
+            var tenants = _application.TenantManager.GetTenants();
+            foreach (var tenant in tenants)
+            {
+                if (tenant.State == TenantState.Active)
+                {
+                    await ExecuteJobAsync<TJob>(new TenantId(tenant.Id));
+                }
+            }
         }
 
         public void ExecuteJob<TJob>(TenantId tenantId) where TJob : IJob
         {
             using (Logger.InfoDuration($"Execution of {typeof(TJob).Name} for tenant[{(tenantId.HasValue ? tenantId.Value.ToString() : "null")}]"))
             {
-                using (var scope = _scopeManager.BeginScope(new SystemIdentity(), tenantId))
+                _application.Invoke(() =>
                 {
-                    scope.GetInstance<IJobExecutor<TJob>>().ExecuteJob();
-                }
+                    _application.CompositionRoot.GetInstance<IJobExecutor<TJob>>().ExecuteJob();
+                }, new SystemIdentity(), tenantId);
             }
         }
-        
-        public Task ExecuteJobAsync<TJob>(TenantId tenantId) where TJob : IJob
+
+        public async Task ExecuteJobAsync<TJob>(TenantId tenantId) where TJob : IJob
         {
-            return Task.Factory.StartNew(() => ExecuteJob<TJob>(tenantId));
+            using (Logger.InfoDuration($"Execution of {typeof(TJob).Name} for tenant[{(tenantId.HasValue ? tenantId.Value.ToString() : "null")}]"))
+            {
+                await _application.InvokeAsync(() =>
+                {
+                    _application.CompositionRoot.GetInstance<IJobExecutor<TJob>>().ExecuteJob();
+                }, new SystemIdentity(), tenantId);
+            }
         }
     }
 }

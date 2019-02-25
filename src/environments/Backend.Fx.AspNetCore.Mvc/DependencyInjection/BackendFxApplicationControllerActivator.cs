@@ -5,10 +5,10 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 
 namespace Backend.Fx.AspNetCore.Mvc.DependencyInjection
 {
-    public class CompositionRootControllerActivator : CompositionRootActivator, IControllerActivator
+    public class BackendFxApplicationControllerActivator : BackendFxApplicationActivator, IControllerActivator
     {
-        private static readonly ILogger Logger = LogManager.Create<CompositionRootControllerActivator>();
-        public CompositionRootControllerActivator(ICompositionRoot compositionRoot) : base(compositionRoot)
+        private static readonly ILogger Logger = LogManager.Create<BackendFxApplicationControllerActivator>();
+        public BackendFxApplicationControllerActivator(IBackendFxApplication application) : base(application)
         { }
 
         public virtual object Create(ControllerContext c)

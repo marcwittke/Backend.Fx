@@ -1,7 +1,6 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Security.Principal;
-using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Domain;
@@ -14,7 +13,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
     /// <summary>
     ///     Provides a reusable composition root assuming Simple Injector as container
     /// </summary>
-    public sealed class SimpleInjectorCompositionRoot : ICompositionRoot, IScopeManager
+    public class SimpleInjectorCompositionRoot : ICompositionRoot
     {
         private static readonly ILogger Logger = LogManager.Create<SimpleInjectorCompositionRoot>();
 
@@ -59,6 +58,11 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             return Container.GetInstance(serviceType);
         }
 
+        public IEnumerable GetInstances(Type serviceType)
+        {
+            return Container.GetAllInstances(serviceType);
+        }
+
         public T GetInstance<T>() where T : class
         {
             return Container.GetInstance<T>();
@@ -68,28 +72,17 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
         {
             return Container.GetAllInstances<T>();
         }
-        #endregion
-
-        #region IScopeManager implementation
-
+        
         /// <inheritdoc />
-        public IScope BeginScope(IIdentity identity, TenantId tenantId)
+        public IDisposable BeginScope()
         {
-            var scope = new SimpleInjectorScope(AsyncScopedLifestyle.BeginScope(Container), identity, tenantId);
-            scope.GetInstance<ICurrentTHolder<IIdentity>>().ReplaceCurrent(identity);
-            scope.GetInstance<ICurrentTHolder<TenantId>>().ReplaceCurrent(tenantId);
+            var scope = AsyncScopedLifestyle.BeginScope(Container);
             return scope;
         }
 
-        public IScope GetCurrentScope()
+        public Scope GetCurrentScope()
         {
-            var scope = ScopedLifestyle.GetCurrentScope(Container);
-            if (scope == null)
-            {
-                return null;
-            }
-
-            return new SimpleInjectorScope(scope, scope.GetInstance<ICurrentTHolder<IIdentity>>().Current, scope.GetInstance<ICurrentTHolder<TenantId>>().Current);
+            return ScopedLifestyle.GetCurrentScope(Container);
         }
         #endregion
 
