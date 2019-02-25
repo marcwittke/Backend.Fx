@@ -17,15 +17,24 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
     {
         private static readonly ILogger Logger = LogManager.Create<SimpleInjectorCompositionRoot>();
 
-        public SimpleInjectorCompositionRoot()
+        /// <summary>
+        /// This constructor creates a composition root that prefers scoped lifestyle
+        /// </summary>
+        public SimpleInjectorCompositionRoot() 
+            : this(new ScopedLifestyleBehavior(), new AsyncScopedLifestyle())
+        {}
+
+        public SimpleInjectorCompositionRoot(ILifestyleSelectionBehavior lifestyleBehavior, ScopedLifestyle scopedLifestyle)
         {
             Logger.Info("Initializing SimpleInjector");
-            Container.Options.LifestyleSelectionBehavior = new ScopedLifestyleBehavior();
+            ScopedLifestyle = scopedLifestyle;
+            Container.Options.LifestyleSelectionBehavior = lifestyleBehavior;
             Container.Options.DefaultScopedLifestyle = ScopedLifestyle;
         }
 
         internal Container Container { get; } = new Container();
-        internal ScopedLifestyle ScopedLifestyle { get; } = new AsyncScopedLifestyle();
+
+        internal ScopedLifestyle ScopedLifestyle { get; }
 
         public void RegisterModules(params IModule[] modules)
         {
