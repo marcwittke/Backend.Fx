@@ -1,5 +1,7 @@
 ﻿using System.Globalization;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Environment.DateAndTime;
 using Backend.Fx.Environment.MultiTenancy;
@@ -50,17 +52,12 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         }
 
         [Fact]
-        public void RunsNoDataGeneratorsOnTenantCreation()
+        public void RaisesTenantCreatedEvent()
         {
-            TenantId tenantId = _sut.CreateProductionTenant("prod", "unit test created", true, new CultureInfo("de-DE"));
-
-            using (_compositionRoot.BeginScope())
-            {
-                _compositionRoot.GetInstance<ICurrentTHolder<TenantId>>().ReplaceCurrent(tenantId);
-                IRepository<AnAggregate> repository = _compositionRoot.GetInstance<IRepository<AnAggregate>>();
-                AnAggregate[] allAggregates = repository.GetAll();
-                Assert.Empty(allAggregates);
-            }
+            ManualResetEvent ev = new ManualResetEvent(false);
+            _sut.TenantCreated += (sender, id) => ev.Set();
+            Task.Run(() => _sut.CreateProductionTenant("prod", "unit test created", true, new CultureInfo("de-DE")));
+            Assert.True(ev.WaitOne(1000));
         }
     }
 }

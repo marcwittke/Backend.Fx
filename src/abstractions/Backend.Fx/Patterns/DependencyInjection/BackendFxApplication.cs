@@ -51,7 +51,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
             Logger.Info("Booting application");
             await OnBoot();
             CompositionRoot.Verify();
-            SeedTenants();
+            new DataGeneratorContext(this).SeedDataForAllActiveTenants();
 
             TenantManager.TenantCreated += (sender, tenantId) =>
             {
@@ -62,17 +62,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
                         var tenant = TenantManager.GetTenant(tenantId);
                         tenant.State = TenantState.Seeding;
                         TenantManager.SaveTenant(tenant);
-
-                        using (BeginScope(new SystemIdentity(), tenantId))
-                        {
-                            var dataGeneratorContext = new DataGeneratorContext(CompositionRoot.GetInstances<DataGenerator>(), CompositionRoot.GetInstance<ICanFlush>());
-                            dataGeneratorContext.RunProductiveDataGenerators();
-                            if (tenant.IsDemoTenant)
-                            {
-                                dataGeneratorContext.RunDemoDataGenerators();
-                            }
-                        }
-
+                        new DataGeneratorContext(this).SeedDataForTenant(tenant);
                         tenant.State = TenantState.Active;
                         TenantManager.SaveTenant(tenant);
                     }
@@ -138,47 +128,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
                 }
             }
         }
-
-        private void SeedTenants()
-        {
-            Logger.Info("Beginning startup seeding");
-            foreach (var tenant in TenantManager.GetTenantIds())
-            {
-                Logger.Debug($"Startup seeding of tenant[{tenant.Value}]");
-                SeedTenant(tenant);
-            }
-        }
-
-        private void SeedTenant(TenantId tenantId)
-        {
-            var tenant = TenantManager.GetTenant(tenantId);
-
-            switch (tenant.State)
-            {
-                case TenantState.Inactive:
-                    Logger.Info($"Skipping seeding for inactive Tenant[{tenant.Id}]");
-                    return;
-
-                case TenantState.Created:
-                case TenantState.Active:
-                    tenant.State = TenantState.Seeding;
-                    TenantManager.SaveTenant(tenant);
-                    Logger.Info($"Seeding {(tenant.IsDemoTenant ? "demonstration" : "production")} tenant[{tenant.Id}] ({tenant.Name})");
-                    using (BeginScope(new SystemIdentity(), tenantId))
-                    {
-                        var dataGeneratorContext = new DataGeneratorContext(CompositionRoot.GetInstances<IDataGenerator>(), CompositionRoot.GetInstance<ICanFlush>());
-                        dataGeneratorContext.RunProductiveDataGenerators();
-                        if (tenant.IsDemoTenant) dataGeneratorContext.RunDemoDataGenerators();
-                    }
-
-                    tenant.State = TenantState.Active;
-                    return;
-
-                default:
-                    return;
-            }
-        }
-
+        
         /// <summary>
         /// Extension point to do additional initialization before composition root is initialized
         /// </summary>

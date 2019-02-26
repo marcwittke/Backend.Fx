@@ -13,6 +13,7 @@ namespace Backend.Fx.Environment.MultiTenancy
     public interface ITenantManager : IDisposable
     {
         event EventHandler<TenantId> TenantCreated;
+        event EventHandler<TenantId> TenantActivated;
 
         TenantId[] GetTenantIds();
         Tenant[] GetTenants();
@@ -28,13 +29,8 @@ namespace Backend.Fx.Environment.MultiTenancy
     public abstract class TenantManager : ITenantManager
     {
         private static readonly ILogger Logger = LogManager.Create<TenantManager>();
-        private readonly object _synclock = new object();
-        private readonly ITenantMatcherCache _tenantMatcherCache;
+        private readonly object _padlock = new object();
 
-        protected TenantManager(ITenantMatcherCache tenantMatcherCache)
-        {
-            _tenantMatcherCache = tenantMatcherCache;
-        }
         public TenantId CreateDemonstrationTenant(string name, string description, bool isDefault, CultureInfo defaultCultureInfo, string uriMatchingExpression = null)
         {
             Logger.Info($"Creating demonstration tenant: {name}");
@@ -47,50 +43,41 @@ namespace Backend.Fx.Environment.MultiTenancy
             return CreateTenant(name, description, false, isDefault, defaultCultureInfo, uriMatchingExpression);
         }
 
-        public TenantId FindMatchingTenantId(string requestUri)
-        {
-            lock (_synclock)
-            {
-                return _tenantMatcherCache.FindMatchingTenant(requestUri);
-            }
-        }
+        public abstract TenantId FindMatchingTenantId(string requestUri);
 
-        public TenantId GetDefaultTenantId()
-        {
-            var defaultTenant = GetTenants().SingleOrDefault(t => t.IsDefault);
-            return defaultTenant == null
-                       ? null
-                       : new TenantId(defaultTenant.Id);
-        }
+        public abstract TenantId GetDefaultTenantId();
 
         public void SaveTenant(Tenant tenant)
         {
-            SaveTenantPersistent(tenant);
-            lock (_synclock)
+            var existingTenant = FindTenant(new TenantId(tenant.Id));
+            lock (_padlock)
             {
-                _tenantMatcherCache.Reload(GetTenants());
+                SaveTenantPersistent(existingTenant, tenant);
+            }
+
+            if (existingTenant == null)
+            {
+                TenantCreated?.Invoke(this, new TenantId(tenant.Id));
+            }
+            else
+            {
+                if (existingTenant.State != TenantState.Active && tenant.State == TenantState.Active)
+                {
+                    TenantActivated?.Invoke(this, new TenantId(tenant.Id));
+                }
             }
         }
 
-        protected abstract void SaveTenantPersistent(Tenant tenant);
+        protected abstract void SaveTenantPersistent(Tenant existingTenant, Tenant tenant);
 
         public event EventHandler<TenantId> TenantCreated;
+        public event EventHandler<TenantId> TenantActivated;
 
         public abstract TenantId[] GetTenantIds();
 
         public abstract Tenant[] GetTenants();
 
-        public Tenant GetTenant(TenantId tenantId)
-        {
-            Tenant tenant = FindTenant(tenantId);
-
-            if (tenant == null)
-            {
-                throw new ArgumentException($"Invalid tenant Id [{tenantId.Value}]", nameof(tenantId));
-            }
-
-            return tenant;
-        }
+        public abstract Tenant GetTenant(TenantId tenantId);
 
         public abstract Tenant FindTenant(TenantId tenantId);
 
@@ -114,7 +101,6 @@ namespace Backend.Fx.Environment.MultiTenancy
             };
             SaveTenant(tenant);
             var tenantId = new TenantId(tenant.Id);
-            TenantCreated?.Invoke(this, tenantId);
             return tenantId;
         }
 

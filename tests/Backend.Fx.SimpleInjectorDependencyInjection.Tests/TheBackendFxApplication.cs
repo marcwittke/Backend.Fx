@@ -1,5 +1,7 @@
-﻿using System.Linq;
+﻿using System.Globalization;
+using System.Linq;
 using System.Security.Principal;
+using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Environment.Authentication;
@@ -22,30 +24,57 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         }
 
         [Fact]
-        public async Task RunsProdAndDemoDataGeneratorsOnEveryBoot()
+        public async Task RunsProdDataGeneratorsOnEveryBoot()
         {
-            TenantId demoTenantId;
-            TenantId prodTenantId;
             using (var sut = CreateSystemUnderTest())
             {
                 await sut.Boot();
 
-                demoTenantId = sut.DemoTenantId;
-                using (sut.BeginScope(new SystemIdentity(), sut.DemoTenantId))
+                var tenantHelper = new TenantHelper();
+                tenantHelper.EnsureProdTenant(sut);
+                
+                using (sut.BeginScope(new SystemIdentity(), tenantHelper.ProdTenantId))
+                {
+                    IRepository<AnAggregate> repository = sut.CompositionRoot.GetInstance<IRepository<AnAggregate>>();
+                    AnAggregate[] allAggregates = repository.GetAll();
+                    Assert.Equal(1, allAggregates.Length);
+                    Assert.Equal(1, allAggregates.Count(agg => agg.Name == AProdAggregateGenerator.Name));
+                }
+            }
+
+            using (var sut = CreateSystemUnderTest())
+            {
+                await sut.Boot();
+
+                var tenantHelper = new TenantHelper();
+                tenantHelper.EnsureProdTenant(sut);
+
+                using (sut.BeginScope(new SystemIdentity(), tenantHelper.ProdTenantId))
+                {
+                    IRepository<AnAggregate> repository = sut.CompositionRoot.GetInstance<IRepository<AnAggregate>>();
+                    AnAggregate[] allAggregates = repository.GetAll();
+                    Assert.Equal(2, allAggregates.Length);
+                    Assert.Equal(2, allAggregates.Count(agg => agg.Name == AProdAggregateGenerator.Name));
+                }
+            }
+        }
+
+        [Fact]
+        public async Task RunsDemoDataGeneratorsOnEveryBoot()
+        {
+            using (var sut = CreateSystemUnderTest())
+            {
+                await sut.Boot();
+
+                var tenantHelper = new TenantHelper();
+                tenantHelper.EnsureDemoTenant(sut);
+
+                using (sut.BeginScope(new SystemIdentity(), tenantHelper.DemoTenantId))
                 {
                     IRepository<AnAggregate> repository = sut.CompositionRoot.GetInstance<IRepository<AnAggregate>>();
                     AnAggregate[] allAggregates = repository.GetAll();
                     Assert.Equal(2, allAggregates.Length);
                     Assert.NotNull(allAggregates.SingleOrDefault(agg => agg.Name == ADemoAggregateGenerator.Name));
-                    Assert.NotNull(allAggregates.SingleOrDefault(agg => agg.Name == AProdAggregateGenerator.Name));
-                }
-
-                prodTenantId = sut.ProdTenantId;
-                using (sut.BeginScope(new SystemIdentity(), sut.ProdTenantId))
-                {
-                    IRepository<AnAggregate> repository = sut.CompositionRoot.GetInstance<IRepository<AnAggregate>>();
-                    AnAggregate[] allAggregates = repository.GetAll();
-                    Assert.Equal(1, allAggregates.Length);
                     Assert.NotNull(allAggregates.SingleOrDefault(agg => agg.Name == AProdAggregateGenerator.Name));
                 }
             }
@@ -54,22 +83,15 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
             {
                 await sut.Boot();
 
-                Assert.Equal(demoTenantId, sut.DemoTenantId);
-                using (sut.BeginScope(new SystemIdentity(), sut.DemoTenantId))
+                var tenantHelper = new TenantHelper();
+                tenantHelper.EnsureDemoTenant(sut);
+
+                using (sut.BeginScope(new SystemIdentity(), tenantHelper.DemoTenantId))
                 {
                     IRepository<AnAggregate> repository = sut.CompositionRoot.GetInstance<IRepository<AnAggregate>>();
                     AnAggregate[] allAggregates = repository.GetAll();
                     Assert.Equal(4, allAggregates.Length);
                     Assert.Equal(2, allAggregates.Count(agg => agg.Name == ADemoAggregateGenerator.Name));
-                    Assert.Equal(2, allAggregates.Count(agg => agg.Name == AProdAggregateGenerator.Name));
-                }
-
-                Assert.Equal(prodTenantId, sut.ProdTenantId);
-                using (sut.BeginScope(new SystemIdentity(), sut.ProdTenantId))
-                {
-                    IRepository<AnAggregate> repository = sut.CompositionRoot.GetInstance<IRepository<AnAggregate>>();
-                    AnAggregate[] allAggregates = repository.GetAll();
-                    Assert.Equal(2, allAggregates.Length);
                     Assert.Equal(2, allAggregates.Count(agg => agg.Name == AProdAggregateGenerator.Name));
                 }
             }
@@ -117,8 +139,51 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
                 new ADomainModule(typeof(AnApplication).Assembly, typeof(AggregateRoot).Assembly),
                 _persistenceModule);
 
-            var sut = new AnApplication(compositionRoot, new InMemoryTenantManager());
+            var sut = new AnApplication(compositionRoot);
             return sut;
+        }
+
+        private class TenantHelper
+        {
+            public void EnsureProdTenant(IBackendFxApplication application)
+            {
+                
+                var tenants = application.TenantManager.GetTenants();
+                var prodTenantId = tenants.SingleOrDefault(t => t.Name == "prod")?.Id;
+                if (prodTenantId == null)
+                {
+                    ManualResetEventSlim prodTenantActivated = new ManualResetEventSlim(false);
+                    application.TenantManager.TenantActivated += (_, tenantId) => { prodTenantActivated.Set(); };
+                    ProdTenantId = application.TenantManager.CreateProductionTenant("prod", "unit test created", true, new CultureInfo("en-US"));
+                    Assert.True(prodTenantActivated.Wait(int.MaxValue));
+                }
+                else
+                {
+                    ProdTenantId = new TenantId(prodTenantId.Value);
+                }
+            }
+
+            public void EnsureDemoTenant(IBackendFxApplication application)
+            {
+                var tenants = application.TenantManager.GetTenants();
+                var demoTenantId = tenants.SingleOrDefault(t => t.Name == "demo")?.Id;
+                if (demoTenantId == null)
+                {
+                    ManualResetEventSlim demoTenantActivated = new ManualResetEventSlim(false);
+                    application.TenantManager.TenantActivated += (_, tenantId) => { demoTenantActivated.Set(); };
+                    DemoTenantId = application.TenantManager.CreateDemonstrationTenant("demo", "unit test created",
+                        false, new CultureInfo("en-US"));
+                    Assert.True(demoTenantActivated.Wait(int.MaxValue));
+                }
+                else
+                {
+                    DemoTenantId = new TenantId(demoTenantId.Value);
+                }
+            }
+
+            public TenantId ProdTenantId { get; private set; }
+
+            public TenantId DemoTenantId { get; private set; }
         }
     }
 }
