@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -7,41 +8,28 @@ using JetBrains.Annotations;
 namespace Backend.Fx.Environment.MultiTenancy
 {
     /// <summary>
-    /// A tenant manager that keeps all tenants in a lookup held in memory. Reload is done
+    /// A tenant manager that keeps all tenants in a lookup held in memory. Refresh is done
     /// automatically when changes occur. However, in a multi process environment, manual
-    /// triggering of reload is required, when another process is updating the tenants.
+    /// triggering of Refresh is required, when another process is updating the tenants.
     /// </summary>
     public abstract class LookupTenantManager : TenantManager
     {
         private LookupItem[] _lookupItems;
         private TenantId _defaultTenantId = new TenantId(null);
 
-        public void EnsureLoaded()
-        {
-            if (_lookupItems == null) Reload();
-        }
-
-        public void Reload()
-        {
-            List<LookupItem> items = new List<LookupItem>();
-            foreach (var tenant in LoadTenants())
-            {
-                var tenantId = new TenantId(tenant.Id);
-                if (tenant.IsDefault)
-                {
-                    Interlocked.Exchange(ref _defaultTenantId, tenantId);
-                }
-
-                items.Add(new LookupItem(tenant));
-            }
-
-            var newLookupItems = items.ToArray();
-            Interlocked.Exchange(ref _lookupItems, newLookupItems);
-        }
-
         public TenantId DefaultTenantId => _defaultTenantId;
 
+        public void EnsureLoaded()
+        {
+            if (_lookupItems == null) RefreshLookupItems();
+        }
 
+        public void RefreshLookupItems()
+        {
+            var newLookupItems = LoadTenantLookupItems();
+            Interlocked.Exchange(ref _lookupItems, newLookupItems);
+        }
+        
         public override TenantId[] GetTenantIds()
         {
             EnsureLoaded();
@@ -59,7 +47,7 @@ namespace Backend.Fx.Environment.MultiTenancy
             EnsureLoaded();
             return _lookupItems.First(itm => itm.TenantId.Value == tenantId.Value).Tenant;
         }
-
+        
         [CanBeNull]
         public override Tenant FindTenant(TenantId tenantId)
         {
@@ -79,10 +67,46 @@ namespace Backend.Fx.Environment.MultiTenancy
             return DefaultTenantId;
         }
 
+        protected override TenantId CreateTenant(string name, string description, bool isDemo, bool isDefault, CultureInfo defaultCultureInfo, string uriMatchingExpression)
+        {
+            var tenantId = base.CreateTenant(name, description, isDemo, isDefault, defaultCultureInfo, uriMatchingExpression);
+            return tenantId;
+        }
+
         protected abstract Tenant[] LoadTenants();
 
         protected override void Dispose(bool disposing)
         { }
+
+        protected override void RaiseTenantCreated(TenantId tenantId)
+        {
+            RefreshLookupItems();
+            base.RaiseTenantCreated(tenantId);
+        }
+
+        protected override void RaiseTenantActivated(TenantId tenantId)
+        {
+            RefreshLookupItems();
+            base.RaiseTenantActivated(tenantId);
+        }
+
+        private LookupItem[] LoadTenantLookupItems()
+        {
+            List<LookupItem> items = new List<LookupItem>();
+            foreach (var tenant in LoadTenants())
+            {
+                var tenantId = new TenantId(tenant.Id);
+                if (tenant.IsDefault)
+                {
+                    Interlocked.Exchange(ref _defaultTenantId, tenantId);
+                }
+
+                items.Add(new LookupItem(tenant));
+            }
+
+            var newLookupItems = items.ToArray();
+            return newLookupItems;
+        }
 
         private class LookupItem
         {

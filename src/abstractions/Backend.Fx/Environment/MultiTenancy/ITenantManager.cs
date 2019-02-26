@@ -31,6 +31,9 @@ namespace Backend.Fx.Environment.MultiTenancy
         private static readonly ILogger Logger = LogManager.Create<TenantManager>();
         private readonly object _padlock = new object();
 
+        public event EventHandler<TenantId> TenantCreated;
+        public event EventHandler<TenantId> TenantActivated;
+
         public TenantId CreateDemonstrationTenant(string name, string description, bool isDefault, CultureInfo defaultCultureInfo, string uriMatchingExpression = null)
         {
             Logger.Info($"Creating demonstration tenant: {name}");
@@ -57,21 +60,28 @@ namespace Backend.Fx.Environment.MultiTenancy
 
             if (existingTenant == null)
             {
-                TenantCreated?.Invoke(this, new TenantId(tenant.Id));
+                RaiseTenantCreated(new TenantId(tenant.Id));
             }
             else
             {
                 if (existingTenant.State != TenantState.Active && tenant.State == TenantState.Active)
                 {
-                    TenantActivated?.Invoke(this, new TenantId(tenant.Id));
+                    RaiseTenantActivated(new TenantId(tenant.Id));
                 }
             }
         }
 
         protected abstract void SaveTenantPersistent(Tenant existingTenant, Tenant tenant);
 
-        public event EventHandler<TenantId> TenantCreated;
-        public event EventHandler<TenantId> TenantActivated;
+        protected virtual void RaiseTenantCreated(TenantId tenantId)
+        {
+            TenantCreated?.Invoke(this, tenantId);
+        }
+
+        protected virtual void RaiseTenantActivated(TenantId tenantId)
+        {
+            TenantActivated?.Invoke(this, tenantId);
+        }
 
         public abstract TenantId[] GetTenantIds();
 
@@ -81,7 +91,7 @@ namespace Backend.Fx.Environment.MultiTenancy
 
         public abstract Tenant FindTenant(TenantId tenantId);
 
-        private TenantId CreateTenant([NotNull] string name, string description, bool isDemo, bool isDefault, CultureInfo defaultCultureInfo, string uriMatchingExpression)
+        protected virtual TenantId CreateTenant([NotNull] string name, string description, bool isDemo, bool isDefault, CultureInfo defaultCultureInfo, string uriMatchingExpression)
         {
             if (string.IsNullOrWhiteSpace(name))
             {

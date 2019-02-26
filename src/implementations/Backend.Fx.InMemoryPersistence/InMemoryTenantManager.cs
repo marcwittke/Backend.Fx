@@ -11,10 +11,17 @@ namespace Backend.Fx.InMemoryPersistence
         
         protected override Tenant[] LoadTenants()
         {
-            // cloning the tenants simulates the behavior of a db persistence, of not having a direct reference to the persisted object
-            return _store.Values
-                .Select(t => new Tenant(t.Id, t.Name, t.Description, t.IsDemoTenant, t.State, t.IsDefault, t.DefaultCultureName, t.UriMatchingExpression))
-                .ToArray();
+            return _store.Values.Select(Clone).ToArray();
+        }
+
+        public override Tenant GetTenant(TenantId tenantId)
+        {
+            return Clone(base.GetTenant(tenantId));
+        }
+
+        public override Tenant FindTenant(TenantId tenantId)
+        {
+            return Clone(base.FindTenant(tenantId));
         }
 
         protected override void Dispose(bool disposing)
@@ -41,8 +48,14 @@ namespace Backend.Fx.InMemoryPersistence
             {
                 _store.Values.Where(t => t.Id != tenant.Id).ForAll(t => t.IsDefault = false);
             }
+        }
 
-            Reload();
+        // cloning the tenants simulates the behavior of a db persistence, of not having a direct reference to the persisted object
+        private static Tenant Clone(Tenant t)
+        {
+            if (t == null) return null;
+            return new Tenant(t.Id, t.Name, t.Description, t.IsDemoTenant, t.State, t.IsDefault, t.DefaultCultureName,
+                t.UriMatchingExpression);
         }
     }
 }
