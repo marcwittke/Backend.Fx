@@ -15,7 +15,7 @@ namespace Backend.Fx.AspNetCore.Scoping
         private readonly IBackendFxApplication _application;
 
         [UsedImplicitly]
-        protected ScopeMiddleware(RequestDelegate next, IBackendFxApplication application)
+        public ScopeMiddleware(RequestDelegate next, IBackendFxApplication application)
         {
             _next = next;
             _application = application;
