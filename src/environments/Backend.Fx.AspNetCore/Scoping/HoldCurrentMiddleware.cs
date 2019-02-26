@@ -23,12 +23,12 @@ namespace Backend.Fx.AspNetCore.Scoping
         [UsedImplicitly]
         public async Task Invoke(HttpContext context)
         {
-            T current = GetCurrent();
+            T current = GetCurrent(context);
             var tenantIdHolder = _application.CompositionRoot.GetInstance<ICurrentTHolder<T>>();
             tenantIdHolder.ReplaceCurrent(current);
             await _next.Invoke(context);
         }
 
-        protected abstract T GetCurrent();
+        protected abstract T GetCurrent(HttpContext context);
     }
 }
