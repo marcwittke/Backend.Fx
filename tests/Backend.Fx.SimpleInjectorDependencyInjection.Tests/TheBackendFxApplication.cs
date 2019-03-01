@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Security.Principal;
 using System.Threading;
@@ -155,7 +156,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
                     ManualResetEventSlim prodTenantActivated = new ManualResetEventSlim(false);
                     application.TenantManager.TenantActivated += (_, tenantId) => { prodTenantActivated.Set(); };
                     ProdTenantId = application.TenantManager.CreateProductionTenant("prod", "unit test created", true, new CultureInfo("en-US"));
-                    Assert.True(prodTenantActivated.Wait(int.MaxValue));
+                    Assert.True(prodTenantActivated.Wait(Debugger.IsAttached ? int.MaxValue : 10000));
                 }
                 else
                 {
@@ -173,7 +174,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
                     application.TenantManager.TenantActivated += (_, tenantId) => { demoTenantActivated.Set(); };
                     DemoTenantId = application.TenantManager.CreateDemonstrationTenant("demo", "unit test created",
                         false, new CultureInfo("en-US"));
-                    Assert.True(demoTenantActivated.Wait(int.MaxValue));
+                    Assert.True(demoTenantActivated.Wait(Debugger.IsAttached ? int.MaxValue : 10000));
                 }
                 else
                 {

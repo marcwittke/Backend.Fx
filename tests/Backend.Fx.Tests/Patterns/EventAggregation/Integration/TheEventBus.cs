@@ -28,7 +28,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             var integrationEvent = new TestIntegrationEvent(1,"a");
             await Sut.Publish(integrationEvent);
             Assert.True(sw.ElapsedMilliseconds < 100);
-            integrationEvent.Processed.Wait(1500);
+            integrationEvent.Processed.Wait(Debugger.IsAttached ? int.MaxValue : 10000);
             Assert.True(sw.ElapsedMilliseconds > 1000);
         }
     }
@@ -61,7 +61,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             Sut.Subscribe<TypedEventHandler, TestIntegrationEvent>();
             var integrationEvent = new TestIntegrationEvent(34, "gaga");
             await Sut.Publish(integrationEvent);
-            integrationEvent.Processed.Wait(1500);
+            integrationEvent.Processed.Wait(Debugger.IsAttached ? int.MaxValue : 10000);
             A.CallTo(() => _app.TypedHandler.Handle(A<TestIntegrationEvent>
                                                    .That
                                                    .Matches(evt => evt.IntParam == 34 && evt.StringParam == "gaga")))
@@ -76,7 +76,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             Sut.Subscribe<ThrowingTypedEventHandler, TestIntegrationEvent>();
             var integrationEvent = new TestIntegrationEvent(34, "gaga");
             await Sut.Publish(integrationEvent);
-            integrationEvent.Processed.Wait(1500);
+            integrationEvent.Processed.Wait(Debugger.IsAttached ? int.MaxValue : 10000);
 
             A.CallTo(() => _app.ExceptionLogger.LogException(A<InvalidOperationException>
                                                             .That
@@ -90,7 +90,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             Sut.Subscribe<DynamicEventHandler>(typeof(TestIntegrationEvent).FullName);
             var integrationEvent = new TestIntegrationEvent(34, "gaga");
             await Sut.Publish(integrationEvent);
-            integrationEvent.Processed.Wait(1500);
+            integrationEvent.Processed.Wait(Debugger.IsAttached ? int.MaxValue : 10000);
 
             A.CallTo(() => _app.TypedHandler.Handle(A<TestIntegrationEvent>._)).MustNotHaveHappened();
             A.CallTo(() => _app.DynamicHandler.Handle(A<object>._)).MustHaveHappenedOnceExactly();
@@ -102,7 +102,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             Sut.Subscribe<ThrowingDynamicEventHandler>(typeof(TestIntegrationEvent).FullName);
             var integrationEvent = new TestIntegrationEvent(34, "gaga");
             await Sut.Publish(integrationEvent);
-            integrationEvent.Processed.Wait(1500);
+            integrationEvent.Processed.Wait(Debugger.IsAttached ? int.MaxValue : 10000);
 
             A.CallTo(() => _app.ExceptionLogger.LogException(A<InvalidOperationException>
                                                         .That
@@ -117,7 +117,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             Sut.Subscribe<TypedEventHandler, TestIntegrationEvent>();
             var integrationEvent = new TestIntegrationEvent(34, "gaga");
             await Sut.Publish(integrationEvent);
-            integrationEvent.Processed.Wait(1500);
+            integrationEvent.Processed.Wait(Debugger.IsAttached ? int.MaxValue : 10000);
 
             A.CallTo(() => _app.TypedHandler.Handle(A<TestIntegrationEvent>
                                                    .That
