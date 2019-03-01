@@ -61,10 +61,9 @@ namespace Backend.Fx.Patterns.DependencyInjection
                     {
                         var tenant = TenantManager.GetTenant(tenantId);
                         tenant.State = TenantState.Seeding;
-                        TenantManager.SaveTenant(tenant);
                         new DataGeneratorContext(this).SeedDataForTenant(tenant);
                         tenant.State = TenantState.Active;
-                        TenantManager.SaveTenant(tenant);
+                        TenantManager.ActivateTenant(tenant);
                     }
                     catch (Exception ex)
                     {

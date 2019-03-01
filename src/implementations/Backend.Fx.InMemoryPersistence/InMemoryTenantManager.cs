@@ -11,23 +11,13 @@ namespace Backend.Fx.InMemoryPersistence
         
         protected override Tenant[] LoadTenants()
         {
-            return _store.Values.Select(Clone).ToArray();
-        }
-
-        public override Tenant GetTenant(TenantId tenantId)
-        {
-            return Clone(base.GetTenant(tenantId));
-        }
-
-        public override Tenant FindTenant(TenantId tenantId)
-        {
-            return Clone(base.FindTenant(tenantId));
+            return _store.Values.ToArray();
         }
 
         protected override void Dispose(bool disposing)
         {}
 
-        protected override void SaveTenantPersistent(Tenant existingTenant, Tenant tenant)
+        protected override void SaveTenant(Tenant tenant)
         {
             if (tenant.Id == 0)
             {
@@ -48,14 +38,6 @@ namespace Backend.Fx.InMemoryPersistence
             {
                 _store.Values.Where(t => t.Id != tenant.Id).ForAll(t => t.IsDefault = false);
             }
-        }
-
-        // cloning the tenants simulates the behavior of a db persistence, of not having a direct reference to the persisted object
-        private static Tenant Clone(Tenant t)
-        {
-            if (t == null) return null;
-            return new Tenant(t.Id, t.Name, t.Description, t.IsDemoTenant, t.State, t.IsDefault, t.DefaultCultureName,
-                t.UriMatchingExpression);
         }
     }
 }

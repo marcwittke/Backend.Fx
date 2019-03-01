@@ -23,7 +23,7 @@ namespace Backend.Fx.Environment.MultiTenancy
         TenantId CreateDemonstrationTenant(string name, string description, bool isDefault, CultureInfo defaultCultureInfo, string uriMatchingExpression = null);
         TenantId CreateProductionTenant(string name, string description, bool isDefault, CultureInfo defaultCultureInfo, string uriMatchingExpression = null);
         TenantId GetDefaultTenantId();
-        void SaveTenant(Tenant tenant);
+        void ActivateTenant(Tenant tenant);
     }
 
     public abstract class TenantManager : ITenantManager
@@ -49,29 +49,14 @@ namespace Backend.Fx.Environment.MultiTenancy
         public abstract TenantId FindMatchingTenantId(string requestUri);
 
         public abstract TenantId GetDefaultTenantId();
-
-        public void SaveTenant(Tenant tenant)
+        public void ActivateTenant(Tenant tenant)
         {
-            var existingTenant = FindTenant(new TenantId(tenant.Id));
-            lock (_padlock)
-            {
-                SaveTenantPersistent(existingTenant, tenant);
-            }
-
-            if (existingTenant == null)
-            {
-                RaiseTenantCreated(new TenantId(tenant.Id));
-            }
-            else
-            {
-                if (existingTenant.State != TenantState.Active && tenant.State == TenantState.Active)
-                {
-                    RaiseTenantActivated(new TenantId(tenant.Id));
-                }
-            }
+            tenant.State = TenantState.Active;
+            SaveTenant(tenant);
+            RaiseTenantActivated(new TenantId(tenant.Id));
         }
 
-        protected abstract void SaveTenantPersistent(Tenant existingTenant, Tenant tenant);
+        protected abstract void SaveTenant(Tenant tenant);
 
         protected virtual void RaiseTenantCreated(TenantId tenantId)
         {
@@ -111,6 +96,7 @@ namespace Backend.Fx.Environment.MultiTenancy
             };
             SaveTenant(tenant);
             var tenantId = new TenantId(tenant.Id);
+            RaiseTenantCreated(tenantId);
             return tenantId;
         }
 

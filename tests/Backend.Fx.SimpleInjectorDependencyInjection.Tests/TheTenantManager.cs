@@ -1,19 +1,13 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.BuildingBlocks;
-using Backend.Fx.Environment.DateAndTime;
 using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.Patterns.EventAggregation.Integration;
-using Backend.Fx.SimpleInjectorDependencyInjection.Modules;
 using Backend.Fx.InMemoryPersistence;
-using Backend.Fx.Logging;
-using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Bootstrapping;
 using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Domain;
-using FakeItEasy;
-using SimpleInjector;
 using Xunit;
 
 namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
@@ -21,21 +15,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
     public class TheTenantManager
     {
         private readonly ITenantManager _sut;
-        private readonly ICompositionRoot _compositionRoot;
-
-        private class ADomainModule  : DomainModule 
-        {
-            public ADomainModule(params Assembly[] domainAssemblies) : base(new DebugExceptionLogger(), domainAssemblies)
-            { }
-
-            protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
-            {
-                base.Register(container, scopedLifestyle);
-                container.Register<IClock, FrozenClock>();
-                container.RegisterInstance(A.Fake<IEventBus>());
-            }
-        }
-
+        
         public TheTenantManager()
         {
             var compositionRoot = new SimpleInjectorCompositionRoot();
@@ -48,7 +28,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
             compositionRoot.Verify();
 
             _sut = new InMemoryTenantManager();
-            _compositionRoot = compositionRoot;
         }
 
         [Fact]
@@ -57,7 +36,22 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
             ManualResetEvent ev = new ManualResetEvent(false);
             _sut.TenantCreated += (sender, id) => ev.Set();
             Task.Run(() => _sut.CreateProductionTenant("prod", "unit test created", true, new CultureInfo("de-DE")));
-            Assert.True(ev.WaitOne(1000));
+            Assert.True(ev.WaitOne(Debugger.IsAttached ? int.MaxValue : 10000));
+        }
+
+        [Fact]
+        public void RaisesTenantActivatedEvent()
+        {
+            ManualResetEvent ev = new ManualResetEvent(false);
+            _sut.TenantCreated += (sender, id) =>
+            {
+                var tenant = _sut.GetTenant(id);
+                _sut.ActivateTenant(tenant);
+            };
+
+            _sut.TenantActivated += (sender, id) => ev.Set();
+            Task.Run(() => _sut.CreateProductionTenant("prod", "unit test created", true, new CultureInfo("de-DE")));
+            Assert.True(ev.WaitOne(Debugger.IsAttached ? int.MaxValue : 10000));
         }
     }
 }
