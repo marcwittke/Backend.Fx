@@ -5,7 +5,7 @@ using Backend.Fx.Patterns.UnitOfWork;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 
-namespace Backend.Fx.AspNetCore.Scoping
+namespace Backend.Fx.AspNetCore.UnitOfWork
 {
     /// <summary>
     ///     The Middleware is responsible for beginning and completing (or disposing) the unit of work for each request.

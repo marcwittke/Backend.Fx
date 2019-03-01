@@ -12,7 +12,6 @@
     using Environment.MultiTenancy;
     using Extensions;
     using Logging;
-    using UnitOfWork;
 
     public interface IEventBus : IDisposable
     {
@@ -56,21 +55,18 @@
     public abstract class EventBus : IEventBus
     {
         private static readonly ILogger Logger = LogManager.Create<EventBus>();
-        private readonly IScopeManager _scopeManager;
-        private readonly IExceptionLogger _exceptionLogger;
-
-
+        private readonly IBackendFxApplication _application;
+        
         /// <summary>
         /// Holds the registered handlers.
         /// Each event type name (key) matches to various handler types
         /// </summary>
         private readonly ConcurrentDictionary<string, List<Type>> _subscriptions = new ConcurrentDictionary<string, List<Type>>();
 
-        protected EventBus(IScopeManager scopeManager, IExceptionLogger exceptionLogger)
+        protected EventBus(IBackendFxApplication application)
         {
             Logger.Debug($"Instantiating {GetType()}");
-            _scopeManager = scopeManager;
-            _exceptionLogger = exceptionLogger;
+            _application = application;
         }
 
         public abstract void Connect();
@@ -135,44 +131,30 @@
         protected abstract void Subscribe(string eventName);
         protected abstract void Unsubscribe(string eventName);
 
-        protected virtual void Process(string eventName, EventProcessingContext context)
+        protected virtual async Task ProcessAsync(string eventName, EventProcessingContext context)
         {
             Logger.Info($"Processing a {eventName} event");
             if (_subscriptions.TryGetValue(eventName, out List<Type> handlerTypes))
             {
                 foreach (var handlerType in handlerTypes)
                 {
-                    using (var scope = _scopeManager.BeginScope(new SystemIdentity(), context.TenantId))
+                    await _application.InvokeAsync(() =>
                     {
-                        using (var unitOfWork = scope.GetInstance<IUnitOfWork>())
+                        Logger.Info($"Getting subscribed handler instance of type {handlerType.Name}");
+
+                        using (Logger.InfoDuration($"Invoking subscribed handler {handlerType.Name}"))
                         {
-                            try
+
+                            if (handlerType.IsImplementationOfOpenGenericInterface(typeof(IIntegrationEventHandler<>)))
                             {
-                                unitOfWork.Begin();
-                                Logger.Info($"Getting subscribed handler instance of type {handlerType.Name}");
-
-                                using (Logger.InfoDuration($"Invoking subscribed handler {handlerType.Name}"))
-                                {
-
-                                    if (handlerType.IsImplementationOfOpenGenericInterface(typeof(IIntegrationEventHandler<>)))
-                                    {
-                                        ProcessTyped(eventName, context, handlerType, scope);
-                                    }
-                                    else
-                                    {
-                                        ProcessDynamic(eventName, context, scope, handlerType);
-                                    }
-                                }
-
-                                unitOfWork.Complete();
+                                ProcessTyped(eventName, context, handlerType);
                             }
-                            catch (Exception ex)
+                            else
                             {
-                                Logger.Info(ex, $"Handling of {eventName} by {handlerType} failed: {ex.Message}");
-                                _exceptionLogger.LogException(ex);
+                                ProcessDynamic(eventName, context, handlerType);
                             }
                         }
-                    }
+                    }, new SystemIdentity(), context.TenantId);
                 }
             }
             else
@@ -181,9 +163,9 @@
             }
         }
 
-        private void ProcessDynamic(string eventName, EventProcessingContext context, IScope scope, Type handlerType)
+        private void ProcessDynamic(string eventName, EventProcessingContext context, Type handlerType)
         {
-            object handlerInstance = scope.GetInstance(handlerType);
+            object handlerInstance = _application.CompositionRoot.GetInstance(handlerType);
             try
             {
                 ((IIntegrationEventHandler) handlerInstance).Handle(context.DynamicEvent);
@@ -191,11 +173,11 @@
             catch (Exception ex)
             {
                 Logger.Info(ex, $"Handling of {eventName} by dynamic handler {handlerType} failed: {ex.Message}");
-                _exceptionLogger.LogException(ex);
+                _application.ExceptionLogger.LogException(ex);
             }
         }
 
-        private void ProcessTyped(string eventName, EventProcessingContext context, Type handlerType, IScope scope)
+        private void ProcessTyped(string eventName, EventProcessingContext context, Type handlerType)
         {
             Type interfaceType = handlerType.GetInterfaces().First(x => x.GetTypeInfo().IsGenericType && x.GetGenericTypeDefinition() == typeof(IIntegrationEventHandler<>));
             var eventType = interfaceType.GetGenericArguments().Single(t => typeof(IIntegrationEvent).IsAssignableFrom(t));
@@ -203,7 +185,7 @@
             MethodInfo handleMethod = handlerType.GetRuntimeMethod("Handle", new[] {eventType});
             Debug.Assert(handleMethod != null, $"No method with signature `Handle({eventName} event)` found on {handlerType.Name}");
 
-            object handlerInstance = scope.GetInstance(handlerType);
+            object handlerInstance = _application.CompositionRoot.GetInstance(handlerType);
 
             try
             {
@@ -212,12 +194,12 @@
             catch (TargetInvocationException ex)
             {
                 Logger.Info(ex, $"Handling of {eventName} by typed handler {handlerType} failed: {(ex.InnerException ?? ex).Message}");
-                _exceptionLogger.LogException(ex.InnerException ?? ex);
+                _application.ExceptionLogger.LogException(ex.InnerException ?? ex);
             }
             catch (Exception ex)
             {
                 Logger.Info(ex, $"Handling of {eventName} by typed handler {handlerType} failed: {ex.Message}");
-                _exceptionLogger.LogException(ex);
+                _application.ExceptionLogger.LogException(ex);
             }
         }
 

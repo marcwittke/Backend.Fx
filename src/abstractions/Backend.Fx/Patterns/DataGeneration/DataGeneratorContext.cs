@@ -1,40 +1,73 @@
-﻿namespace Backend.Fx.Patterns.DataGeneration
-{
-    using System.Collections.Generic;
-    using System.Linq;
-    using Logging;
-    using Patterns.UnitOfWork;
+﻿using System;
+using System.Linq;
+using System.Reflection;
+using Backend.Fx.Environment.Authentication;
+using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Logging;
+using Backend.Fx.Patterns.DependencyInjection;
 
+namespace Backend.Fx.Patterns.DataGeneration
+{
     public class DataGeneratorContext
     {
         private static readonly ILogger Logger = LogManager.Create<DataGeneratorContext>();
-        private readonly IEnumerable<IDataGenerator> _dataGenerators;
-        private readonly ICanFlush _canFlush;
-
-        public DataGeneratorContext(IEnumerable<IDataGenerator> dataGenerators, ICanFlush canFlush)
+        private readonly IBackendFxApplication _application;
+        
+        public DataGeneratorContext(IBackendFxApplication application)
         {
-            _dataGenerators = dataGenerators;
-            _canFlush = canFlush;
+            _application = application;
         }
 
-        public void RunProductiveDataGenerators()
+        public void SeedDataForAllActiveTenants()
         {
-            Logger.Info("Loading productive data into database");
-            RunDataGenerators<IProductiveDataGenerator>();
-        }
-
-        public void RunDemoDataGenerators()
-        {
-            Logger.Info("Loading demonstration data into database");
-            RunDataGenerators<IDemoDataGenerator>();
-        }
-
-        private void RunDataGenerators<TDataGenerator>()
-        {
-            foreach (var dataGenerator in _dataGenerators.Where(dg => dg is TDataGenerator).OrderBy(dg => dg.Priority))
+            using (Logger.InfoDuration("Seeding data"))
             {
-                dataGenerator.Generate();
-                _canFlush.Flush();
+                var tenants = _application.TenantManager.GetTenants();
+                foreach (var tenant in tenants)
+                {
+                    if (tenant.State == TenantState.Active)
+                    {
+                        SeedDataForTenant(tenant);
+                    }
+                    else
+                    {
+                        Logger.Info($"Not seeding data for tenant {tenant.Id} because it is not active but {tenant.State}");
+                    }
+                }
+            }
+        }
+
+        public void SeedDataForTenant(Tenant tenant)
+        {
+            using (Logger.InfoDuration($"Seeding data for tenant {tenant.Id} ({tenant.Name})"))
+            {
+                Type[] dataGeneratorTypesToRun;
+
+                using (_application.CompositionRoot.BeginScope())
+                {
+                    var dataGenerators = _application.CompositionRoot.GetInstances<IDataGenerator>()
+                        .OrderBy(dg => dg.Priority)
+                        .Select(dg => dg.GetType());
+
+                    if (!tenant.IsDemoTenant)
+                    {
+                        dataGenerators = dataGenerators.Where(dg => !typeof(IDemoDataGenerator).IsAssignableFrom(dg));
+                    }
+
+                    dataGeneratorTypesToRun = dataGenerators.ToArray();
+                }
+
+                foreach (var dataGeneratorTypeToRun in dataGeneratorTypesToRun)
+                {
+                    _application.Invoke(() =>
+                    {
+                        IDataGenerator dataGenerator = _application
+                            .CompositionRoot
+                            .GetInstances<IDataGenerator>()
+                            .Single(dg => dg.GetType() == dataGeneratorTypeToRun);
+                        dataGenerator.Generate();
+                    }, new SystemIdentity(), new TenantId(tenant.Id));
+                }
             }
         }
     }

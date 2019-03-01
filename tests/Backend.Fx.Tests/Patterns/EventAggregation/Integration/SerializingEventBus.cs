@@ -1,26 +1,27 @@
-﻿namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
+﻿using Backend.Fx.Patterns.DependencyInjection;
+
+namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
 {
     using System;
     using System.Threading.Tasks;
     using Fx.Environment.MultiTenancy;
-    using Fx.Logging;
-    using Fx.Patterns.DependencyInjection;
     using Fx.Patterns.EventAggregation.Integration;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
     public class SerializingEventBus : EventBus 
     {
-        public SerializingEventBus(IScopeManager scopeManager, IExceptionLogger exceptionLogger) : base(scopeManager, exceptionLogger)
+        public SerializingEventBus(IBackendFxApplication application) 
+            : base(application)
         { }
 
         public override void Connect()
         { }
 
-        public override Task Publish(IIntegrationEvent integrationEvent)
+        public override async Task Publish(IIntegrationEvent integrationEvent)
         {
             var jsonString = JsonConvert.SerializeObject(integrationEvent);
-            return Task.Run(() => Process(integrationEvent.GetType().FullName, new SerializingProcessingContext(jsonString)));
+            await ProcessAsync(integrationEvent.GetType().FullName, new SerializingProcessingContext(jsonString));
         }
 
         protected override void Subscribe(string eventName)

@@ -8,5 +8,7 @@ namespace Backend.Fx.Patterns.Jobs
         void ExecuteJob<TJob>(TenantId tenantId) where TJob : IJob;
         
         Task ExecuteJobAsync<TJob>(TenantId tenantId) where TJob : IJob;
+        void ExecuteJob<TJob>() where TJob : IJob;
+        Task ExecuteJobAsync<TJob>() where TJob : IJob;
     }
 }

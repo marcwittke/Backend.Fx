@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Security.Principal;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Logging;
 using Backend.Fx.Patterns.Jobs;
 
 namespace Backend.Fx.Patterns.DependencyInjection
@@ -8,17 +10,16 @@ namespace Backend.Fx.Patterns.DependencyInjection
     public interface IBackendFxApplication : IDisposable
     {
         /// <summary>
-        /// You should use the <see cref="IScopeManager"/> to open an injection scope for every logical operation.
-        /// In case of web applications, this refers to a single HTTP request, for example.
-        /// </summary>
-        IScopeManager ScopeManager { get; }
-
-        /// <summary>
         /// The composition root of the dependency injection framework
         /// </summary>
         ICompositionRoot CompositionRoot { get; }
 
         IJobEngine JobEngine { get; }
+
+        /// <summary>
+        /// Used to log exceptions 
+        /// </summary>
+        IExceptionLogger ExceptionLogger { get; }
 
         /// <summary>
         /// allows asynchronously awaiting application startup
@@ -37,5 +38,11 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// </summary>
         /// <returns></returns>
         Task Boot();
+
+        IDisposable BeginScope(IIdentity identity = null, TenantId tenantId = null);
+
+        void Invoke(Action action, IIdentity identity, TenantId tenantId);
+
+        Task InvokeAsync(Action action, IIdentity identity, TenantId tenantId);
     }
 }

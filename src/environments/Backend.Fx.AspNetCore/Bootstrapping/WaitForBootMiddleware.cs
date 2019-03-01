@@ -1,21 +1,22 @@
 ﻿using System.Threading.Tasks;
+using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 
-namespace Backend.Fx.AspNetCore.Scoping
+namespace Backend.Fx.AspNetCore.Bootstrapping
 {
     /// <summary>
-    ///     This middleware enables use of an application scope for each request. It makes sure that every request
-    ///     is handled inside a unique execution scope resulting in a specific resolution root throughout the request.
+    /// Queues all requests until the application finished booting.
     /// </summary>
-    public class ScopeMiddleware
+    public class WaitForBootMiddleware
     {
+        private static readonly ILogger Logger = LogManager.Create<WaitForBootMiddleware>();
         private readonly RequestDelegate _next;
         private readonly IBackendFxApplication _application;
 
         [UsedImplicitly]
-        public ScopeMiddleware(RequestDelegate next, IBackendFxApplication application)
+        protected WaitForBootMiddleware(RequestDelegate next, IBackendFxApplication application)
         {
             _next = next;
             _application = application;
@@ -27,10 +28,11 @@ namespace Backend.Fx.AspNetCore.Scoping
         [UsedImplicitly]
         public async Task Invoke(HttpContext context)
         {
-            using (_application.BeginScope())
+            while (!await _application.WaitForBootAsync(3000))
             {
-                await _next.Invoke(context);
+                Logger.Info("Queuing Request while application is booting...");
             }
+            await _next.Invoke(context);
         }
     }
 }

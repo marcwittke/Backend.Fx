@@ -5,17 +5,13 @@ using Microsoft.AspNetCore.Http;
 
 namespace Backend.Fx.AspNetCore.Scoping
 {
-    /// <summary>
-    ///     This middleware enables use of an application scope for each request. It makes sure that every request
-    ///     is handled inside a unique execution scope resulting in a specific resolution root throughout the request.
-    /// </summary>
-    public class ScopeMiddleware
+    public abstract class HoldCurrentMiddleware<T> where T : class
     {
         private readonly RequestDelegate _next;
         private readonly IBackendFxApplication _application;
 
         [UsedImplicitly]
-        public ScopeMiddleware(RequestDelegate next, IBackendFxApplication application)
+        protected HoldCurrentMiddleware(RequestDelegate next, IBackendFxApplication application)
         {
             _next = next;
             _application = application;
@@ -27,10 +23,12 @@ namespace Backend.Fx.AspNetCore.Scoping
         [UsedImplicitly]
         public async Task Invoke(HttpContext context)
         {
-            using (_application.BeginScope())
-            {
-                await _next.Invoke(context);
-            }
+            T current = GetCurrent(context);
+            var tenantIdHolder = _application.CompositionRoot.GetInstance<ICurrentTHolder<T>>();
+            tenantIdHolder.ReplaceCurrent(current);
+            await _next.Invoke(context);
         }
+
+        protected abstract T GetCurrent(HttpContext context);
     }
 }

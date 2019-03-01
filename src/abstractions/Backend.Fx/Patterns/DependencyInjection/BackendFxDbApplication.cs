@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Environment.Persistence;
+using Backend.Fx.Logging;
 
 namespace Backend.Fx.Patterns.DependencyInjection
 {
@@ -12,12 +13,13 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// <param name="compositionRoot">The composition root of the dependency injection framework</param>
         /// <param name="databaseBootstrapper">The database manager for the current application</param>
         /// <param name="tenantManager">The tenant manager for the current application</param>
-        /// <param name="scopeManager">The scope manager for the current application</param>
+        /// <param name="exceptionLogger">The exception logger used by jobs and integration event handling</param>
         protected BackendFxDbApplication(
                           ICompositionRoot compositionRoot,
                           IDatabaseBootstrapper databaseBootstrapper,
                           ITenantManager tenantManager,
-                          IScopeManager scopeManager) : base(compositionRoot, scopeManager, tenantManager)
+                          IExceptionLogger exceptionLogger) 
+            : base(compositionRoot, tenantManager, exceptionLogger)
         {
             DatabaseBootstrapper = databaseBootstrapper;
         }
