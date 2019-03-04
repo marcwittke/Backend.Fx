@@ -12,14 +12,14 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// </summary>
         /// <param name="compositionRoot">The composition root of the dependency injection framework</param>
         /// <param name="databaseBootstrapper">The database manager for the current application</param>
-        /// <param name="tenantManager">The tenant manager for the current application</param>
+        /// <param name="tenantIdService"></param>
         /// <param name="exceptionLogger">The exception logger used by jobs and integration event handling</param>
         protected BackendFxDbApplication(
                           ICompositionRoot compositionRoot,
-                          IDatabaseBootstrapper databaseBootstrapper,
-                          ITenantManager tenantManager,
-                          IExceptionLogger exceptionLogger) 
-            : base(compositionRoot, tenantManager, exceptionLogger)
+                          ITenantIdService tenantIdService,
+                          IExceptionLogger exceptionLogger,
+                          IDatabaseBootstrapper databaseBootstrapper) 
+            : base(compositionRoot, tenantIdService, exceptionLogger)
         {
             DatabaseBootstrapper = databaseBootstrapper;
         }

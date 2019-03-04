@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
@@ -6,7 +7,6 @@ using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Extensions;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.DataGeneration;
 using Backend.Fx.Patterns.Jobs;
 using Backend.Fx.Patterns.UnitOfWork;
 
@@ -20,30 +20,26 @@ namespace Backend.Fx.Patterns.DependencyInjection
         private static readonly ILogger Logger = LogManager.Create<BackendFxApplication>();
         private readonly ManualResetEventSlim _isBooted = new ManualResetEventSlim(false);
         private int _scopeIndex = 1;
-        
+
         /// <summary>
         /// Initializes the application's runtime instance
         /// </summary>
         /// <param name="compositionRoot">The composition root of the dependency injection framework</param>
-        /// <param name="tenantManager">The tenant manager for the current appliastion</param>
+        /// <param name="tenantIdService">This service provides all known tenant ids</param>
         /// <param name="exceptionLogger">The exception logger used for job execution and integration event handling</param>
-        protected BackendFxApplication(ICompositionRoot compositionRoot, ITenantManager tenantManager, IExceptionLogger exceptionLogger)
+        protected BackendFxApplication(ICompositionRoot compositionRoot, ITenantIdService tenantIdService, IExceptionLogger exceptionLogger)
         {
             CompositionRoot = compositionRoot;
-            TenantManager = tenantManager;
+            TenantIdService = tenantIdService;
             ExceptionLogger = exceptionLogger;
-            JobEngine = new JobEngine(this);
         }
-
-        /// <inheritdoc />
-        public ITenantManager TenantManager { get; }
 
         public IExceptionLogger ExceptionLogger { get; }
 
         /// <inheritdoc />
         public ICompositionRoot CompositionRoot { get; }
 
-        public IJobEngine JobEngine { get; }
+        public ITenantIdService TenantIdService { get; }
 
         /// <inheritdoc />
         public async Task Boot()
@@ -51,26 +47,6 @@ namespace Backend.Fx.Patterns.DependencyInjection
             Logger.Info("Booting application");
             await OnBoot();
             CompositionRoot.Verify();
-            new DataGeneratorContext(this).SeedDataForAllActiveTenants();
-
-            TenantManager.TenantCreated += (sender, tenantId) =>
-            {
-                Task.Run(() =>
-                {
-                    try
-                    {
-                        var tenant = TenantManager.GetTenant(tenantId);
-                        tenant.State = TenantState.Seeding;
-                        new DataGeneratorContext(this).SeedDataForTenant(tenant);
-                        tenant.State = TenantState.Active;
-                        TenantManager.ActivateTenant(tenant);
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Error(ex, "Handling TenantCreated event failed");
-                    }
-                });
-            };
 
             await OnBooted();
             _isBooted.Set();
@@ -102,6 +78,20 @@ namespace Backend.Fx.Patterns.DependencyInjection
             return new MultipleDisposable(scope, scopeDurationLogger);
         }
 
+        public void Run<TJob>() where TJob : class, IJob
+        {
+            var tenantIds = TenantIdService.GetActiveTenantIds();
+            foreach (var tenantId in tenantIds)
+            {
+                Invoke(() => CompositionRoot.GetInstance<TJob>().Run(), new SystemIdentity(), tenantId);
+            }
+        }
+
+        public void Run<TJob>(TenantId tenantId) where TJob : class, IJob
+        {
+            Invoke(() => CompositionRoot.GetInstance<TJob>().Run(), new SystemIdentity(), tenantId);
+        }
+
         public Task InvokeAsync(Action action, IIdentity identity, TenantId tenantId)
         {
             return Task.Run(() => Invoke(action, identity, tenantId));
@@ -118,6 +108,10 @@ namespace Backend.Fx.Patterns.DependencyInjection
                         unitOfWork.Begin();
                         action.Invoke();
                         unitOfWork.Complete();
+                    }
+                    catch (TargetInvocationException ex)
+                    {
+                        ExceptionLogger.LogException(ex.InnerException ?? ex);
                     }
                     catch (Exception ex)
                     {
@@ -152,7 +146,6 @@ namespace Backend.Fx.Patterns.DependencyInjection
             {
                 Logger.Info("Application shut down initialized");
                 CompositionRoot?.Dispose();
-                TenantManager?.Dispose();
             }
         }
 
