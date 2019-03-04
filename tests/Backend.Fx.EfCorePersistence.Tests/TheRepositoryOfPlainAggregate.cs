@@ -139,7 +139,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 {
                     var repo = new EfRepository<Blogger>(dbs.DbContext, new BloggerMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blogger>());
                     Blogger johnnyFlash = repo.Single(456);
-                    Assert.Equal(DateTime.UtcNow, johnnyFlash.ChangedOn, new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(1000)));
+                    Assert.Equal(DateTime.UtcNow, johnnyFlash.ChangedOn, new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(5000)));
                     Assert.Equal(new SystemIdentity().Name, johnnyFlash.ChangedBy);
                     Assert.Equal("Johnny", johnnyFlash.FirstName);
                     Assert.Equal("Flash", johnnyFlash.LastName);

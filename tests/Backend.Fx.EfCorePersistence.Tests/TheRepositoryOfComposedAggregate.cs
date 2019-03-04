@@ -18,7 +18,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
     {
         private static int _nextTenantId = 57839;
         private readonly int _tenantId = _nextTenantId++;
-        private readonly IEqualityComparer<DateTime?> _tolerantDateTimeComparer = new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(500));
+        private readonly IEqualityComparer<DateTime?> _tolerantDateTimeComparer = new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(5000));
         private readonly IEntityIdGenerator _idGenerator = A.Fake<IEntityIdGenerator>();
         private readonly DatabaseFixture _fixture;
         private readonly IClock _clock = new FrozenClock();
