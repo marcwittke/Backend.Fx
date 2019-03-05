@@ -1,14 +1,12 @@
-﻿using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
+﻿using System.Linq;
 using System.Security.Principal;
-using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.InMemoryPersistence;
 using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.Patterns.EventAggregation.Integration;
 using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Bootstrapping;
 using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Domain;
 using Xunit;
@@ -30,11 +28,9 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
             using (var sut = CreateSystemUnderTest())
             {
                 await sut.Boot();
-
-                var tenantHelper = new TenantHelper();
-                tenantHelper.EnsureProdTenant(sut);
+                sut.EnsureProdTenant();
                 
-                using (sut.BeginScope(new SystemIdentity(), tenantHelper.ProdTenantId))
+                using (sut.BeginScope(new SystemIdentity(), sut.ProdTenantId))
                 {
                     IRepository<AnAggregate> repository = sut.CompositionRoot.GetInstance<IRepository<AnAggregate>>();
                     AnAggregate[] allAggregates = repository.GetAll();
@@ -46,11 +42,9 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
             using (var sut = CreateSystemUnderTest())
             {
                 await sut.Boot();
-
-                var tenantHelper = new TenantHelper();
-                tenantHelper.EnsureProdTenant(sut);
-
-                using (sut.BeginScope(new SystemIdentity(), tenantHelper.ProdTenantId))
+                sut.EnsureProdTenant();
+                
+                using (sut.BeginScope(new SystemIdentity(), sut.ProdTenantId))
                 {
                     IRepository<AnAggregate> repository = sut.CompositionRoot.GetInstance<IRepository<AnAggregate>>();
                     AnAggregate[] allAggregates = repository.GetAll();
@@ -66,11 +60,8 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
             using (var sut = CreateSystemUnderTest())
             {
                 await sut.Boot();
-
-                var tenantHelper = new TenantHelper();
-                tenantHelper.EnsureDemoTenant(sut);
-
-                using (sut.BeginScope(new SystemIdentity(), tenantHelper.DemoTenantId))
+                sut.EnsureDemoTenant();
+                using (sut.BeginScope(new SystemIdentity(), sut.DemoTenantId))
                 {
                     IRepository<AnAggregate> repository = sut.CompositionRoot.GetInstance<IRepository<AnAggregate>>();
                     AnAggregate[] allAggregates = repository.GetAll();
@@ -83,11 +74,9 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
             using (var sut = CreateSystemUnderTest())
             {
                 await sut.Boot();
+                sut.EnsureDemoTenant();
 
-                var tenantHelper = new TenantHelper();
-                tenantHelper.EnsureDemoTenant(sut);
-
-                using (sut.BeginScope(new SystemIdentity(), tenantHelper.DemoTenantId))
+                using (sut.BeginScope(new SystemIdentity(), sut.DemoTenantId))
                 {
                     IRepository<AnAggregate> repository = sut.CompositionRoot.GetInstance<IRepository<AnAggregate>>();
                     AnAggregate[] allAggregates = repository.GetAll();
@@ -136,55 +125,14 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         private AnApplication CreateSystemUnderTest()
         {
             SimpleInjectorCompositionRoot compositionRoot = new SimpleInjectorCompositionRoot();
-            compositionRoot.RegisterModules(
-                new ADomainModule(typeof(AnApplication).Assembly, typeof(AggregateRoot).Assembly),
+            var sut = new AnApplication(compositionRoot);
+            IEventBus eventBus = new InMemoryEventBus(sut);
+            sut.CompositionRoot.RegisterModules(
+                new ADomainModule(eventBus, typeof(AnApplication).Assembly, typeof(AggregateRoot).Assembly),
                 _persistenceModule);
 
-            var sut = new AnApplication(compositionRoot);
             return sut;
         }
 
-        private class TenantHelper
-        {
-            public void EnsureProdTenant(IBackendFxApplication application)
-            {
-                
-                var tenants = application.TenantManager.GetTenants();
-                var prodTenantId = tenants.SingleOrDefault(t => t.Name == "prod")?.Id;
-                if (prodTenantId == null)
-                {
-                    ManualResetEventSlim prodTenantActivated = new ManualResetEventSlim(false);
-                    application.TenantManager.TenantActivated += (_, tenantId) => { prodTenantActivated.Set(); };
-                    ProdTenantId = application.TenantManager.CreateProductionTenant("prod", "unit test created", true, new CultureInfo("en-US"));
-                    Assert.True(prodTenantActivated.Wait(Debugger.IsAttached ? int.MaxValue : 10000));
-                }
-                else
-                {
-                    ProdTenantId = new TenantId(prodTenantId.Value);
-                }
-            }
-
-            public void EnsureDemoTenant(IBackendFxApplication application)
-            {
-                var tenants = application.TenantManager.GetTenants();
-                var demoTenantId = tenants.SingleOrDefault(t => t.Name == "demo")?.Id;
-                if (demoTenantId == null)
-                {
-                    ManualResetEventSlim demoTenantActivated = new ManualResetEventSlim(false);
-                    application.TenantManager.TenantActivated += (_, tenantId) => { demoTenantActivated.Set(); };
-                    DemoTenantId = application.TenantManager.CreateDemonstrationTenant("demo", "unit test created",
-                        false, new CultureInfo("en-US"));
-                    Assert.True(demoTenantActivated.Wait(Debugger.IsAttached ? int.MaxValue : 10000));
-                }
-                else
-                {
-                    DemoTenantId = new TenantId(demoTenantId.Value);
-                }
-            }
-
-            public TenantId ProdTenantId { get; private set; }
-
-            public TenantId DemoTenantId { get; private set; }
-        }
     }
 }

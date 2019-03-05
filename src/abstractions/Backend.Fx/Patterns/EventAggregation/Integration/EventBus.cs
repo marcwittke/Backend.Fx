@@ -4,64 +4,21 @@
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Linq;
-    using System.Reflection;
     using System.Threading.Tasks;
     using DependencyInjection;
     using Environment.Authentication;
-    using Environment.MultiTenancy;
-    using Extensions;
     using Logging;
-
-    public interface IEventBus : IDisposable
-    {
-        void Connect();
-
-        /// <summary>
-        /// Directly publishes an event on the event bus without delay.
-        /// In most cases you want to publish an event when the cause is considered as safely done, e.g. when the 
-        /// wrapping transaction is committed. Use <see cref="IEventBusScope"/> to let the framework raise all events
-        /// after committing the unit of work.
-        /// </summary>
-        /// <param name="integrationEvent"></param>
-        /// <returns></returns>
-        Task Publish(IIntegrationEvent integrationEvent);
-
-        /// <summary>
-        /// Subscribes to an integration event with a dynamic event handler
-        /// </summary>
-        /// <typeparam name="THandler">The handler type</typeparam>
-        /// <param name="eventName">Th event name to subscribe to. (Should be Type.FullName to avoid namespace collisions)</param>
-        void Subscribe<THandler>(string eventName)
-            where THandler : IIntegrationEventHandler;
-
-        /// <summary>
-        /// Subscribes to an integration event with a generically typed event handler
-        /// </summary>
-        /// <typeparam name="THandler">The handler type</typeparam>
-        /// <typeparam name="TEvent">The event type to subscribe to</typeparam>
-        void Subscribe<THandler, TEvent>()
-                where THandler : IIntegrationEventHandler<TEvent>
-                where TEvent : IIntegrationEvent;
-
-        void Unsubscribe<THandler>(string eventName)
-            where THandler : IIntegrationEventHandler;
-
-        void Unsubscribe<THandler, TEvent>()
-                where THandler : IIntegrationEventHandler<TEvent>
-                where TEvent : IIntegrationEvent;
-    }
 
     public abstract class EventBus : IEventBus
     {
         private static readonly ILogger Logger = LogManager.Create<EventBus>();
         private readonly IBackendFxApplication _application;
-        
+
         /// <summary>
         /// Holds the registered handlers.
-        /// Each event type name (key) matches to various handler types
+        /// Each event type name (key) matches to various subscriptions
         /// </summary>
-        private readonly ConcurrentDictionary<string, List<Type>> _subscriptions = new ConcurrentDictionary<string, List<Type>>();
+        private readonly ConcurrentDictionary<string, List<ISubscription>> _subscriptions = new ConcurrentDictionary<string, List<ISubscription>>();
 
         protected EventBus(IBackendFxApplication application)
         {
@@ -77,12 +34,12 @@
         public void Subscribe<THandler>(string eventName) where THandler : IIntegrationEventHandler
         {
             Logger.Info($"Subscribing to {eventName}");
-            var handlerType = typeof(THandler);
+            var subscription = new DynamicSubscription(_application, typeof(THandler));
             _subscriptions.AddOrUpdate(eventName,
-                                      s => new List<Type> { handlerType },
+                                      s => new List<ISubscription> { subscription },
                                       (s, list) =>
                                       {
-                                          list.Add(handlerType);
+                                          list.Add(subscription);
                                           return list;
                                       });
             Subscribe(eventName);
@@ -94,14 +51,31 @@
             string eventName = typeof(TEvent).FullName ?? typeof(TEvent).Name;
 
             Logger.Info($"Subscribing to {eventName}");
-            var handlerType = typeof(THandler);
+            var subscription = new TypedSubscription(_application, typeof(THandler));
             _subscriptions.AddOrUpdate(eventName,
-                                      s => new List<Type> { handlerType },
-                                      (s, list) =>
-                                      {
-                                          list.Add(handlerType);
-                                          return list;
-                                      });
+                                        s => new List<ISubscription> { subscription },
+                                        (s, list) =>
+                                        {
+                                            list.Add(subscription);
+                                            return list;
+                                        });
+            Subscribe(eventName);
+        }
+
+        public void Subscribe<TEvent>(IIntegrationEventHandler<TEvent> handler)
+            where TEvent : IIntegrationEvent
+        {
+            string eventName = typeof(TEvent).FullName ?? typeof(TEvent).Name;
+
+            Logger.Info($"Subscribing to {eventName}");
+            var subscription = new SingletonSubscription<TEvent>(handler);
+            _subscriptions.AddOrUpdate(eventName,
+                s => new List<ISubscription> { subscription },
+                (s, list) =>
+                {
+                    list.Add(subscription);
+                    return list;
+                });
             Subscribe(eventName);
         }
 
@@ -110,7 +84,7 @@
             Logger.Info($"Unsubscribing from {eventName}");
             if (_subscriptions.TryGetValue(eventName, out var handlers))
             {
-                handlers.RemoveAll(t => t == typeof(THandler));
+                handlers.RemoveAll(t => t.Matches(typeof(THandler)));
             }
             Unsubscribe(eventName);
         }
@@ -123,7 +97,20 @@
             Logger.Info($"Unsubscribing from {eventName}");
             if (_subscriptions.TryGetValue(eventName, out var handlers))
             {
-                handlers.RemoveAll(t => t == typeof(THandler));
+                handlers.RemoveAll(t => t.Matches(typeof(THandler)));
+            }
+            Unsubscribe(eventName);
+        }
+
+        public void Unsubscribe<TEvent>(IIntegrationEventHandler<TEvent> handler) where TEvent : IIntegrationEvent
+        {
+            string eventName = typeof(TEvent).FullName;
+            Debug.Assert(eventName != null, nameof(eventName) + " != null");
+
+            Logger.Info($"Unsubscribing from {eventName}");
+            if (_subscriptions.TryGetValue(eventName, out var handlers))
+            {
+                handlers.RemoveAll(t => t.Matches(handler));
             }
             Unsubscribe(eventName);
         }
@@ -134,27 +121,14 @@
         protected virtual async Task ProcessAsync(string eventName, EventProcessingContext context)
         {
             Logger.Info($"Processing a {eventName} event");
-            if (_subscriptions.TryGetValue(eventName, out List<Type> handlerTypes))
+            if (_subscriptions.TryGetValue(eventName, out List<ISubscription> subscriptions))
             {
-                foreach (var handlerType in handlerTypes)
+                foreach (var subscription in subscriptions)
                 {
-                    await _application.InvokeAsync(() =>
-                    {
-                        Logger.Info($"Getting subscribed handler instance of type {handlerType.Name}");
-
-                        using (Logger.InfoDuration($"Invoking subscribed handler {handlerType.Name}"))
-                        {
-
-                            if (handlerType.IsImplementationOfOpenGenericInterface(typeof(IIntegrationEventHandler<>)))
-                            {
-                                ProcessTyped(eventName, context, handlerType);
-                            }
-                            else
-                            {
-                                ProcessDynamic(eventName, context, handlerType);
-                            }
-                        }
-                    }, new SystemIdentity(), context.TenantId);
+                    await _application.InvokeAsync(
+                        () => subscription.Process(eventName, context),
+                        new SystemIdentity(),
+                        context.TenantId);
                 }
             }
             else
@@ -162,47 +136,7 @@
                 Logger.Info($"No handler registered. Ignoring {eventName} event");
             }
         }
-
-        private void ProcessDynamic(string eventName, EventProcessingContext context, Type handlerType)
-        {
-            object handlerInstance = _application.CompositionRoot.GetInstance(handlerType);
-            try
-            {
-                ((IIntegrationEventHandler) handlerInstance).Handle(context.DynamicEvent);
-            }
-            catch (Exception ex)
-            {
-                Logger.Info(ex, $"Handling of {eventName} by dynamic handler {handlerType} failed: {ex.Message}");
-                _application.ExceptionLogger.LogException(ex);
-            }
-        }
-
-        private void ProcessTyped(string eventName, EventProcessingContext context, Type handlerType)
-        {
-            Type interfaceType = handlerType.GetInterfaces().First(x => x.GetTypeInfo().IsGenericType && x.GetGenericTypeDefinition() == typeof(IIntegrationEventHandler<>));
-            var eventType = interfaceType.GetGenericArguments().Single(t => typeof(IIntegrationEvent).IsAssignableFrom(t));
-            var integrationEvent = context.GetTypedEvent(eventType);
-            MethodInfo handleMethod = handlerType.GetRuntimeMethod("Handle", new[] {eventType});
-            Debug.Assert(handleMethod != null, $"No method with signature `Handle({eventName} event)` found on {handlerType.Name}");
-
-            object handlerInstance = _application.CompositionRoot.GetInstance(handlerType);
-
-            try
-            {
-                handleMethod.Invoke(handlerInstance, new object[] {integrationEvent});
-            }
-            catch (TargetInvocationException ex)
-            {
-                Logger.Info(ex, $"Handling of {eventName} by typed handler {handlerType} failed: {(ex.InnerException ?? ex).Message}");
-                _application.ExceptionLogger.LogException(ex.InnerException ?? ex);
-            }
-            catch (Exception ex)
-            {
-                Logger.Info(ex, $"Handling of {eventName} by typed handler {handlerType} failed: {ex.Message}");
-                _application.ExceptionLogger.LogException(ex);
-            }
-        }
-
+        
         protected virtual void Dispose(bool disposing)
         { }
 
@@ -211,12 +145,5 @@
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-    }
-
-    public abstract class EventProcessingContext
-    {
-        public abstract TenantId TenantId { get; }
-        public abstract dynamic DynamicEvent { get; }
-        public abstract IIntegrationEvent GetTypedEvent(Type eventType);
     }
 }

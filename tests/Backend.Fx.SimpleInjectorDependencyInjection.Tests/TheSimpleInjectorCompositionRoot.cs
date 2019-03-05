@@ -23,23 +23,22 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         
         private class ADomainModule  : DomainModule 
         {
-            public ADomainModule(params Assembly[] domainAssemblies) : base(new DebugExceptionLogger(), domainAssemblies)
+            public ADomainModule(params Assembly[] domainAssemblies) : base(new DebugExceptionLogger(), A.Fake<IEventBus>(), domainAssemblies)
             { }
 
             protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
             {
                 base.Register(container, scopedLifestyle);
                 container.Register<IClock, FrozenClock>();
-                container.RegisterInstance(A.Fake<IEventBus>());
             }
         }
 
         public TheSimpleInjectorCompositionRoot()
         {
 
-            var tenantManager = A.Fake<ITenantManager>();
+            var tenantManager = A.Fake<ITenantIdService>();
             TenantId[] tenantIds = { new TenantId(999) };
-            A.CallTo(() => tenantManager.GetTenantIds()).Returns(tenantIds);
+            A.CallTo(() => tenantManager.GetActiveTenantIds()).Returns(tenantIds);
 
 
             _sut = new SimpleInjectorCompositionRoot();

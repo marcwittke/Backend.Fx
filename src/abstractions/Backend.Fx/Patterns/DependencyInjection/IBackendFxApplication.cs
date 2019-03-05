@@ -14,12 +14,15 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// </summary>
         ICompositionRoot CompositionRoot { get; }
 
-        IJobEngine JobEngine { get; }
-
         /// <summary>
         /// Used to log exceptions 
         /// </summary>
         IExceptionLogger ExceptionLogger { get; }
+
+        /// <summary>
+        /// Provides application wide tenant ids
+        /// </summary>
+        ITenantIdService TenantIdService { get; }
 
         /// <summary>
         /// allows asynchronously awaiting application startup
@@ -30,8 +33,6 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// allows synchronously awaiting application startup
         /// </summary>
         bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue);
-
-        ITenantManager TenantManager { get; }
 
         /// <summary>
         /// Initializes ans starts the application (async)
@@ -44,5 +45,9 @@ namespace Backend.Fx.Patterns.DependencyInjection
         void Invoke(Action action, IIdentity identity, TenantId tenantId);
 
         Task InvokeAsync(Action action, IIdentity identity, TenantId tenantId);
+
+        void Run<TJob>() where TJob : class, IJob;
+
+        void Run<TJob>(TenantId tenantId) where TJob : class, IJob;
     }
 }

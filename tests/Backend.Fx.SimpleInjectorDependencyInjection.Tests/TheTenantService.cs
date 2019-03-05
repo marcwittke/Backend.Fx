@@ -1,41 +1,48 @@
 ﻿using System.Diagnostics;
-using System.Globalization;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.InMemoryPersistence;
+using Backend.Fx.Patterns.EventAggregation.Integration;
 using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Bootstrapping;
 using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Domain;
+using FakeItEasy;
 using Xunit;
 
 namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
 {
-    public class TheTenantManager
+    public class TheTenantService
     {
-        private readonly ITenantManager _sut;
+        private readonly ITenantService _sut;
+        private readonly IEventBus _eventBus = A.Fake<IEventBus>();
         
-        public TheTenantManager()
+        public TheTenantService()
         {
+            A.CallTo(() => _eventBus.Publish(A<IIntegrationEvent>._)).Invokes((IIntegrationEvent iev) =>
+            {
+                _sut.ActivateTenant(new TenantId(iev.TenantId));
+            });
+
             var compositionRoot = new SimpleInjectorCompositionRoot();
             var domainAssembly = typeof(AnAggregate).GetTypeInfo().Assembly;
             var backendfxAssembly = typeof(Entity).GetTypeInfo().Assembly;
             compositionRoot.RegisterModules(
-                new ADomainModule(domainAssembly, backendfxAssembly),
+                new ADomainModule(_eventBus, domainAssembly, backendfxAssembly),
                 new APersistenceModule(domainAssembly));
 
             compositionRoot.Verify();
 
-            _sut = new InMemoryTenantManager();
+            _sut = new TenantService(_eventBus, new InMemoryTenantRepository());
         }
 
         [Fact]
         public void RaisesTenantCreatedEvent()
         {
             ManualResetEvent ev = new ManualResetEvent(false);
-            _sut.TenantCreated += (sender, id) => ev.Set();
-            Task.Run(() => _sut.CreateProductionTenant("prod", "unit test created", true, new CultureInfo("de-DE")));
+            A.CallTo(() => _eventBus.Publish(A<TenantCreated>._)).Invokes(() => ev.Set());
+            Task.Run(() => _sut.CreateProductionTenant("prod", "unit test created", "de-DE"));
             Assert.True(ev.WaitOne(Debugger.IsAttached ? int.MaxValue : 10000));
         }
 
@@ -43,14 +50,9 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         public void RaisesTenantActivatedEvent()
         {
             ManualResetEvent ev = new ManualResetEvent(false);
-            _sut.TenantCreated += (sender, id) =>
-            {
-                var tenant = _sut.GetTenant(id);
-                _sut.ActivateTenant(tenant);
-            };
+            A.CallTo(() => _eventBus.Publish(A<TenantActivated>._)).Invokes(() => ev.Set());
 
-            _sut.TenantActivated += (sender, id) => ev.Set();
-            Task.Run(() => _sut.CreateProductionTenant("prod", "unit test created", true, new CultureInfo("de-DE")));
+            Task.Run(() => _sut.CreateProductionTenant("prod", "unit test created", "de-DE"));
             Assert.True(ev.WaitOne(Debugger.IsAttached ? int.MaxValue : 10000));
         }
     }

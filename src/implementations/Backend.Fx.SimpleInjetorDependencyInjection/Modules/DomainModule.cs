@@ -10,6 +10,7 @@ using Backend.Fx.Patterns.Authorization;
 using Backend.Fx.Patterns.DataGeneration;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Domain;
+using Backend.Fx.Patterns.EventAggregation.Integration;
 using Backend.Fx.Patterns.Jobs;
 using SimpleInjector;
 
@@ -24,14 +25,16 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
     public abstract class DomainModule : SimpleInjectorModule
     {
         private readonly IExceptionLogger _exceptionLogger;
+        private readonly IEventBus _eventBus;
         private static readonly ILogger Logger = LogManager.Create<DomainModule>();
         private readonly Assembly[] _assemblies;
         private Func<DomainEventAggregator> _domainEventAggregatorFactory;
         private readonly string _assembliesForLogging;
 
-        protected DomainModule(IExceptionLogger exceptionLogger, params Assembly[] domainAssemblies)
+        protected DomainModule(IExceptionLogger exceptionLogger, IEventBus eventBus, params Assembly[] domainAssemblies)
         {
             _exceptionLogger = exceptionLogger;
+            _eventBus = eventBus;
             _assemblies = domainAssemblies.Concat(new[] {
                 typeof(Entity).GetTypeInfo().Assembly,
             }).ToArray();
@@ -67,6 +70,10 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
             Logger.Debug("Registering event aggregator");
             container.Register<IDomainEventAggregator>(_domainEventAggregatorFactory);
 
+            // integration event subsystem
+            Logger.Debug("Registering event bus");
+            container.RegisterInstance(_eventBus);
+
             // initial data generation subsystem
             Logger.Debug($"Registering initial data generators from {_assembliesForLogging}");
             container.Collection.Register<IDataGenerator>(_assemblies);
@@ -77,10 +84,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
                 Logger.Debug($"Registering {jobType.Name}");
                 container.Register(jobType);
             }
-
-            container.Register(typeof(IJobExecutor<>), typeof(JobExecutor<>));
-            container.RegisterDecorator(typeof(IJobExecutor<>), typeof(UnitOfWorkJobExecutor<>));
-            container.RegisterDecorator(typeof(IJobExecutor<>), typeof(ExceptionLoggingJobExecutor<>));
         }
 
 

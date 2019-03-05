@@ -135,7 +135,8 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             public AFakeApplication() : this (A.Fake<ICompositionRoot>())
             {}
 
-            private AFakeApplication(ICompositionRoot compositionRoot) : base(compositionRoot, A.Fake<ITenantManager>(), A.Fake<IExceptionLogger>())
+            private AFakeApplication(ICompositionRoot compositionRoot) 
+                : base(compositionRoot, A.Fake<ITenantIdService>(), A.Fake<IExceptionLogger>())
             {
                 A.CallTo(() => CompositionRoot.BeginScope())
                     .Returns(A.Fake<IDisposable>());
