@@ -1,17 +1,20 @@
-﻿namespace Backend.Fx.EfCorePersistence
-{
-    using System;
-    using System.Globalization;
-    using System.Linq;
-    using System.Reflection;
-    using System.Text;
-    using BuildingBlocks;
-    using Extensions;
-    using Logging;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.ChangeTracking;
-    using Microsoft.EntityFrameworkCore.Metadata;
+﻿using System;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using Backend.Fx.BuildingBlocks;
+using Backend.Fx.Extensions;
+using Backend.Fx.Logging;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Metadata;
+using System.Diagnostics;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 
+namespace Backend.Fx.EfCorePersistence
+{
     public static class DbContextExtensions
     {
         private static readonly ILogger Logger = LogManager.Create(typeof(DbContextExtensions));
@@ -106,6 +109,15 @@
             {
                 Logger.Debug($"Tracked {count} entities as created/changed on {utcNow:u} by {userId}");
             }
+        }
+
+        public static void ResetTransactions(this DbContext dbContext)
+        {
+            // big fat HACK: until EF Core allows to change the transaction and/or connection on an existing instance of DbContext...
+            RelationalConnection relationalConnection = (RelationalConnection)dbContext.Database.GetService<IDbContextTransactionManager>();
+            MethodInfo methodInfo = typeof(RelationalConnection).GetMethod("ClearTransactions", BindingFlags.Instance | BindingFlags.NonPublic);
+            Debug.Assert(methodInfo != null, nameof(methodInfo) + " != null");
+            methodInfo.Invoke(relationalConnection, new object[0]);
         }
 
         /// <summary>
