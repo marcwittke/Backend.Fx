@@ -6,7 +6,7 @@
     using System.Linq;
     using System.Linq.Expressions;
 
-    public interface IView<out T> : IQueryable<T>, IDomainService
+    public interface IView<out T> : IQueryable<T>
     {}
 
     public abstract class View<T> : IView<T>

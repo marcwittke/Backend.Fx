@@ -2,9 +2,8 @@
 {
     using System.Collections.Concurrent;
     using System.Threading.Tasks;
-    using BuildingBlocks;
-
-    public interface IEventBusScope : IDomainService
+    
+    public interface IEventBusScope
     { 
         /// <summary>
         /// Enqueue an event to be raised later. 

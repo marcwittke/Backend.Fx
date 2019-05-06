@@ -49,6 +49,8 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
             Logger.Debug("Registering event bus");
             container.RegisterInstance(_eventBus);
 
+            container.Register<IEventBusScope, EventBusScope>();
+
         }
     }
 }

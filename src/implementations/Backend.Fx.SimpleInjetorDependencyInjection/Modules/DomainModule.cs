@@ -21,16 +21,13 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
     public abstract class DomainModule : SimpleInjectorModule
     {
         private static readonly ILogger Logger = LogManager.Create<DomainModule>();
-        private readonly Assembly[] _assemblies;
-        private readonly string _assembliesForLogging;
+        private readonly Assembly[] _domainAssemblies;
+        private readonly string _domainAssembliesForLogging;
 
         protected DomainModule(params Assembly[] domainAssemblies)
         {
-            _assemblies = domainAssemblies.Concat(new[] {
-                typeof(Entity).GetTypeInfo().Assembly,
-            }).ToArray();
-
-            _assembliesForLogging = string.Join(",", _assemblies.Select(ass => ass.GetName().Name));
+            _domainAssemblies = domainAssemblies;
+            _domainAssembliesForLogging = string.Join(",", _domainAssemblies.Select(ass => ass.GetName().Name));
         }
 
         protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
@@ -40,21 +37,21 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
             RegisterAuthorization(container);
 
             // all jobs are dynamically registered
-            foreach (var jobType in container.GetTypesToRegister(typeof(IJob), _assemblies))
+            foreach (var jobType in container.GetTypesToRegister(typeof(IJob), _domainAssemblies))
             {
                 Logger.Debug($"Registering {jobType.Name}");
                 container.Register(jobType);
             }
 
             // initial data generation subsystem
-            foreach (var dataGeneratorType in container.GetTypesToRegister(typeof(IDataGenerator), _assemblies))
+            foreach (var dataGeneratorType in container.GetTypesToRegister(typeof(IDataGenerator), _domainAssemblies))
             {
                 Logger.Debug($"Appending {dataGeneratorType.Name} to list of IDataGenerators");
                 container.Collection.Append(typeof(IDataGenerator), dataGeneratorType);
             }
 
             // domain event handlers
-            foreach (var domainEventHandlerType in container.GetTypesToRegister(typeof(IDomainEventHandler<>), _assemblies))
+            foreach (var domainEventHandlerType in container.GetTypesToRegister(typeof(IDomainEventHandler<>), _domainAssemblies))
             {
                 Logger.Debug($"Appending {domainEventHandlerType.Name} to list of IDomainEventHandler");
                 container.Collection.Append(typeof(IDomainEventHandler<>), domainEventHandlerType);
@@ -63,17 +60,17 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
 
         private void RegisterDomainAndApplicationServices(Container container)
         {
-            Logger.Debug($"Registering domain and application services from {string.Join(",", _assemblies.Select(ass => ass.GetName().Name))}");
+            Logger.Debug($"Registering domain and application services from {string.Join(",", _domainAssemblies.Select(ass => ass.GetName().Name))}");
             var serviceRegistrations = container
-                                       .GetTypesToRegister(typeof(IDomainService), _assemblies)
-                                       .Concat(container.GetTypesToRegister(typeof(IApplicationService), _assemblies))
+                                       .GetTypesToRegister(typeof(IDomainService), _domainAssemblies)
+                                       .Concat(container.GetTypesToRegister(typeof(IApplicationService), _domainAssemblies))
                                        .SelectMany(type =>
                                                        type.GetTypeInfo()
                                                            .ImplementedInterfaces
                                                            .Where(i => typeof(IDomainService) != i
                                                                        && typeof(IApplicationService) != i
                                                                        && (i.Namespace != null && i.Namespace.StartsWith("Backend")
-                                                                           || _assemblies.Contains(i.GetTypeInfo().Assembly)))
+                                                                           || _domainAssemblies.Contains(i.GetTypeInfo().Assembly)))
                                                            .Select(service => new
                                                                               {
                                                                                   Service = service,
@@ -92,8 +89,8 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
         /// </summary>
         private void RegisterAuthorization(Container container)
         {
-            Logger.Debug($"Registering authorization services from {_assembliesForLogging}");
-            var aggregateRootAuthorizationTypes = container.GetTypesToRegister(typeof(IAggregateAuthorization<>), _assemblies).ToArray();
+            Logger.Debug($"Registering authorization services from {_domainAssembliesForLogging}");
+            var aggregateRootAuthorizationTypes = container.GetTypesToRegister(typeof(IAggregateAuthorization<>), _domainAssemblies).ToArray();
             foreach (var aggregateAuthorizationType in aggregateRootAuthorizationTypes)
             {
                 var serviceTypes = aggregateAuthorizationType
