@@ -5,8 +5,10 @@ using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.InMemoryPersistence;
+using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
+using Backend.Fx.SimpleInjectorDependencyInjection.Modules;
 using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Bootstrapping;
 using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Domain;
 using Xunit;
@@ -128,7 +130,8 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
             var sut = new AnApplication(compositionRoot);
             IEventBus eventBus = new InMemoryEventBus(sut);
             sut.CompositionRoot.RegisterModules(
-                new ADomainModule(eventBus, typeof(AnApplication).Assembly, typeof(AggregateRoot).Assembly),
+                new InfrastructureModule(new DebugExceptionLogger(), eventBus),
+                new ADomainModule(typeof(AnApplication).Assembly, typeof(AggregateRoot).Assembly),
                 _persistenceModule);
 
             return sut;

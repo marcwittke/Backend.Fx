@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.InMemoryPersistence;
+using Backend.Fx.Logging;
 using Backend.Fx.Patterns.EventAggregation.Integration;
+using Backend.Fx.SimpleInjectorDependencyInjection.Modules;
 using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Bootstrapping;
 using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Domain;
 using FakeItEasy;
@@ -29,7 +31,8 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
             var domainAssembly = typeof(AnAggregate).GetTypeInfo().Assembly;
             var backendfxAssembly = typeof(Entity).GetTypeInfo().Assembly;
             compositionRoot.RegisterModules(
-                new ADomainModule(_eventBus, domainAssembly, backendfxAssembly),
+                new InfrastructureModule(new DebugExceptionLogger(), _eventBus),
+                new ADomainModule(domainAssembly, backendfxAssembly),
                 new APersistenceModule(domainAssembly));
 
             compositionRoot.Verify();

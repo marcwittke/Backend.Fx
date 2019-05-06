@@ -1,16 +1,12 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Reflection;
 using System.Security.Principal;
 using Backend.Fx.BuildingBlocks;
-using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.Authorization;
 using Backend.Fx.Patterns.DataGeneration;
-using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Domain;
-using Backend.Fx.Patterns.EventAggregation.Integration;
 using Backend.Fx.Patterns.Jobs;
 using SimpleInjector;
 
@@ -24,17 +20,12 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
     /// </summary>
     public abstract class DomainModule : SimpleInjectorModule
     {
-        private readonly IExceptionLogger _exceptionLogger;
-        private readonly IEventBus _eventBus;
         private static readonly ILogger Logger = LogManager.Create<DomainModule>();
         private readonly Assembly[] _assemblies;
-        private Func<DomainEventAggregator> _domainEventAggregatorFactory;
         private readonly string _assembliesForLogging;
 
-        protected DomainModule(IExceptionLogger exceptionLogger, IEventBus eventBus, params Assembly[] domainAssemblies)
+        protected DomainModule(params Assembly[] domainAssemblies)
         {
-            _exceptionLogger = exceptionLogger;
-            _eventBus = eventBus;
             _assemblies = domainAssemblies.Concat(new[] {
                 typeof(Entity).GetTypeInfo().Assembly,
             }).ToArray();
@@ -42,41 +33,11 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
             _assembliesForLogging = string.Join(",", _assemblies.Select(ass => ass.GetName().Name));
         }
 
-        public override void Register(ICompositionRoot compositionRoot)
-        {
-            _domainEventAggregatorFactory = ()=>new DomainEventAggregator(compositionRoot);        
-            base.Register(compositionRoot);
-        }
-
         protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
         {
-            container.RegisterInstance(_exceptionLogger);
-
-            // the current IIdentity is resolved using the scoped CurrentIdentityHolder that is maintained when opening a scope
-            Logger.Debug($"Registering {nameof(CurrentIdentityHolder)} as {nameof(ICurrentTHolder<IIdentity>)}");
-            container.Register<ICurrentTHolder<IIdentity>, CurrentIdentityHolder>();
-
-            // same for the current TenantId
-            Logger.Debug($"Registering {nameof(CurrentTenantIdHolder)} as {nameof(ICurrentTHolder<TenantId>)}");
-            container.Register<ICurrentTHolder<TenantId>, CurrentTenantIdHolder>();
-            
-            container.RegisterDomainAndApplicationServices(_assemblies);
+            RegisterDomainAndApplicationServices(container);
 
             RegisterAuthorization(container);
-
-            // domain event subsystem
-            Logger.Debug($"Registering domain event handlers from {_assembliesForLogging}");
-            container.Collection.Register(typeof(IDomainEventHandler<>), _assemblies);
-            Logger.Debug("Registering event aggregator");
-            container.Register<IDomainEventAggregator>(_domainEventAggregatorFactory);
-
-            // integration event subsystem
-            Logger.Debug("Registering event bus");
-            container.RegisterInstance(_eventBus);
-
-            // initial data generation subsystem
-            Logger.Debug($"Registering initial data generators from {_assembliesForLogging}");
-            container.Collection.Register<IDataGenerator>(_assemblies);
 
             // all jobs are dynamically registered
             foreach (var jobType in container.GetTypesToRegister(typeof(IJob), _assemblies))
@@ -84,8 +45,47 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
                 Logger.Debug($"Registering {jobType.Name}");
                 container.Register(jobType);
             }
+
+            // initial data generation subsystem
+            foreach (var dataGeneratorType in container.GetTypesToRegister(typeof(IDataGenerator), _assemblies))
+            {
+                Logger.Debug($"Appending {dataGeneratorType.Name} to list of IDataGenerators");
+                container.Collection.Append(typeof(IDataGenerator), dataGeneratorType);
+            }
+
+            // domain event handlers
+            foreach (var domainEventHandlerType in container.GetTypesToRegister(typeof(IDomainEventHandler<>), _assemblies))
+            {
+                Logger.Debug($"Appending {domainEventHandlerType.Name} to list of IDomainEventHandler");
+                container.Collection.Append(typeof(IDomainEventHandler<>), domainEventHandlerType);
+            }
         }
 
+        private void RegisterDomainAndApplicationServices(Container container)
+        {
+            Logger.Debug($"Registering domain and application services from {string.Join(",", _assemblies.Select(ass => ass.GetName().Name))}");
+            var serviceRegistrations = container
+                                       .GetTypesToRegister(typeof(IDomainService), _assemblies)
+                                       .Concat(container.GetTypesToRegister(typeof(IApplicationService), _assemblies))
+                                       .SelectMany(type =>
+                                                       type.GetTypeInfo()
+                                                           .ImplementedInterfaces
+                                                           .Where(i => typeof(IDomainService) != i
+                                                                       && typeof(IApplicationService) != i
+                                                                       && (i.Namespace != null && i.Namespace.StartsWith("Backend")
+                                                                           || _assemblies.Contains(i.GetTypeInfo().Assembly)))
+                                                           .Select(service => new
+                                                                              {
+                                                                                  Service = service,
+                                                                                  Implementation = type
+                                                                              })
+                                       );
+            foreach (var reg in serviceRegistrations)
+            {
+                Logger.Debug($"Registering scoped service {reg.Service.Name} with implementation {reg.Implementation.Name}");
+                container.Register(reg.Service, reg.Implementation);
+            }
+        }
 
         /// <summary>
         ///     Auto registering all aggregate authorization classes
