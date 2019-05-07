@@ -1,4 +1,6 @@
-﻿namespace Backend.Fx.EfCorePersistence
+﻿using JetBrains.Annotations;
+
+namespace Backend.Fx.EfCorePersistence
 {
     using System;
     using System.Collections;
@@ -10,11 +12,24 @@
     
     public class EntityQueryable<TEntity> : IQueryable<TEntity> where TEntity : Entity
     {
-        private readonly DbContext _dbContext;
-        
+        [CanBeNull] private DbContext _dbContext;
+
         public EntityQueryable(DbContext dbContext)
         {
             _dbContext = dbContext;
+        }
+
+        public DbContext DbContext
+        {
+            get => _dbContext ?? throw new InvalidOperationException("This EntityQueryable does not have a DbContext yet. You might either make sure a proper DbContext gets injected or the DbContext is initialized later using a derived class");
+            protected set
+            {
+                if (_dbContext != null)
+                {
+                    throw new InvalidOperationException("This EntityQueryable has already a DbContext assigned. It is not allowed to change it later.");
+                }
+                _dbContext = value;
+            }
         }
 
         public IEnumerator<TEntity> GetEnumerator()
@@ -33,6 +48,6 @@
 
         public IQueryProvider Provider => InnerQueryable.Provider;
 
-        private IQueryable<TEntity> InnerQueryable => _dbContext.Set<TEntity>();
+        private IQueryable<TEntity> InnerQueryable => DbContext.Set<TEntity>();
     }
 }
