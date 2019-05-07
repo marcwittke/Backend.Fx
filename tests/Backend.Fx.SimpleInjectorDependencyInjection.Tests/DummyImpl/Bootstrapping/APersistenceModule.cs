@@ -54,7 +54,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Bootstrap
                     container);
             container.AddRegistration(typeof(IUnitOfWork), uowRegistration);
             container.AddRegistration(typeof(ICanFlush), uowRegistration);
-            container.Register(A.Fake<IReadonlyUnitOfWork>);
             container.Register(A.Fake<ICanInterruptTransaction>);
 
             container.RegisterInstance<IEntityIdGenerator>(new InMemoryEntityIdGenerator());
