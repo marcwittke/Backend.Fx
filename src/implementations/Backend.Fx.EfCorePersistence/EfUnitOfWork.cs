@@ -32,14 +32,7 @@ namespace Backend.Fx.EfCorePersistence
         public virtual DbContext DbContext
         {
             get => _dbContext ?? throw new InvalidOperationException("This EfUnitOfWork does not have a DbContext yet. You might either make sure a proper DbContext gets injected or the DbContext is initialized later using a derived class");
-            protected set
-            {
-                if (_dbContext != null)
-                {
-                    throw new InvalidOperationException("This EfUnitOfWork has already a DbContext assigned. It is not allowed to change it later.");
-                }
-                _dbContext = value;
-            }
+            protected set => _dbContext = value;
         }
 
         public override void Begin()
