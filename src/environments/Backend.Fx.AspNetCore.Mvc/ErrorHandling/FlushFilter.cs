@@ -29,6 +29,12 @@ namespace Backend.Fx.AspNetCore.Mvc.ErrorHandling
 
         public void OnActionExecuted(ActionExecutedContext context)
         {
+            // only unsafe requests need flush
+            if (context.HttpContext.Request.IsSafe())
+            {
+                return;
+            }
+
             // that's all:
             _backendFxApplication.CompositionRoot.GetInstance<ICanFlush>().Flush();
         }
