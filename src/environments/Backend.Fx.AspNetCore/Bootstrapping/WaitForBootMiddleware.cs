@@ -16,7 +16,7 @@ namespace Backend.Fx.AspNetCore.Bootstrapping
         private readonly IBackendFxApplication _application;
 
         [UsedImplicitly]
-        protected WaitForBootMiddleware(RequestDelegate next, IBackendFxApplication application)
+        public WaitForBootMiddleware(RequestDelegate next, IBackendFxApplication application)
         {
             _next = next;
             _application = application;
