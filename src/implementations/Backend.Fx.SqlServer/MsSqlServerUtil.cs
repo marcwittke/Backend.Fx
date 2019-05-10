@@ -107,6 +107,31 @@ namespace Backend.Fx.SqlServer
                 });
         }
 
+        public void EnsureExistingDatabase()
+        {
+            SqlConnectionStringBuilder sb = new SqlConnectionStringBuilder(ConnectionString);
+            string dbName = sb.InitialCatalog;
+            sb.InitialCatalog = "master";
+            using (var connection = new SqlConnection(sb.ConnectionString))
+            {
+                connection.Open();
+                bool isExistant;
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = $"SELECT count(*) FROM sys.databases WHERE Name = '{dbName}'";
+                    isExistant = (int)command.ExecuteScalar() == 1;
+                }
+
+                if (!isExistant)
+                {
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText = "CREATE DATABASE [" + dbName + "]";
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+        }
 
         public void EnsureDroppedDatabase(string dbName)
         {

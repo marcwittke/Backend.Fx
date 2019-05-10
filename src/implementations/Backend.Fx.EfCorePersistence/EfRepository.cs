@@ -1,24 +1,26 @@
-﻿namespace Backend.Fx.EfCorePersistence
-{
-    using System.Linq;
-    using System.Security;
-    using BuildingBlocks;
-    using Environment.MultiTenancy;
-    using Logging;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
-    using Microsoft.EntityFrameworkCore.Infrastructure;
-    using Patterns.Authorization;
-    using Patterns.DependencyInjection;
+﻿using System;
+using System.Linq;
+using System.Security;
+using Backend.Fx.BuildingBlocks;
+using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Logging;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Backend.Fx.Patterns.Authorization;
+using Backend.Fx.Patterns.DependencyInjection;
+using JetBrains.Annotations;
 
+namespace Backend.Fx.EfCorePersistence
+{
     public class EfRepository<TAggregateRoot> : Repository<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
         private static readonly ILogger Logger = LogManager.Create<EfRepository<TAggregateRoot>>();
-        private readonly DbContext _dbContext;
+        private DbContext _dbContext;
         private readonly IAggregateMapping<TAggregateRoot> _aggregateMapping;
         private readonly IAggregateAuthorization<TAggregateRoot> _aggregateAuthorization;
 
-        public EfRepository(DbContext dbContext, IAggregateMapping<TAggregateRoot> aggregateMapping,
+        public EfRepository([CanBeNull] DbContext dbContext, IAggregateMapping<TAggregateRoot> aggregateMapping,
             ICurrentTHolder<TenantId> currentTenantIdHolder, IAggregateAuthorization<TAggregateRoot> aggregateAuthorization)
             : base(currentTenantIdHolder, aggregateAuthorization)
         {
@@ -27,10 +29,25 @@
             _aggregateAuthorization = aggregateAuthorization;
 
             // somewhat a hack: using the internal EF Core services against advice
-            var localViewListener = dbContext.GetService<ILocalViewListener>();
-            localViewListener.RegisterView(AuthorizeChanges);
+            var localViewListener = dbContext?.GetService<ILocalViewListener>();
+            localViewListener?.RegisterView(AuthorizeChanges);
         }
-        
+
+        public DbContext DbContext
+        {
+            get => _dbContext ?? throw new InvalidOperationException("This EfRepository does not have a DbContext yet. You might either make sure a proper DbContext gets injected or the DbContext is initialized later using a derived class");
+            protected set
+            {
+                if (_dbContext != null)
+                {
+                    throw new InvalidOperationException("This EfRepository has already a DbContext assigned. It is not allowed to change it later.");
+                }
+                _dbContext = value;
+                var localViewListener = _dbContext?.GetService<ILocalViewListener>();
+                localViewListener?.RegisterView(AuthorizeChanges);
+            }
+        }
+
         /// <summary>
         /// Due to the fact, that a real lifecycle hook API is not yet available (see issue https://github.com/aspnet/EntityFrameworkCore/issues/626)
         /// we are using an internal service to achieve the same goal: When a state change occurs from unchanged to modified, and this repository is
@@ -57,26 +74,26 @@
         protected override void AddPersistent(TAggregateRoot aggregateRoot)
         {
             Logger.Debug($"Persistently adding new {AggregateTypeName}");
-            _dbContext.Set<TAggregateRoot>().Add(aggregateRoot);
+            DbContext.Set<TAggregateRoot>().Add(aggregateRoot);
         }
 
         protected override void AddRangePersistent(TAggregateRoot[] aggregateRoots)
         {
             Logger.Debug($"Persistently adding {aggregateRoots.Length} item(s) of type {AggregateTypeName}");
-            _dbContext.Set<TAggregateRoot>().AddRange(aggregateRoots);
+            DbContext.Set<TAggregateRoot>().AddRange(aggregateRoots);
         }
 
         protected override void DeletePersistent(TAggregateRoot aggregateRoot)
         {
             Logger.Debug($"Persistently removing {aggregateRoot.DebuggerDisplay}");
-            _dbContext.Set<TAggregateRoot>().Remove(aggregateRoot);
+            DbContext.Set<TAggregateRoot>().Remove(aggregateRoot);
         }
 
         protected override IQueryable<TAggregateRoot> RawAggregateQueryable
         {
             get
             {
-                IQueryable<TAggregateRoot> queryable = _dbContext.Set<TAggregateRoot>();
+                IQueryable<TAggregateRoot> queryable = DbContext.Set<TAggregateRoot>();
                 if (_aggregateMapping.IncludeDefinitions != null)
                 {
                     foreach (var include in _aggregateMapping.IncludeDefinitions)

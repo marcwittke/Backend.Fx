@@ -23,7 +23,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         
         private class ADomainModule  : DomainModule 
         {
-            public ADomainModule(params Assembly[] domainAssemblies) : base(new DebugExceptionLogger(), A.Fake<IEventBus>(), domainAssemblies)
+            public ADomainModule(params Assembly[] domainAssemblies) : base(domainAssemblies)
             { }
 
             protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
@@ -44,6 +44,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
             _sut = new SimpleInjectorCompositionRoot();
             var domainAssembly = typeof(AnAggregate).GetTypeInfo().Assembly;
             _sut.RegisterModules(
+                new InfrastructureModule(new DebugExceptionLogger(), A.Fake<IEventBus>()),
                 new ADomainModule(domainAssembly),
                 new APersistenceModule(domainAssembly));
             

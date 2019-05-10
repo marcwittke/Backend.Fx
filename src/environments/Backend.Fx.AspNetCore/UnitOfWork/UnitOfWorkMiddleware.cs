@@ -34,14 +34,21 @@ namespace Backend.Fx.AspNetCore.UnitOfWork
                 Logger.Info("Queuing Request while application is booting...");
             }
 
-            var asReadonly = context.Request.Method.ToUpperInvariant() == "GET";
-            using (var unitOfWork = asReadonly
-                                            ? _application.CompositionRoot.GetInstance<IReadonlyUnitOfWork>()
-                                            : _application.CompositionRoot.GetInstance<IUnitOfWork>())
+            IUnitOfWork unitOfWork = _application.CompositionRoot.GetInstance<IUnitOfWork>();
+            try
             {
+                if (context.Request.Method.ToUpperInvariant() == "GET")
+                {
+                    unitOfWork = new ReadonlyDecorator(unitOfWork);
+                }
+
                 unitOfWork.Begin();
                 await _next.Invoke(context);
                 unitOfWork.Complete();
+            }
+            finally
+            {
+                unitOfWork.Dispose();
             }
         }
     }

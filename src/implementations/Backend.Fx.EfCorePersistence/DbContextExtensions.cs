@@ -1,17 +1,20 @@
-﻿namespace Backend.Fx.EfCorePersistence
-{
-    using System;
-    using System.Globalization;
-    using System.Linq;
-    using System.Reflection;
-    using System.Text;
-    using BuildingBlocks;
-    using Extensions;
-    using Logging;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.ChangeTracking;
-    using Microsoft.EntityFrameworkCore.Metadata;
+﻿using System;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using Backend.Fx.BuildingBlocks;
+using Backend.Fx.Extensions;
+using Backend.Fx.Logging;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Metadata;
+using System.Diagnostics;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 
+namespace Backend.Fx.EfCorePersistence
+{
     public static class DbContextExtensions
     {
         private static readonly ILogger Logger = LogManager.Create(typeof(DbContextExtensions));
@@ -108,6 +111,15 @@
             }
         }
 
+        public static void ResetTransactions(this DbContext dbContext)
+        {
+            // big fat HACK: until EF Core allows to change the transaction and/or connection on an existing instance of DbContext...
+            RelationalConnection relationalConnection = (RelationalConnection)dbContext.Database.GetService<IDbContextTransactionManager>();
+            MethodInfo methodInfo = typeof(RelationalConnection).GetMethod("ClearTransactions", BindingFlags.Instance | BindingFlags.NonPublic);
+            Debug.Assert(methodInfo != null, nameof(methodInfo) + " != null");
+            methodInfo.Invoke(relationalConnection, new object[0]);
+        }
+
         /// <summary>
         /// This method finds the EntityEntry&lt;AggregateRoot&gt; of an EntityEntry&lt;Entity&gt;
         /// assuming it has been loaded and is being tracked by the change tracker.
@@ -168,25 +180,25 @@
                     var unchanged = dbContext.ChangeTracker.Entries().Where(entry => entry.State == EntityState.Unchanged).ToArray();
 
                     var stateDumpBuilder = new StringBuilder();
-                    stateDumpBuilder.AppendFormat("{0} entities added{1}{2}", added.Length, deleted.Length == 0 ? "." : ":", Environment.NewLine);
+                    stateDumpBuilder.AppendFormat("{0} entities added{1}{2}", added.Length, deleted.Length == 0 ? "." : ":", System.Environment.NewLine);
                     foreach (var entry in added)
                     {
-                        stateDumpBuilder.AppendFormat("added: {0}[{1}]{2}", entry.Entity.GetType().Name, GetPrimaryKeyValue(entry), Environment.NewLine);
+                        stateDumpBuilder.AppendFormat("added: {0}[{1}]{2}", entry.Entity.GetType().Name, GetPrimaryKeyValue(entry), System.Environment.NewLine);
                     }
-                    stateDumpBuilder.AppendFormat("{0} entities modified{1}{2}", modified.Length, deleted.Length == 0 ? "." : ":", Environment.NewLine);
+                    stateDumpBuilder.AppendFormat("{0} entities modified{1}{2}", modified.Length, deleted.Length == 0 ? "." : ":", System.Environment.NewLine);
                     foreach (var entry in modified)
                     {
-                        stateDumpBuilder.AppendFormat("modified: {0}[{1}]{2}", entry.Entity.GetType().Name, GetPrimaryKeyValue(entry), Environment.NewLine);
+                        stateDumpBuilder.AppendFormat("modified: {0}[{1}]{2}", entry.Entity.GetType().Name, GetPrimaryKeyValue(entry), System.Environment.NewLine);
                     }
-                    stateDumpBuilder.AppendFormat("{0} entities deleted{1}{2}", deleted.Length, deleted.Length == 0 ? "." : ":", Environment.NewLine);
+                    stateDumpBuilder.AppendFormat("{0} entities deleted{1}{2}", deleted.Length, deleted.Length == 0 ? "." : ":", System.Environment.NewLine);
                     foreach (var entry in deleted)
                     {
-                        stateDumpBuilder.AppendFormat("deleted: {0}[{1}]{2}", entry.Entity.GetType().Name, GetPrimaryKeyValue(entry), Environment.NewLine);
+                        stateDumpBuilder.AppendFormat("deleted: {0}[{1}]{2}", entry.Entity.GetType().Name, GetPrimaryKeyValue(entry), System.Environment.NewLine);
                     }
-                    stateDumpBuilder.AppendFormat("{0} entities unchanged{1}{2}", unchanged.Length, deleted.Length == 0 ? "." : ":", Environment.NewLine);
+                    stateDumpBuilder.AppendFormat("{0} entities unchanged{1}{2}", unchanged.Length, deleted.Length == 0 ? "." : ":", System.Environment.NewLine);
                     foreach (var entry in unchanged)
                     {
-                        stateDumpBuilder.AppendFormat("unchanged: {0}[{1}]{2}", entry.Entity.GetType().Name, GetPrimaryKeyValue(entry), Environment.NewLine);
+                        stateDumpBuilder.AppendFormat("unchanged: {0}[{1}]{2}", entry.Entity.GetType().Name, GetPrimaryKeyValue(entry), System.Environment.NewLine);
                     }
                     Logger.Trace(stateDumpBuilder.ToString());
                 }
