@@ -19,9 +19,9 @@ namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain
 
         public ISet<Post> Posts { get; } = new HashSet<Post>();
 
-        public Post AddPost(IEntityIdGenerator idGenerator, string name)
+        public Post AddPost(IEntityIdGenerator idGenerator, string name, bool isPublic=false)
         {
-            var post = new Post(idGenerator.NextId(), this, name);
+            var post = new Post(idGenerator.NextId(), this, name, isPublic);
             Posts.Add(post);
             return post;
         }
