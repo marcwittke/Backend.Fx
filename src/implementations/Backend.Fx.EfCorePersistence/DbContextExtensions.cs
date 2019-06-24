@@ -60,7 +60,7 @@ namespace Backend.Fx.EfCorePersistence
 
             // Modifying an entity (also removing an entity from an aggregate) should leave the aggregate root as modified
             dbContext.ChangeTracker
-                     .Entries()
+                     .Entries<Entity>()
                      .Where(entry => entry.State == EntityState.Added || entry.State == EntityState.Modified || entry.State == EntityState.Deleted)
                      .Where(entry => !(entry.Entity is AggregateRoot))
                      .ForAll(entry =>
