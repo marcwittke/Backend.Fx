@@ -60,6 +60,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
             _onDisposal = onDisposal;
         }
 
+
         public void Dispose()
         {
             _onDisposal();
