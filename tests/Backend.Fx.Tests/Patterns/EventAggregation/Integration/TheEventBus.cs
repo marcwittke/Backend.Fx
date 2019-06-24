@@ -116,7 +116,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             Sut.Subscribe<DynamicEventHandler>(typeof(TestIntegrationEvent).FullName);
             Sut.Subscribe<TypedEventHandler, TestIntegrationEvent>();
             var integrationEvent = new TestIntegrationEvent(34, "gaga");
-            await Sut.Publish(integrationEvent);
+            Task.Run(()=> Sut.Publish(integrationEvent)).Wait();
             integrationEvent.Processed.Wait(Debugger.IsAttached ? int.MaxValue : 10000);
 
             A.CallTo(() => _app.TypedHandler.Handle(A<TestIntegrationEvent>
