@@ -145,7 +145,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
         }
 
         [Fact]
-        public void CanDeleteDependant()
+        public void CanDeleteDependent()
         {
             using (var dbs = _fixture.UseDbSession())
             {
@@ -203,7 +203,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
         }
 
         [Fact]
-        public void CanAddDependant()
+        public void CanAddDependent()
         {
             using (var dbs = _fixture.UseDbSession())
             {
