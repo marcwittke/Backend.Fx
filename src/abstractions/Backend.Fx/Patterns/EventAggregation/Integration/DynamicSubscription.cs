@@ -1,4 +1,5 @@
 ﻿using System;
+using Backend.Fx.Extensions;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 
@@ -20,7 +21,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
         {
             Logger.Info($"Getting subscribed handler instance of type {_handlerType.Name}");
             object handlerInstance = _application.CompositionRoot.GetInstance(_handlerType);
-            using (Logger.InfoDuration($"Invoking subscribed handler {_handlerType.Name}"))
+            using (Logger.InfoDuration($"Invoking subscribed handler {_handlerType.GetDetailedTypeName()}"))
             {
                 ((IIntegrationEventHandler)handlerInstance).Handle(context.DynamicEvent);
             }

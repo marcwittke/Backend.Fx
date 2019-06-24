@@ -18,18 +18,19 @@ namespace Backend.Fx.Environment.MultiTenancy
             application.CompositionRoot
                 .GetInstance<IEventBus>()
                 .Subscribe(new DelegateIntegrationEventHandler<TenantCreated>(tenantCreated =>
-            {
-                try
                 {
-                    var tenantId = new TenantId(tenantCreated.TenantId);
-                    application.SeedDataForTenant(tenantId, tenantCreated.IsDemoTenant);
-                    tenantService.ActivateTenant(tenantId);
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error(ex, "Handling TenantCreated event failed");
-                }
-            }));
+                    Logger.Info($"Seeding data for recently created {(tenantCreated.IsDemoTenant?"demo ":"")}tenant {tenantCreated.TenantId}");
+                    try
+                    {
+                        var tenantId = new TenantId(tenantCreated.TenantId);
+                        application.SeedDataForTenant(tenantId, tenantCreated.IsDemoTenant);
+                        tenantService.ActivateTenant(tenantId);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error(ex, $"Seeding data for recently created {(tenantCreated.IsDemoTenant ? "demo " : "")}tenant {tenantCreated.TenantId} failed.");
+                    }
+                }));
         }
 
         public static void SeedDataForAllActiveTenants(this IBackendFxApplication application)

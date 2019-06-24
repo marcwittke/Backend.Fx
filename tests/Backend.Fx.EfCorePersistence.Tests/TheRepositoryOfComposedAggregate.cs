@@ -145,7 +145,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
         }
 
         [Fact]
-        public void CanDeleteDependant()
+        public void CanDeleteDependent()
         {
             using (var dbs = _fixture.UseDbSession())
             {
@@ -198,12 +198,48 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 {
                     string name = dbs.Connection.ExecuteScalar<string>($"SELECT name FROM Posts where id = {post.Id}");
                     Assert.Equal("modified", name);
+
+                    string strChangedOn = dbs.Connection.ExecuteScalar<string>($"SELECT changedon FROM Posts where id = {post.Id}");
+                    DateTime changedOn = DateTime.Parse(strChangedOn);
+                    Assert.Equal(_clock.UtcNow, changedOn, new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(500)));
                 }
             }
         }
 
+        //FAILING!!!!
+        // this shows, that ValueObjects treated as OwnedTypes are not supported very well
+        //[Fact]
+        //public void CanUpdateDependantValueObject()
+        //{
+        //    using (var dbs = _fixture.UseDbSession())
+        //    {
+        //        int id = CreateBlogWithPost(dbs, 10);
+        //        Post post;
+
+        //        using (var uow = dbs.UseUnitOfWork(_clock))
+        //        {
+        //            var sut = new EfRepository<Blog>(dbs.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId),
+        //                new AllowAll<Blog>());
+        //            var blog = sut.Single(id);
+        //            post = blog.Posts.First();
+        //            post.TargetAudience = new TargetAudience{Culture = "es-AR", IsPublic = false};
+        //            uow.Complete();
+        //        }
+
+        //        using (dbs.Connection.OpenDisposable())
+        //        {
+        //            string culture = dbs.Connection.ExecuteScalar<string>($"SELECT TargetAudience_Culture ame FROM Posts where id = {post.Id}");
+        //            Assert.Equal("es-AR", culture);
+
+        //            string strChangedOn = dbs.Connection.ExecuteScalar<string>($"SELECT changedon FROM Posts where id = {post.Id}");
+        //            DateTime changedOn = DateTime.Parse(strChangedOn);
+        //            Assert.Equal(_clock.UtcNow, changedOn, new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(500)));
+        //        }
+        //    }
+        //}
+
         [Fact]
-        public void CanAddDependant()
+        public void CanAddDependent()
         {
             using (var dbs = _fixture.UseDbSession())
             {
@@ -294,7 +330,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 for (int i = 0; i < postCount; i++)
                 {
                     dbs.Connection.ExecuteNonQuery(
-                        $"INSERT INTO Posts (Id, BlogId, Name, CreatedOn, CreatedBy) VALUES ({_nextId++}, {blogId}, 'my post {i:00}', CURRENT_TIMESTAMP, 'persistence test')");
+                        $"INSERT INTO Posts (Id, BlogId, Name, TargetAudience_IsPublic, TargetAudience_Culture, CreatedOn, CreatedBy) VALUES ({_nextId++}, {blogId}, 'my post {i:00}', '1', 'de-DE', CURRENT_TIMESTAMP, 'persistence test')");
                 }
 
                 return (int) blogId;

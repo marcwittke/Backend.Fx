@@ -21,7 +21,8 @@ namespace Backend.Fx.ConfigurationSettings
 
         protected T ReadSetting<T>(string key)
         {
-            var setting = _settingRepository.AggregateQueryable.SingleOrDefault(s => s.Key == _category + "." + key);
+            var categoryKey = _category + "." + key;
+            var setting = _settingRepository.AggregateQueryable.SingleOrDefault(s => s.Key == categoryKey);
             if (setting == null)
             {
                 return default(T);
@@ -32,10 +33,11 @@ namespace Backend.Fx.ConfigurationSettings
 
         protected void WriteSetting<T>(string key, T value)
         {
-            var setting = _settingRepository.AggregateQueryable.SingleOrDefault(s => s.Key == _category + "." + key);
+            var categoryKey = _category + "." + key;
+            var setting = _settingRepository.AggregateQueryable.SingleOrDefault(s => s.Key == categoryKey);
             if (setting == null)
             {
-                setting = new Setting(_idGenerator.NextId(), _category + "." + key);
+                setting = new Setting(_idGenerator.NextId(), categoryKey);
                 _settingRepository.Add(setting);
             }
             var serializer = _settingSerializerFactory.GetSerializer<T>();
