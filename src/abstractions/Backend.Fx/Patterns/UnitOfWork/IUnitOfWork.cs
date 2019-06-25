@@ -56,8 +56,9 @@
         public void Complete()
         {
             Logger.Debug("Completing unit of work #" + _instanceId);
-            Flush();
+            Flush(); // we have to flush before raising events, therefore the handlers find the latest changes in the DB
             _eventAggregator.RaiseEvents();
+            Flush(); // event handlers change the DB state, so we have to flush again
             Commit();
             AsyncHelper.RunSync(()=>_eventBusScope.RaiseEvents());
             _isCompleted = true;
