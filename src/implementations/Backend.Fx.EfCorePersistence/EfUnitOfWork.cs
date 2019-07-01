@@ -89,6 +89,7 @@ namespace Backend.Fx.EfCorePersistence
         /// <inheritdoc />
         public void CompleteCurrentTransaction_InvokeAction_BeginNewTransaction(Action action)
         {
+            Flush();
             Commit();
             action.Invoke();
             DbContext.ResetTransactions();
@@ -98,6 +99,7 @@ namespace Backend.Fx.EfCorePersistence
         /// <inheritdoc />
         public T CompleteCurrentTransaction_InvokeFunction_BeginNewTransaction<T>(Func<T> func)
         {
+            Flush();
             Commit();
             T result = func.Invoke();
             DbContext.ResetTransactions();
@@ -108,6 +110,7 @@ namespace Backend.Fx.EfCorePersistence
         /// <inheritdoc />
         public void CompleteCurrentTransaction_BeginNewTransaction()
         {
+            Flush();
             Commit();
             DbContext.ResetTransactions();
             Begin();
