@@ -24,7 +24,7 @@ namespace Backend.Fx.Patterns.UnitOfWork
 
         public void Complete()
         {
-            //skip
+            // prevent completion, results in rollback on disposal
         }
 
         public ICurrentTHolder<IIdentity> IdentityHolder => _unitOfWorkImplementation.IdentityHolder;

@@ -64,8 +64,6 @@
             _isCompleted = true;
         }
 
-        
-
         protected abstract void UpdateTrackingProperties(string userId, DateTime utcNow);
         protected abstract void Commit();
         protected abstract void Rollback();
@@ -76,7 +74,7 @@
             {
                 if (_isCompleted == false)
                 {
-                    Logger.Info($"Canceling unit of work #{_instanceId} because the instance is being disposed although it did not complete before. This should only occur during cleanup after errors.");
+                    Logger.Info($"Canceling unit of work #{_instanceId}.");
                     Rollback();
                 }
                 _lifetimeLogger?.Dispose();
