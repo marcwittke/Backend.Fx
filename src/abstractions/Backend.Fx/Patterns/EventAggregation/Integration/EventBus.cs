@@ -126,7 +126,7 @@
                 foreach (var subscription in subscriptions)
                 {
                     await _application.InvokeAsync(
-                        () => subscription.Process(eventName, context),
+                        () => Task.Factory.StartNew(() => subscription.Process(eventName, context)),
                         new SystemIdentity(),
                         context.TenantId);
                 }
@@ -136,7 +136,7 @@
                 Logger.Info($"No handler registered. Ignoring {eventName} event");
             }
         }
-        
+
         protected virtual void Dispose(bool disposing)
         { }
 
