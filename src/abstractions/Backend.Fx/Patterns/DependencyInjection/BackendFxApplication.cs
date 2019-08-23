@@ -42,24 +42,19 @@ namespace Backend.Fx.Patterns.DependencyInjection
         public ITenantIdService TenantIdService { get; }
 
         /// <inheritdoc />
-        public async Task Boot()
+        public async Task Boot(CancellationToken cancellationToken = default)
         {
             Logger.Info("Booting application");
-            await OnBoot();
+            await OnBoot(cancellationToken);
             CompositionRoot.Verify();
 
-            await OnBooted();
+            await OnBooted(cancellationToken);
             _isBooted.Set();
         }
 
-        public Task<bool> WaitForBootAsync(int timeoutMilliSeconds = int.MaxValue)
+        public bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue, CancellationToken cancellationToken = default)
         {
-            return Task.Run(() => WaitForBoot(timeoutMilliSeconds));
-        }
-
-        public bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue)
-        {
-            return _isBooted.Wait(timeoutMilliSeconds);
+            return _isBooted.Wait(timeoutMilliSeconds, cancellationToken);
         }
 
         public IDisposable BeginScope(IIdentity identity = null, TenantId tenantId = null)
@@ -92,11 +87,6 @@ namespace Backend.Fx.Patterns.DependencyInjection
             Invoke(() => CompositionRoot.GetInstance<TJob>().Run(), new SystemIdentity(), tenantId);
         }
 
-        public Task InvokeAsync(Action action, IIdentity identity, TenantId tenantId)
-        {
-            return Task.Run(() => Invoke(action, identity, tenantId));
-        }
-
         public void Invoke(Action action, IIdentity identity, TenantId tenantId)
         {
             using (BeginScope(new SystemIdentity(), tenantId))
@@ -121,12 +111,38 @@ namespace Backend.Fx.Patterns.DependencyInjection
                 }
             }
         }
-        
+
+        public async Task InvokeAsync(Action action, IIdentity identity, TenantId tenantId, CancellationToken cancellationToken = default)
+        {
+            using (BeginScope(new SystemIdentity(), tenantId))
+            {
+                using (var unitOfWork = CompositionRoot.GetInstance<IUnitOfWork>())
+                {
+                    try
+                    {
+                        unitOfWork.Begin();
+                        await Task.Factory.StartNew(action, cancellationToken);
+                        unitOfWork.Complete();
+                    }
+                    catch (TargetInvocationException ex)
+                    {
+                        ExceptionLogger.LogException(ex.InnerException ?? ex);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Info(ex);
+                        ExceptionLogger.LogException(ex);
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Extension point to do additional initialization before composition root is initialized
         /// </summary>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        protected virtual async Task OnBoot()
+        protected virtual async Task OnBoot(CancellationToken cancellationToken)
         {
             await Task.CompletedTask;
         }
@@ -134,8 +150,9 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// <summary>
         /// Extension point to do additional initialization after composition root is initialized
         /// </summary>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        protected virtual async Task OnBooted()
+        protected virtual async Task OnBooted(CancellationToken cancellationToken)
         {
             await Task.CompletedTask;
         }
