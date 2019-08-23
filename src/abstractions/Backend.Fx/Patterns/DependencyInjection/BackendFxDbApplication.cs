@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Environment.Persistence;
 using Backend.Fx.Logging;
@@ -29,21 +30,24 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// </summary>
         public IDatabaseBootstrapper DatabaseBootstrapper { get; }
 
-        protected sealed override async Task OnBoot()
+        protected sealed override async Task OnBoot(CancellationToken cancellationToken)
         {
-            await OnDatabaseBoot();
-            WaitForDatabase();
+            await OnDatabaseBoot(cancellationToken);
+            await WaitForDatabase(cancellationToken);
             DatabaseBootstrapper.EnsureDatabaseExistence();
-            await OnDatabaseBooted();
+            await OnDatabaseBooted(cancellationToken);
         }
 
-        protected virtual void WaitForDatabase() { }
+        protected virtual async Task WaitForDatabase(CancellationToken cancellationToken)
+        {
+            await Task.CompletedTask;
+        }
 
         /// <summary>
         /// Extension point to do additional initialization before existence of database is ensured
         /// </summary>
         /// <returns></returns>
-        protected virtual async Task OnDatabaseBoot()
+        protected virtual async Task OnDatabaseBoot(CancellationToken cancellationToken)
         {
             await Task.CompletedTask;
         }
@@ -52,7 +56,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// Extension point to do additional initialization after existence of database is ensured
         /// </summary>
         /// <returns></returns>
-        protected virtual async Task OnDatabaseBooted()
+        protected virtual async Task OnDatabaseBooted(CancellationToken cancellationToken)
         {
             await Task.CompletedTask;
         }

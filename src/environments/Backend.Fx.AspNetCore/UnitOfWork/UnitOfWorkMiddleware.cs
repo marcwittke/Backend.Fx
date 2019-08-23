@@ -8,7 +8,8 @@ using Microsoft.AspNetCore.Http;
 namespace Backend.Fx.AspNetCore.UnitOfWork
 {
     /// <summary>
-    ///     The Middleware is responsible for beginning and completing (or disposing) the unit of work for each request.
+    /// The Middleware is responsible for beginning and completing (or disposing) the unit of work for each request.
+    /// In context of an MVC application you should not use a middleware, but the UnitOfWorkActionFilter.
     /// </summary>
     public class UnitOfWorkMiddleware
     {
@@ -29,15 +30,11 @@ namespace Backend.Fx.AspNetCore.UnitOfWork
         [UsedImplicitly]
         public async Task Invoke(HttpContext context)
         {
-            while (!await _application.WaitForBootAsync(3000))
-            {
-                Logger.Info("Queuing Request while application is booting...");
-            }
-
             IUnitOfWork unitOfWork = _application.CompositionRoot.GetInstance<IUnitOfWork>();
             try
             {
-                if (context.Request.Method.ToUpperInvariant() == "GET")
+                // Safe requests (GET, HEAD, OPTIONS) are handled using a unit of work that gets never completed
+                if (context.Request.IsSafe())
                 {
                     unitOfWork = new ReadonlyDecorator(unitOfWork);
                 }

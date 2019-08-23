@@ -28,7 +28,7 @@ namespace Backend.Fx.AspNetCore.Bootstrapping
         [UsedImplicitly]
         public async Task Invoke(HttpContext context)
         {
-            while (!await _application.WaitForBootAsync(3000))
+            while (!_application.WaitForBoot(3000))
             {
                 Logger.Info("Queuing Request while application is booting...");
             }
