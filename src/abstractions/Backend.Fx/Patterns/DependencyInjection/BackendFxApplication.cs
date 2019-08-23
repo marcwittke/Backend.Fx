@@ -112,9 +112,29 @@ namespace Backend.Fx.Patterns.DependencyInjection
             }
         }
 
-        public async Task InvokeAsync(Action action, IIdentity identity, TenantId tenantId, CancellationToken cancellationToken)
+        public async Task InvokeAsync(Func<Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId)
         {
-            await Task.Factory.StartNew(() => Invoke(action, identity, tenantId), cancellationToken);
+            using (BeginScope(new SystemIdentity(), tenantId))
+            {
+                using (var unitOfWork = CompositionRoot.GetInstance<IUnitOfWork>())
+                {
+                    try
+                    {
+                        unitOfWork.Begin();
+                        await awaitableAsyncAction.Invoke();
+                        unitOfWork.Complete();
+                    }
+                    catch (TargetInvocationException ex)
+                    {
+                        ExceptionLogger.LogException(ex.InnerException ?? ex);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Info(ex);
+                        ExceptionLogger.LogException(ex);
+                    }
+                }
+            }
         }
 
         /// <summary>

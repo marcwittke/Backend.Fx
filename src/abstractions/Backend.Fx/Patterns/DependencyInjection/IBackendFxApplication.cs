@@ -40,7 +40,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
         void Invoke(Action action, IIdentity identity, TenantId tenantId);
 
-        Task InvokeAsync(Action action, IIdentity identity, TenantId tenantId, CancellationToken cancellationToken = default);
+        Task InvokeAsync(Func<Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId);
 
         void Run<TJob>() where TJob : class, IJob;
 
