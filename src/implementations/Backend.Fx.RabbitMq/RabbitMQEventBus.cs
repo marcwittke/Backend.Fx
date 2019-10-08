@@ -1,10 +1,8 @@
-﻿using Backend.Fx.Patterns.DependencyInjection;
-
-namespace Backend.Fx.RabbitMq
+﻿namespace Backend.Fx.RabbitMq
 {
     using System;
     using System.Text;
-    using System.Threading.Tasks;
+    using Backend.Fx.Patterns.DependencyInjection;
     using Environment.MultiTenancy;
     using Logging;
     using Newtonsoft.Json;

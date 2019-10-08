@@ -1,7 +1,6 @@
 ﻿namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
     using System.Collections.Concurrent;
-    using System.Threading.Tasks;
     
     public interface IEventBusScope
     { 

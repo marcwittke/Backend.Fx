@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 
 namespace Backend.Fx.Patterns.EventAggregation.Integration
 {

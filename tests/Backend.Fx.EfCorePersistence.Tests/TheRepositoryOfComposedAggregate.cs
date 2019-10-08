@@ -333,7 +333,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                         $"INSERT INTO Posts (Id, BlogId, Name, TargetAudience_IsPublic, TargetAudience_Culture, CreatedOn, CreatedBy) VALUES ({_nextId++}, {blogId}, 'my post {i:00}', '1', 'de-DE', CURRENT_TIMESTAMP, 'persistence test')");
                 }
 
-                return (int) blogId;
+                return blogId;
             }
         }
     }

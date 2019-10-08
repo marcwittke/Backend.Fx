@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.Common;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -131,6 +132,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     // see EfUnitOfWork.cs ClearTransactions()
                     RelationalConnection txman = (RelationalConnection)dbs.DbContext.Database.GetService<IDbContextTransactionManager>();
                     var methodInfo = typeof(RelationalConnection).GetMethod("ClearTransactions", BindingFlags.Instance | BindingFlags.NonPublic);
+                    Debug.Assert(methodInfo != null, nameof(methodInfo) + " != null");
                     methodInfo.Invoke(txman, new object[0]);
 
                     using (var tx = dbs.Connection.BeginTransaction())
@@ -171,10 +173,10 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (var dbs = _fixture.UseDbSession())
             {
-                A.CallTo(
-                        () => fakeEventHandlerProvider.GetAllEventHandlers<AnEvent>())
+                A.CallTo(() => fakeEventHandlerProvider.GetAllEventHandlers<AnEvent>())
                     .ReturnsLazily(() =>
                     {
+                        // ReSharper disable once AccessToDisposedClosure
                         var repo = new EfRepository<Blog>(dbs.DbContext, new BlogMapping(),
                             CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
                         return new[] {new AnEventHandler(repo)};

@@ -1,10 +1,8 @@
-﻿using JetBrains.Annotations;
-using Xunit;
-
-namespace Backend.Fx.Tests.Extensions
+﻿namespace Backend.Fx.Tests.Extensions
 {
     using System;
     using Fx.Extensions;
+    using Xunit;
 
     public enum AnEnum
     {

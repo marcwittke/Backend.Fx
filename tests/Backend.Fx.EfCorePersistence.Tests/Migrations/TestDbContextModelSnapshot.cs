@@ -3,7 +3,6 @@ using System;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Backend.Fx.EfCorePersistence.Tests.Migrations
 {

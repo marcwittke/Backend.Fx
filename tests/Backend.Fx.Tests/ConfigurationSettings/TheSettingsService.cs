@@ -1,12 +1,10 @@
-﻿using Backend.Fx.Hacking;
-using Backend.Fx.InMemoryPersistence;
-using Xunit;
-
-namespace Backend.Fx.Tests.ConfigurationSettings
+﻿namespace Backend.Fx.Tests.ConfigurationSettings
 {
     using System.Linq;
     using FakeItEasy;
     using Fx.BuildingBlocks;
+    using Backend.Fx.Hacking;
+    using Backend.Fx.InMemoryPersistence;
     using Fx.ConfigurationSettings;
     using Fx.Environment.MultiTenancy;
     using Fx.Patterns.Authorization;

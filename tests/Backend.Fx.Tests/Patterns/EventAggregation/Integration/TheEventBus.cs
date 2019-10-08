@@ -43,7 +43,7 @@
 
     public abstract class TheEventBus
     {
-        private readonly ManualResetEventSlim _exceptionHandled = new ManualResetEventSlim();
+        private readonly AutoResetEvent _exceptionHandled = new AutoResetEvent(false);
         private readonly AFakeApplication _app;
         protected IEventBus Sut { get; }
 
@@ -106,7 +106,7 @@
             Sut.Subscribe<ThrowingDynamicEventHandler>(typeof(TestIntegrationEvent).FullName);
             var integrationEvent = new TestIntegrationEvent(34, "gaga");
             Sut.Publish(integrationEvent);
-            _exceptionHandled.Wait(Debugger.IsAttached ? int.MaxValue : 5000);
+            _exceptionHandled.WaitOne(Debugger.IsAttached ? int.MaxValue : 5000);
 
             A.CallTo(() => _app.ExceptionLogger.LogException(A<NotSupportedException>
                     .That
@@ -120,7 +120,7 @@
             Sut.Subscribe<ThrowingTypedEventHandler, TestIntegrationEvent>();
             var integrationEvent = new TestIntegrationEvent(34, "gaga");
             Sut.Publish(integrationEvent);
-            _exceptionHandled.Wait(Debugger.IsAttached ? int.MaxValue : 5000);
+            _exceptionHandled.WaitOne(Debugger.IsAttached ? int.MaxValue : 5000);
 
             
             A.CallTo(() => _app.ExceptionLogger.LogException(A<NotSupportedException>
@@ -134,13 +134,13 @@
             public IIntegrationEventHandler<TestIntegrationEvent> TypedHandler { get; } = A.Fake<IIntegrationEventHandler<TestIntegrationEvent>>();
             public IIntegrationEventHandler DynamicHandler { get; } = A.Fake<IIntegrationEventHandler>();
             
-            public AFakeApplication(ManualResetEventSlim exceptionHandled) : this (A.Fake<ICompositionRoot>(), exceptionHandled)
+            public AFakeApplication(AutoResetEvent exceptionHandled) : this (A.Fake<ICompositionRoot>(), exceptionHandled)
             {}
 
-            private AFakeApplication(ICompositionRoot compositionRoot, ManualResetEventSlim exceptionHandled) 
+            private AFakeApplication(ICompositionRoot compositionRoot, AutoResetEvent exceptionHandled) 
                 : base(compositionRoot, A.Fake<ITenantIdService>(), A.Fake<IExceptionLogger>())
             {
-                A.CallTo(() => ExceptionLogger.LogException(A<Exception>._)).Invokes(exceptionHandled.Set);
+                A.CallTo(() => ExceptionLogger.LogException(A<Exception>._)).Invokes(()=>exceptionHandled.Set());
                 
                 A.CallTo(() => CompositionRoot.BeginScope())
                     .Returns(A.Fake<IDisposable>());

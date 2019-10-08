@@ -13,7 +13,6 @@ namespace Backend.Fx.AspNetCore.UnitOfWork
     /// </summary>
     public class UnitOfWorkMiddleware
     {
-        private static readonly ILogger Logger = LogManager.Create<UnitOfWorkMiddleware>();
         private readonly RequestDelegate _next;
         private readonly IBackendFxApplication _application;
 

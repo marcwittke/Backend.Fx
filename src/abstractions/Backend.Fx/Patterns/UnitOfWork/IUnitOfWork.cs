@@ -8,7 +8,6 @@ namespace Backend.Fx.Patterns.UnitOfWork
     using Environment.DateAndTime;
     using EventAggregation.Domain;
     using EventAggregation.Integration;
-    using Extensions;
     using Logging;
 
     /// <summary>
