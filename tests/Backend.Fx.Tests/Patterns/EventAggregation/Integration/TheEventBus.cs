@@ -76,6 +76,7 @@
             var integrationEvent = new TestIntegrationEvent(34, "gaga");
             Sut.Publish(integrationEvent);
             ScopeCompleted.WaitOne(Debugger.IsAttached ? int.MaxValue : 5000);
+            ScopeCompleted.WaitOne(Debugger.IsAttached ? int.MaxValue : 5000); // wait for two scope completions! two events need to be processed
 
             A.CallTo(() => _app.TypedHandler.Handle(A<TestIntegrationEvent>
                     .That
