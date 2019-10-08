@@ -8,6 +8,5 @@
         public void Handle(TestIntegrationEvent eventData)
         {
             Thread.Sleep(1000);
-            eventData.Processed.Set();
         }
     }}
