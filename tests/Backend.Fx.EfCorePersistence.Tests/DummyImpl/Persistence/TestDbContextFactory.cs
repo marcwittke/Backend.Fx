@@ -2,7 +2,6 @@
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence
 {

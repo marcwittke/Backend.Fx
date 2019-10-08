@@ -1,4 +1,6 @@
-﻿namespace Backend.Fx.Patterns.EventAggregation.Domain
+﻿using System.Threading.Tasks;
+
+namespace Backend.Fx.Patterns.EventAggregation.Domain
 {
     using System;
     using System.Collections.Concurrent;
@@ -8,16 +10,16 @@
     {
         private class HandleAction
         {
-            public HandleAction(string domainEventName, string handlerTypeName, Action action)
+            public HandleAction(string domainEventName, string handlerTypeName, Func<Task> asyncAction)
             {
                 DomainEventName = domainEventName;
                 HandlerTypeName = handlerTypeName;
-                Action = action;
+                AsyncAction = asyncAction;
             }
 
             public string DomainEventName { get; }
             public string HandlerTypeName { get; }
-            public Action Action { get; }
+            public Func<Task> AsyncAction { get; }
         }
 
         private static readonly ILogger Logger = LogManager.Create<DomainEventAggregator>();
@@ -42,20 +44,20 @@
                 HandleAction handleAction = new HandleAction (
                                                             typeof(TDomainEvent).Name,
                                                             injectedHandler.GetType().Name,
-                                                            () => injectedHandler.Handle(domainEvent));
+                                                            () => injectedHandler.HandleAsync(domainEvent));
 
                 _handleActions.Enqueue(handleAction);
                 Logger.Debug($"Invocation of {injectedHandler.GetType().Name} for domain event {typeof(TDomainEvent).Name} registered. It will be executed on completion of unit of work");
             }
         }
 
-        public void RaiseEvents()
+        public async Task RaiseEvents()
         {
             while (_handleActions.TryDequeue(out var handleAction))
             {
                 try
                 {
-                    handleAction.Action.Invoke();
+                    await handleAction.AsyncAction.Invoke();
                 }
                 catch (Exception ex)
                 {

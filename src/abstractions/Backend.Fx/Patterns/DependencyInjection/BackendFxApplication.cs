@@ -73,21 +73,21 @@ namespace Backend.Fx.Patterns.DependencyInjection
             return new MultipleDisposable(scope, scopeDurationLogger);
         }
 
-        public void Run<TJob>() where TJob : class, IJob
+        public async Task RunAsync<TJob>() where TJob : class, IJob
         {
             var tenantIds = TenantIdService.GetActiveTenantIds();
             foreach (var tenantId in tenantIds)
             {
-                Invoke(() => CompositionRoot.GetInstance<TJob>().Run(), new SystemIdentity(), tenantId);
+                await InvokeAsync(() => CompositionRoot.GetInstance<TJob>().Run(), new SystemIdentity(), tenantId);
             }
         }
 
-        public void Run<TJob>(TenantId tenantId) where TJob : class, IJob
+        public async Task RunAsync<TJob>(TenantId tenantId) where TJob : class, IJob
         {
-            Invoke(() => CompositionRoot.GetInstance<TJob>().Run(), new SystemIdentity(), tenantId);
+            await InvokeAsync(() => CompositionRoot.GetInstance<TJob>().Run(), new SystemIdentity(), tenantId);
         }
 
-        public void Invoke(Action action, IIdentity identity, TenantId tenantId)
+        public async Task InvokeAsync(Action action, IIdentity identity, TenantId tenantId)
         {
             using (BeginScope(new SystemIdentity(), tenantId))
             {
@@ -97,7 +97,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
                     {
                         unitOfWork.Begin();
                         action.Invoke();
-                        unitOfWork.Complete();
+                        await unitOfWork.CompleteAsync();
                     }
                     catch (TargetInvocationException ex)
                     {
@@ -122,7 +122,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
                     {
                         unitOfWork.Begin();
                         await awaitableAsyncAction.Invoke();
-                        unitOfWork.Complete();
+                        await unitOfWork.CompleteAsync();
                     }
                     catch (TargetInvocationException ex)
                     {

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Data.Common;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Backend.Fx.BuildingBlocks;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
@@ -47,7 +49,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     Assert.Equal(dbs.Connection, dbs.DbContext.Database.CurrentTransaction.GetDbTransaction().Connection);
 
                     dbs.DbContext.Add(new Blogger(333, "Metulsky", "Bratislav"));
-                    sut.Complete();
+                    sut.CompleteAsync();
                 }
 
                 Assert.Throws<InvalidOperationException>(() => dbs.DbContext.Database.CurrentTransaction.Commit());
@@ -97,7 +99,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     dbs.DbContext.Add(new Blogger(333, "Metulsky", "Bratislav"));
                     sut.CompleteCurrentTransaction_BeginNewTransaction();
                     dbs.DbContext.Add(new Blogger(334, "Flash", "Johnny"));
-                    sut.Complete();
+                    sut.CompleteAsync();
                 }
 
                 Assert.Throws<InvalidOperationException>(() => dbs.DbContext.Database.CurrentTransaction.Commit());
@@ -130,6 +132,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     // see EfUnitOfWork.cs ClearTransactions()
                     RelationalConnection txman = (RelationalConnection)dbs.DbContext.Database.GetService<IDbContextTransactionManager>();
                     var methodInfo = typeof(RelationalConnection).GetMethod("ClearTransactions", BindingFlags.Instance | BindingFlags.NonPublic);
+                    Debug.Assert(methodInfo != null, nameof(methodInfo) + " != null");
                     methodInfo.Invoke(txman, new object[0]);
 
                     using (var tx = dbs.Connection.BeginTransaction())
@@ -154,9 +157,10 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 _blogRepository = blogRepository;
             }
 
-            public void Handle(AnEvent domainEvent)
+            public Task HandleAsync(AnEvent domainEvent)
             {
                 _blogRepository.Add(new Blog(99999, "Created via Event Handling"));
+                return Task.CompletedTask;
             }
         }
 
@@ -169,10 +173,10 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (var dbs = _fixture.UseDbSession())
             {
-                A.CallTo(
-                        () => fakeEventHandlerProvider.GetAllEventHandlers<AnEvent>())
+                A.CallTo(() => fakeEventHandlerProvider.GetAllEventHandlers<AnEvent>())
                     .ReturnsLazily(() =>
                     {
+                        // ReSharper disable once AccessToDisposedClosure
                         var repo = new EfRepository<Blog>(dbs.DbContext, new BlogMapping(),
                             CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
                         return new[] {new AnEventHandler(repo)};
@@ -183,7 +187,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 {
                     sut.Begin();
                     domainEventAggregator.PublishDomainEvent(new AnEvent());
-                    sut.Complete();
+                    sut.CompleteAsync();
                 }
             }
 

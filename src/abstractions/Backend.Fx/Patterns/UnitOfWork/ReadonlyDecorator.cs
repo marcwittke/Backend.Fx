@@ -1,4 +1,5 @@
 ﻿using System.Security.Principal;
+using System.Threading.Tasks;
 using Backend.Fx.Patterns.DependencyInjection;
 
 namespace Backend.Fx.Patterns.UnitOfWork
@@ -22,9 +23,10 @@ namespace Backend.Fx.Patterns.UnitOfWork
             _unitOfWorkImplementation.Begin();
         }
 
-        public void Complete()
+        public Task CompleteAsync()
         {
             // prevent completion, results in rollback on disposal
+            return Task.CompletedTask;
         }
 
         public ICurrentTHolder<IIdentity> IdentityHolder => _unitOfWorkImplementation.IdentityHolder;

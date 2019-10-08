@@ -13,7 +13,6 @@ namespace Backend.Fx.AspNetCore.UnitOfWork
     /// </summary>
     public class UnitOfWorkMiddleware
     {
-        private static readonly ILogger Logger = LogManager.Create<UnitOfWorkMiddleware>();
         private readonly RequestDelegate _next;
         private readonly IBackendFxApplication _application;
 
@@ -41,7 +40,7 @@ namespace Backend.Fx.AspNetCore.UnitOfWork
 
                 unitOfWork.Begin();
                 await _next.Invoke(context);
-                unitOfWork.Complete();
+                await unitOfWork.CompleteAsync();
             }
             finally
             {

@@ -39,7 +39,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 Assert.Null(dbs.DbContext.Database.CurrentTransaction);
                 sut.Begin();
                 Assert.NotNull(dbs.DbContext.Database.CurrentTransaction);
-                sut.Complete();
+                sut.CompleteAsync();
                 sut.Dispose();
                 Assert.Throws<InvalidOperationException>(() => dbs.DbContext.Database.CurrentTransaction.Commit());
             }
@@ -59,7 +59,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                                                     dbs.Connection));
                 sut.Begin();
                 dbs.DbContext.Add(new Blogger(334, "Bratislav", "Metulsky"));
-                sut.Complete();
+                sut.CompleteAsync();
                 sut.Dispose();
                 Assert.Throws<InvalidOperationException>(() => dbs.DbContext.Database.CurrentTransaction.Commit());
             }

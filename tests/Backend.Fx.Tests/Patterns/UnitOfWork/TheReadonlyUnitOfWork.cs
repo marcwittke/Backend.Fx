@@ -12,9 +12,9 @@ namespace Backend.Fx.Tests.Patterns.UnitOfWork
             IUnitOfWork uow = A.Fake<IUnitOfWork>();
             IUnitOfWork sut = new ReadonlyDecorator(uow);
             sut.Begin();
-            sut.Complete();
+            sut.CompleteAsync();
             sut.Dispose();
-            A.CallTo(() => uow.Complete()).MustNotHaveHappened();
+            A.CallTo(() => uow.CompleteAsync()).MustNotHaveHappened();
             A.CallTo(() => uow.Dispose()).MustHaveHappenedOnceExactly();
         }
 
@@ -25,7 +25,7 @@ namespace Backend.Fx.Tests.Patterns.UnitOfWork
             IUnitOfWork sut = new ReadonlyDecorator(uow);
             sut.Begin();
             sut.Dispose();
-            A.CallTo(() => uow.Complete()).MustNotHaveHappened();
+            A.CallTo(() => uow.CompleteAsync()).MustNotHaveHappened();
             A.CallTo(() => uow.Dispose()).MustHaveHappenedOnceExactly();
         }
     }

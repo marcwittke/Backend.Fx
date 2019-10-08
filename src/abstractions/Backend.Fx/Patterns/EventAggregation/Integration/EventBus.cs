@@ -1,10 +1,11 @@
-﻿namespace Backend.Fx.Patterns.EventAggregation.Integration
+﻿using System.Threading.Tasks;
+
+namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Threading.Tasks;
     using DependencyInjection;
     using Environment.Authentication;
     using Logging;
@@ -27,7 +28,7 @@
         }
 
         public abstract void Connect();
-        public abstract Task Publish(IIntegrationEvent integrationEvent);
+        public abstract void Publish(IIntegrationEvent integrationEvent);
 
 
         /// <inheritdoc />
@@ -118,17 +119,18 @@
         protected abstract void Subscribe(string eventName);
         protected abstract void Unsubscribe(string eventName);
 
-        protected virtual async Task ProcessAsync(string eventName, EventProcessingContext context)
+        protected virtual void Process(string eventName, EventProcessingContext context)
         {
             Logger.Info($"Processing a {eventName} event");
             if (_subscriptions.TryGetValue(eventName, out List<ISubscription> subscriptions))
             {
                 foreach (var subscription in subscriptions)
                 {
-                    await _application.InvokeAsync(
-                        () => Task.Factory.StartNew(() => subscription.Process(eventName, context)),
-                        new SystemIdentity(),
-                        context.TenantId);
+                    // offload work to thread pool
+                    // fire and forget is okay, since IBackendFxApplication.InvokeAsync provides exception handling
+                    Task.Run(()=>_application
+                        .InvokeAsync(() => subscription.Process(eventName, context), new SystemIdentity(), context.TenantId)
+                        .ContinueWith(t => Logger.Info($"Processed {eventName} event with status {t.Status}")));
                 }
             }
             else

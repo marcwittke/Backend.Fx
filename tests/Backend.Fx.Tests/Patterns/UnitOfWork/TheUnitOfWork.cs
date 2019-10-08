@@ -18,7 +18,7 @@ namespace Backend.Fx.Tests.Patterns.UnitOfWork
         {
             TestUnitOfWork sut = new TestUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), _eventAggregator, _eventBusScope);
             sut.Begin();
-            sut.Complete();
+            sut.CompleteAsync();
             sut.Dispose();
             Assert.Equal(0, sut.RollbackCount);
             Assert.Equal(2, sut.UpdateTrackingPropertiesCount);
@@ -30,7 +30,7 @@ namespace Backend.Fx.Tests.Patterns.UnitOfWork
         {
             TestUnitOfWork sut = new TestUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), _eventAggregator, _eventBusScope);
             sut.Begin();
-            sut.Complete();
+            sut.CompleteAsync();
             sut.Dispose();
             A.CallTo(() => _eventAggregator.RaiseEvents()).MustHaveHappenedOnceExactly();
         }
@@ -40,7 +40,7 @@ namespace Backend.Fx.Tests.Patterns.UnitOfWork
         {
             TestUnitOfWork sut = new TestUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), _eventAggregator, _eventBusScope);
             sut.Begin();
-            sut.Complete();
+            sut.CompleteAsync();
             sut.Dispose();
             A.CallTo(() => _eventBusScope.RaiseEvents()).MustHaveHappenedOnceExactly();
         }

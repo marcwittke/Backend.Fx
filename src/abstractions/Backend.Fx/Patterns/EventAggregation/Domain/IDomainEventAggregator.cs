@@ -1,4 +1,6 @@
-﻿namespace Backend.Fx.Patterns.EventAggregation.Domain
+﻿using System.Threading.Tasks;
+
+namespace Backend.Fx.Patterns.EventAggregation.Domain
 {
     /// <summary>
     /// Channel events from multiple objects into a single object to simplify registration for clients.
@@ -7,6 +9,6 @@
     public interface IDomainEventAggregator
     {
         void PublishDomainEvent<TDomainEvent>(TDomainEvent domainEvent) where TDomainEvent : IDomainEvent;
-        void RaiseEvents();
+        Task  RaiseEvents();
     }
 }

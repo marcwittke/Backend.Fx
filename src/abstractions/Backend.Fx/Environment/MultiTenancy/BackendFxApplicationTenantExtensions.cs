@@ -73,7 +73,7 @@ namespace Backend.Fx.Environment.MultiTenancy
 
                 foreach (var dataGeneratorTypeToRun in dataGeneratorTypesToRun)
                 {
-                    application.Invoke(() =>
+                    application.InvokeAsync(() =>
                     {
                         IDataGenerator dataGenerator = application
                             .CompositionRoot

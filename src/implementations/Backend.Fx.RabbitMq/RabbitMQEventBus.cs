@@ -1,10 +1,8 @@
-﻿using Backend.Fx.Patterns.DependencyInjection;
-
-namespace Backend.Fx.RabbitMq
+﻿namespace Backend.Fx.RabbitMq
 {
     using System;
     using System.Text;
-    using System.Threading.Tasks;
+    using Backend.Fx.Patterns.DependencyInjection;
     using Environment.MultiTenancy;
     using Logging;
     using Newtonsoft.Json;
@@ -38,18 +36,17 @@ namespace Backend.Fx.RabbitMq
             }
         }
         
-        private async void ChannelOnMessageReceived(object sender, BasicDeliverEventArgs args)
+        private void ChannelOnMessageReceived(object sender, BasicDeliverEventArgs args)
         {
             Logger.Debug($"RabbitMQ message with routing key {args.RoutingKey} received");
-            await ProcessAsync(args.RoutingKey, new RabbitMqEventProcessingContext(args.Body));
+            Process(args.RoutingKey, new RabbitMqEventProcessingContext(args.Body));
         }
 
-        public override Task Publish(IIntegrationEvent integrationEvent)
+        public override void Publish(IIntegrationEvent integrationEvent)
         {
             Logger.Info($"Publishing {integrationEvent.GetType().Name}");
             _channel.EnsureOpen();
             _channel.PublishEvent(integrationEvent);
-            return Task.CompletedTask;
         }
         
         protected override void Subscribe(string eventName)
