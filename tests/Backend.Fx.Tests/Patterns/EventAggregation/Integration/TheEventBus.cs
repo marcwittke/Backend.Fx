@@ -140,11 +140,7 @@
             private AFakeApplication(ICompositionRoot compositionRoot, AutoResetEvent scopeCompleted) 
                 : base(compositionRoot, A.Fake<ITenantIdService>(), A.Fake<IExceptionLogger>())
             {
-                var scope = A.Fake<IDisposable>();
-                A.CallTo(() => CompositionRoot.BeginScope())
-                    .Returns(scope);
-
-                A.CallTo(() => scope.Dispose()).Invokes(() => scopeCompleted.Set());
+                A.CallTo(() => CompositionRoot.BeginScope()).Returns(new PseudoScope(scopeCompleted));
 
                 A.CallTo(() => CompositionRoot.GetInstance(A<Type>.That.IsEqualTo(typeof(TypedEventHandler))))
                  .Returns(new TypedEventHandler(TypedHandler));
@@ -160,6 +156,21 @@
 
                 A.CallTo(() => CompositionRoot.GetInstance(A<Type>.That.IsEqualTo(typeof(ThrowingDynamicEventHandler))))
                  .Returns(new ThrowingDynamicEventHandler());
+            }
+
+            private class PseudoScope : IDisposable
+            {
+                private readonly AutoResetEvent _scopeCompleted;
+
+                public PseudoScope(AutoResetEvent scopeCompleted)
+                {
+                    _scopeCompleted = scopeCompleted;
+                }
+
+                public void Dispose()
+                {
+                    _scopeCompleted.Set();
+                }
             }
         }
     }
