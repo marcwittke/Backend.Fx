@@ -9,7 +9,7 @@
 
         public void Handle(TestIntegrationEvent eventData)
         {
-            throw new InvalidOperationException(ExceptionMessage);
+            throw new NotSupportedException(ExceptionMessage);
         }
     }
 }

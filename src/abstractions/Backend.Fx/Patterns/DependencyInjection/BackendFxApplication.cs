@@ -73,21 +73,21 @@ namespace Backend.Fx.Patterns.DependencyInjection
             return new MultipleDisposable(scope, scopeDurationLogger);
         }
 
-        public async Task Run<TJob>() where TJob : class, IJob
+        public async Task RunAsync<TJob>() where TJob : class, IJob
         {
             var tenantIds = TenantIdService.GetActiveTenantIds();
             foreach (var tenantId in tenantIds)
             {
-                await Invoke(() => CompositionRoot.GetInstance<TJob>().Run(), new SystemIdentity(), tenantId);
+                await InvokeAsync(() => CompositionRoot.GetInstance<TJob>().Run(), new SystemIdentity(), tenantId);
             }
         }
 
-        public async Task Run<TJob>(TenantId tenantId) where TJob : class, IJob
+        public async Task RunAsync<TJob>(TenantId tenantId) where TJob : class, IJob
         {
-            await Invoke(() => CompositionRoot.GetInstance<TJob>().Run(), new SystemIdentity(), tenantId);
+            await InvokeAsync(() => CompositionRoot.GetInstance<TJob>().Run(), new SystemIdentity(), tenantId);
         }
 
-        public async Task Invoke(Action action, IIdentity identity, TenantId tenantId)
+        public async Task InvokeAsync(Action action, IIdentity identity, TenantId tenantId)
         {
             using (BeginScope(new SystemIdentity(), tenantId))
             {

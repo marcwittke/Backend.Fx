@@ -9,7 +9,7 @@
 
         public void Handle(dynamic eventData)
         {
-            throw new InvalidOperationException(ExceptionMessage);
+            throw new NotSupportedException(ExceptionMessage);
         }
     }
 }

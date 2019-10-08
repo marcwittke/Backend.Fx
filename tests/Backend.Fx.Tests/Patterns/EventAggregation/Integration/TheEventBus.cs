@@ -1,8 +1,8 @@
-﻿
-namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
+﻿namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
 {
     using System;
     using System.Diagnostics;
+    using System.Threading;
     using FakeItEasy;
     using Fx.Environment.MultiTenancy;
     using Fx.Logging;
@@ -27,7 +27,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             var integrationEvent = new TestIntegrationEvent(1,"a");
             Sut.Publish(integrationEvent);
             Assert.True(sw.ElapsedMilliseconds < 900);
-            integrationEvent.Processed.Wait(Debugger.IsAttached ? int.MaxValue : 20000);
+            integrationEvent.Processed.Wait(Debugger.IsAttached ? int.MaxValue : 5000);
             Assert.True(sw.ElapsedMilliseconds > 1000);
         }
     }
@@ -43,11 +43,13 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
 
     public abstract class TheEventBus
     {
-        private readonly AFakeApplication _app = new AFakeApplication();
-        public IEventBus Sut { get; }
+        private readonly ManualResetEventSlim _exceptionHandled = new ManualResetEventSlim();
+        private readonly AFakeApplication _app;
+        protected IEventBus Sut { get; }
 
         protected TheEventBus()
         {
+            _app = new AFakeApplication(_exceptionHandled);
             // ReSharper disable once VirtualMemberCallInConstructor
             Sut = Create(_app);
         }
@@ -55,60 +57,17 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         protected abstract IEventBus Create(IBackendFxApplication application);
 
         [Fact]
-        public void CallsTypedEventHandler()
-        {
-            Sut.Subscribe<TypedEventHandler, TestIntegrationEvent>();
-            var integrationEvent = new TestIntegrationEvent(34, "gaga");
-            Sut.Publish(integrationEvent);
-            integrationEvent.Processed.Wait(Debugger.IsAttached ? int.MaxValue : 20000);
-            A.CallTo(() => _app.TypedHandler.Handle(A<TestIntegrationEvent>
-                                                   .That
-                                                   .Matches(evt => evt.IntParam == 34 && evt.StringParam == "gaga")))
-             .MustHaveHappenedOnceExactly();
-
-            A.CallTo(() => _app.DynamicHandler.Handle(A<object>._)).MustNotHaveHappened();
-        }
-
-        [Fact]
-        public void HandlesExceptionFromTypedEventHandler()
-        {
-            Sut.Subscribe<ThrowingTypedEventHandler, TestIntegrationEvent>();
-            var integrationEvent = new TestIntegrationEvent(34, "gaga");
-            Sut.Publish(integrationEvent);
-            integrationEvent.Processed.Wait(Debugger.IsAttached ? int.MaxValue : 20000);
-
-            A.CallTo(() => _app.ExceptionLogger.LogException(A<InvalidOperationException>
-                                                            .That
-                                                            .Matches(ex => ex.Message == ThrowingTypedEventHandler.ExceptionMessage)))
-             .MustHaveHappenedOnceExactly();
-        }
-
-        [Fact]
         public void CallsDynamicEventHandler()
         {
             Sut.Subscribe<DynamicEventHandler>(typeof(TestIntegrationEvent).FullName);
             var integrationEvent = new TestIntegrationEvent(34, "gaga");
             Sut.Publish(integrationEvent);
-            integrationEvent.Processed.Wait(Debugger.IsAttached ? int.MaxValue : 20000);
+            integrationEvent.Processed.Wait(Debugger.IsAttached ? int.MaxValue : 5000);
 
             A.CallTo(() => _app.TypedHandler.Handle(A<TestIntegrationEvent>._)).MustNotHaveHappened();
             A.CallTo(() => _app.DynamicHandler.Handle(A<object>._)).MustHaveHappenedOnceExactly();
         }
-
-        [Fact]
-        public void HandlesExceptionFromDynamicEventHandler()
-        {
-            Sut.Subscribe<ThrowingDynamicEventHandler>(typeof(TestIntegrationEvent).FullName);
-            var integrationEvent = new TestIntegrationEvent(34, "gaga");
-            Sut.Publish(integrationEvent);
-            integrationEvent.Processed.Wait(Debugger.IsAttached ? int.MaxValue : 20000);
-
-            A.CallTo(() => _app.ExceptionLogger.LogException(A<InvalidOperationException>
-                                                        .That
-                                                        .Matches(ex => ex.Message == ThrowingDynamicEventHandler.ExceptionMessage)))
-             .MustHaveHappenedOnceExactly();
-        }
-
+        
         [Fact]
         public void CallsMixedEventHandlers()
         {
@@ -116,14 +75,58 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             Sut.Subscribe<TypedEventHandler, TestIntegrationEvent>();
             var integrationEvent = new TestIntegrationEvent(34, "gaga");
             Sut.Publish(integrationEvent);
-            integrationEvent.Processed.Wait(Debugger.IsAttached ? int.MaxValue : 20000);
+            integrationEvent.Processed.Wait(Debugger.IsAttached ? int.MaxValue : 5000);
 
+            A.CallTo(() => _app.TypedHandler.Handle(A<TestIntegrationEvent>
+                    .That
+                    .Matches(evt => evt.IntParam == 34 && evt.StringParam == "gaga")))
+                .MustHaveHappenedOnceExactly();
+
+            A.CallTo(() => _app.DynamicHandler.Handle(A<object>._)).MustHaveHappenedOnceExactly();
+        }
+        
+        [Fact]
+        public void CallsTypedEventHandler()
+        {
+            Sut.Subscribe<TypedEventHandler, TestIntegrationEvent>();
+            var integrationEvent = new TestIntegrationEvent(34, "gaga");
+            Sut.Publish(integrationEvent);
+            integrationEvent.Processed.Wait(Debugger.IsAttached ? int.MaxValue : 5000);
             A.CallTo(() => _app.TypedHandler.Handle(A<TestIntegrationEvent>
                                                    .That
                                                    .Matches(evt => evt.IntParam == 34 && evt.StringParam == "gaga")))
              .MustHaveHappenedOnceExactly();
 
-            A.CallTo(() => _app.DynamicHandler.Handle(A<object>._)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _app.DynamicHandler.Handle(A<object>._)).MustNotHaveHappened();
+        }
+        
+        [Fact]
+        public void HandlesExceptionFromDynamicEventHandler()
+        {
+            Sut.Subscribe<ThrowingDynamicEventHandler>(typeof(TestIntegrationEvent).FullName);
+            var integrationEvent = new TestIntegrationEvent(34, "gaga");
+            Sut.Publish(integrationEvent);
+            _exceptionHandled.Wait(Debugger.IsAttached ? int.MaxValue : 5000);
+
+            A.CallTo(() => _app.ExceptionLogger.LogException(A<NotSupportedException>
+                    .That
+                    .Matches(ex => ex.Message == ThrowingDynamicEventHandler.ExceptionMessage)))
+                .MustHaveHappenedOnceExactly();
+        }
+        
+        [Fact]
+        public void HandlesExceptionFromTypedEventHandler()
+        {
+            Sut.Subscribe<ThrowingTypedEventHandler, TestIntegrationEvent>();
+            var integrationEvent = new TestIntegrationEvent(34, "gaga");
+            Sut.Publish(integrationEvent);
+            _exceptionHandled.Wait(Debugger.IsAttached ? int.MaxValue : 5000);
+
+            
+            A.CallTo(() => _app.ExceptionLogger.LogException(A<NotSupportedException>
+                                                            .That
+                                                            .Matches(ex => ex.Message == ThrowingTypedEventHandler.ExceptionMessage)))
+             .MustHaveHappenedOnceExactly();
         }
 
         private class AFakeApplication : BackendFxApplication
@@ -131,12 +134,14 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             public IIntegrationEventHandler<TestIntegrationEvent> TypedHandler { get; } = A.Fake<IIntegrationEventHandler<TestIntegrationEvent>>();
             public IIntegrationEventHandler DynamicHandler { get; } = A.Fake<IIntegrationEventHandler>();
             
-            public AFakeApplication() : this (A.Fake<ICompositionRoot>())
+            public AFakeApplication(ManualResetEventSlim exceptionHandled) : this (A.Fake<ICompositionRoot>(), exceptionHandled)
             {}
 
-            private AFakeApplication(ICompositionRoot compositionRoot) 
+            private AFakeApplication(ICompositionRoot compositionRoot, ManualResetEventSlim exceptionHandled) 
                 : base(compositionRoot, A.Fake<ITenantIdService>(), A.Fake<IExceptionLogger>())
             {
+                A.CallTo(() => ExceptionLogger.LogException(A<Exception>._)).Invokes(exceptionHandled.Set);
+                
                 A.CallTo(() => CompositionRoot.BeginScope())
                     .Returns(A.Fake<IDisposable>());
 
