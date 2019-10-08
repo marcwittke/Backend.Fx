@@ -38,12 +38,12 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
         IDisposable BeginScope(IIdentity identity = null, TenantId tenantId = null);
 
-        void Invoke(Action action, IIdentity identity, TenantId tenantId);
+        Task Invoke(Action action, IIdentity identity, TenantId tenantId);
 
         Task InvokeAsync(Func<Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId);
 
-        void Run<TJob>() where TJob : class, IJob;
+        Task Run<TJob>() where TJob : class, IJob;
 
-        void Run<TJob>(TenantId tenantId) where TJob : class, IJob;
+        Task Run<TJob>(TenantId tenantId) where TJob : class, IJob;
     }
 }

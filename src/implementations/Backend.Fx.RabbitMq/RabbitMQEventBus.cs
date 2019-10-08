@@ -44,12 +44,11 @@ namespace Backend.Fx.RabbitMq
             await ProcessAsync(args.RoutingKey, new RabbitMqEventProcessingContext(args.Body));
         }
 
-        public override Task Publish(IIntegrationEvent integrationEvent)
+        public override void Publish(IIntegrationEvent integrationEvent)
         {
             Logger.Info($"Publishing {integrationEvent.GetType().Name}");
             _channel.EnsureOpen();
             _channel.PublishEvent(integrationEvent);
-            return Task.CompletedTask;
         }
         
         protected override void Subscribe(string eventName)

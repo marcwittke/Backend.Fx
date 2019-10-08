@@ -41,7 +41,7 @@ namespace Backend.Fx.AspNetCore.UnitOfWork
 
                 unitOfWork.Begin();
                 await _next.Invoke(context);
-                unitOfWork.Complete();
+                await unitOfWork.CompleteAsync();
             }
             finally
             {

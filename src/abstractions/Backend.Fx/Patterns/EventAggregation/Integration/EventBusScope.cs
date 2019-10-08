@@ -12,7 +12,7 @@
         /// </summary>
         /// <param name="integrationEvent"></param>
         void Publish(IIntegrationEvent integrationEvent);
-        Task RaiseEvents();
+        void RaiseEvents();
     }
 
     public class EventBusScope : IEventBusScope
@@ -30,11 +30,11 @@
             _integrationEvents.Enqueue(integrationEvent);
         }
 
-        public async Task RaiseEvents()
+        public void RaiseEvents()
         {
             while (_integrationEvents.TryDequeue(out var integrationEvent))
             {
-                await _eventBus.Publish(integrationEvent);
+                _eventBus.Publish(integrationEvent);
             }
         }
     }

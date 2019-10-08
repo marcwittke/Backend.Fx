@@ -15,7 +15,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
         /// </summary>
         /// <param name="integrationEvent"></param>
         /// <returns></returns>
-        Task Publish(IIntegrationEvent integrationEvent);
+        void Publish(IIntegrationEvent integrationEvent);
 
         /// <summary>
         /// Subscribes to an integration event with a dynamic event handler

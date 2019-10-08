@@ -27,7 +27,7 @@
         }
 
         public abstract void Connect();
-        public abstract Task Publish(IIntegrationEvent integrationEvent);
+        public abstract void Publish(IIntegrationEvent integrationEvent);
 
 
         /// <inheritdoc />

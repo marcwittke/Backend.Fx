@@ -32,7 +32,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 {
                     var repo = new EfRepository<Blogger>(dbs.DbContext, new BloggerMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blogger>());
                     repo.Add(new Blogger(345, "Metulsky", "Bratislav"));
-                    uow.Complete();
+                    uow.CompleteAsync();
                 }
 
                 using (dbs.Connection.OpenDisposable())
@@ -68,7 +68,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     Assert.Equal("Bratislav", bratislavMetulsky.FirstName);
                     Assert.Equal("Metulsky", bratislavMetulsky.LastName);
                     Assert.Equal("whatever", bratislavMetulsky.Bio);
-                    uow.Complete();
+                    uow.CompleteAsync();
                 }
 
             }
@@ -91,7 +91,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     var repo = new EfRepository<Blogger>(dbs.DbContext, new BloggerMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blogger>());
                     Blogger bratislavMetulsky = repo.Single(555);
                     repo.Delete(bratislavMetulsky);
-                    uow.Complete();
+                    uow.CompleteAsync();
                 }
 
                 using (dbs.Connection.OpenDisposable())
@@ -122,7 +122,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     bratislavMetulsky.FirstName = "Johnny";
                     bratislavMetulsky.LastName = "Flash";
                     bratislavMetulsky.Bio = "Der lustige Clown";
-                    uow.Complete();
+                    uow.CompleteAsync();
                 }
             }
 
@@ -143,7 +143,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     Assert.Equal(new SystemIdentity().Name, johnnyFlash.ChangedBy);
                     Assert.Equal("Johnny", johnnyFlash.FirstName);
                     Assert.Equal("Flash", johnnyFlash.LastName);
-                    uow.Complete();
+                    uow.CompleteAsync();
                 }
             }
         }

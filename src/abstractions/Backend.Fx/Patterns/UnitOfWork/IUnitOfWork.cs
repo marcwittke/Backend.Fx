@@ -1,4 +1,6 @@
-﻿namespace Backend.Fx.Patterns.UnitOfWork
+﻿using System.Threading.Tasks;
+
+namespace Backend.Fx.Patterns.UnitOfWork
 {
     using System;
     using System.Security.Principal;
@@ -15,7 +17,7 @@
     public interface IUnitOfWork : IDisposable
     {
         void Begin();
-        void Complete();
+        Task CompleteAsync();
         ICurrentTHolder<IIdentity> IdentityHolder { get; }
     }
 
@@ -53,14 +55,14 @@
             _isCompleted = false;
         }
 
-        public void Complete()
+        public async Task CompleteAsync()
         {
             Logger.Debug("Completing unit of work #" + _instanceId);
             Flush(); // we have to flush before raising events, therefore the handlers find the latest changes in the DB
-            _eventAggregator.RaiseEvents();
+            await _eventAggregator.RaiseEvents();
             Flush(); // event handlers change the DB state, so we have to flush again
             Commit();
-            AsyncHelper.RunSync(()=>_eventBusScope.RaiseEvents());
+            _eventBusScope.RaiseEvents();
             _isCompleted = true;
         }
 

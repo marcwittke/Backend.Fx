@@ -2,6 +2,7 @@
 using System.Data.Common;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Backend.Fx.BuildingBlocks;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
@@ -47,7 +48,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     Assert.Equal(dbs.Connection, dbs.DbContext.Database.CurrentTransaction.GetDbTransaction().Connection);
 
                     dbs.DbContext.Add(new Blogger(333, "Metulsky", "Bratislav"));
-                    sut.Complete();
+                    sut.CompleteAsync();
                 }
 
                 Assert.Throws<InvalidOperationException>(() => dbs.DbContext.Database.CurrentTransaction.Commit());
@@ -97,7 +98,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     dbs.DbContext.Add(new Blogger(333, "Metulsky", "Bratislav"));
                     sut.CompleteCurrentTransaction_BeginNewTransaction();
                     dbs.DbContext.Add(new Blogger(334, "Flash", "Johnny"));
-                    sut.Complete();
+                    sut.CompleteAsync();
                 }
 
                 Assert.Throws<InvalidOperationException>(() => dbs.DbContext.Database.CurrentTransaction.Commit());
@@ -154,9 +155,10 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 _blogRepository = blogRepository;
             }
 
-            public void Handle(AnEvent domainEvent)
+            public Task HandleAsync(AnEvent domainEvent)
             {
                 _blogRepository.Add(new Blog(99999, "Created via Event Handling"));
+                return Task.CompletedTask;
             }
         }
 
@@ -183,7 +185,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 {
                     sut.Begin();
                     domainEventAggregator.PublishDomainEvent(new AnEvent());
-                    sut.Complete();
+                    sut.CompleteAsync();
                 }
             }
 

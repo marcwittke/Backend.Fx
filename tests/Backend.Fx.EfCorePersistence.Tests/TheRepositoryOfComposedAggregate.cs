@@ -52,7 +52,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     var blog = new Blog(_idGenerator.NextId(), "my blog");
                     blog.AddPost(_idGenerator, "my post");
                     sut.Add(blog);
-                    uow.Complete();
+                    uow.CompleteAsync();
                 }
 
                 using (dbs.Connection.OpenDisposable())
@@ -79,7 +79,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     var sut = new EfRepository<Blog>(dbs.DbContext, new BlogMapping(),
                         CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
                     blog = sut.Single(id);
-                    uow.Complete();
+                    uow.CompleteAsync();
                 }
 
                 using (dbs.Connection.OpenDisposable())
@@ -105,7 +105,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                         CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
                     var blog = sut.Single(id);
                     blog.Modify("modified");
-                    uow.Complete();
+                    uow.CompleteAsync();
                 }
 
                 using (dbs.Connection.OpenDisposable())
@@ -130,7 +130,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     var sut = new EfRepository<Blog>(dbs.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
                     var blog = sut.Single(id);
                     sut.Delete(blog);
-                    uow.Complete();
+                    uow.CompleteAsync();
                 }
 
                 using (dbs.Connection.OpenDisposable())
@@ -165,7 +165,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     var firstPost = blog.Posts.First();
                     firstPost.SetName("sadfasfsadf");
                     blog.Posts.Remove(firstPost);
-                    uow.Complete();
+                    uow.CompleteAsync();
                 }
 
                 using (dbs.Connection.OpenDisposable())
@@ -191,7 +191,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     var blog = sut.Single(id);
                     post = blog.Posts.First();
                     post.SetName("modified");
-                    uow.Complete();
+                    uow.CompleteAsync();
                 }
 
                 using (dbs.Connection.OpenDisposable())
@@ -250,7 +250,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     var sut = new EfRepository<Blog>(dbs.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
                     var blog = sut.Single(id);
                     blog.Posts.Add(new Post(_idGenerator.NextId(), blog, "added"));
-                    uow.Complete();
+                    uow.CompleteAsync();
                 }
 
                 using (dbs.Connection.OpenDisposable())
@@ -279,7 +279,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     blog.Posts.Add(new Post(_idGenerator.NextId(), blog, "new name 3"));
                     blog.Posts.Add(new Post(_idGenerator.NextId(), blog, "new name 4"));
                     blog.Posts.Add(new Post(_idGenerator.NextId(), blog, "new name 5"));
-                    uow.Complete();
+                    uow.CompleteAsync();
                 }
 
                 using (dbs.Connection.OpenDisposable())
@@ -305,7 +305,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     var sut = new EfRepository<Blog>(dbs.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
                     var b = sut.Single(id);
                     b.Posts.Remove(b.Posts.First());
-                    uow.Complete();
+                    uow.CompleteAsync();
                 }
 
                 using (dbs.Connection.OpenDisposable())

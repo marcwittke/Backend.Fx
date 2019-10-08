@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using System.Threading.Tasks;
+using Xunit;
 
 namespace Backend.Fx.Tests.Patterns.EventAggregation.Domain
 {
@@ -33,7 +34,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Domain
         }
 
         [Fact]
-        public void DoesNotSwallowExceptionOnDomainEventHandling()
+        public async Task DoesNotSwallowExceptionOnDomainEventHandling()
         {
             IDomainEventHandler<TestDomainEvent> handler = new FailingDomainEventHandler();
             IDomainEventHandlerProvider fakeDomainEventHandlerProvider = A.Fake<IDomainEventHandlerProvider>();
@@ -41,7 +42,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Domain
 
             IDomainEventAggregator sut = new DomainEventAggregator(fakeDomainEventHandlerProvider);
             sut.PublishDomainEvent(new TestDomainEvent(444));
-            Assert.Throws<NotSupportedException>(() => sut.RaiseEvents());
+            await Assert.ThrowsAsync<NotSupportedException>(() => sut.RaiseEvents());
         }
     }
 }

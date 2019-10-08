@@ -16,14 +16,13 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
         public override void Connect()
         { }
 
-        public override Task Publish(IIntegrationEvent integrationEvent)
+        public override void Publish(IIntegrationEvent integrationEvent)
         {
 #pragma warning disable 4014
             // Processing is done on the thread pool and not being awaited. This emulates best the behavior of a real
             // event bus, that incorporates network transfer and another system handling the event
             ProcessAsync(integrationEvent.GetType().FullName, new InMemoryProcessingContext(integrationEvent));
 #pragma warning restore 4014
-            return Task.CompletedTask;
         }
 
         protected override void Subscribe(string eventName)
