@@ -18,10 +18,10 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         public override void Connect()
         { }
 
-        public override async Task Publish(IIntegrationEvent integrationEvent)
+        public override Task Publish(IIntegrationEvent integrationEvent)
         {
             var jsonString = JsonConvert.SerializeObject(integrationEvent);
-            await ProcessAsync(integrationEvent.GetType().FullName, new SerializingProcessingContext(jsonString));
+            return Task.Run(()=>Process(integrationEvent.GetType().FullName, new SerializingProcessingContext(jsonString)));
         }
 
         protected override void Subscribe(string eventName)

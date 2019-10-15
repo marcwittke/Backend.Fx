@@ -109,10 +109,10 @@ namespace Backend.Fx.SqlServer
                 });
         }
 
-        public async Task<bool> WaitUntilAvailableAsync(int retries, Func<int, TimeSpan> sleepDurationProvider, CancellationToken cancellationToken = default)
+        public async Task<bool> WaitUntilAvailableAsync(int retries, Func<int, TimeSpan> sleepDurationProvider, CancellationToken cancellationToken = default(CancellationToken))
         {
             Logger.Info($"Probing for SQL instance with {retries} retries.");
-            SqlConnectionStringBuilder sb = new SqlConnectionStringBuilder(ConnectionString) { InitialCatalog = "master" };
+            var sb = new SqlConnectionStringBuilder(ConnectionString) { InitialCatalog = "master" };
             return await Policy
                 .HandleResult<bool>(result => result == false)
                 .WaitAndRetryAsync(retries, sleepDurationProvider)
