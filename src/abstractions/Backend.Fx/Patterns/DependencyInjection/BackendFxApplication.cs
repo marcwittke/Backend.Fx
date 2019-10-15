@@ -42,7 +42,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
         public ITenantIdService TenantIdService { get; }
 
         /// <inheritdoc />
-        public async Task Boot(CancellationToken cancellationToken = default)
+        public async Task Boot(CancellationToken cancellationToken = default(CancellationToken))
         {
             Logger.Info("Booting application");
             await OnBoot(cancellationToken);
@@ -52,7 +52,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
             _isBooted.Set();
         }
 
-        public bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue, CancellationToken cancellationToken = default)
+        public bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue, CancellationToken cancellationToken = default(CancellationToken))
         {
             return _isBooted.Wait(timeoutMilliSeconds, cancellationToken);
         }

@@ -28,13 +28,13 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// <summary>
         /// allows synchronously awaiting application startup
         /// </summary>
-        bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue, CancellationToken cancellationToken = default);
+        bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Initializes ans starts the application (async)
         /// </summary>
         /// <returns></returns>
-        Task Boot(CancellationToken cancellationToken = default);
+        Task Boot(CancellationToken cancellationToken = default(CancellationToken));
 
         IDisposable BeginScope(IIdentity identity = null, TenantId tenantId = null);
 
