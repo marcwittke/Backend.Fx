@@ -30,7 +30,7 @@ namespace Backend.Fx.RabbitMq
 
         public override void Connect()
         {
-            Logger.Info("OPening a channel to RabbitMQ...");
+            Logger.Info("Opening a channel to RabbitMQ...");
             if (_channel.EnsureOpen())
             {
                 _channel.MessageReceived += ChannelOnMessageReceived;
@@ -38,10 +38,10 @@ namespace Backend.Fx.RabbitMq
             }
         }
         
-        private async void ChannelOnMessageReceived(object sender, BasicDeliverEventArgs args)
+        private void ChannelOnMessageReceived(object sender, BasicDeliverEventArgs args)
         {
             Logger.Debug($"RabbitMQ message with routing key {args.RoutingKey} received");
-            await ProcessAsync(args.RoutingKey, new RabbitMqEventProcessingContext(args.Body));
+            Process(args.RoutingKey, new RabbitMqEventProcessingContext(args.Body));
         }
 
         public override Task Publish(IIntegrationEvent integrationEvent)

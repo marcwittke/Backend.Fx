@@ -118,15 +118,15 @@
         protected abstract void Subscribe(string eventName);
         protected abstract void Unsubscribe(string eventName);
 
-        protected virtual async Task ProcessAsync(string eventName, EventProcessingContext context)
+        protected virtual void Process(string eventName, EventProcessingContext context)
         {
             Logger.Info($"Processing a {eventName} event");
             if (_subscriptions.TryGetValue(eventName, out List<ISubscription> subscriptions))
             {
                 foreach (var subscription in subscriptions)
                 {
-                    await _application.InvokeAsync(
-                        () => Task.Factory.StartNew(() => subscription.Process(eventName, context)),
+                    _application.Invoke(
+                        () => subscription.Process(eventName, context),
                         new SystemIdentity(),
                         context.TenantId);
                 }
