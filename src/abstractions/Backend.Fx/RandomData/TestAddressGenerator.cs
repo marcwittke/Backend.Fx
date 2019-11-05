@@ -22,7 +22,8 @@
                         Names.Streets.Random(),
                         Numbers.RandomHouseNumber(),
                         Numbers.RandomPostalCode(),
-                        Names.Cities.Random());
+                        Names.Cities.Random(),
+                        Names.Countries.Random());
                 }
 
                 distinctCheck.Add(generated.Street + generated.Number);

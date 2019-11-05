@@ -5817,5 +5817,11 @@
             "Zwingenberg (Bergstraße)",
             "Zwönitz"
         };
+
+        public static readonly string[] Countries = {
+            "Austria",
+            "Germany",
+            "Switzerland",
+        };
     }
 }
