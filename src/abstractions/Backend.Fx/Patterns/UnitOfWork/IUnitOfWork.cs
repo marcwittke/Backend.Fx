@@ -56,14 +56,13 @@
         public void Complete()
         {
             Logger.Debug("Completing unit of work #" + _instanceId);
-            Flush();
+            Flush(); // we have to flush before raising events, therefore the handlers find the latest changes in the DB
             _eventAggregator.RaiseEvents();
+            Flush(); // event handlers change the DB state, so we have to flush again
             Commit();
             AsyncHelper.RunSync(()=>_eventBusScope.RaiseEvents());
             _isCompleted = true;
         }
-
-        
 
         protected abstract void UpdateTrackingProperties(string userId, DateTime utcNow);
         protected abstract void Commit();
@@ -75,7 +74,7 @@
             {
                 if (_isCompleted == false)
                 {
-                    Logger.Info($"Canceling unit of work #{_instanceId} because the instance is being disposed although it did not complete before. This should only occur during cleanup after errors.");
+                    Logger.Info($"Canceling unit of work #{_instanceId}.");
                     Rollback();
                 }
                 _lifetimeLogger?.Dispose();

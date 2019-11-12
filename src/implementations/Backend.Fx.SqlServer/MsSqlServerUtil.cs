@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Data.SqlClient;
+using System.Threading;
+using System.Threading.Tasks;
 using Backend.Fx.Environment.Persistence;
 using Backend.Fx.Logging;
 using Polly;
@@ -96,6 +98,40 @@ namespace Backend.Fx.SqlServer
                             var command = connection.CreateCommand();
                             command.CommandText = "SELECT count(*) FROM sys.databases WHERE Name = 'master'";
                             command.ExecuteScalar();
+                            return true;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Info(ex, "No MSSQL instance was found");
+                        return false;
+                    }
+                });
+        }
+
+        public async Task<bool> WaitUntilAvailableAsync(int retries, Func<int, TimeSpan> sleepDurationProvider, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            Logger.Info($"Probing for SQL instance with {retries} retries.");
+            var sb = new SqlConnectionStringBuilder(ConnectionString) { InitialCatalog = "master" };
+            return await Policy
+                .HandleResult<bool>(result => result == false)
+                .WaitAndRetryAsync(retries, sleepDurationProvider)
+                .ExecuteAsync(async () =>
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        Logger.Info("Waiting until database is available was cancelled");
+                        return false;
+                    }
+
+                    try
+                    {
+                        using (var connection = new SqlConnection(sb.ConnectionString))
+                        {
+                            connection.Open();
+                            var command = connection.CreateCommand();
+                            command.CommandText = "SELECT count(*) FROM sys.databases WHERE Name = 'master'";
+                            await command.ExecuteScalarAsync(cancellationToken);
                             return true;
                         }
                     }

@@ -65,7 +65,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Bootstrap
 
         public TenantId DemoTenantId { get; private set; }
 
-        protected override Task OnBooted()
+        protected override Task OnBooted(CancellationToken cancellationToken)
         {
             var tenantService = new TenantService(CompositionRoot.GetInstance<IEventBus>(), _tenantRepository);
             this.RegisterSeedActionForNewlyCreatedTenants(tenantService);

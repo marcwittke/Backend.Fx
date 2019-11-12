@@ -2,10 +2,14 @@
 using System.Data.Common;
 using System.Linq;
 using System.Reflection;
+using Backend.Fx.BuildingBlocks;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
+using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
 using Backend.Fx.EfCorePersistence.Tests.Fixtures;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.DateAndTime;
+using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Patterns.Authorization;
 using Backend.Fx.Patterns.EventAggregation.Domain;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using FakeItEasy;
@@ -19,7 +23,9 @@ namespace Backend.Fx.EfCorePersistence.Tests
     public class TheEfUnitOfWork
     {
         private readonly DatabaseFixture _fixture;
-        
+        private static int _nextTenantId = 2675;
+        private readonly int _tenantId = _nextTenantId++;
+
         public TheEfUnitOfWork()
         {
             _fixture = new SqliteDatabaseFixture();
@@ -30,9 +36,9 @@ namespace Backend.Fx.EfCorePersistence.Tests
         [Fact]
         public void OpensTransaction()
         {
-            using(var dbs = _fixture.UseDbSession())
+            using (var dbs = _fixture.UseDbSession())
             {
-                using (var sut = new EfUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), 
+                using (var sut = new EfUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(),
                     A.Fake<IDomainEventAggregator>(), A.Fake<IEventBusScope>(), dbs.DbContext, dbs.Connection))
                 {
                     Assert.Null(dbs.DbContext.Database.CurrentTransaction);
@@ -44,7 +50,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     sut.Complete();
                 }
 
-                Assert.Throws<InvalidOperationException>(()=> dbs.DbContext.Database.CurrentTransaction.Commit());
+                Assert.Throws<InvalidOperationException>(() => dbs.DbContext.Database.CurrentTransaction.Commit());
             }
 
             using (var dbs = _fixture.UseDbSession())
@@ -58,9 +64,9 @@ namespace Backend.Fx.EfCorePersistence.Tests
         {
             using (var dbs = _fixture.UseDbSession())
             {
-                using (var sut = new EfUnitOfWork(new FrozenClock(), 
-                    CurrentIdentityHolder.CreateSystem(), 
-                    A.Fake<IDomainEventAggregator>(), 
+                using (var sut = new EfUnitOfWork(new FrozenClock(),
+                    CurrentIdentityHolder.CreateSystem(),
+                    A.Fake<IDomainEventAggregator>(),
                     A.Fake<IEventBusScope>(),
                     dbs.DbContext,
                     dbs.Connection))
@@ -113,25 +119,79 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 {
                     using (var tx = dbs.Connection.BeginTransaction())
                     {
-                        dbs.DbContext.Database.UseTransaction((DbTransaction) tx);
+                        dbs.DbContext.Database.UseTransaction((DbTransaction)tx);
                         dbs.DbContext.Bloggers.Add(new Blogger(1, "bbb", "fff"));
                         dbs.DbContext.SaveChanges();
                         tx.Commit();
                     }
 
+
+
                     // see EfUnitOfWork.cs ClearTransactions()
-                    RelationalConnection txman = (RelationalConnection) dbs.DbContext.Database.GetService<IDbContextTransactionManager>();
+                    RelationalConnection txman = (RelationalConnection)dbs.DbContext.Database.GetService<IDbContextTransactionManager>();
                     var methodInfo = typeof(RelationalConnection).GetMethod("ClearTransactions", BindingFlags.Instance | BindingFlags.NonPublic);
                     methodInfo.Invoke(txman, new object[0]);
 
                     using (var tx = dbs.Connection.BeginTransaction())
                     {
-                        dbs.DbContext.Database.UseTransaction((DbTransaction) tx);
+                        dbs.DbContext.Database.UseTransaction((DbTransaction)tx);
                         dbs.DbContext.Bloggers.Add(new Blogger(2, "bbb", "fff"));
                         dbs.DbContext.SaveChanges();
                         tx.Commit();
                     }
                 }
+            }
+        }
+
+        public class AnEvent : IDomainEvent { }
+
+        public class AnEventHandler : IDomainEventHandler<AnEvent>
+        {
+            private readonly IRepository<Blog> _blogRepository;
+
+            public AnEventHandler(IRepository<Blog> blogRepository)
+            {
+                _blogRepository = blogRepository;
+            }
+
+            public void Handle(AnEvent domainEvent)
+            {
+                _blogRepository.Add(new Blog(99999, "Created via Event Handling"));
+            }
+        }
+
+        [Fact]
+        public void FlushesAfterDomainEventHandling()
+        {
+            IDomainEventHandlerProvider fakeEventHandlerProvider = A.Fake<IDomainEventHandlerProvider>();
+            var domainEventAggregator = new DomainEventAggregator(fakeEventHandlerProvider);
+
+
+            using (var dbs = _fixture.UseDbSession())
+            {
+                A.CallTo(
+                        () => fakeEventHandlerProvider.GetAllEventHandlers<AnEvent>())
+                    .ReturnsLazily(() =>
+                    {
+                        var repo = new EfRepository<Blog>(dbs.DbContext, new BlogMapping(),
+                            CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
+                        return new[] {new AnEventHandler(repo)};
+                    });
+
+                using (var sut = new EfUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(),
+                    domainEventAggregator, A.Fake<IEventBusScope>(), dbs.DbContext, dbs.Connection))
+                {
+                    sut.Begin();
+                    domainEventAggregator.PublishDomainEvent(new AnEvent());
+                    sut.Complete();
+                }
+            }
+
+            using (var dbs = _fixture.UseDbSession())
+            {
+                var createdViaEvent = dbs.DbContext.Blogs.Find(99999);
+                Assert.NotNull(createdViaEvent);
+                Assert.Equal("Created via Event Handling", createdViaEvent.Name);
             }
         }
     }

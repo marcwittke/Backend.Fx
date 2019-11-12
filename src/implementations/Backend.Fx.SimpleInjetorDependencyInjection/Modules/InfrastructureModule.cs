@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Reflection;
 using System.Security.Principal;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
+using Backend.Fx.Patterns.DataGeneration;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Domain;
 using Backend.Fx.Patterns.EventAggregation.Integration;
@@ -42,12 +44,16 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
             Logger.Debug($"Registering {nameof(CurrentTenantIdHolder)} as {nameof(ICurrentTHolder<TenantId>)}");
             container.Register<ICurrentTHolder<TenantId>, CurrentTenantIdHolder>();
 
+            // domain event subsystem
             Logger.Debug("Registering event aggregator");
             container.Register<IDomainEventAggregator>(_domainEventAggregatorFactory);
 
             // integration event subsystem
             Logger.Debug("Registering event bus");
             container.RegisterInstance(_eventBus);
+
+            // initial data generators collection (using the current assembly causes an empty collection)
+            container.Collection.Register<IDataGenerator>(typeof(InfrastructureModule).GetTypeInfo().Assembly);
 
             container.Register<IEventBusScope, EventBusScope>();
 

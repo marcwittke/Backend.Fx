@@ -2,13 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.3</TargetFramework>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	<PublishRepositoryUrl>true</PublishRepositoryUrl>
 	<GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>  
   </PropertyGroup>
 
-    <PropertyGroup>
+  <PropertyGroup>
     <Authors>Marc Wittke</Authors>
     <Company>anic GmbH</Company>
     <Copyright>All rights reserved. Distributed under the terms of the MIT License.</Copyright>
@@ -23,6 +26,7 @@
   
   <ItemGroup>
     <ProjectReference Include="..\..\abstractions\Backend.Fx\Backend.Fx.csproj" />
+	<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-19324-01" PrivateAssets="All"/>
   </ItemGroup>
 
 </Project>

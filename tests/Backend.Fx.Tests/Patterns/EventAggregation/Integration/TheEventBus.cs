@@ -27,7 +27,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             sw.Start();
             var integrationEvent = new TestIntegrationEvent(1,"a");
             await Sut.Publish(integrationEvent);
-            Assert.True(sw.ElapsedMilliseconds < 100);
+            Assert.True(sw.ElapsedMilliseconds < 900);
             integrationEvent.Processed.Wait(Debugger.IsAttached ? int.MaxValue : 10000);
             Assert.True(sw.ElapsedMilliseconds > 1000);
         }
@@ -116,7 +116,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             Sut.Subscribe<DynamicEventHandler>(typeof(TestIntegrationEvent).FullName);
             Sut.Subscribe<TypedEventHandler, TestIntegrationEvent>();
             var integrationEvent = new TestIntegrationEvent(34, "gaga");
-            Task.Run(()=> Sut.Publish(integrationEvent)).Wait();
+            await Sut.Publish(integrationEvent);
             integrationEvent.Processed.Wait(Debugger.IsAttached ? int.MaxValue : 10000);
 
             A.CallTo(() => _app.TypedHandler.Handle(A<TestIntegrationEvent>

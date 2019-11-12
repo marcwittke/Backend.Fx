@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Security.Principal;
+using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
@@ -25,26 +26,21 @@ namespace Backend.Fx.Patterns.DependencyInjection
         ITenantIdService TenantIdService { get; }
 
         /// <summary>
-        /// allows asynchronously awaiting application startup
-        /// </summary>
-        Task<bool> WaitForBootAsync(int timeoutMilliSeconds = int.MaxValue);
-
-        /// <summary>
         /// allows synchronously awaiting application startup
         /// </summary>
-        bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue);
+        bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Initializes ans starts the application (async)
         /// </summary>
         /// <returns></returns>
-        Task Boot();
+        Task Boot(CancellationToken cancellationToken = default(CancellationToken));
 
         IDisposable BeginScope(IIdentity identity = null, TenantId tenantId = null);
 
         void Invoke(Action action, IIdentity identity, TenantId tenantId);
 
-        Task InvokeAsync(Action action, IIdentity identity, TenantId tenantId);
+        Task InvokeAsync(Func<Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId);
 
         void Run<TJob>() where TJob : class, IJob;
 
