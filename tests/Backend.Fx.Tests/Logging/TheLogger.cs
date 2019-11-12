@@ -29,7 +29,7 @@ namespace Backend.Fx.Tests.Logging
             var logger = _loggerFactory.Create("aaa");
             logger.Fatal(msg);
 
-            A.CallTo(() => logger.Fatal(A<string>.That.Matches(s => s == msg))).MustHaveHappened(Repeated.Exactly.Once);
+            A.CallTo(() => logger.Fatal(A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
@@ -39,7 +39,7 @@ namespace Backend.Fx.Tests.Logging
             var logger = _loggerFactory.Create("aaa");
             logger.Fatal(_exception, msg);
 
-            A.CallTo(() => logger.Fatal(A<Exception>.That.Matches(ex => ex == _exception), A<string>.That.Matches(s => s == msg))).MustHaveHappened(Repeated.Exactly.Once);
+            A.CallTo(() => logger.Fatal(A<Exception>.That.Matches(ex => ex == _exception), A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
@@ -49,7 +49,7 @@ namespace Backend.Fx.Tests.Logging
             var logger = _loggerFactory.Create("aaa");
             logger.Error(msg);
 
-            A.CallTo(() => logger.Error(A<string>.That.Matches(s => s == msg))).MustHaveHappened(Repeated.Exactly.Once);
+            A.CallTo(() => logger.Error(A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
@@ -59,7 +59,7 @@ namespace Backend.Fx.Tests.Logging
             var logger = _loggerFactory.Create("aaa");
             logger.Error(_exception, msg);
 
-            A.CallTo(() => logger.Error(A<Exception>.That.Matches(ex => ex == _exception), A<string>.That.Matches(s => s == msg))).MustHaveHappened(Repeated.Exactly.Once);
+            A.CallTo(() => logger.Error(A<Exception>.That.Matches(ex => ex == _exception), A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
@@ -69,7 +69,7 @@ namespace Backend.Fx.Tests.Logging
             var logger = _loggerFactory.Create("aaa");
             logger.Warn(msg);
 
-            A.CallTo(() => logger.Warn(A<string>.That.Matches(s => s == msg))).MustHaveHappened(Repeated.Exactly.Once);
+            A.CallTo(() => logger.Warn(A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
@@ -79,7 +79,7 @@ namespace Backend.Fx.Tests.Logging
             var logger = _loggerFactory.Create("aaa");
             logger.Warn(_exception, msg);
 
-            A.CallTo(() => logger.Warn(A<Exception>.That.Matches(ex => ex == _exception), A<string>.That.Matches(s => s == msg))).MustHaveHappened(Repeated.Exactly.Once);
+            A.CallTo(() => logger.Warn(A<Exception>.That.Matches(ex => ex == _exception), A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
@@ -89,7 +89,7 @@ namespace Backend.Fx.Tests.Logging
             var logger = _loggerFactory.Create("aaa");
             logger.Info(msg);
 
-            A.CallTo(() => logger.Info(A<string>.That.Matches(s => s == msg))).MustHaveHappened(Repeated.Exactly.Once);
+            A.CallTo(() => logger.Info(A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
@@ -99,7 +99,7 @@ namespace Backend.Fx.Tests.Logging
             var logger = _loggerFactory.Create("aaa");
             logger.Info(_exception, msg);
 
-            A.CallTo(() => logger.Info(A<Exception>.That.Matches(ex => ex == _exception), A<string>.That.Matches(s => s == msg))).MustHaveHappened(Repeated.Exactly.Once);
+            A.CallTo(() => logger.Info(A<Exception>.That.Matches(ex => ex == _exception), A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
@@ -109,8 +109,8 @@ namespace Backend.Fx.Tests.Logging
             var logger = _loggerFactory.Create("aaa");
             logger.InfoDuration(msg).Dispose();
 
-            A.CallTo(() => logger.Info(A<string>.That.Matches(s => s == msg))).MustHaveHappened(Repeated.Exactly.Once);
-            A.CallTo(() => logger.Info(A<string>.That.Matches(s => s.StartsWith(msg + " - Duration:")))).MustHaveHappened(Repeated.Exactly.Once);
+            A.CallTo(() => logger.Info(A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
+            A.CallTo(() => logger.Info(A<string>.That.Matches(s => s.StartsWith(msg + " - Duration:")))).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
@@ -120,7 +120,7 @@ namespace Backend.Fx.Tests.Logging
             var logger = _loggerFactory.Create("aaa");
             logger.Debug(msg);
 
-            A.CallTo(() => logger.Debug(A<string>.That.Matches(s => s == msg))).MustHaveHappened(Repeated.Exactly.Once);
+            A.CallTo(() => logger.Debug(A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
@@ -130,7 +130,7 @@ namespace Backend.Fx.Tests.Logging
             var logger = _loggerFactory.Create("aaa");
             logger.Debug(_exception, msg);
 
-            A.CallTo(() => logger.Debug(A<Exception>.That.Matches(ex => ex == _exception), A<string>.That.Matches(s => s == msg))).MustHaveHappened(Repeated.Exactly.Once);
+            A.CallTo(() => logger.Debug(A<Exception>.That.Matches(ex => ex == _exception), A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
@@ -140,8 +140,8 @@ namespace Backend.Fx.Tests.Logging
             var logger = _loggerFactory.Create("aaa");
             logger.DebugDuration(msg).Dispose();
 
-            A.CallTo(() => logger.Debug(A<string>.That.Matches(s => s == msg))).MustHaveHappened(Repeated.Exactly.Once);
-            A.CallTo(() => logger.Debug(A<string>.That.Matches(s => s.StartsWith(msg+" - Duration:")))).MustHaveHappened(Repeated.Exactly.Once);
+            A.CallTo(() => logger.Debug(A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
+            A.CallTo(() => logger.Debug(A<string>.That.Matches(s => s.StartsWith(msg+" - Duration:")))).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
@@ -151,7 +151,7 @@ namespace Backend.Fx.Tests.Logging
             var logger = _loggerFactory.Create("aaa");
             logger.Trace(msg);
 
-            A.CallTo(() => logger.Trace(A<string>.That.Matches(s => s == msg))).MustHaveHappened(Repeated.Exactly.Once);
+            A.CallTo(() => logger.Trace(A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
@@ -161,7 +161,7 @@ namespace Backend.Fx.Tests.Logging
             var logger = _loggerFactory.Create("aaa");
             logger.Trace(_exception, msg);
 
-            A.CallTo(() => logger.Trace(A<Exception>.That.Matches(ex => ex == _exception), A<string>.That.Matches(s => s == msg))).MustHaveHappened(Repeated.Exactly.Once);
+            A.CallTo(() => logger.Trace(A<Exception>.That.Matches(ex => ex == _exception), A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
@@ -171,8 +171,8 @@ namespace Backend.Fx.Tests.Logging
             var logger = _loggerFactory.Create("aaa");
             logger.TraceDuration(msg).Dispose();
 
-            A.CallTo(() => logger.Trace(A<string>.That.Matches(s => s == msg))).MustHaveHappened(Repeated.Exactly.Once);
-            A.CallTo(() => logger.Trace(A<string>.That.Matches(s => s.StartsWith(msg + " - Duration:")))).MustHaveHappened(Repeated.Exactly.Once);
+            A.CallTo(() => logger.Trace(A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
+            A.CallTo(() => logger.Trace(A<string>.That.Matches(s => s.StartsWith(msg + " - Duration:")))).MustHaveHappenedOnceExactly();
         }
     }
 }

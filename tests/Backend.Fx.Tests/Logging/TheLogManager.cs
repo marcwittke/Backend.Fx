@@ -55,7 +55,8 @@ namespace Backend.Fx.Tests.Logging
         {
             LogManager.Initialize(_loggerFactory);
             LogManager.Create<TheLogManager>();
-            A.CallTo(() => _loggerFactory.Create(A<string>.That.Matches(s => s == "Backend.Fx.Tests.Logging.TheLogManager"))).MustHaveHappened(Repeated.Exactly.Once);
+            A.CallTo(() => _loggerFactory.Create(A<string>.That.Matches(s => s == "Backend.Fx.Tests.Logging.TheLogManager")))
+                .MustHaveHappenedOnceExactly();
         }
     }
 }

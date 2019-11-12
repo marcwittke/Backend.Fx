@@ -21,7 +21,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Domain
             sut.PublishDomainEvent(new TestDomainEvent(4711));
             sut.RaiseEvents();
 
-            A.CallTo(() => fakeDomainEventHandlerProvider.GetAllEventHandlers<TestDomainEvent>()).MustHaveHappened(Repeated.Exactly.Once);
+            A.CallTo(() => fakeDomainEventHandlerProvider.GetAllEventHandlers<TestDomainEvent>()).MustHaveHappenedOnceExactly();
 
             Assert.Single(handler1.Events);
             Assert.Equal(4711, handler1.Events[0].Id);
