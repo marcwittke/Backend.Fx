@@ -7,7 +7,6 @@
     using System.Threading.Tasks;
     using Exceptions;
     using Logging;
-    using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Net.Http.Headers;
     using Newtonsoft.Json;

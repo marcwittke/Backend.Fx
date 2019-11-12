@@ -36,7 +36,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
                 {
                     IRepository<AnAggregate> repository = sut.CompositionRoot.GetInstance<IRepository<AnAggregate>>();
                     AnAggregate[] allAggregates = repository.GetAll();
-                    Assert.Equal(1, allAggregates.Length);
+                    Assert.Single(allAggregates);
                     Assert.Equal(1, allAggregates.Count(agg => agg.Name == AProdAggregateGenerator.Name));
                 }
             }
