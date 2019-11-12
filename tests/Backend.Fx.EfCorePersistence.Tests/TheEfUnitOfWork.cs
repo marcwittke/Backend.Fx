@@ -130,7 +130,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     // see EfUnitOfWork.cs ClearTransactions()
                     RelationalConnection txman = (RelationalConnection)dbs.DbContext.Database.GetService<IDbContextTransactionManager>();
                     var methodInfo = typeof(RelationalConnection).GetMethod("ClearTransactions", BindingFlags.Instance | BindingFlags.NonPublic);
-                    methodInfo.Invoke(txman, new object[0]);
+                    methodInfo.Invoke(txman, new object[] {false});
 
                     using (var tx = dbs.Connection.BeginTransaction())
                     {

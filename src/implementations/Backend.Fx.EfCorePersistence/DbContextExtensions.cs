@@ -63,6 +63,8 @@ namespace Backend.Fx.EfCorePersistence
                      .Entries<Entity>()
                      .Where(entry => entry.State == EntityState.Added || entry.State == EntityState.Modified || entry.State == EntityState.Deleted)
                      .Where(entry => !(entry.Entity is AggregateRoot))
+                     .ToArray()
+                     .AsParallel()
                      .ForAll(entry =>
                      {
                          EntityEntry aggregateRootEntry = FindAggregateRootEntry(dbContext.ChangeTracker, entry);
@@ -117,7 +119,7 @@ namespace Backend.Fx.EfCorePersistence
             RelationalConnection relationalConnection = (RelationalConnection)dbContext.Database.GetService<IDbContextTransactionManager>();
             MethodInfo methodInfo = typeof(RelationalConnection).GetMethod("ClearTransactions", BindingFlags.Instance | BindingFlags.NonPublic);
             Debug.Assert(methodInfo != null, nameof(methodInfo) + " != null");
-            methodInfo.Invoke(relationalConnection, new object[0]);
+            methodInfo.Invoke(relationalConnection, new object[] {false});
         }
 
         /// <summary>
