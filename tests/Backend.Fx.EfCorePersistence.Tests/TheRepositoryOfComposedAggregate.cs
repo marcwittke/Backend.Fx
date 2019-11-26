@@ -28,16 +28,16 @@ namespace Backend.Fx.EfCorePersistence.Tests
         {
             A.CallTo(() => _idGenerator.NextId()).ReturnsLazily(() => _nextId++);
             //_fixture = new SqlServerDatabaseFixture();
-             _fixture = new SqliteDatabaseFixture();
+            _fixture = new SqliteDatabaseFixture();
             _fixture.CreateDatabase();
         }
 
         [Fact]
         public void CanCreate()
         {
-            using (var dbs = _fixture.UseDbSession())
+            using (DbSession dbs = _fixture.UseDbSession())
             {
-                using (dbs.Connection.OpenDisposable())
+                
                 {
                     int count = dbs.Connection.ExecuteScalar<int>("SELECT count(*) FROM Blogs");
                     Assert.Equal(0, count);
@@ -46,16 +46,16 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     Assert.Equal(0, count);
                 }
 
-                using (var uow = dbs.UseUnitOfWork(_clock))
+                using (var uow = dbs.BeginUnitOfWork(_clock))
                 {
-                    var sut = new EfRepository<Blog>(dbs.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
+                    var sut = new EfRepository<Blog>(uow.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
                     var blog = new Blog(_idGenerator.NextId(), "my blog");
                     blog.AddPost(_idGenerator, "my post");
                     sut.Add(blog);
                     uow.Complete();
                 }
 
-                using (dbs.Connection.OpenDisposable())
+                
                 {
                     int count = dbs.Connection.ExecuteScalar<int>("SELECT count(*) FROM Blogs");
                     Assert.Equal(1, count);
@@ -69,20 +69,20 @@ namespace Backend.Fx.EfCorePersistence.Tests
         [Fact]
         public void CanRead()
         {
-            using (var dbs = _fixture.UseDbSession())
+            using (DbSession dbs = _fixture.UseDbSession())
             {
                 var id = CreateBlogWithPost(dbs);
                 Blog blog;
 
-                using (var uow = dbs.UseUnitOfWork(_clock))
+                using (var uow = dbs.BeginUnitOfWork(_clock))
                 {
-                    var sut = new EfRepository<Blog>(dbs.DbContext, new BlogMapping(),
+                    var sut = new EfRepository<Blog>(uow.DbContext, new BlogMapping(),
                         CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
                     blog = sut.Single(id);
                     uow.Complete();
                 }
 
-                using (dbs.Connection.OpenDisposable())
+                
                 {
                     Assert.NotNull(blog);
                     Assert.Equal(id, blog.Id);
@@ -95,71 +95,64 @@ namespace Backend.Fx.EfCorePersistence.Tests
         [Fact]
         public void CanUpdate()
         {
-            using (var dbs = _fixture.UseDbSession())
+            using (DbSession dbs = _fixture.UseDbSession())
             {
                 var id = CreateBlogWithPost(dbs);
 
-                using (var uow = dbs.UseUnitOfWork(_clock))
+                using (var uow = dbs.BeginUnitOfWork(_clock))
                 {
-                    var sut = new EfRepository<Blog>(dbs.DbContext, new BlogMapping(),
+                    var sut = new EfRepository<Blog>(uow.DbContext, new BlogMapping(),
                         CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
-                    var blog = sut.Single(id);
+                    Blog blog = sut.Single(id);
                     blog.Modify("modified");
                     uow.Complete();
                 }
 
-                using (dbs.Connection.OpenDisposable())
-                {
-                    Assert.Equal(1, dbs.Connection.ExecuteScalar<int>("SELECT count(*) FROM Blogs"));
-                    Assert.Equal(id, dbs.Connection.ExecuteScalar<int>("SELECT Id FROM Blogs LIMIT 1"));
-                    Assert.Equal("modified", dbs.Connection.ExecuteScalar<string>("SELECT Name FROM Blogs LIMIT 1"));
-                    Assert.Equal("modified", dbs.Connection.ExecuteScalar<string>("SELECT Name FROM Posts LIMIT 1"));
-                }
+                Assert.Equal(1, dbs.Connection.ExecuteScalar<int>("SELECT count(*) FROM Blogs"));
+                Assert.Equal(id, dbs.Connection.ExecuteScalar<int>("SELECT Id FROM Blogs LIMIT 1"));
+                Assert.Equal("modified", dbs.Connection.ExecuteScalar<string>("SELECT Name FROM Blogs LIMIT 1"));
+                Assert.Equal("modified", dbs.Connection.ExecuteScalar<string>("SELECT Name FROM Posts LIMIT 1"));
             }
         }
 
         [Fact]
         public void CanDelete()
         {
-            using (var dbs = _fixture.UseDbSession())
+            using (DbSession dbs = _fixture.UseDbSession())
             {
                 var id = CreateBlogWithPost(dbs);
 
-                using (var uow = dbs.UseUnitOfWork(_clock))
+                using (var uow = dbs.BeginUnitOfWork(_clock))
                 {
-                    var sut = new EfRepository<Blog>(dbs.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
-                    var blog = sut.Single(id);
+                    var sut = new EfRepository<Blog>(uow.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
+                    Blog blog = sut.Single(id);
                     sut.Delete(blog);
                     uow.Complete();
                 }
 
-                using (dbs.Connection.OpenDisposable())
-                {
-                    int count = dbs.Connection.ExecuteScalar<int>("SELECT count(*) FROM Blogs");
-                    Assert.Equal(0, count);
+                int count = dbs.Connection.ExecuteScalar<int>("SELECT count(*) FROM Blogs");
+                Assert.Equal(0, count);
 
-                    count = dbs.Connection.ExecuteScalar<int>("SELECT count(*) FROM Posts");
-                    Assert.Equal(0, count);
-                }
+                count = dbs.Connection.ExecuteScalar<int>("SELECT count(*) FROM Posts");
+                Assert.Equal(0, count);
             }
         }
 
         [Fact]
         public void CanDeleteDependent()
         {
-            using (var dbs = _fixture.UseDbSession())
+            using (DbSession dbs = _fixture.UseDbSession())
             {
                 int id = CreateBlogWithPost(dbs, 10);
 
-                using (dbs.Connection.OpenDisposable())
                 {
                     int count = dbs.Connection.ExecuteScalar<int>("SELECT count(*) FROM Posts");
                     Assert.Equal(10, count);
                 }
 
-                using (var uow = dbs.UseUnitOfWork(_clock))
+                using (var uow = dbs.BeginUnitOfWork(_clock))
                 {
-                    var sut = new EfRepository<Blog>(dbs.DbContext, new BlogMapping(),
+                    var sut = new EfRepository<Blog>(uow.DbContext, new BlogMapping(),
                         CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
                     var blog = sut.Single(id);
                     var firstPost = blog.Posts.First();
@@ -168,7 +161,6 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     uow.Complete();
                 }
 
-                using (dbs.Connection.OpenDisposable())
                 {
                     var count = dbs.Connection.ExecuteScalar<int>("SELECT count(*) FROM Posts");
                     Assert.Equal(9, count);
@@ -179,14 +171,14 @@ namespace Backend.Fx.EfCorePersistence.Tests
         [Fact]
         public void CanUpdateDependant()
         {
-            using (var dbs = _fixture.UseDbSession())
+            using (DbSession dbs = _fixture.UseDbSession())
             {
                 int id = CreateBlogWithPost(dbs, 10);
                 Post post;
 
-                using (var uow = dbs.UseUnitOfWork(_clock))
+                using (var uow = dbs.BeginUnitOfWork(_clock))
                 {
-                    var sut = new EfRepository<Blog>(dbs.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId),
+                    var sut = new EfRepository<Blog>(uow.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId),
                         new AllowAll<Blog>());
                     var blog = sut.Single(id);
                     post = blog.Posts.First();
@@ -194,7 +186,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     uow.Complete();
                 }
 
-                using (dbs.Connection.OpenDisposable())
+                
                 {
                     string name = dbs.Connection.ExecuteScalar<string>($"SELECT name FROM Posts where id = {post.Id}");
                     Assert.Equal("modified", name);
@@ -211,14 +203,14 @@ namespace Backend.Fx.EfCorePersistence.Tests
         //[Fact]
         //public void CanUpdateDependantValueObject()
         //{
-        //    using (var dbs = _fixture.UseDbSession())
+        //    using (DbSession dbs = _fixture.UseDbSession())
         //    {
         //        int id = CreateBlogWithPost(dbs, 10);
         //        Post post;
 
         //        using (var uow = dbs.UseUnitOfWork(_clock))
         //        {
-        //            var sut = new EfRepository<Blog>(dbs.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId),
+        //            var sut = new EfRepository<Blog>(uow.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId),
         //                new AllowAll<Blog>());
         //            var blog = sut.Single(id);
         //            post = blog.Posts.First();
@@ -226,7 +218,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
         //            uow.Complete();
         //        }
 
-        //        using (dbs.Connection.OpenDisposable())
+        //        
         //        {
         //            string culture = dbs.Connection.ExecuteScalar<string>($"SELECT TargetAudience_Culture ame FROM Posts where id = {post.Id}");
         //            Assert.Equal("es-AR", culture);
@@ -241,19 +233,19 @@ namespace Backend.Fx.EfCorePersistence.Tests
         [Fact]
         public void CanAddDependent()
         {
-            using (var dbs = _fixture.UseDbSession())
+            using (DbSession dbs = _fixture.UseDbSession())
             {
                 int id = CreateBlogWithPost(dbs, 10);
 
-                using (var uow = dbs.UseUnitOfWork(_clock))
+                using (var uow = dbs.BeginUnitOfWork(_clock))
                 {
-                    var sut = new EfRepository<Blog>(dbs.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
+                    var sut = new EfRepository<Blog>(uow.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
                     var blog = sut.Single(id);
                     blog.Posts.Add(new Post(_idGenerator.NextId(), blog, "added"));
                     uow.Complete();
                 }
 
-                using (dbs.Connection.OpenDisposable())
+                
                 {
                     int count = dbs.Connection.ExecuteScalar<int>("SELECT count(*) FROM Posts");
                     Assert.Equal(11, count);
@@ -265,13 +257,13 @@ namespace Backend.Fx.EfCorePersistence.Tests
         [Fact]
         public void CanReplaceDependentCollection()
         {
-            using (var dbs = _fixture.UseDbSession())
+            using (DbSession dbs = _fixture.UseDbSession())
             {
                 var id = CreateBlogWithPost(dbs, 10);
 
-                using (var uow = dbs.UseUnitOfWork(_clock))
+                using (var uow = dbs.BeginUnitOfWork(_clock))
                 {
-                    var sut = new EfRepository<Blog>(dbs.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
+                    var sut = new EfRepository<Blog>(uow.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
                     var blog = sut.Single(id);
                     blog.Posts.Clear();
                     blog.Posts.Add(new Post(_idGenerator.NextId(), blog, "new name 1"));
@@ -282,7 +274,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     uow.Complete();
                 }
 
-                using (dbs.Connection.OpenDisposable())
+                
                 {
                     int count = dbs.Connection.ExecuteScalar<int>("SELECT count(*) FROM Posts");
                     Assert.Equal(5, count);
@@ -293,24 +285,24 @@ namespace Backend.Fx.EfCorePersistence.Tests
         [Fact]
         public void UpdatesAggregateTrackingPropertiesOnDeleteOfDependant()
         {
-            using (var dbs = _fixture.UseDbSession())
+            using (DbSession dbs = _fixture.UseDbSession())
             {
                 int id = CreateBlogWithPost(dbs, 10);
 
                 var expectedModifiedOn = _clock.UtcNow.AddHours(1);
                 _clock.OverrideUtcNow(expectedModifiedOn);
 
-                using (var uow = dbs.UseUnitOfWork(_clock))
+                using (var uow = dbs.BeginUnitOfWork(_clock))
                 {
-                    var sut = new EfRepository<Blog>(dbs.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
+                    var sut = new EfRepository<Blog>(uow.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
                     var b = sut.Single(id);
                     b.Posts.Remove(b.Posts.First());
                     uow.Complete();
                 }
 
-                using (dbs.Connection.OpenDisposable())
+                using (var uow = dbs.BeginUnitOfWork(_clock))
                 {
-                    var blog = dbs.DbContext.Blogs.Find(id);
+                    var blog = uow.DbContext.Blogs.Find(id);
                     Assert.NotNull(blog.ChangedOn);
                     Assert.Equal(expectedModifiedOn, blog.ChangedOn.Value, _tolerantDateTimeComparer);
                 }
@@ -319,7 +311,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
         private int CreateBlogWithPost(DbSession dbs, int postCount = 1)
         {
-            using (dbs.Connection.OpenDisposable())
+            
             {
                 int blogId = _nextId++;
                 dbs.Connection.ExecuteNonQuery(
@@ -333,7 +325,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                         $"INSERT INTO Posts (Id, BlogId, Name, TargetAudience_IsPublic, TargetAudience_Culture, CreatedOn, CreatedBy) VALUES ({_nextId++}, {blogId}, 'my post {i:00}', '1', 'de-DE', CURRENT_TIMESTAMP, 'persistence test')");
                 }
 
-                return (int) blogId;
+                return blogId;
             }
         }
     }

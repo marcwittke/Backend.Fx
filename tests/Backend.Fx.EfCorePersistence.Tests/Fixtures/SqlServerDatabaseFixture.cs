@@ -50,15 +50,16 @@ namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
             return new DbContextOptionsBuilder<TestDbContext>().UseSqlServer(_connectionString).Options;
         }
 
-        protected override DbContextOptions<TestDbContext> GetDbContextOptions(DbConnection connection)
+        
+        protected override DbContextOptionsBuilder<TestDbContext> GetDbContextOptionsBuilder(DbConnection connection)
         {
-            return new DbContextOptionsBuilder<TestDbContext>().UseSqlServer(connection).Options;
+            return new DbContextOptionsBuilder<TestDbContext>().UseSqlServer(connection);
         }
 
         public override DbSession UseDbSession()
         {
             var sqlConnection = new SqlConnection(_connectionString);
-            return new DbSession(sqlConnection, GetDbContextOptions(sqlConnection));
+            return new DbSession(sqlConnection, GetDbContextOptionsBuilder(sqlConnection));
         }
     }
 }

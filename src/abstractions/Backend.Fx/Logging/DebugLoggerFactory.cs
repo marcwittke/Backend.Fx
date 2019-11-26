@@ -1,7 +1,7 @@
-﻿namespace Backend.Fx.Logging
-{
-    using System.Diagnostics;
+﻿using System.Diagnostics;
 
+namespace Backend.Fx.Logging
+{
     [DebuggerStepThrough]
     public class DebugLoggerFactory : ILoggerFactory
     {
@@ -12,7 +12,7 @@
 
         public void BeginActivity(int activityIndex)
         {
-            System.Diagnostics.Debug.WriteLine($"Beginning activity {activityIndex}");
+            Debug.WriteLine($"Beginning activity {activityIndex}");
         }
 
         public void Shutdown()

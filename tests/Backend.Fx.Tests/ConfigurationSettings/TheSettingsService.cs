@@ -1,18 +1,16 @@
-﻿using Backend.Fx.Hacking;
+﻿using System.Linq;
+using Backend.Fx.BuildingBlocks;
+using Backend.Fx.ConfigurationSettings;
+using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Hacking;
 using Backend.Fx.InMemoryPersistence;
+using Backend.Fx.Patterns.Authorization;
+using Backend.Fx.Patterns.IdGeneration;
+using FakeItEasy;
 using Xunit;
 
 namespace Backend.Fx.Tests.ConfigurationSettings
 {
-    using System.Linq;
-    using FakeItEasy;
-    using Fx.BuildingBlocks;
-    using Fx.ConfigurationSettings;
-    using Fx.Environment.MultiTenancy;
-    using Fx.Patterns.Authorization;
-    using Fx.Patterns.IdGeneration;
-    using Xunit;
-
     public class TheSettingsService
     {
         public class MySettingsService : SettingsService
