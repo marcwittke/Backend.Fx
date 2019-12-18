@@ -1,5 +1,5 @@
 using System;
-using System.Data.Common;
+using System.Data;
 using System.Security.Principal;
 using Backend.Fx.Patterns.DependencyInjection;
 
@@ -7,7 +7,7 @@ namespace Backend.Fx.Patterns.UnitOfWork
 {
     public class UnitOfWorkTransactionDecorator : IUnitOfWork
     {
-        public UnitOfWorkTransactionDecorator(DbConnection dbConnection, IUnitOfWork unitOfWork)
+        public UnitOfWorkTransactionDecorator(IDbConnection dbConnection, IUnitOfWork unitOfWork)
         {
             UnitOfWork = unitOfWork;
             TransactionContext = new TransactionContext(dbConnection);

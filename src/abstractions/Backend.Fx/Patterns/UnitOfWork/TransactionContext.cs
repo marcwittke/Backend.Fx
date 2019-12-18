@@ -1,6 +1,5 @@
 using System;
 using System.Data;
-using System.Data.Common;
 using Backend.Fx.Logging;
 
 namespace Backend.Fx.Patterns.UnitOfWork
@@ -11,11 +10,11 @@ namespace Backend.Fx.Patterns.UnitOfWork
         private IDisposable _transactionLifetimeLogger;
         private readonly bool _shouldHandleConnectionState;
         
-        public DbConnection Connection { get; }
+        public IDbConnection Connection { get; }
         
-        public DbTransaction CurrentTransaction { get; private set; }
+        public IDbTransaction CurrentTransaction { get; private set; }
         
-        public TransactionContext(DbConnection connection)
+        public TransactionContext(IDbConnection connection)
         {
             Connection = connection;
             ConnectionState connectionState = Connection.State;

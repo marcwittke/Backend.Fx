@@ -66,7 +66,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
         {
             if (unitOfWork is UnitOfWorkTransactionDecorator transactionDecorator)
             {
-                return transactionDecorator.TransactionContext.CurrentTransaction;
+                return (DbTransaction) transactionDecorator.TransactionContext.CurrentTransaction;
             }
 
             throw new InvalidOperationException();
