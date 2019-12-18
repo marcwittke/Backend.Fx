@@ -10,6 +10,7 @@ using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Patterns.Authorization;
 using Backend.Fx.Patterns.EventAggregation.Domain;
 using Backend.Fx.Patterns.EventAggregation.Integration;
+using Backend.Fx.Patterns.UnitOfWork;
 using FakeItEasy;
 using Microsoft.EntityFrameworkCore.Storage;
 using Xunit;
@@ -34,21 +35,21 @@ namespace Backend.Fx.EfCorePersistence.Tests
         {
             using (DbSession dbs = _fixture.UseDbSession())
             {
-                using (EfUnitOfWork<TestDbContext> sut = dbs.BeginUnitOfWork())
+                using (IUnitOfWork sut = dbs.BeginUnitOfWork())
                 {
-                    Assert.NotNull(sut.DbContext.Database.CurrentTransaction);
-                    Assert.Equal(dbs.Connection, sut.DbContext.Database.CurrentTransaction.GetDbTransaction().Connection);
+                    Assert.NotNull(sut.GetDbContext().Database.CurrentTransaction);
+                    Assert.Equal(dbs.Connection, sut.GetDbContext().Database.CurrentTransaction.GetDbTransaction().Connection);
 
-                    sut.DbContext.Add(new Blogger(333, "Metulsky", "Bratislav"));
+                    sut.GetDbContext().Add(new Blogger(333, "Metulsky", "Bratislav"));
                     sut.Complete();
                     
-                    Assert.Null(sut.CurrentTransaction);
-                    Assert.Throws<InvalidOperationException>(() => sut.DbContext.Database.CurrentTransaction.Commit()); // because sut.Complete() did it already
+                    Assert.Null(sut.GetDbTransaction());
+                    Assert.Throws<InvalidOperationException>(() => sut.GetDbContext().Database.CurrentTransaction.Commit()); // because sut.Complete() did it already
                 }
             
-                using (EfUnitOfWork<TestDbContext> sut = dbs.BeginUnitOfWork())
+                using (IUnitOfWork sut = dbs.BeginUnitOfWork())
                 {
-                    Assert.NotNull(sut.DbContext.Set<Blogger>().SingleOrDefault(b => b.Id == 333 && b.FirstName == "Bratislav" && b.LastName == "Metulsky"));
+                    Assert.NotNull(sut.GetDbContext().Set<Blogger>().SingleOrDefault(b => b.Id == 333 && b.FirstName == "Bratislav" && b.LastName == "Metulsky"));
                 }
             }
         }
@@ -59,19 +60,19 @@ namespace Backend.Fx.EfCorePersistence.Tests
             using (DbSession dbs = _fixture.UseDbSession())
             {
                 {
-                    EfUnitOfWork<TestDbContext> sut = dbs.BeginUnitOfWork();
-                    sut.DbContext.Add(new Blogger(333, "Metulsky", "Bratislav"));
-                    sut.Flush();
+                    IUnitOfWork sut = dbs.BeginUnitOfWork();
+                    sut.GetDbContext().Add(new Blogger(333, "Metulsky", "Bratislav"));
+                    sut.GetDbContext().SaveChanges();
                     // no sut.Complete()
                     sut.Dispose();
                     
-                    Assert.Null(sut.CurrentTransaction);
-                    Assert.Throws<InvalidOperationException>(() => sut.DbContext.Database.CurrentTransaction.Commit()); // because sut.Dispose() has already rolled back the open tx
+                    Assert.Null(sut.GetDbTransaction());
+                    Assert.Throws<InvalidOperationException>(() => sut.GetDbContext().Database.CurrentTransaction.Commit()); // because sut.Dispose() has already rolled back the open tx
                 }
                 
-                using (EfUnitOfWork<TestDbContext> sut = dbs.BeginUnitOfWork())
+                using (IUnitOfWork sut = dbs.BeginUnitOfWork())
                 {
-                    Assert.Null(sut.DbContext.Set<Blogger>().SingleOrDefault(b => b.Id == 333 && b.FirstName == "Bratislav" && b.LastName == "Metulsky"));
+                    Assert.Null(sut.GetDbContext().Set<Blogger>().SingleOrDefault(b => b.Id == 333 && b.FirstName == "Bratislav" && b.LastName == "Metulsky"));
                 }
             }
         }
@@ -108,8 +109,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     domainEventAggregator,
                     A.Fake<IEventBusScope>(),
                     // ReSharper disable once AccessToDisposedClosure
-                    connection => new TestDbContext(dbs.OptionsBuilder.Options),
-                    dbs.Connection))
+                    new TestDbContext(dbs.OptionsBuilder.Options)))
                 {
                     sut.Begin();
                     A.CallTo(() => fakeEventHandlerProvider.GetAllEventHandlers<AnEvent>())
@@ -129,9 +129,9 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (DbSession dbs = _fixture.UseDbSession())
             {
-                using (EfUnitOfWork<TestDbContext> sut = dbs.BeginUnitOfWork())
+                using (IUnitOfWork sut = dbs.BeginUnitOfWork())
                 {
-                    Blog createdViaEvent = sut.DbContext.Set<Blog>().Find(99999);
+                    Blog createdViaEvent = sut.GetDbContext().Set<Blog>().Find(99999);
                     Assert.NotNull(createdViaEvent);
                     Assert.Equal("Created via Event Handling", createdViaEvent.Name);
                 }

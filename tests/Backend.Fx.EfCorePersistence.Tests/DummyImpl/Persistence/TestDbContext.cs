@@ -10,6 +10,12 @@ namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence
         public TestDbContext([NotNull] DbContextOptions<TestDbContext> options) : base(options)
         {}
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            base.OnConfiguring(optionsBuilder);
+            Database.AutoTransactionsEnabled = false;
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             this.ApplyAggregateMappings(modelBuilder);

@@ -48,7 +48,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
                 using (var uow = dbs.BeginUnitOfWork(_clock))
                 {
-                    var sut = new EfRepository<Blog>(uow.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
+                    var sut = new EfRepository<Blog>(uow.GetDbContext(), new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
                     var blog = new Blog(_idGenerator.NextId(), "my blog");
                     blog.AddPost(_idGenerator, "my post");
                     sut.Add(blog);
@@ -76,7 +76,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
                 using (var uow = dbs.BeginUnitOfWork(_clock))
                 {
-                    var sut = new EfRepository<Blog>(uow.DbContext, new BlogMapping(),
+                    var sut = new EfRepository<Blog>(uow.GetDbContext(), new BlogMapping(),
                         CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
                     blog = sut.Single(id);
                     uow.Complete();
@@ -101,7 +101,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
                 using (var uow = dbs.BeginUnitOfWork(_clock))
                 {
-                    var sut = new EfRepository<Blog>(uow.DbContext, new BlogMapping(),
+                    var sut = new EfRepository<Blog>(uow.GetDbContext(), new BlogMapping(),
                         CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
                     Blog blog = sut.Single(id);
                     blog.Modify("modified");
@@ -124,7 +124,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
                 using (var uow = dbs.BeginUnitOfWork(_clock))
                 {
-                    var sut = new EfRepository<Blog>(uow.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
+                    var sut = new EfRepository<Blog>(uow.GetDbContext(), new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
                     Blog blog = sut.Single(id);
                     sut.Delete(blog);
                     uow.Complete();
@@ -152,7 +152,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
                 using (var uow = dbs.BeginUnitOfWork(_clock))
                 {
-                    var sut = new EfRepository<Blog>(uow.DbContext, new BlogMapping(),
+                    var sut = new EfRepository<Blog>(uow.GetDbContext(), new BlogMapping(),
                         CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
                     var blog = sut.Single(id);
                     var firstPost = blog.Posts.First();
@@ -178,7 +178,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
                 using (var uow = dbs.BeginUnitOfWork(_clock))
                 {
-                    var sut = new EfRepository<Blog>(uow.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId),
+                    var sut = new EfRepository<Blog>(uow.GetDbContext(), new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId),
                         new AllowAll<Blog>());
                     var blog = sut.Single(id);
                     post = blog.Posts.First();
@@ -239,7 +239,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
                 using (var uow = dbs.BeginUnitOfWork(_clock))
                 {
-                    var sut = new EfRepository<Blog>(uow.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
+                    var sut = new EfRepository<Blog>(uow.GetDbContext(), new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
                     var blog = sut.Single(id);
                     blog.Posts.Add(new Post(_idGenerator.NextId(), blog, "added"));
                     uow.Complete();
@@ -263,7 +263,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
                 using (var uow = dbs.BeginUnitOfWork(_clock))
                 {
-                    var sut = new EfRepository<Blog>(uow.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
+                    var sut = new EfRepository<Blog>(uow.GetDbContext(), new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
                     var blog = sut.Single(id);
                     blog.Posts.Clear();
                     blog.Posts.Add(new Post(_idGenerator.NextId(), blog, "new name 1"));
@@ -294,7 +294,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
                 using (var uow = dbs.BeginUnitOfWork(_clock))
                 {
-                    var sut = new EfRepository<Blog>(uow.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
+                    var sut = new EfRepository<Blog>(uow.GetDbContext(), new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
                     var b = sut.Single(id);
                     b.Posts.Remove(b.Posts.First());
                     uow.Complete();
@@ -302,7 +302,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
                 using (var uow = dbs.BeginUnitOfWork(_clock))
                 {
-                    var blog = uow.DbContext.Blogs.Find(id);
+                    var blog = uow.GetDbContext().Set<Blog>().Find(id);
                     Assert.NotNull(blog.ChangedOn);
                     Assert.Equal(expectedModifiedOn, blog.ChangedOn.Value, _tolerantDateTimeComparer);
                 }

@@ -7,6 +7,7 @@ using Backend.Fx.Environment.DateAndTime;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Domain;
 using Backend.Fx.Patterns.EventAggregation.Integration;
+using Backend.Fx.Patterns.UnitOfWork;
 using FakeItEasy;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,30 +25,16 @@ namespace Backend.Fx.EfCorePersistence.Tests
         public DbConnection Connection { get; }
         public DbContextOptionsBuilder<TestDbContext> OptionsBuilder { get; }
 
-        public EfUnitOfWork<TestDbContext> BeginUnitOfWork(IClock clock = null, IIdentity identity = null)
+        public IUnitOfWork BeginUnitOfWork(IClock clock = null, IIdentity identity = null)
         {
             ICurrentTHolder<IIdentity> currentIdentityHolder = new CurrentIdentityHolder();
             currentIdentityHolder.ReplaceCurrent(identity ?? new SystemIdentity());
-            var uow = new EfUnitOfWork<TestDbContext>(clock ?? new FrozenClock(),
+            var efuow = new EfUnitOfWork<TestDbContext>(clock ?? new FrozenClock(),
                 currentIdentityHolder,
                 A.Fake<IDomainEventAggregator>(),
                 A.Fake<IEventBusScope>(),
-                connection => new TestDbContext(OptionsBuilder.Options),
-                Connection);
-            uow.Begin();
-            return uow;
-        }
-        
-        public InterruptableEfUnitOfWork<TestDbContext> BeginInterruptableUnitOfWork(IClock clock = null, IIdentity identity = null)
-        {
-            ICurrentTHolder<IIdentity> currentIdentityHolder = new CurrentIdentityHolder();
-            currentIdentityHolder.ReplaceCurrent(identity ?? new SystemIdentity());
-            var uow = new InterruptableEfUnitOfWork<TestDbContext>(clock ?? new FrozenClock(),
-                currentIdentityHolder,
-                A.Fake<IDomainEventAggregator>(),
-                A.Fake<IEventBusScope>(),
-                connection => new TestDbContext(OptionsBuilder.Options),
-                Connection);
+                new TestDbContext(OptionsBuilder.Options));
+            var uow = new EfUnitOfWorkTransactionDecorator<TestDbContext>(Connection, efuow);
             uow.Begin();
             return uow;
         }
@@ -55,6 +42,34 @@ namespace Backend.Fx.EfCorePersistence.Tests
         public void Dispose()
         {
             Connection?.Close();
+        }
+    }
+
+    public static class TestEx
+    {
+        public static DbContext GetDbContext(this IUnitOfWork unitOfWork)
+        {
+            if (unitOfWork is EfUnitOfWork<TestDbContext> efUnitOfWork)
+            {
+                return efUnitOfWork.DbContext;
+            }
+
+            if (unitOfWork is UnitOfWorkTransactionDecorator transactionDecorator)
+            {
+                return GetDbContext(transactionDecorator.UnitOfWork);
+            }
+
+            throw new InvalidOperationException();
+        }
+        
+        public static DbTransaction GetDbTransaction(this IUnitOfWork unitOfWork)
+        {
+            if (unitOfWork is UnitOfWorkTransactionDecorator transactionDecorator)
+            {
+                return transactionDecorator.TransactionContext.CurrentTransaction;
+            }
+
+            throw new InvalidOperationException();
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
-using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
 using Backend.Fx.EfCorePersistence.Tests.Fixtures;
 using Backend.Fx.Patterns.UnitOfWork;
 using Xunit;
@@ -23,13 +22,13 @@ namespace Backend.Fx.EfCorePersistence.Tests
         {
             using(DbSession dbs = _fixture.UseDbSession())
             {
-                EfUnitOfWork<TestDbContext> unitOfWork = dbs.BeginUnitOfWork();
+                IUnitOfWork unitOfWork = dbs.BeginUnitOfWork();
                 var sut = new ReadonlyDecorator(unitOfWork);
-                Assert.NotNull(unitOfWork.DbContext);
-                Assert.NotNull(unitOfWork.DbContext.Database.CurrentTransaction);
+                Assert.NotNull(unitOfWork.GetDbContext());
+                Assert.NotNull(unitOfWork.GetDbContext().Database.CurrentTransaction);
                 sut.Complete();
                 sut.Dispose();
-                Assert.Throws<InvalidOperationException>(() => unitOfWork.DbContext.Database.CurrentTransaction.Commit());
+                Assert.Throws<InvalidOperationException>(() => unitOfWork.GetDbContext().Database.CurrentTransaction.Commit());
             }
         }
 
@@ -38,19 +37,19 @@ namespace Backend.Fx.EfCorePersistence.Tests
         {
             using (DbSession dbs = _fixture.UseDbSession())
             {
-                EfUnitOfWork<TestDbContext> unitOfWork = dbs.BeginUnitOfWork();
+                IUnitOfWork unitOfWork = dbs.BeginUnitOfWork();
                 var sut = new ReadonlyDecorator(unitOfWork);
-                unitOfWork.DbContext.Add(new Blogger(334, "Bratislav", "Metulsky"));
+                unitOfWork.GetDbContext().Add(new Blogger(334, "Bratislav", "Metulsky"));
                 sut.Complete();
                 sut.Dispose();
-                Assert.Throws<InvalidOperationException>(() => unitOfWork.DbContext.Database.CurrentTransaction.Commit());
+                Assert.Throws<InvalidOperationException>(() => unitOfWork.GetDbContext().Database.CurrentTransaction.Commit());
             }
 
             using (DbSession dbs = _fixture.UseDbSession())
             {
-                using (EfUnitOfWork<TestDbContext> sut = dbs.BeginUnitOfWork())
+                using (IUnitOfWork sut = dbs.BeginUnitOfWork())
                 {
-                    Assert.Empty(sut.DbContext.Set<Blogger>());
+                    Assert.Empty(sut.GetDbContext().Set<Blogger>());
                 }
             }
         }
@@ -60,18 +59,18 @@ namespace Backend.Fx.EfCorePersistence.Tests
         {
             using (DbSession dbs = _fixture.UseDbSession())
             {
-                EfUnitOfWork<TestDbContext> unitOfWork = dbs.BeginUnitOfWork();
+                IUnitOfWork unitOfWork = dbs.BeginUnitOfWork();
                 var sut = new ReadonlyDecorator(unitOfWork);
-                unitOfWork.DbContext.Add(new Blogger(335, "Bratislav", "Metulsky"));
+                unitOfWork.GetDbContext().Add(new Blogger(335, "Bratislav", "Metulsky"));
                 sut.Dispose();
-                Assert.Throws<InvalidOperationException>(() => unitOfWork.DbContext.Database.CurrentTransaction.Commit());
+                Assert.Throws<InvalidOperationException>(() => unitOfWork.GetDbContext().Database.CurrentTransaction.Commit());
             }
 
             using (DbSession dbs = _fixture.UseDbSession())
             {
-                using (EfUnitOfWork<TestDbContext> sut = dbs.BeginUnitOfWork())
+                using (IUnitOfWork sut = dbs.BeginUnitOfWork())
                 {
-                    Assert.Empty(sut.DbContext.Set<Blogger>());
+                    Assert.Empty(sut.GetDbContext().Set<Blogger>());
                 }
             }
         }

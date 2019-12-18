@@ -12,7 +12,6 @@ using Backend.Fx.Patterns.EventAggregation.Integration;
 using Backend.Fx.Patterns.IdGeneration;
 using Backend.Fx.Patterns.UnitOfWork;
 using Backend.Fx.SimpleInjectorDependencyInjection.Modules;
-using FakeItEasy;
 using SimpleInjector;
 
 namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Bootstrapping
@@ -54,8 +53,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Bootstrap
                     container);
             container.AddRegistration(typeof(IUnitOfWork), uowRegistration);
             container.AddRegistration(typeof(ICanFlush), uowRegistration);
-            container.Register(A.Fake<ICanInterruptTransaction>);
-
+            
             container.RegisterInstance<IEntityIdGenerator>(new InMemoryEntityIdGenerator());
         }
     }
