@@ -18,12 +18,13 @@ namespace Backend.Fx.EfCorePersistence.Tests
     public class TheRepositoryOfComposedAggregate
     {
         private static int _nextTenantId = 57839;
+        private static int _nextId = 1;
         private readonly int _tenantId = _nextTenantId++;
         private readonly IEqualityComparer<DateTime?> _tolerantDateTimeComparer = new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(5000));
         private readonly IEntityIdGenerator _idGenerator = A.Fake<IEntityIdGenerator>();
         private readonly DatabaseFixture _fixture;
         private readonly IClock _clock = new FrozenClock();
-        private int _nextId = 1;
+        
 
         public TheRepositoryOfComposedAggregate()
         {
@@ -155,8 +156,8 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     IUnitOfWork uow = dbs.BeginUnitOfWork(clock:_clock);
                     var sut = new EfRepository<Blog>(uow.GetDbContext(), new BlogMapping(),
                         CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
-                    var blog = sut.Single(id);
-                    var firstPost = blog.Posts.First();
+                    Blog blog = sut.Single(id);
+                    Post firstPost = blog.Posts.First();
                     firstPost.SetName("sadfasfsadf");
                     blog.Posts.Remove(firstPost);
                     uow.Complete();
@@ -181,7 +182,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     IUnitOfWork uow = dbs.BeginUnitOfWork(clock:_clock);
                     var sut = new EfRepository<Blog>(uow.GetDbContext(), new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId),
                         new AllowAll<Blog>());
-                    var blog = sut.Single(id);
+                    Blog blog = sut.Single(id);
                     post = blog.Posts.First();
                     post.SetName("modified");
                     uow.Complete();
@@ -224,7 +225,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
         //            string culture = dbs.Connection.ExecuteScalar<string>($"SELECT TargetAudience_Culture ame FROM Posts where id = {post.Id}");
         //            Assert.Equal("es-AR", culture);
 
-        //            string strChangedOn = dbs.Connection.ExecuteScalar<string>($"SELECT changedon FROM Posts where id = {post.Id}");
+        //            string strChangedOn = dbs.Connection.ExecuteScalar<string>($"SELECT ChangedOn FROM Posts where id = {post.Id}");
         //            DateTime changedOn = DateTime.Parse(strChangedOn);
         //            Assert.Equal(_clock.UtcNow, changedOn, new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(500)));
         //        }
@@ -241,7 +242,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 {
                     IUnitOfWork uow = dbs.BeginUnitOfWork(clock:_clock);
                     var sut = new EfRepository<Blog>(uow.GetDbContext(), new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
-                    var blog = sut.Single(id);
+                    Blog blog = sut.Single(id);
                     blog.Posts.Add(new Post(_idGenerator.NextId(), blog, "added"));
                     uow.Complete();
                 
@@ -262,7 +263,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 {
                     IUnitOfWork uow = dbs.BeginUnitOfWork(clock:_clock);
                     var sut = new EfRepository<Blog>(uow.GetDbContext(), new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
-                    var blog = sut.Single(id);
+                    Blog blog = sut.Single(id);
                     blog.Posts.Clear();
                     blog.Posts.Add(new Post(_idGenerator.NextId(), blog, "new name 1"));
                     blog.Posts.Add(new Post(_idGenerator.NextId(), blog, "new name 2"));
@@ -287,20 +288,20 @@ namespace Backend.Fx.EfCorePersistence.Tests
             {
                 int id = CreateBlogWithPost(dbs, 10);
 
-                var expectedModifiedOn = _clock.UtcNow.AddHours(1);
+                DateTime expectedModifiedOn = _clock.UtcNow.AddHours(1);
                 _clock.OverrideUtcNow(expectedModifiedOn);
 
                 {
                     IUnitOfWork uow = dbs.BeginUnitOfWork(clock:_clock);
                     var sut = new EfRepository<Blog>(uow.GetDbContext(), new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
-                    var b = sut.Single(id);
+                    Blog b = sut.Single(id);
                     b.Posts.Remove(b.Posts.First());
                     uow.Complete();
                 }
 
                 {
                     IUnitOfWork uow = dbs.BeginUnitOfWork(clock:_clock);
-                    var blog = uow.GetDbContext().Set<Blog>().Find(id);
+                    Blog blog = uow.GetDbContext().Set<Blog>().Find(id);
                     Assert.NotNull(blog.ChangedOn);
                     Assert.Equal(expectedModifiedOn, blog.ChangedOn.Value, _tolerantDateTimeComparer);
                 }
