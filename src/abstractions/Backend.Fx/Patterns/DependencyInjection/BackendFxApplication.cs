@@ -72,7 +72,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
             return new MultipleDisposable(scope, scopeDurationLogger);
         }
-
+        
         public void Run<TJob>() where TJob : class, IJob
         {
             var tenantIds = TenantIdService.GetActiveTenantIds();
@@ -91,23 +91,21 @@ namespace Backend.Fx.Patterns.DependencyInjection
         {
             using (BeginScope(new SystemIdentity(), tenantId))
             {
-                using (var unitOfWork = CompositionRoot.GetInstance<IUnitOfWork>())
+                var unitOfWork = CompositionRoot.GetInstance<IUnitOfWork>();
+                try
                 {
-                    try
-                    {
-                        unitOfWork.Begin();
-                        action.Invoke();
-                        unitOfWork.Complete();
-                    }
-                    catch (TargetInvocationException ex)
-                    {
-                        ExceptionLogger.LogException(ex.InnerException ?? ex);
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Info(ex);
-                        ExceptionLogger.LogException(ex);
-                    }
+                    unitOfWork.Begin();
+                    action.Invoke();
+                    unitOfWork.Complete();
+                }
+                catch (TargetInvocationException ex)
+                {
+                    ExceptionLogger.LogException(ex.InnerException ?? ex);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Info(ex);
+                    ExceptionLogger.LogException(ex);
                 }
             }
         }
@@ -116,23 +114,21 @@ namespace Backend.Fx.Patterns.DependencyInjection
         {
             using (BeginScope(new SystemIdentity(), tenantId))
             {
-                using (var unitOfWork = CompositionRoot.GetInstance<IUnitOfWork>())
+                var unitOfWork = CompositionRoot.GetInstance<IUnitOfWork>();
+                try
                 {
-                    try
-                    {
-                        unitOfWork.Begin();
-                        await awaitableAsyncAction.Invoke();
-                        unitOfWork.Complete();
-                    }
-                    catch (TargetInvocationException ex)
-                    {
-                        ExceptionLogger.LogException(ex.InnerException ?? ex);
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Info(ex);
-                        ExceptionLogger.LogException(ex);
-                    }
+                    unitOfWork.Begin();
+                    await awaitableAsyncAction.Invoke();
+                    unitOfWork.Complete();
+                }
+                catch (TargetInvocationException ex)
+                {
+                    ExceptionLogger.LogException(ex.InnerException ?? ex);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Info(ex);
+                    ExceptionLogger.LogException(ex);
                 }
             }
         }

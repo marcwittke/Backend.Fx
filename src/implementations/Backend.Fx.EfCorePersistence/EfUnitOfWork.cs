@@ -9,28 +9,36 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Fx.EfCorePersistence
 {
-    public class EfUnitOfWork<TDbContext> : UnitOfWork where TDbContext : DbContext
+    public class EfUnitOfWork : UnitOfWork
     {
-        // private static readonly ILogger Logger = LogManager.Create<EfUnitOfWork<TDbContext>>();
         
         public EfUnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder, IDomainEventAggregator eventAggregator,
-            IEventBusScope eventBusScope, TDbContext dbContext)
+            IEventBusScope eventBusScope, DbContext dbContext)
             : base(clock, identityHolder, eventAggregator, eventBusScope)
         {
             DbContext = dbContext;
         }
 
-        public TDbContext DbContext { get; }
+        public DbContext DbContext { get; }
 
         public override void Flush()
         {
             base.Flush();
             DbContext.SaveChanges();
         }
-
+        
         protected override void UpdateTrackingProperties(string userId, DateTime utcNow)
         {
             DbContext.UpdateTrackingProperties(userId, utcNow);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                DbContext?.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 }

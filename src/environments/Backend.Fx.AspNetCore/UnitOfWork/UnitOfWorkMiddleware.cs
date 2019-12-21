@@ -30,23 +30,10 @@ namespace Backend.Fx.AspNetCore.UnitOfWork
         [UsedImplicitly]
         public async Task Invoke(HttpContext context)
         {
-            IUnitOfWork unitOfWork = _application.CompositionRoot.GetInstance<IUnitOfWork>();
-            try
-            {
-                // Safe requests (GET, HEAD, OPTIONS) are handled using a unit of work that gets never completed
-                if (context.Request.IsSafe())
-                {
-                    unitOfWork = new ReadonlyDecorator(unitOfWork);
-                }
-
-                unitOfWork.Begin();
-                await _next.Invoke(context);
-                unitOfWork.Complete();
-            }
-            finally
-            {
-                unitOfWork.Dispose();
-            }
+            var unitOfWork = _application.CompositionRoot.GetInstance<IUnitOfWork>();
+            unitOfWork.Begin();
+            await _next.Invoke(context);
+            unitOfWork.Complete();
         }
     }
 }

@@ -5,14 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence
 {
-    public class TestDbContext : DbContext
+    public sealed class TestDbContext : DbContext
     {
         public TestDbContext([NotNull] DbContextOptions<TestDbContext> options) : base(options)
-        {}
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            base.OnConfiguring(optionsBuilder);
             Database.AutoTransactionsEnabled = false;
         }
 

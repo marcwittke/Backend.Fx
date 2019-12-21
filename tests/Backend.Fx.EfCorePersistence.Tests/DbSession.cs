@@ -7,6 +7,7 @@ using Backend.Fx.Environment.DateAndTime;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Domain;
 using Backend.Fx.Patterns.EventAggregation.Integration;
+using Backend.Fx.Patterns.Transactions;
 using Backend.Fx.Patterns.UnitOfWork;
 using FakeItEasy;
 using Microsoft.EntityFrameworkCore;
@@ -25,18 +26,29 @@ namespace Backend.Fx.EfCorePersistence.Tests
         public DbConnection Connection { get; }
         public DbContextOptionsBuilder<TestDbContext> OptionsBuilder { get; }
 
-        public IUnitOfWork BeginUnitOfWork(IClock clock = null, IIdentity identity = null)
+        public IUnitOfWork BeginUnitOfWork(bool asReadonly = false, IClock clock = null, IIdentity identity = null)
         {
             ICurrentTHolder<IIdentity> currentIdentityHolder = new CurrentIdentityHolder();
             currentIdentityHolder.ReplaceCurrent(identity ?? new SystemIdentity());
-            var efuow = new EfUnitOfWork<TestDbContext>(clock ?? new FrozenClock(),
+
+            var dbContext = new TestDbContext(OptionsBuilder.Options);
+            IUnitOfWork unitOfWork = new EfUnitOfWork(clock ?? new FrozenClock(),
                 currentIdentityHolder,
                 A.Fake<IDomainEventAggregator>(),
                 A.Fake<IEventBusScope>(),
-                new TestDbContext(OptionsBuilder.Options));
-            var uow = new EfUnitOfWorkTransactionDecorator<TestDbContext>(Connection, efuow);
-            uow.Begin();
-            return uow;
+                dbContext);
+
+            ITransactionContext transactionContext = new TransactionContext(Connection);
+            if (asReadonly)
+            {
+                transactionContext = new ReadonlyDecorator(transactionContext);
+            }
+            
+            unitOfWork = new DbContextTransactionDecorator(transactionContext,dbContext, unitOfWork);
+            // unitOfWork = new DbConnectionDecorator(Connection, unitOfWork);
+
+            unitOfWork.Begin();
+            return unitOfWork;
         }
         
         public void Dispose()
@@ -49,14 +61,24 @@ namespace Backend.Fx.EfCorePersistence.Tests
     {
         public static DbContext GetDbContext(this IUnitOfWork unitOfWork)
         {
-            if (unitOfWork is EfUnitOfWork<TestDbContext> efUnitOfWork)
+            if (unitOfWork is EfUnitOfWork efUnitOfWork)
             {
                 return efUnitOfWork.DbContext;
             }
 
-            if (unitOfWork is UnitOfWorkTransactionDecorator transactionDecorator)
+            if (unitOfWork is DbContextTransactionDecorator dbcTransactionDecorator)
+            {
+                return GetDbContext(dbcTransactionDecorator.UnitOfWork);
+            }
+            
+            if (unitOfWork is DbTransactionDecorator transactionDecorator)
             {
                 return GetDbContext(transactionDecorator.UnitOfWork);
+            }
+            
+            if (unitOfWork is DbConnectionDecorator connectionDecorator)
+            {
+                return GetDbContext(connectionDecorator.UnitOfWork);
             }
 
             throw new InvalidOperationException();
@@ -64,9 +86,19 @@ namespace Backend.Fx.EfCorePersistence.Tests
         
         public static DbTransaction GetDbTransaction(this IUnitOfWork unitOfWork)
         {
-            if (unitOfWork is UnitOfWorkTransactionDecorator transactionDecorator)
+            if (unitOfWork is DbContextTransactionDecorator dbcTransactionDecorator)
+            {
+                return (DbTransaction) dbcTransactionDecorator.TransactionContext.CurrentTransaction;
+            }
+            
+            if (unitOfWork is DbTransactionDecorator transactionDecorator)
             {
                 return (DbTransaction) transactionDecorator.TransactionContext.CurrentTransaction;
+            }
+            
+            if (unitOfWork is DbConnectionDecorator connectionDecorator)
+            {
+                return GetDbTransaction(connectionDecorator.UnitOfWork);
             }
 
             throw new InvalidOperationException();

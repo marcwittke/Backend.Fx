@@ -10,9 +10,9 @@
     using Logging;
 
     /// <summary>
-    /// All-or-nothing operation wrapper, typically implemented by a surrounding database transaction
+    /// Maintains a list of objects affected by a business transaction and coordinates the writing out of changes and the resolution of concurrency problems.
     /// </summary>
-    public interface IUnitOfWork : IDisposable
+    public interface IUnitOfWork 
     {
         void Begin();
         void Complete();
@@ -52,7 +52,7 @@
             _lifetimeLogger = Logger.DebugDuration($"Beginning unit of work #{_instanceId}", $"Disposing unit of work #{_instanceId}");
             _isCompleted = false;
         }
-
+        
         public virtual void Complete()
         {
             Logger.Debug("Completing unit of work #" + _instanceId);

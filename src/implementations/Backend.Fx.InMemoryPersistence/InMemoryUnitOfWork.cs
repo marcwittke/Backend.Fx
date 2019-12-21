@@ -25,7 +25,5 @@ namespace Backend.Fx.InMemoryPersistence
         {
             CommitCalls++;
         }
-
-        
     }
 }
