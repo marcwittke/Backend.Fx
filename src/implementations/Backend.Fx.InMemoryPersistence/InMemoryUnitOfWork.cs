@@ -21,14 +21,9 @@ namespace Backend.Fx.InMemoryPersistence
         protected override void UpdateTrackingProperties(string userId, DateTime utcNow)
         { }
 
-        protected override void Commit()
+        public override void Complete()
         {
             CommitCalls++;
-        }
-
-        protected override void Rollback()
-        {
-            RollbackCalls++;
         }
     }
 }

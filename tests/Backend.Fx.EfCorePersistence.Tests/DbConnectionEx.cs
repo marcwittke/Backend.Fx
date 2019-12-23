@@ -43,27 +43,5 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 }
             }
         }
-
-        public static IDisposable OpenDisposable(this IDbConnection connection)
-        {
-            connection.Open();
-            return new DelegateDisposable(connection.Close);
-        }
-    }
-
-    public class DelegateDisposable : IDisposable
-    {
-        private readonly Action _onDisposal;
-
-        public DelegateDisposable(Action onDisposal)
-        {
-            _onDisposal = onDisposal;
-        }
-
-
-        public void Dispose()
-        {
-            _onDisposal();
-        }
     }
 }

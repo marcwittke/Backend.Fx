@@ -1,4 +1,7 @@
-﻿namespace Backend.Fx.EfCorePersistence.Oracle
+﻿using Backend.Fx.EfCorePersistence.Bootstrapping;
+using Backend.Fx.Patterns.IdGeneration;
+
+namespace Backend.Fx.EfCorePersistence.Oracle
 {
     using System;
     using System.Data;
@@ -6,54 +9,61 @@
 
     public abstract class OracleSequence : ISequence
     {
+        private readonly IDbConnectionFactory _dbConnectionFactory;
         private static readonly ILogger Logger = LogManager.Create<OracleSequence>();
 
-        public void EnsureSequence(IDbConnection dbConnection)
+        protected OracleSequence(IDbConnectionFactory dbConnectionFactory)
+        {
+            _dbConnectionFactory = dbConnectionFactory;
+        }
+
+        public void EnsureSequence()
         {
             Logger.Info($"Ensuring existence of oracle sequence {SchemaPrefix}{SequenceName}");
 
-            if (dbConnection.State == ConnectionState.Closed)
+            using (IDbConnection dbConnection = _dbConnectionFactory.Create())
             {
                 dbConnection.Open();
-            }
-
-            bool sequenceExists;
-            using (IDbCommand command = dbConnection.CreateCommand())
-            {
-                command.CommandText = $"SELECT count(*) FROM user_sequences WHERE sequence_name = '{SequenceName}'";
-                sequenceExists = (decimal)command.ExecuteScalar() == 1;
-            }
-            if (sequenceExists)
-            {
-                Logger.Info($"Sequence {SchemaPrefix}{SequenceName} exists");
-            }
-            else
-            {
-                Logger.Info($"Sequence {SchemaPrefix}{SequenceName} does not exist yet and will be created now");
-                using (var cmd = dbConnection.CreateCommand())
+                bool sequenceExists;
+                using (IDbCommand command = dbConnection.CreateCommand())
                 {
-                    cmd.CommandText = $"CREATE SEQUENCE {SchemaPrefix}{SequenceName} START WITH 1 INCREMENT BY {Increment}";
-                    cmd.ExecuteNonQuery();
-                    Logger.Info($"Sequence {SchemaPrefix}{SequenceName} created");
+                    command.CommandText = $"SELECT count(*) FROM user_sequences WHERE sequence_name = '{SequenceName}'";
+                    sequenceExists = (decimal) command.ExecuteScalar() == 1;
+                }
+
+                if (sequenceExists)
+                {
+                    Logger.Info($"Sequence {SchemaPrefix}{SequenceName} exists");
+                }
+                else
+                {
+                    Logger.Info($"Sequence {SchemaPrefix}{SequenceName} does not exist yet and will be created now");
+                    using (var cmd = dbConnection.CreateCommand())
+                    {
+                        cmd.CommandText = $"CREATE SEQUENCE {SchemaPrefix}{SequenceName} START WITH 1 INCREMENT BY {Increment}";
+                        cmd.ExecuteNonQuery();
+                        Logger.Info($"Sequence {SchemaPrefix}{SequenceName} created");
+                    }
                 }
             }
         }
 
-        public int GetNextValue(IDbConnection dbConnection)
+        public int GetNextValue()
         {
-            if (dbConnection.State == ConnectionState.Closed)
+            using (IDbConnection dbConnection = _dbConnectionFactory.Create())
             {
                 dbConnection.Open();
-            }
 
-            int nextValue;
-            using (IDbCommand command = dbConnection.CreateCommand())
-            {
-                command.CommandText = $"SELECT {SchemaPrefix}{SequenceName}.NEXTVAL FROM dual";
-                nextValue = Convert.ToInt32(command.ExecuteScalar());
-                Logger.Debug($"{SchemaPrefix}{SequenceName} served {nextValue} as next value");
+                int nextValue;
+                using (IDbCommand command = dbConnection.CreateCommand())
+                {
+                    command.CommandText = $"SELECT {SchemaPrefix}{SequenceName}.NEXTVAL FROM dual";
+                    nextValue = Convert.ToInt32(command.ExecuteScalar());
+                    Logger.Debug($"{SchemaPrefix}{SequenceName} served {nextValue} as next value");
+                }
+
+                return nextValue;
             }
-            return nextValue;
         }
 
         public abstract int Increment { get; }

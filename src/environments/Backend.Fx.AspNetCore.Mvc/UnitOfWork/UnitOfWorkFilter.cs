@@ -18,10 +18,6 @@ namespace Backend.Fx.AspNetCore.Mvc.UnitOfWork
         public void OnActionExecuting(ActionExecutingContext context)
         {
             var unitOfWork = _application.CompositionRoot.GetInstance<IUnitOfWork>();
-            if (context.HttpContext.Request.IsSafe())
-            {
-                unitOfWork = new ReadonlyDecorator(unitOfWork);
-            }
             unitOfWork.Begin();
         }
 
@@ -29,20 +25,13 @@ namespace Backend.Fx.AspNetCore.Mvc.UnitOfWork
         {
             var unitOfWork = _application.CompositionRoot.GetInstance<IUnitOfWork>();
 
-            try
+            if (context.Exception == null)
             {
-                if (context.Exception == null)
-                {
-                    unitOfWork.Complete();
-                }
-                else
-                {
-                    Logger.Warn($"Preventing unit of work completion due to {context.Exception.GetType().Name}: {context.Exception.Message}");
-                }
+                unitOfWork.Complete();
             }
-            finally
+            else
             {
-                unitOfWork.Dispose();
+                Logger.Warn($"Preventing unit of work completion due to {context.Exception.GetType().Name}: {context.Exception.Message}");
             }
         }
     }

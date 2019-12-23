@@ -18,14 +18,16 @@
             UpdateTrackingPropertiesCount++;
         }
 
-        protected override void Commit()
+        public override void Complete()
         {
             CommitCount++;
+            base.Complete();
         }
 
-        protected override void Rollback()
+        protected override void Dispose(bool disposing)
         {
             RollbackCount++;
+            base.Dispose(disposing);
         }
 
         public TestUnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder, IDomainEventAggregator eventAggregator, IEventBusScope eventBusScope) 

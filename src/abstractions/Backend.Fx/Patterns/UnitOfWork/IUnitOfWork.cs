@@ -10,9 +10,9 @@
     using Logging;
 
     /// <summary>
-    /// All-or-nothing operation wrapper, typically implemented by a surrounding database transaction
+    /// Maintains a list of objects affected by a business transaction and coordinates the writing out of changes and the resolution of concurrency problems.
     /// </summary>
-    public interface IUnitOfWork : IDisposable
+    public interface IUnitOfWork 
     {
         void Begin();
         void Complete();
@@ -52,21 +52,18 @@
             _lifetimeLogger = Logger.DebugDuration($"Beginning unit of work #{_instanceId}", $"Disposing unit of work #{_instanceId}");
             _isCompleted = false;
         }
-
-        public void Complete()
+        
+        public virtual void Complete()
         {
             Logger.Debug("Completing unit of work #" + _instanceId);
             Flush(); // we have to flush before raising events, therefore the handlers find the latest changes in the DB
             _eventAggregator.RaiseEvents();
             Flush(); // event handlers change the DB state, so we have to flush again
-            Commit();
             AsyncHelper.RunSync(()=>_eventBusScope.RaiseEvents());
             _isCompleted = true;
         }
 
         protected abstract void UpdateTrackingProperties(string userId, DateTime utcNow);
-        protected abstract void Commit();
-        protected abstract void Rollback();
 
         protected virtual void Dispose(bool disposing)
         {
@@ -75,7 +72,6 @@
                 if (_isCompleted == false)
                 {
                     Logger.Info($"Canceling unit of work #{_instanceId}.");
-                    Rollback();
                 }
                 _lifetimeLogger?.Dispose();
                 _lifetimeLogger = null;

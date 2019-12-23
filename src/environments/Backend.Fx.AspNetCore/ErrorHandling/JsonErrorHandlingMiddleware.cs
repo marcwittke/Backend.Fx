@@ -7,7 +7,6 @@
     using System.Threading.Tasks;
     using Exceptions;
     using Logging;
-    using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Net.Http.Headers;
     using Newtonsoft.Json;
@@ -15,7 +14,7 @@
 
     public class JsonErrorHandlingMiddleware : ErrorHandlingMiddleware
     {
-        private readonly IHostingEnvironment _env;
+        private readonly bool _showInternalServerErrorDetails;
         private static readonly ILogger Logger = LogManager.Create<JsonErrorHandlingMiddleware>();
 
         protected JsonSerializerSettings JsonSerializerSettings { get; } = new JsonSerializerSettings
@@ -26,10 +25,10 @@
             },
         };
 
-        public JsonErrorHandlingMiddleware(RequestDelegate next, IHostingEnvironment env) 
+        public JsonErrorHandlingMiddleware(RequestDelegate next, bool showInternalServerErrorDetails) 
             : base(next)
         {
-            _env = env;
+            _showInternalServerErrorDetails = showInternalServerErrorDetails;
         }
 
         protected override Task<bool> ShouldHandle(HttpContext context)
@@ -67,7 +66,7 @@
                 return;
             }
             context.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
-            var responseContent = _env.IsDevelopment()
+            var responseContent = _showInternalServerErrorDetails
                                           ? JsonConvert.SerializeObject(new { message = exception.Message, stackTrace = exception.StackTrace }, JsonSerializerSettings)
                                           : JsonConvert.SerializeObject(new { message = "An internal error occured" }, JsonSerializerSettings);
             context.Response.ContentType = "application/json; charset=utf-8";

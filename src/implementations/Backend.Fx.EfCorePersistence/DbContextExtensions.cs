@@ -9,9 +9,6 @@ using Backend.Fx.Logging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
-using System.Diagnostics;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Backend.Fx.EfCorePersistence
 {
@@ -63,6 +60,8 @@ namespace Backend.Fx.EfCorePersistence
                      .Entries<Entity>()
                      .Where(entry => entry.State == EntityState.Added || entry.State == EntityState.Modified || entry.State == EntityState.Deleted)
                      .Where(entry => !(entry.Entity is AggregateRoot))
+                     .ToArray()
+                     .AsParallel()
                      .ForAll(entry =>
                      {
                          EntityEntry aggregateRootEntry = FindAggregateRootEntry(dbContext.ChangeTracker, entry);
@@ -109,15 +108,6 @@ namespace Backend.Fx.EfCorePersistence
             {
                 Logger.Debug($"Tracked {count} entities as created/changed on {utcNow:u} by {userId}");
             }
-        }
-
-        public static void ResetTransactions(this DbContext dbContext)
-        {
-            // big fat HACK: until EF Core allows to change the transaction and/or connection on an existing instance of DbContext...
-            RelationalConnection relationalConnection = (RelationalConnection)dbContext.Database.GetService<IDbContextTransactionManager>();
-            MethodInfo methodInfo = typeof(RelationalConnection).GetMethod("ClearTransactions", BindingFlags.Instance | BindingFlags.NonPublic);
-            Debug.Assert(methodInfo != null, nameof(methodInfo) + " != null");
-            methodInfo.Invoke(relationalConnection, new object[0]);
         }
 
         /// <summary>

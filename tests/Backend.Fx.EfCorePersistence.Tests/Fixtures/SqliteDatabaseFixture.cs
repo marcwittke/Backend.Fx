@@ -15,15 +15,15 @@ namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
             return new DbContextOptionsBuilder<TestDbContext>().UseSqlite(_connectionString).Options;
         }
 
-        protected override DbContextOptions<TestDbContext> GetDbContextOptions(DbConnection connection)
+        protected override DbContextOptionsBuilder<TestDbContext> GetDbContextOptionsBuilder(DbConnection connection)
         {
-            return new DbContextOptionsBuilder<TestDbContext>().UseSqlite(connection).Options;
+            return new DbContextOptionsBuilder<TestDbContext>().UseSqlite(connection);
         }
 
         public override DbSession UseDbSession()
         {
             var sqliteConnection = new SqliteConnection(_connectionString);
-            return new DbSession(sqliteConnection, GetDbContextOptions(sqliteConnection));
+            return new DbSession(sqliteConnection, GetDbContextOptionsBuilder(sqliteConnection));
         }
     }
 }

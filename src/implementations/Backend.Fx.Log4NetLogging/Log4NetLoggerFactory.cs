@@ -1,12 +1,11 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using log4net.Repository;
+using BackendFxILogger = Backend.Fx.Logging.ILogger;
+using BackendFxILoggerFactory = Backend.Fx.Logging.ILoggerFactory;
 
 namespace Backend.Fx.Log4NetLogging
 {
-    using log4net.Repository;
-    using BackendFxILogger = Backend.Fx.Logging.ILogger;
-    using BackendFxILoggerFactory = Backend.Fx.Logging.ILoggerFactory;
-
     [DebuggerStepThrough]
     public class Log4NetLoggerFactory : BackendFxILoggerFactory
     {

@@ -14,18 +14,6 @@ namespace Backend.Fx.Tests.Patterns.UnitOfWork
         private readonly IEventBusScope _eventBusScope = A.Fake<IEventBusScope>();
 
         [Fact]
-        public void CommitsOnComplete()
-        {
-            TestUnitOfWork sut = new TestUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), _eventAggregator, _eventBusScope);
-            sut.Begin();
-            sut.Complete();
-            sut.Dispose();
-            Assert.Equal(0, sut.RollbackCount);
-            Assert.Equal(2, sut.UpdateTrackingPropertiesCount);
-            Assert.Equal(1, sut.CommitCount);
-        }
-
-        [Fact]
         public void RaisesDomainEventsOnComplete()
         {
             TestUnitOfWork sut = new TestUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), _eventAggregator, _eventBusScope);
@@ -43,17 +31,6 @@ namespace Backend.Fx.Tests.Patterns.UnitOfWork
             sut.Complete();
             sut.Dispose();
             A.CallTo(() => _eventBusScope.RaiseEvents()).MustHaveHappenedOnceExactly();
-        }
-
-        [Fact]
-        public void RollsBackOnDispose()
-        {
-            TestUnitOfWork sut = new TestUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), _eventAggregator, _eventBusScope);
-            sut.Begin();
-            sut.Dispose();
-            Assert.Equal(1, sut.RollbackCount);
-            Assert.Equal(0, sut.UpdateTrackingPropertiesCount);
-            Assert.Equal(0, sut.CommitCount);
         }
 
         [Fact]
@@ -80,9 +57,7 @@ namespace Backend.Fx.Tests.Patterns.UnitOfWork
             TestUnitOfWork sut = new TestUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), _eventAggregator, _eventBusScope);
             sut.Begin();
             sut.Flush();
-            Assert.Equal(0, sut.RollbackCount);
             Assert.Equal(1, sut.UpdateTrackingPropertiesCount);
-            Assert.Equal(0, sut.CommitCount);
         }
     }
 }

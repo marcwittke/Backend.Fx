@@ -61,6 +61,7 @@ namespace Backend.Fx.EfCorePersistence
         /// <param name="previousState"></param>
         private void AuthorizeChanges(InternalEntityEntry entry, EntityState previousState)
         {
+            // ReSharper disable EF1001
             if (previousState == EntityState.Unchanged && entry.EntityState == EntityState.Modified && entry.EntityType.ClrType == typeof(TAggregateRoot))
             {
                 var aggregateRoot = (TAggregateRoot) entry.Entity;
@@ -69,6 +70,7 @@ namespace Backend.Fx.EfCorePersistence
                     throw new SecurityException($"You are not allowed to modify {AggregateTypeName}[{aggregateRoot.Id}]");
                 }
             }
+            // ReSharper restore EF1001
         }
 
         protected override void AddPersistent(TAggregateRoot aggregateRoot)

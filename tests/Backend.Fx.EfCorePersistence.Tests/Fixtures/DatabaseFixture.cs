@@ -16,7 +16,7 @@ namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
 
         protected abstract DbContextOptions<TestDbContext> GetDbContextOptionsForDbCreation();
 
-        protected abstract DbContextOptions<TestDbContext> GetDbContextOptions(DbConnection connection);
+        protected abstract DbContextOptionsBuilder<TestDbContext> GetDbContextOptionsBuilder(DbConnection connection);
 
         public abstract DbSession UseDbSession();
     }

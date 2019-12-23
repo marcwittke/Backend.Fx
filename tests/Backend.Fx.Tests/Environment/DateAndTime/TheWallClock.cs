@@ -1,14 +1,12 @@
-﻿using Backend.Fx.Extensions;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
+using Backend.Fx.Environment.DateAndTime;
+using Backend.Fx.Extensions;
 using Xunit;
 
 namespace Backend.Fx.Tests.Environment.DateAndTime
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading;
-    using Fx.Environment.DateAndTime;
-    using Xunit;
-
     public class TheWallClock
     {
         private readonly IEqualityComparer<DateTime?> _tolerantDateTimeComparer = new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(10));

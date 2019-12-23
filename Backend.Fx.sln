@@ -45,8 +45,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.InMemoryPersiste
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.Log4NetLogging", "src\implementations\Backend.Fx.Log4NetLogging\Backend.Fx.Log4NetLogging.csproj", "{C27BA4CE-882B-405F-906E-4DFA6E9F1216}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend.Fx.SqlServer", "src\implementations\Backend.Fx.SqlServer\Backend.Fx.SqlServer.csproj", "{BEDC2709-7B9C-4BE3-97F3-C56D593C8C15}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -105,10 +103,6 @@ Global
 		{C27BA4CE-882B-405F-906E-4DFA6E9F1216}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C27BA4CE-882B-405F-906E-4DFA6E9F1216}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C27BA4CE-882B-405F-906E-4DFA6E9F1216}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BEDC2709-7B9C-4BE3-97F3-C56D593C8C15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BEDC2709-7B9C-4BE3-97F3-C56D593C8C15}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BEDC2709-7B9C-4BE3-97F3-C56D593C8C15}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BEDC2709-7B9C-4BE3-97F3-C56D593C8C15}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -130,7 +124,6 @@ Global
 		{45EC5987-1C85-4940-8E5E-3B4F0FA90AF8} = {56ACAE69-F7F0-4FF2-BEE6-4B079481CF9A}
 		{0B8F13CA-1347-4655-9D41-AED21B1AFAC4} = {739A7296-579F-4D9A-BC73-DCECD260D7A0}
 		{C27BA4CE-882B-405F-906E-4DFA6E9F1216} = {739A7296-579F-4D9A-BC73-DCECD260D7A0}
-		{BEDC2709-7B9C-4BE3-97F3-C56D593C8C15} = {739A7296-579F-4D9A-BC73-DCECD260D7A0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {45648557-C751-44AD-9C87-0F12EB673969}
