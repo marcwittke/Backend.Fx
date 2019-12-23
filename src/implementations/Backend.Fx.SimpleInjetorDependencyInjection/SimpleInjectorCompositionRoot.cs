@@ -32,7 +32,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             Container.Options.DefaultScopedLifestyle = ScopedLifestyle;
         }
 
-        internal Container Container { get; } = new Container();
+        public Container Container { get; } = new Container();
 
         internal ScopedLifestyle ScopedLifestyle { get; }
 

@@ -17,9 +17,9 @@ namespace Backend.Fx.NLogLogging
         {
             lock (SyncLock)
             {
-                if (NLog.LogManager.Configuration != null) return;
+                if (LogManager.Configuration != null) return;
                 
-                Backend.Fx.Logging.LogManager.Initialize(new NLogLoggerFactory());
+                Logging.LogManager.Initialize(new NLogLoggerFactory());
                 var config = new LoggingConfiguration();
 
                 var consoleTarget = new ConsoleTarget
@@ -66,7 +66,7 @@ namespace Backend.Fx.NLogLogging
                 config.AddTarget(warnings);
                 config.LoggingRules.Add(new LoggingRule("*", LogLevel.Warn, LogLevel.Warn, warnings));
 
-                NLog.LogManager.Configuration = config;
+                LogManager.Configuration = config;
 
                 Console.WriteLine($"Test console shows only warn, error and fatal events. Full log file is available at {Path.Combine(AppContext.BaseDirectory, logfilename)}");
             }
@@ -79,7 +79,7 @@ namespace Backend.Fx.NLogLogging
 
         public static IEnumerable<string> LogMessages(string level)
         {
-            return NLog.LogManager.Configuration?.FindTargetByName<MemoryTarget>(level)?.Logs ?? Enumerable.Empty<string>();
+            return LogManager.Configuration?.FindTargetByName<MemoryTarget>(level)?.Logs ?? Enumerable.Empty<string>();
         }
     }
 }

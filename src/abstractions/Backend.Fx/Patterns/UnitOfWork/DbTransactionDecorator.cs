@@ -5,7 +5,8 @@ using Backend.Fx.Patterns.Transactions;
 namespace Backend.Fx.Patterns.UnitOfWork
 {
     /// <summary>
-    /// Enriches the unit of work to use a database transaction during lifetime. 
+    /// Enriches the unit of work to use a database transaction during lifetime. The transaction gets started, before IUnitOfWork.Begin()
+    /// is being called and gets committed after IUnitOfWork.Complete() is being called.
     /// </summary>
     public class DbTransactionDecorator : IUnitOfWork
     {
@@ -21,13 +22,13 @@ namespace Backend.Fx.Patterns.UnitOfWork
 
         public ICurrentTHolder<IIdentity> IdentityHolder => UnitOfWork.IdentityHolder;
 
-        public void Begin()
+        public virtual void Begin()
         {
             TransactionContext.BeginTransaction();
             UnitOfWork.Begin();
         }
 
-        public void Complete()
+        public virtual void Complete()
         {
             UnitOfWork.Complete();
             TransactionContext.CommitTransaction();

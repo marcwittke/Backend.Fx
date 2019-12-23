@@ -42,16 +42,16 @@ namespace Backend.Fx.EfCorePersistence
                 .ExportedTypes
                 .Select(t => t.GetTypeInfo())
                 .Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericType && typeof(IAggregateMapping).GetTypeInfo().IsAssignableFrom(t));
-            foreach (var typeInfo in aggregateDefinitionTypeInfos)
+            foreach (TypeInfo typeInfo in aggregateDefinitionTypeInfos)
             {
-                IAggregateMapping aggregateMapping = (IAggregateMapping)Activator.CreateInstance(typeInfo.AsType());
+                var aggregateMapping = (IAggregateMapping)Activator.CreateInstance(typeInfo.AsType());
                 aggregateMapping.ApplyEfMapping(modelBuilder);
             }
         }
 
         public static void UpdateTrackingProperties(this DbContext dbContext, string userId, DateTime utcNow)
         {
-            userId = userId ?? "anonymous";
+            userId ??= "anonymous";
             var isTraceEnabled = Logger.IsTraceEnabled();
             int count = 0;
 
@@ -61,7 +61,6 @@ namespace Backend.Fx.EfCorePersistence
                      .Where(entry => entry.State == EntityState.Added || entry.State == EntityState.Modified || entry.State == EntityState.Deleted)
                      .Where(entry => !(entry.Entity is AggregateRoot))
                      .ToArray()
-                     .AsParallel()
                      .ForAll(entry =>
                      {
                          EntityEntry aggregateRootEntry = FindAggregateRootEntry(dbContext.ChangeTracker, entry);
@@ -116,9 +115,10 @@ namespace Backend.Fx.EfCorePersistence
         /// </summary>
         private static EntityEntry FindAggregateRootEntry(ChangeTracker changeTracker, EntityEntry entry)
         {
-            foreach (var navigation in entry.Navigations)
+            Logger.Debug($"Searching aggregate root of {entry.Entity.GetType().Name}[{(entry.Entity as Identified)?.Id}]");
+            foreach (NavigationEntry navigation in entry.Navigations)
             {
-                var navTargetTypeInfo = navigation.Metadata.GetTargetType().ClrType.GetTypeInfo();
+                TypeInfo navTargetTypeInfo = navigation.Metadata.GetTargetType().ClrType.GetTypeInfo();
                 int navigationTargetForeignKeyValue;
 
                 if (navigation.CurrentValue == null)
@@ -152,6 +152,7 @@ namespace Backend.Fx.EfCorePersistence
                 }
 
                 // recurse in case of "Entity -> Entity -> AggregateRoot"
+                Logger.Debug("Recursing...");
                 return FindAggregateRootEntry(changeTracker, navigationTargetEntry);
             }
 

@@ -11,8 +11,7 @@ namespace Backend.Fx.InMemoryPersistence
     public class InMemoryUnitOfWork : UnitOfWork
     {
         public int CommitCalls { get; private set; }
-        public int RollbackCalls { get; private set; }
-
+        
         public InMemoryUnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder, 
                                   IDomainEventAggregator eventAggregator, IEventBusScope eventBusScope) 
                 : base(clock, identityHolder, eventAggregator, eventBusScope)

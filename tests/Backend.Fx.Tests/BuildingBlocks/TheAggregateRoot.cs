@@ -22,7 +22,8 @@ namespace Backend.Fx.Tests.BuildingBlocks
                 Children.Add(new TestEntity("Child 3", this));
             }
 
-            public string Name { get; [UsedImplicitly] private set; }
+            [UsedImplicitly]
+            public string Name { get; private set; }
 
             public ISet<TestEntity> Children { get;  } = new HashSet<TestEntity>();
         }
@@ -35,7 +36,9 @@ namespace Backend.Fx.Tests.BuildingBlocks
                 Parent = parent;
             }
 
+            [UsedImplicitly]
             public string Name { get; set; }
+            [UsedImplicitly]
             public TestAggregateRoot Parent { get; set; }
         }
 

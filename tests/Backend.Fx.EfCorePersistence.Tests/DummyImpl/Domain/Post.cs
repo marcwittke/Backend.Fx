@@ -17,10 +17,13 @@ namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain
             TargetAudience = new TargetAudience {IsPublic = isPublic, Culture = "fr-FR"};
         }
 
-        public int BlogId { get; [UsedImplicitly] private set; }
-        public Blog Blog { get; [UsedImplicitly] private set; }
+        [UsedImplicitly]
+        public int BlogId { get;  private set; }
+        [UsedImplicitly]
+        public Blog Blog { get; private set; }
+        [UsedImplicitly]
         public string Name { get; private set; }
-
+        [UsedImplicitly]
         public TargetAudience TargetAudience { get; set; }
 
         public void SetName(string name)

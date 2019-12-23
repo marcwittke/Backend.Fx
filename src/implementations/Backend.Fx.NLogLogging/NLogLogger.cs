@@ -3,7 +3,7 @@
     using System;
     using System.Diagnostics;
     using System.Globalization;
-    using BackendFxILogger = Backend.Fx.Logging.ILogger;
+    using BackendFxILogger = Logging.ILogger;
     
     using NLogILogger = NLog.ILogger;
     using NLogLogLevel = NLog.LogLevel;
@@ -84,12 +84,12 @@
 
         public IDisposable InfoDuration(string activity)
         {
-            return new Backend.Fx.Logging.DurationLogger(s => Info(s), activity);
+            return new Logging.DurationLogger(s => Info(s), activity);
         }
 
         public IDisposable InfoDuration(string beginMessage, string endMessage)
         {
-            return new Backend.Fx.Logging.DurationLogger(s => Info(s), beginMessage, endMessage);
+            return new Logging.DurationLogger(s => Info(s), beginMessage, endMessage);
         }
 
         public void Info(string format, params object[] args)
@@ -118,12 +118,12 @@
 
         public IDisposable DebugDuration(string activity)
         {
-            return new Backend.Fx.Logging.DurationLogger(s => Debug(s), activity);
+            return new Logging.DurationLogger(s => Debug(s), activity);
         }
 
         public IDisposable DebugDuration(string beginMessage, string endMessage)
         {
-            return new Backend.Fx.Logging.DurationLogger(s => Debug(s), beginMessage, endMessage);
+            return new Logging.DurationLogger(s => Debug(s), beginMessage, endMessage);
         }
 
         public void Debug(string format, params object[] args)
@@ -153,12 +153,12 @@
 
         public IDisposable TraceDuration(string activity)
         {
-            return new Backend.Fx.Logging.DurationLogger(s => Trace(s), activity);
+            return new Logging.DurationLogger(s => Trace(s), activity);
         }
 
         public IDisposable TraceDuration(string beginMessage, string endMessage)
         {
-            return new Backend.Fx.Logging.DurationLogger(s => Trace(s), beginMessage, endMessage);
+            return new Logging.DurationLogger(s => Trace(s), beginMessage, endMessage);
         }
 
         public void Trace(string format, params object[] args)

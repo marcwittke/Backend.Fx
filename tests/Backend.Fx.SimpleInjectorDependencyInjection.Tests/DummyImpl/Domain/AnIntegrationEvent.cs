@@ -11,6 +11,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Domain
             Whatever = whatever;
         }
 
-        public int Whatever { get; }
+        public int Whatever { [UsedImplicitly] get; }
     }
 }
