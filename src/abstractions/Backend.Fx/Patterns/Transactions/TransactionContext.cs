@@ -53,15 +53,18 @@ namespace Backend.Fx.Patterns.Transactions
         {
             if (_shouldHandleConnectionState)
             {
+                Logger.Debug("Opening connection");
                 Connection.Open();
             }
 
+            Logger.Debug("Beginning transaction");
             CurrentTransaction = Connection.BeginTransaction();
             _transactionLifetimeLogger = Logger.DebugDuration("Transaction open");
         }
 
         public void CommitTransaction()
         {
+            Logger.Debug("Committing transaction");
             CurrentTransaction.Commit();
             CurrentTransaction.Dispose();
             CurrentTransaction = null;
@@ -69,12 +72,14 @@ namespace Backend.Fx.Patterns.Transactions
             _transactionLifetimeLogger = null;
             if (_shouldHandleConnectionState)
             {
+                Logger.Debug("Closing connection");
                 Connection.Close();
             }
         }
 
         public void RollbackTransaction()
         {
+            Logger.Debug("rolling back transaction");
             CurrentTransaction.Rollback();
             CurrentTransaction.Dispose();
             CurrentTransaction = null;
