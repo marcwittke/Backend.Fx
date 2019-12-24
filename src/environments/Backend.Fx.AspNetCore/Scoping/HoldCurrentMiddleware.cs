@@ -5,28 +5,21 @@ using Microsoft.AspNetCore.Http;
 
 namespace Backend.Fx.AspNetCore.Scoping
 {
-    public abstract class HoldCurrentMiddleware<T> where T : class
+    public abstract class HoldCurrentMiddleware<T> : IMiddleware where T : class
     {
-        private readonly RequestDelegate _next;
-        private readonly IBackendFxApplication _application;
-
+        private readonly ICurrentTHolder<T> _currentTHolder;
+        
         [UsedImplicitly]
-        protected HoldCurrentMiddleware(RequestDelegate next, IBackendFxApplication application)
+        protected HoldCurrentMiddleware(ICurrentTHolder<T> currentTHolder)
         {
-            _next = next;
-            _application = application;
+            _currentTHolder = currentTHolder;
         }
 
-        /// <summary>
-        ///     This method is being called by the previous middleware in the HTTP pipeline
-        /// </summary>
-        [UsedImplicitly]
-        public async Task Invoke(HttpContext context)
+        public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
             T current = GetCurrent(context);
-            var tenantIdHolder = _application.CompositionRoot.GetInstance<ICurrentTHolder<T>>();
-            tenantIdHolder.ReplaceCurrent(current);
-            await _next.Invoke(context);
+            _currentTHolder.ReplaceCurrent(current);
+            await next.Invoke(context);
         }
 
         protected abstract T GetCurrent(HttpContext context);
