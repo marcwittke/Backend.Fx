@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Security;
 using Backend.Fx.BuildingBlocks;
@@ -59,9 +60,9 @@ namespace Backend.Fx.EfCorePersistence
         /// </summary>
         /// <param name="entry"></param>
         /// <param name="previousState"></param>
+        [SuppressMessage("ReSharper", "EF1001")]
         private void AuthorizeChanges(InternalEntityEntry entry, EntityState previousState)
         {
-            // ReSharper disable EF1001
             if (previousState == EntityState.Unchanged && entry.EntityState == EntityState.Modified && entry.EntityType.ClrType == typeof(TAggregateRoot))
             {
                 var aggregateRoot = (TAggregateRoot) entry.Entity;
@@ -70,7 +71,6 @@ namespace Backend.Fx.EfCorePersistence
                     throw new SecurityException($"You are not allowed to modify {AggregateTypeName}[{aggregateRoot.Id}]");
                 }
             }
-            // ReSharper restore EF1001
         }
 
         protected override void AddPersistent(TAggregateRoot aggregateRoot)

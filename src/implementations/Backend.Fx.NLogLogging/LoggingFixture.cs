@@ -15,7 +15,7 @@ namespace Backend.Fx.NLogLogging
         {
             Configurations.ForTests(appRootNamespace, GetType().GetTypeInfo().Assembly.GetName().Name + ".xlog");
 
-            _lifetimeLogger = Backend.Fx.Logging.LogManager.Create<LoggingFixture>().InfoDuration("Test run started", "Test run finished");
+            _lifetimeLogger = Logging.LogManager.Create<LoggingFixture>().InfoDuration("Test run started", "Test run finished");
         }
 
         public void Dispose()

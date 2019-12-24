@@ -7,6 +7,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Domain
     [UsedImplicitly]
     public class TestIntegrationEvent : IntegrationEvent
     {
+        [UsedImplicitly]
         public int Whatever { get; }
 
         public TestIntegrationEvent(int whatever, int tenantId) : base(tenantId)

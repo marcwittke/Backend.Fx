@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+// ReSharper disable RedundantArgumentDefaultValue
 
 namespace Backend.Fx.EfCorePersistence.Tests.Migrations
 {

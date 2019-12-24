@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.UnitOfWork;
 using JetBrains.Annotations;
@@ -13,7 +12,6 @@ namespace Backend.Fx.AspNetCore.UnitOfWork
     /// </summary>
     public class UnitOfWorkMiddleware
     {
-        private static readonly ILogger Logger = LogManager.Create<UnitOfWorkMiddleware>();
         private readonly RequestDelegate _next;
         private readonly IBackendFxApplication _application;
 

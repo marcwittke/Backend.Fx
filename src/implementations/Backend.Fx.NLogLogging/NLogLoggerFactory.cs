@@ -3,14 +3,14 @@
     using System.Diagnostics;
     
     [DebuggerStepThrough]
-    public class NLogLoggerFactory : Backend.Fx.Logging.ILoggerFactory
+    public class NLogLoggerFactory : Logging.ILoggerFactory
     {
         public NLogLoggerFactory()
         {
             BeginActivity(0);
         }
 
-        public Backend.Fx.Logging.ILogger Create(string s)
+        public Logging.ILogger Create(string s)
         {
             return new NLogLogger(NLog.LogManager.GetLogger(s));
         }
@@ -27,7 +27,7 @@
 
         public static void Configure(string nlogConfigPath)
         {
-            Backend.Fx.Logging.LogManager.Initialize(new NLogLoggerFactory());
+            Logging.LogManager.Initialize(new NLogLoggerFactory());
             NLog.LogManager.Configuration = new NLog.Config.XmlLoggingConfiguration(nlogConfigPath);
         }
     }
