@@ -50,14 +50,5 @@ namespace Backend.Fx.Tests.Patterns.UnitOfWork
             sut.Dispose();
             A.CallTo(() => _eventBusScope.RaiseEvents()).MustNotHaveHappened();
         }
-
-        [Fact]
-        public void UpdatesTrackingPropertiesOnFlush()
-        {
-            TestUnitOfWork sut = new TestUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), _eventAggregator, _eventBusScope);
-            sut.Begin();
-            sut.Flush();
-            Assert.Equal(1, sut.UpdateTrackingPropertiesCount);
-        }
     }
 }

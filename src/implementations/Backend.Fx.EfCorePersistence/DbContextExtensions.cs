@@ -2,10 +2,13 @@
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Security.Principal;
 using System.Text;
 using Backend.Fx.BuildingBlocks;
+using Backend.Fx.Environment.DateAndTime;
 using Backend.Fx.Extensions;
 using Backend.Fx.Logging;
+using Backend.Fx.Patterns.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -22,7 +25,74 @@ namespace Backend.Fx.EfCorePersistence
             dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
             dbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
-        
+
+        public static void UpdateTrackingProperties(this EntityEntry entityEntry, ICurrentTHolder<IIdentity> identity, IClock clock, ChangeTracker changeTracker, EntityState newState)
+        {
+            try
+            {
+                int count = 0;
+                string userId = identity.Current.Name ?? "anonymous";
+                DateTime utcNow = clock.UtcNow;
+                var isTraceEnabled = Logger.IsTraceEnabled();
+                
+                if (entityEntry.Entity is Entity entity)
+                {
+                    if (newState == EntityState.Added)
+                    {
+                        if (isTraceEnabled)
+                        {
+                            Logger.Trace("tracking that {0}[{1}] was created by {2} at {3:T} UTC", entity.GetType().Name, entity.Id, userId, utcNow);
+                        }
+
+                        count++;
+                        entity.SetCreatedProperties(userId, utcNow);
+                    }
+
+                    if (newState == EntityState.Modified)
+                    {
+                        if (isTraceEnabled)
+                        {
+                            Logger.Trace("tracking that {0}[{1}] was modified by {2} at {3:T} UTC", entity.GetType().Name, entity.Id, userId, utcNow);
+                        }
+
+                        count++;
+                        entity.SetModifiedProperties(userId, utcNow);
+                    }
+                }
+
+                if (!(entityEntry.Entity is AggregateRoot))
+                {
+                    if (newState == EntityState.Added || newState == EntityState.Deleted || newState == EntityState.Modified)
+                    {
+                        EntityEntry aggregateRootEntry = FindAggregateRootEntry(changeTracker, entityEntry);
+
+                        if (aggregateRootEntry != null && aggregateRootEntry.State == EntityState.Unchanged && aggregateRootEntry.Entity is AggregateRoot aggregateRoot)
+                        {
+                            if (isTraceEnabled)
+                            {
+                                Logger.Trace("tracking that {0}[{1}] was modified by {2} at {3:T} UTC implicitly because the dependent {4} was {5}",
+                                             aggregateRoot.GetType().Name, aggregateRoot.Id, userId, utcNow, entityEntry.Entity.GetType().Name, newState);
+                            }
+
+                            count++;
+                            aggregateRoot.SetModifiedProperties(userId, utcNow);
+                        }
+                    }
+                }
+
+                if (count > 0)
+                {
+                    Logger.Debug($"Tracked {count} entities as created/changed on {utcNow:u} by {userId}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Warn(ex, "Updating tracking properties failed");
+                throw;
+            }
+        }
+
+
         public static void RegisterRowVersionProperty(this ModelBuilder modelBuilder)
         {
             modelBuilder.Model
@@ -43,15 +113,15 @@ namespace Backend.Fx.EfCorePersistence
         {
             //CAVE: IAggregateMapping implementations must reside in the same assembly as the Applications DbContext-type
             var aggregateDefinitionTypeInfos = dbContext
-                .GetType()
-                .GetTypeInfo()
-                .Assembly
-                .ExportedTypes
-                .Select(t => t.GetTypeInfo())
-                .Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericType && typeof(IAggregateMapping).GetTypeInfo().IsAssignableFrom(t));
+                                               .GetType()
+                                               .GetTypeInfo()
+                                               .Assembly
+                                               .ExportedTypes
+                                               .Select(t => t.GetTypeInfo())
+                                               .Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericType && typeof(IAggregateMapping).GetTypeInfo().IsAssignableFrom(t));
             foreach (TypeInfo typeInfo in aggregateDefinitionTypeInfos)
             {
-                var aggregateMapping = (IAggregateMapping)Activator.CreateInstance(typeInfo.AsType());
+                var aggregateMapping = (IAggregateMapping) Activator.CreateInstance(typeInfo.AsType());
                 aggregateMapping.ApplyEfMapping(modelBuilder);
             }
         }
@@ -137,20 +207,20 @@ namespace Backend.Fx.EfCorePersistence
                     }
 
                     IProperty property = navigation.Metadata.ForeignKey.Properties[0];
-                    navigationTargetForeignKeyValue = (int)entry.OriginalValues[property];
+                    navigationTargetForeignKeyValue = (int) entry.OriginalValues[property];
                 }
                 else
                 {
                     // added or modified entity, current value contains the foreign key value
-                    navigationTargetForeignKeyValue = ((Entity)navigation.CurrentValue).Id;
+                    navigationTargetForeignKeyValue = ((Entity) navigation.CurrentValue).Id;
                 }
 
                 // assumption: an entity cannot be loaded on its own. Everything on the navigation path starting from the 
                 // aggregate root must have been loaded before, therefore we can find it using the change tracker
                 EntityEntry<Entity> navigationTargetEntry = changeTracker
-                        .Entries<Entity>()
-                        .Single(ent => Equals(ent.Entity.GetType().GetTypeInfo(), navTargetTypeInfo)
-                                       && ent.Property(nameof(Entity.Id)).CurrentValue.Equals(navigationTargetForeignKeyValue));
+                                                            .Entries<Entity>()
+                                                            .Single(ent => Equals(ent.Entity.GetType().GetTypeInfo(), navTargetTypeInfo)
+                                                                           && ent.Property(nameof(Entity.Id)).CurrentValue.Equals(navigationTargetForeignKeyValue));
 
                 // if the target is AggregateRoot, no (further) recursion is needed
                 if (typeof(AggregateRoot).GetTypeInfo().IsAssignableFrom(navTargetTypeInfo))
@@ -183,21 +253,25 @@ namespace Backend.Fx.EfCorePersistence
                     {
                         stateDumpBuilder.AppendFormat("added: {0}[{1}]{2}", entry.Entity.GetType().Name, GetPrimaryKeyValue(entry), System.Environment.NewLine);
                     }
+
                     stateDumpBuilder.AppendFormat("{0} entities modified{1}{2}", modified.Length, deleted.Length == 0 ? "." : ":", System.Environment.NewLine);
                     foreach (var entry in modified)
                     {
                         stateDumpBuilder.AppendFormat("modified: {0}[{1}]{2}", entry.Entity.GetType().Name, GetPrimaryKeyValue(entry), System.Environment.NewLine);
                     }
+
                     stateDumpBuilder.AppendFormat("{0} entities deleted{1}{2}", deleted.Length, deleted.Length == 0 ? "." : ":", System.Environment.NewLine);
                     foreach (var entry in deleted)
                     {
                         stateDumpBuilder.AppendFormat("deleted: {0}[{1}]{2}", entry.Entity.GetType().Name, GetPrimaryKeyValue(entry), System.Environment.NewLine);
                     }
+
                     stateDumpBuilder.AppendFormat("{0} entities unchanged{1}{2}", unchanged.Length, deleted.Length == 0 ? "." : ":", System.Environment.NewLine);
                     foreach (var entry in unchanged)
                     {
                         stateDumpBuilder.AppendFormat("unchanged: {0}[{1}]{2}", entry.Entity.GetType().Name, GetPrimaryKeyValue(entry), System.Environment.NewLine);
                     }
+
                     Logger.Trace(stateDumpBuilder.ToString());
                 }
                 catch (Exception ex)
@@ -206,7 +280,7 @@ namespace Backend.Fx.EfCorePersistence
                 }
             }
         }
-        
+
         private static string GetPrimaryKeyValue(EntityEntry entry)
         {
             return (entry.Entity as Entity)?.Id.ToString(CultureInfo.InvariantCulture) ?? "?";

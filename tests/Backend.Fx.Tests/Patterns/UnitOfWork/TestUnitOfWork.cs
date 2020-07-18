@@ -11,12 +11,7 @@
     public class TestUnitOfWork : UnitOfWork
     {
         public int RollbackCount { get; private set; }
-        public int UpdateTrackingPropertiesCount { get; private set; }
         public int CommitCount { get; private set; }
-        protected override void UpdateTrackingProperties(string userId, DateTime utcNow)
-        {
-            UpdateTrackingPropertiesCount++;
-        }
 
         public override void Complete()
         {

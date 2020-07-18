@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
@@ -34,7 +33,6 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     blog.Posts.Add(new Post(4, blog, "new name 4"));
                     blog.Posts.Add(new Post(5, blog, "new name 5"));
                     dbContext.Add(blog);
-                    dbContext.UpdateTrackingProperties("me", DateTime.Now);
                     dbContext.SaveChanges();
                 }
 
@@ -48,7 +46,6 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     blog.Posts.Add(new Post(8, blog, "new name 8"));
                     blog.Posts.Add(new Post(9, blog, "new name 9"));
                     blog.Posts.Add(new Post(10, blog, "new name 10"));
-                    dbContext.UpdateTrackingProperties("me", DateTime.Now);
                     dbContext.SaveChanges();
                 }
 

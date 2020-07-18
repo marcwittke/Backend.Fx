@@ -1,5 +1,4 @@
-﻿using System;
-using System.Security.Principal;
+﻿using System.Security.Principal;
 using Backend.Fx.Environment.DateAndTime;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Domain;
@@ -15,9 +14,6 @@ namespace Backend.Fx.InMemoryPersistence
         public InMemoryUnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder, 
                                   IDomainEventAggregator eventAggregator, IEventBusScope eventBusScope) 
                 : base(clock, identityHolder, eventAggregator, eventBusScope)
-        { }
-
-        protected override void UpdateTrackingProperties(string userId, DateTime utcNow)
         { }
 
         public override void Complete()

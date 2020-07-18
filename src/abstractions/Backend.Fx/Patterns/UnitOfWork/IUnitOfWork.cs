@@ -24,7 +24,6 @@
         private static readonly ILogger Logger = LogManager.Create<UnitOfWork>();
         private static int _index;
         private readonly int _instanceId = _index++;
-        private readonly IClock _clock;
         private readonly IDomainEventAggregator _eventAggregator;
         private readonly IEventBusScope _eventBusScope;
         private bool? _isCompleted;
@@ -33,18 +32,18 @@
         protected UnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder,
                              IDomainEventAggregator eventAggregator, IEventBusScope eventBusScope)
         {
-            _clock = clock;
+            Clock = clock;
             _eventAggregator = eventAggregator;
             _eventBusScope = eventBusScope;
             IdentityHolder = identityHolder;
         }
 
         public ICurrentTHolder<IIdentity> IdentityHolder { get; }
+        public IClock Clock { get; }
 
         public virtual void Flush()
         {
             Logger.Debug("Flushing unit of work #" + _instanceId);
-            UpdateTrackingProperties(IdentityHolder.Current.Name, _clock.UtcNow);
         }
     
         public virtual void Begin()
@@ -62,8 +61,6 @@
             AsyncHelper.RunSync(()=>_eventBusScope.RaiseEvents());
             _isCompleted = true;
         }
-
-        protected abstract void UpdateTrackingProperties(string userId, DateTime utcNow);
 
         protected virtual void Dispose(bool disposing)
         {
