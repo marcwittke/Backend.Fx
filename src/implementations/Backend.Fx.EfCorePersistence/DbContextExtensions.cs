@@ -126,6 +126,7 @@ namespace Backend.Fx.EfCorePersistence
             }
         }
 
+        [Obsolete]
         public static void UpdateTrackingProperties(this DbContext dbContext, string userId, DateTime utcNow)
         {
             userId ??= "anonymous";
