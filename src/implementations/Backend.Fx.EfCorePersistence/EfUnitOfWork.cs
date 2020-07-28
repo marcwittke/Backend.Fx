@@ -41,11 +41,13 @@ namespace Backend.Fx.EfCorePersistence
             _dbConnection.Open();
             _currentTransaction = _dbConnection.BeginTransaction();
             DbContext.Database.UseTransaction((DbTransaction)_currentTransaction);
+            DbContext.ChangeTracker.AutoDetectChangesEnabled = false;
             _transactionLifetimeLogger = Logger.DebugDuration("Transaction open");
         }
 
         public override void Flush()
         {
+            DbContext.ChangeTracker.DetectChanges();
             base.Flush();
             DbContext.SaveChanges();
         }
