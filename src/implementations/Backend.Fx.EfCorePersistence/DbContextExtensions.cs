@@ -102,6 +102,9 @@ namespace Backend.Fx.EfCorePersistence
                                 Logger.Trace("tracking that {0}[{1}] was modified by {2} at {3:T} UTC", entity.GetType().Name, entity.Id, userId, utcNow);
                             }
                             entity.SetModifiedProperties(userId, utcNow);
+                            
+                            // this line causes the recent changes of tracking properties to be detected before flushing
+                            entry.State = EntityState.Modified;
                         }
                     }
                     catch (Exception ex)

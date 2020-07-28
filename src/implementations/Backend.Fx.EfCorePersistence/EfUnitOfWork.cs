@@ -17,12 +17,14 @@ namespace Backend.Fx.EfCorePersistence
             : base(clock, identityHolder, eventAggregator, eventBusScope)
         {
             DbContext = dbContext;
+            DbContext.ChangeTracker.AutoDetectChangesEnabled = false;
         }
 
         public DbContext DbContext { get; }
 
         public override void Flush()
         {
+            DbContext.ChangeTracker.DetectChanges();
             base.Flush();
             DbContext.SaveChanges();
         }
