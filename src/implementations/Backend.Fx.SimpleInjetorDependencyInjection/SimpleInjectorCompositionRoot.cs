@@ -90,6 +90,19 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             return scope;
         }
 
+        public bool TryGetCurrentCorrelation(out Correlation correlation)
+        {
+            Scope scope = ScopedLifestyle.GetCurrentScope(Container);
+            if (scope == null)
+            {
+                correlation = null;
+                return false;
+            }
+
+            correlation = scope.GetInstance<ICurrentTHolder<Correlation>>().Current;
+            return true;
+        }
+
         public Scope GetCurrentScope()
         {
             return ScopedLifestyle.GetCurrentScope(Container);

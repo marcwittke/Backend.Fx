@@ -46,5 +46,12 @@
         IEnumerable<T> GetInstances<T>() where T : class;
 
         IDisposable BeginScope();
+        
+        /// <summary>
+        /// Gets the current correlation, when inside a scope, otherwise this method will return false
+        /// </summary>
+        /// <param name="correlation"></param>
+        /// <returns></returns>
+        bool TryGetCurrentCorrelation(out Correlation correlation);
     }
 }

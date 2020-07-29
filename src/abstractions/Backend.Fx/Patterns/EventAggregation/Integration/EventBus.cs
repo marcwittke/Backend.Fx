@@ -30,8 +30,11 @@
 
         public Task Publish(IIntegrationEvent integrationEvent)
         {
-            Correlation correlation = _application.CompositionRoot.GetInstance<ICurrentTHolder<Correlation>>().Current;
-            ((IntegrationEvent)integrationEvent).SetCorrelation(correlation);
+            if (_application.CompositionRoot.TryGetCurrentCorrelation(out Correlation correlation))
+            {
+                ((IntegrationEvent)integrationEvent).SetCorrelation(correlation);    
+            }
+            
             return PublishOnEventBus(integrationEvent);
         }
         
