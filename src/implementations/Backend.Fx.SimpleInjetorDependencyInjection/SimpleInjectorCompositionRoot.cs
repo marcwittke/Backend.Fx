@@ -30,6 +30,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             ScopedLifestyle = scopedLifestyle;
             Container.Options.LifestyleSelectionBehavior = lifestyleBehavior;
             Container.Options.DefaultScopedLifestyle = ScopedLifestyle;
+            Container.Register<ICurrentTHolder<Correlation>, CurrentCorrelationHolder>();
         }
 
         public Container Container { get; } = new Container();

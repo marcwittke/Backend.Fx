@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using Backend.Fx.BuildingBlocks;
@@ -102,6 +104,26 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
                         var insideScopeTenantId = sut.CompositionRoot.GetInstance<ICurrentTHolder<TenantId>>().Current;
                         Assert.True(insideScopeTenantId.HasValue);
                         Assert.Equal(i, insideScopeTenantId.Value);
+                    }
+                });
+            }
+        }
+        
+        [Fact]
+        public async Task MaintainsCorrelationWhenBeginningScopes()
+        {
+            using (var sut = CreateSystemUnderTest())
+            {
+                await sut.Boot();
+                var usedCorrelationIds = new HashSet<Guid>();
+                Enumerable.Range(1, 100).AsParallel().ForAll(i =>
+                {
+                    using (sut.BeginScope(new SystemIdentity(), new TenantId(i)))
+                    {
+                        Correlation insideScopeCorrelation = sut.CompositionRoot.GetInstance<ICurrentTHolder<Correlation>>().Current;
+                        Assert.NotEqual(Guid.Empty,insideScopeCorrelation.Id);
+                        Assert.DoesNotContain(insideScopeCorrelation.Id, usedCorrelationIds);
+                        usedCorrelationIds.Add(insideScopeCorrelation.Id);
                     }
                 });
             }
