@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Linq;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using Backend.Fx.BuildingBlocks;
@@ -27,7 +29,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         [Fact]
         public async Task RunsProdDataGeneratorsOnEveryBoot()
         {
-            using (var sut = CreateSystemUnderTest())
+            using (AnApplication sut = CreateSystemUnderTest())
             {
                 await sut.Boot();
                 sut.EnsureProdTenant();
@@ -41,7 +43,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
                 }
             }
 
-            using (var sut = CreateSystemUnderTest())
+            using (AnApplication sut = CreateSystemUnderTest())
             {
                 await sut.Boot();
                 sut.EnsureProdTenant();
@@ -59,7 +61,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         [Fact]
         public async Task RunsDemoDataGeneratorsOnEveryBoot()
         {
-            using (var sut = CreateSystemUnderTest())
+            using (AnApplication sut = CreateSystemUnderTest())
             {
                 await sut.Boot();
                 sut.EnsureDemoTenant();
@@ -73,7 +75,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
                 }
             }
 
-            using (var sut = CreateSystemUnderTest())
+            using (AnApplication sut = CreateSystemUnderTest())
             {
                 await sut.Boot();
                 sut.EnsureDemoTenant();
@@ -92,17 +94,42 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         [Fact]
         public async Task MaintainsTenantIdWhenBeginningScopes()
         {
-            using (var sut = CreateSystemUnderTest())
+            using (AnApplication sut = CreateSystemUnderTest())
             {
                 await sut.Boot();
                 Enumerable.Range(1, 100).AsParallel().ForAll(i =>
                 {
+                    // ReSharper disable AccessToDisposedClosure
                     using (sut.BeginScope(new SystemIdentity(), new TenantId(i)))
                     {
-                        var insideScopeTenantId = sut.CompositionRoot.GetInstance<ICurrentTHolder<TenantId>>().Current;
+                        TenantId insideScopeTenantId = sut.CompositionRoot.GetInstance<ICurrentTHolder<TenantId>>().Current;
                         Assert.True(insideScopeTenantId.HasValue);
                         Assert.Equal(i, insideScopeTenantId.Value);
                     }
+                    // ReSharper restore AccessToDisposedClosure
+                });
+                
+            }
+        }
+        
+        [Fact]
+        public async Task MaintainsCorrelationWhenBeginningScopes()
+        {
+            using (AnApplication sut = CreateSystemUnderTest())
+            {
+                await sut.Boot();
+                var usedCorrelationIds = new ConcurrentBag<Guid>();
+                Enumerable.Range(1, 100).AsParallel().ForAll(i =>
+                {
+                    // ReSharper disable AccessToDisposedClosure
+                    using (sut.BeginScope(new SystemIdentity(), new TenantId(i)))
+                    {
+                        Correlation insideScopeCorrelation = sut.CompositionRoot.GetInstance<ICurrentTHolder<Correlation>>().Current;
+                        Assert.NotEqual(Guid.Empty,insideScopeCorrelation.Id);
+                        Assert.DoesNotContain(insideScopeCorrelation.Id, usedCorrelationIds);
+                        usedCorrelationIds.Add(insideScopeCorrelation.Id);
+                    }
+                    // ReSharper restore AccessToDisposedClosure
                 });
             }
         }
@@ -110,23 +137,25 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         [Fact]
         public async Task MaintainsIdentityWhenBeginningScopes()
         {
-            using (var sut = CreateSystemUnderTest())
+            using (AnApplication sut = CreateSystemUnderTest())
             {
                 await sut.Boot();
                 Enumerable.Range(1, 100).AsParallel().ForAll(i =>
                 {
+                    // ReSharper disable AccessToDisposedClosure
                     using (sut.BeginScope(new GenericIdentity(i.ToString()), new TenantId(100)))
                     {
-                        var insideScopeIdentity = sut.CompositionRoot.GetInstance<ICurrentTHolder<IIdentity>>().Current;
+                        IIdentity insideScopeIdentity = sut.CompositionRoot.GetInstance<ICurrentTHolder<IIdentity>>().Current;
                         Assert.Equal(i.ToString(), insideScopeIdentity.Name);
                     }
+                    // ReSharper restore AccessToDisposedClosure
                 });
             }
         }
 
         private AnApplication CreateSystemUnderTest()
         {
-            SimpleInjectorCompositionRoot compositionRoot = new SimpleInjectorCompositionRoot();
+            var compositionRoot = new SimpleInjectorCompositionRoot();
             var sut = new AnApplication(compositionRoot);
             IEventBus eventBus = new InMemoryEventBus(sut);
             sut.CompositionRoot.RegisterModules(

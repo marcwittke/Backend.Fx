@@ -36,11 +36,11 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// <returns></returns>
         Task Boot(CancellationToken cancellationToken = default(CancellationToken));
 
-        IDisposable BeginScope(IIdentity identity = null, TenantId tenantId = null);
+        IDisposable BeginScope(IIdentity identity = null, TenantId tenantId = null, Guid? correlationId = null);
 
-        void Invoke(Action action, IIdentity identity, TenantId tenantId);
+        void Invoke(Action action, IIdentity identity, TenantId tenantId, Guid? correlationId = null);
 
-        Task InvokeAsync(Func<Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId);
+        Task InvokeAsync(Func<Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId, Guid? correlationId = null);
 
         void Run<TJob>() where TJob : class, IJob;
 

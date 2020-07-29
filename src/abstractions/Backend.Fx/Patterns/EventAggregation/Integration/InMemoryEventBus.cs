@@ -16,7 +16,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
         public override void Connect()
         { }
 
-        public override Task Publish(IIntegrationEvent integrationEvent)
+        protected override Task PublishOnEventBus(IIntegrationEvent integrationEvent)
         {
             Task.Run(() => Process(integrationEvent.GetType().FullName, new InMemoryProcessingContext(integrationEvent)));
             
@@ -42,6 +42,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
             public override TenantId TenantId => new TenantId(_integrationEvent.TenantId);
 
             public override dynamic DynamicEvent => _integrationEvent;
+            public override Guid CorrelationId => _integrationEvent.CorrelationId;
 
             public override IIntegrationEvent GetTypedEvent(Type eventType)
             {

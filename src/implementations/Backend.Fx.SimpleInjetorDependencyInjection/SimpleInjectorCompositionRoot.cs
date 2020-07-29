@@ -30,6 +30,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             ScopedLifestyle = scopedLifestyle;
             Container.Options.LifestyleSelectionBehavior = lifestyleBehavior;
             Container.Options.DefaultScopedLifestyle = ScopedLifestyle;
+            Container.Register<ICurrentTHolder<Correlation>, CurrentCorrelationHolder>();
         }
 
         public Container Container { get; } = new Container();
@@ -87,6 +88,19 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
         {
             var scope = AsyncScopedLifestyle.BeginScope(Container);
             return scope;
+        }
+
+        public bool TryGetCurrentCorrelation(out Correlation correlation)
+        {
+            Scope scope = ScopedLifestyle.GetCurrentScope(Container);
+            if (scope == null)
+            {
+                correlation = null;
+                return false;
+            }
+
+            correlation = scope.GetInstance<ICurrentTHolder<Correlation>>().Current;
+            return true;
         }
 
         public Scope GetCurrentScope()
