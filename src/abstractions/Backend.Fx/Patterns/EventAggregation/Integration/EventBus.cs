@@ -27,7 +27,15 @@
         }
 
         public abstract void Connect();
-        public abstract Task Publish(IIntegrationEvent integrationEvent);
+
+        public Task Publish(IIntegrationEvent integrationEvent)
+        {
+            Correlation correlation = _application.CompositionRoot.GetInstance<ICurrentTHolder<Correlation>>().Current;
+            ((IntegrationEvent)integrationEvent).SetCorrelation(correlation);
+            return PublishOnEventBus(integrationEvent);
+        }
+        
+        protected abstract Task PublishOnEventBus(IIntegrationEvent integrationEvent);
 
 
         /// <inheritdoc />
@@ -128,7 +136,8 @@
                     _application.Invoke(
                         () => subscription.Process(eventName, context),
                         new SystemIdentity(),
-                        context.TenantId);
+                        context.TenantId,
+                        context.CorrelationId);
                 }
             }
             else

@@ -18,7 +18,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         public override void Connect()
         { }
 
-        public override Task Publish(IIntegrationEvent integrationEvent)
+        protected override Task PublishOnEventBus(IIntegrationEvent integrationEvent)
         {
             var jsonString = JsonConvert.SerializeObject(integrationEvent);
             return Task.Run(()=>Process(integrationEvent.GetType().FullName, new SerializingProcessingContext(jsonString)));
@@ -37,13 +37,15 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             public SerializingProcessingContext(string jsonString)
             {
                 _jsonString = jsonString;
-                var eventStub = JsonConvert.DeserializeAnonymousType(jsonString, new {tenantId = 0});
+                var eventStub = JsonConvert.DeserializeAnonymousType(jsonString, new {tenantId = 0, correlationId = Guid.Empty});
                 TenantId = new TenantId(eventStub.tenantId);
+                CorrelationId = eventStub.correlationId;
             }
 
             public override TenantId TenantId {get; }
             
             public override dynamic DynamicEvent => JObject.Parse(_jsonString);
+            public override Guid CorrelationId { get; }
 
             public override IIntegrationEvent GetTypedEvent(Type eventType)
             {

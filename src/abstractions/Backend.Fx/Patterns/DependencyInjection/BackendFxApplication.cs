@@ -57,7 +57,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
             return _isBooted.Wait(timeoutMilliSeconds, cancellationToken);
         }
 
-        public IDisposable BeginScope(IIdentity identity = null, TenantId tenantId = null)
+        public IDisposable BeginScope(IIdentity identity = null, TenantId tenantId = null, Guid? correlationId = null)
         {
             var scopeIndex = _scopeIndex++;
             tenantId = tenantId ?? new TenantId(null);
@@ -69,6 +69,10 @@ namespace Backend.Fx.Patterns.DependencyInjection
             var scope = CompositionRoot.BeginScope();
             CompositionRoot.GetInstance<ICurrentTHolder<TenantId>>().ReplaceCurrent(tenantId);
             CompositionRoot.GetInstance<ICurrentTHolder<IIdentity>>().ReplaceCurrent(identity);
+            if (correlationId.HasValue)
+            {
+                CompositionRoot.GetInstance<ICurrentTHolder<Correlation>>().Current.Resume(correlationId.Value);
+            }
 
             return new MultipleDisposable(scope, scopeDurationLogger);
         }
@@ -87,9 +91,9 @@ namespace Backend.Fx.Patterns.DependencyInjection
             Invoke(() => CompositionRoot.GetInstance<TJob>().Run(), new SystemIdentity(), tenantId);
         }
 
-        public void Invoke(Action action, IIdentity identity, TenantId tenantId)
+        public void Invoke(Action action, IIdentity identity, TenantId tenantId, Guid? correlationId = null)
         {
-            using (BeginScope(new SystemIdentity(), tenantId))
+            using (BeginScope(identity, tenantId, correlationId))
             {
                 var unitOfWork = CompositionRoot.GetInstance<IUnitOfWork>();
                 try
@@ -110,9 +114,9 @@ namespace Backend.Fx.Patterns.DependencyInjection
             }
         }
 
-        public async Task InvokeAsync(Func<Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId)
+        public async Task InvokeAsync(Func<Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId, Guid? correlationId = null)
         {
-            using (BeginScope(new SystemIdentity(), tenantId))
+            using (BeginScope(identity, tenantId, correlationId))
             {
                 var unitOfWork = CompositionRoot.GetInstance<IUnitOfWork>();
                 try

@@ -44,7 +44,7 @@ namespace Backend.Fx.RabbitMq
             Process(args.RoutingKey, new RabbitMqEventProcessingContext(args.Body));
         }
 
-        public override Task Publish(IIntegrationEvent integrationEvent)
+        protected override Task PublishOnEventBus(IIntegrationEvent integrationEvent)
         {
             Logger.Info($"Publishing {integrationEvent.GetType().Name}");
             _channel.EnsureOpen();
@@ -94,13 +94,15 @@ namespace Backend.Fx.RabbitMq
                 }
 
                 _jsonString = Encoding.UTF8.GetString(rawEventPayloadBytes);
-                var eventStub = JsonConvert.DeserializeAnonymousType(_jsonString, new {tenantId = 0});
+                var eventStub = JsonConvert.DeserializeAnonymousType(_jsonString, new {tenantId = 0, correlationId = Guid.Empty} );
                 TenantId = new TenantId(eventStub.tenantId);
+                CorrelationId = eventStub.correlationId;
             }
 
             public override TenantId TenantId { get; }
 
             public override dynamic DynamicEvent => JObject.Parse(_jsonString);
+            public override Guid CorrelationId { get; }
 
             public override IIntegrationEvent GetTypedEvent(Type eventType)
             {
