@@ -87,11 +87,11 @@ namespace Backend.Fx.Patterns.DependencyInjection
             Invoke(() => CompositionRoot.GetInstance<TJob>().Run(), new SystemIdentity(), tenantId);
         }
 
-        public void Invoke(Action action, IIdentity identity, TenantId tenantId, Action configureScope = null)
+        public void Invoke(Action action, IIdentity identity, TenantId tenantId, Action<ICompositionRoot> configureScope = null)
         {
             using (BeginScope(identity, tenantId))
             {
-                configureScope?.Invoke();
+                configureScope?.Invoke(CompositionRoot);
                 var unitOfWork = CompositionRoot.GetInstance<IUnitOfWork>();
                 try
                 {
@@ -111,11 +111,11 @@ namespace Backend.Fx.Patterns.DependencyInjection
             }
         }
 
-        public async Task InvokeAsync(Func<Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId, Action configureScope = null)
+        public async Task InvokeAsync(Func<Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId, Action<ICompositionRoot> configureScope = null)
         {
             using (BeginScope(identity, tenantId))
             {
-                configureScope?.Invoke();
+                configureScope?.Invoke(CompositionRoot);
                 var unitOfWork = CompositionRoot.GetInstance<IUnitOfWork>();
                 try
                 {

@@ -140,13 +140,18 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
                         () => subscription.Process(eventName, context),
                         new SystemIdentity(),
                         context.TenantId,
-                        () => { _application.CompositionRoot.GetInstance<ICurrentTHolder<Correlation>>().Current.Resume(context.CorrelationId); });
+                        compositionRoot => ConfigureProcessingScope(compositionRoot, context));
                 }
             }
             else
             {
                 Logger.Info($"No handler registered. Ignoring {eventName} event");
             }
+        }
+
+        protected virtual void ConfigureProcessingScope(ICompositionRoot compositionRoot, EventProcessingContext context)
+        {
+            compositionRoot.GetInstance<ICurrentTHolder<Correlation>>().Current.Resume(context.CorrelationId);
         }
 
         protected virtual void Dispose(bool disposing)

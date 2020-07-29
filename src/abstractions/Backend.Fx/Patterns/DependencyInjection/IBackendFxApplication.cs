@@ -42,13 +42,13 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// <param name="identity">The acting identity</param>
         /// <param name="tenantId">The targeted tenant id</param>
         /// <param name="configureScope">An optional action that is used to configure the scope before beginning the unit of work</param>
-        void Invoke(Action action, IIdentity identity, TenantId tenantId, Action configureScope = null);
+        void Invoke(Action action, IIdentity identity, TenantId tenantId, Action<ICompositionRoot> configureScope = null);
 
         /// <param name="awaitableAsyncAction">The async action to be invoked by the application</param>
         /// <param name="identity">The acting identity</param>
         /// <param name="tenantId">The targeted tenant id</param>
         /// <param name="configureScope">An optional action that is used to configure the scope before beginning the unit of work</param>
-        Task InvokeAsync(Func<Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId, Action configureScope = null);
+        Task InvokeAsync(Func<Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId, Action<ICompositionRoot> configureScope = null);
 
         void Run<TJob>() where TJob : class, IJob;
 

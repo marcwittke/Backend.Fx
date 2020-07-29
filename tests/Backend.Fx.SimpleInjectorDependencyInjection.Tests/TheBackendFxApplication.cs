@@ -33,7 +33,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
             {
                 await sut.Boot();
                 sut.EnsureProdTenant();
-                
+
                 using (sut.BeginScope(new SystemIdentity(), sut.ProdTenantId))
                 {
                     IRepository<AnAggregate> repository = sut.CompositionRoot.GetInstance<IRepository<AnAggregate>>();
@@ -47,7 +47,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
             {
                 await sut.Boot();
                 sut.EnsureProdTenant();
-                
+
                 using (sut.BeginScope(new SystemIdentity(), sut.ProdTenantId))
                 {
                     IRepository<AnAggregate> repository = sut.CompositionRoot.GetInstance<IRepository<AnAggregate>>();
@@ -108,10 +108,33 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
                     }
                     // ReSharper restore AccessToDisposedClosure
                 });
-                
             }
         }
-        
+
+        [Fact]
+        public async Task CanConfigureScopeOnInvoke()
+        {
+            using (AnApplication sut = CreateSystemUnderTest())
+            {
+                await sut.Boot();
+                Enumerable.Range(1, 100).AsParallel().ForAll(i =>
+                {
+                    // ReSharper disable AccessToDisposedClosure
+                    sut.Invoke(() =>
+                               {
+                                   Assert.Equal(i.ToString(), sut.CompositionRoot.GetInstance<SomeState>().Value);
+                               },
+                               new SystemIdentity(),
+                               new TenantId(1),
+                               cr =>
+                               {
+                                   cr.GetInstance<SomeState>().Value = i.ToString();
+                               });
+                    // ReSharper restore AccessToDisposedClosure
+                });
+            }
+        }
+
         [Fact]
         public async Task MaintainsCorrelationWhenBeginningScopes()
         {
@@ -125,7 +148,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
                     using (sut.BeginScope(new SystemIdentity(), new TenantId(i)))
                     {
                         Correlation insideScopeCorrelation = sut.CompositionRoot.GetInstance<ICurrentTHolder<Correlation>>().Current;
-                        Assert.NotEqual(Guid.Empty,insideScopeCorrelation.Id);
+                        Assert.NotEqual(Guid.Empty, insideScopeCorrelation.Id);
                         Assert.DoesNotContain(insideScopeCorrelation.Id, usedCorrelationIds);
                         usedCorrelationIds.Add(insideScopeCorrelation.Id);
                     }
@@ -165,6 +188,5 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
 
             return sut;
         }
-
     }
 }

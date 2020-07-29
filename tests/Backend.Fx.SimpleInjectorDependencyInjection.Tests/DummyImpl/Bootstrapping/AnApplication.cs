@@ -18,7 +18,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Bootstrap
 
         public AnApplication(ICompositionRoot compositionRoot)
             : this(compositionRoot, new InMemoryTenantRepository())
-        {}
+        { }
 
         public AnApplication(ICompositionRoot compositionRoot, ITenantRepository tenantRepository)
             : base(compositionRoot, new TenantIdService(tenantRepository), new ExceptionLogger(Logger))
