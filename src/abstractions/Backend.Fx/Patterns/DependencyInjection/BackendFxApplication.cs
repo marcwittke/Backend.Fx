@@ -42,7 +42,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
         public ITenantIdService TenantIdService { get; }
 
         /// <inheritdoc />
-        public async Task Boot(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task Boot(CancellationToken cancellationToken = default)
         {
             Logger.Info("Booting application");
             await OnBoot(cancellationToken);
@@ -52,35 +52,31 @@ namespace Backend.Fx.Patterns.DependencyInjection
             _isBooted.Set();
         }
 
-        public bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue, CancellationToken cancellationToken = default(CancellationToken))
+        public bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue, CancellationToken cancellationToken = default)
         {
             return _isBooted.Wait(timeoutMilliSeconds, cancellationToken);
         }
 
-        public IDisposable BeginScope(IIdentity identity = null, TenantId tenantId = null, Guid? correlationId = null)
+        public IDisposable BeginScope(IIdentity identity = null, TenantId tenantId = null)
         {
             var scopeIndex = _scopeIndex++;
             tenantId = tenantId ?? new TenantId(null);
             identity = identity ?? new AnonymousIdentity();
 
-            var scopeDurationLogger = Logger.InfoDuration(
+            IDisposable scopeDurationLogger = Logger.InfoDuration(
                 $"Starting scope {scopeIndex} for {identity.Name} in tenant {(tenantId.HasValue ? tenantId.Value.ToString() : "null")}",
                 $"Ended scope {scopeIndex} for {identity.Name} in tenant {(tenantId.HasValue ? tenantId.Value.ToString() : "null")}");
-            var scope = CompositionRoot.BeginScope();
+            IDisposable scope = CompositionRoot.BeginScope();
             CompositionRoot.GetInstance<ICurrentTHolder<TenantId>>().ReplaceCurrent(tenantId);
             CompositionRoot.GetInstance<ICurrentTHolder<IIdentity>>().ReplaceCurrent(identity);
-            if (correlationId.HasValue)
-            {
-                CompositionRoot.GetInstance<ICurrentTHolder<Correlation>>().Current.Resume(correlationId.Value);
-            }
-
+            
             return new MultipleDisposable(scope, scopeDurationLogger);
         }
         
         public void Run<TJob>() where TJob : class, IJob
         {
             var tenantIds = TenantIdService.GetActiveTenantIds();
-            foreach (var tenantId in tenantIds)
+            foreach (TenantId tenantId in tenantIds)
             {
                 Invoke(() => CompositionRoot.GetInstance<TJob>().Run(), new SystemIdentity(), tenantId);
             }
@@ -91,10 +87,11 @@ namespace Backend.Fx.Patterns.DependencyInjection
             Invoke(() => CompositionRoot.GetInstance<TJob>().Run(), new SystemIdentity(), tenantId);
         }
 
-        public void Invoke(Action action, IIdentity identity, TenantId tenantId, Guid? correlationId = null)
+        public void Invoke(Action action, IIdentity identity, TenantId tenantId, Action configureScope = null)
         {
-            using (BeginScope(identity, tenantId, correlationId))
+            using (BeginScope(identity, tenantId))
             {
+                configureScope?.Invoke();
                 var unitOfWork = CompositionRoot.GetInstance<IUnitOfWork>();
                 try
                 {
@@ -114,10 +111,11 @@ namespace Backend.Fx.Patterns.DependencyInjection
             }
         }
 
-        public async Task InvokeAsync(Func<Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId, Guid? correlationId = null)
+        public async Task InvokeAsync(Func<Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId, Action configureScope = null)
         {
-            using (BeginScope(identity, tenantId, correlationId))
+            using (BeginScope(identity, tenantId))
             {
+                configureScope?.Invoke();
                 var unitOfWork = CompositionRoot.GetInstance<IUnitOfWork>();
                 try
                 {

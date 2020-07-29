@@ -1,14 +1,14 @@
-﻿namespace Backend.Fx.Patterns.EventAggregation.Integration
-{
-    using System;
-    using System.Collections.Concurrent;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Threading.Tasks;
-    using DependencyInjection;
-    using Environment.Authentication;
-    using Logging;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading.Tasks;
+using Backend.Fx.Environment.Authentication;
+using Backend.Fx.Logging;
+using Backend.Fx.Patterns.DependencyInjection;
 
+namespace Backend.Fx.Patterns.EventAggregation.Integration
+{
     public abstract class EventBus : IEventBus
     {
         private static readonly ILogger Logger = LogManager.Create<EventBus>();
@@ -30,14 +30,11 @@
 
         public Task Publish(IIntegrationEvent integrationEvent)
         {
-            if (_application.CompositionRoot.TryGetCurrentCorrelation(out Correlation correlation))
-            {
-                ((IntegrationEvent)integrationEvent).SetCorrelation(correlation);    
-            }
-            
+            Guid correlationId = _application.CompositionRoot.TryGetCurrentCorrelation(out Correlation correlation) ? correlation.Id : Guid.NewGuid();
+            ((IntegrationEvent) integrationEvent).SetCorrelationId(correlationId);
             return PublishOnEventBus(integrationEvent);
         }
-        
+
         protected abstract Task PublishOnEventBus(IIntegrationEvent integrationEvent);
 
 
@@ -47,12 +44,12 @@
             Logger.Info($"Subscribing to {eventName}");
             var subscription = new DynamicSubscription(_application, typeof(THandler));
             _subscriptions.AddOrUpdate(eventName,
-                                      s => new List<ISubscription> { subscription },
-                                      (s, list) =>
-                                      {
-                                          list.Add(subscription);
-                                          return list;
-                                      });
+                                       s => new List<ISubscription> {subscription},
+                                       (s, list) =>
+                                       {
+                                           list.Add(subscription);
+                                           return list;
+                                       });
             Subscribe(eventName);
         }
 
@@ -64,12 +61,12 @@
             Logger.Info($"Subscribing to {eventName}");
             var subscription = new TypedSubscription(_application, typeof(THandler));
             _subscriptions.AddOrUpdate(eventName,
-                                        s => new List<ISubscription> { subscription },
-                                        (s, list) =>
-                                        {
-                                            list.Add(subscription);
-                                            return list;
-                                        });
+                                       s => new List<ISubscription> {subscription},
+                                       (s, list) =>
+                                       {
+                                           list.Add(subscription);
+                                           return list;
+                                       });
             Subscribe(eventName);
         }
 
@@ -81,12 +78,12 @@
             Logger.Info($"Subscribing to {eventName}");
             var subscription = new SingletonSubscription<TEvent>(handler);
             _subscriptions.AddOrUpdate(eventName,
-                s => new List<ISubscription> { subscription },
-                (s, list) =>
-                {
-                    list.Add(subscription);
-                    return list;
-                });
+                                       s => new List<ISubscription> {subscription},
+                                       (s, list) =>
+                                       {
+                                           list.Add(subscription);
+                                           return list;
+                                       });
             Subscribe(eventName);
         }
 
@@ -97,6 +94,7 @@
             {
                 handlers.RemoveAll(t => t.Matches(typeof(THandler)));
             }
+
             Unsubscribe(eventName);
         }
 
@@ -110,6 +108,7 @@
             {
                 handlers.RemoveAll(t => t.Matches(typeof(THandler)));
             }
+
             Unsubscribe(eventName);
         }
 
@@ -123,24 +122,25 @@
             {
                 handlers.RemoveAll(t => t.Matches(handler));
             }
+
             Unsubscribe(eventName);
         }
 
         protected abstract void Subscribe(string eventName);
         protected abstract void Unsubscribe(string eventName);
 
-        protected virtual void Process(string eventName, EventProcessingContext context)
+        protected void Process(string eventName, EventProcessingContext context)
         {
             Logger.Info($"Processing a {eventName} event");
             if (_subscriptions.TryGetValue(eventName, out List<ISubscription> subscriptions))
             {
-                foreach (var subscription in subscriptions)
+                foreach (ISubscription subscription in subscriptions)
                 {
                     _application.Invoke(
                         () => subscription.Process(eventName, context),
                         new SystemIdentity(),
                         context.TenantId,
-                        context.CorrelationId);
+                        () => { _application.CompositionRoot.GetInstance<ICurrentTHolder<Correlation>>().Current.Resume(context.CorrelationId); });
                 }
             }
             else
@@ -150,7 +150,8 @@
         }
 
         protected virtual void Dispose(bool disposing)
-        { }
+        {
+        }
 
         public void Dispose()
         {

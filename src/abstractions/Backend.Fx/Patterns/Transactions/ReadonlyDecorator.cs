@@ -25,6 +25,11 @@ namespace Backend.Fx.Patterns.Transactions
 
         public void RollbackTransaction() => _transactionContext.RollbackTransaction();
         
+        public void SetIsolationLevel(IsolationLevel isolationLevel)
+        {
+            _transactionContext.SetIsolationLevel(isolationLevel);
+        }
+
 
         public IDbTransaction CurrentTransaction => _transactionContext.CurrentTransaction;
     }

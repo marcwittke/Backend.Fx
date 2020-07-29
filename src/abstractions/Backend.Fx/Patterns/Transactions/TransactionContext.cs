@@ -14,12 +14,14 @@ namespace Backend.Fx.Patterns.Transactions
         void BeginTransaction();
         void CommitTransaction();
         void RollbackTransaction();
+        void SetIsolationLevel(IsolationLevel isolationLevel);
     }
 
     public class TransactionContext : ITransactionContext, IDisposable
     {
         private static readonly ILogger Logger = LogManager.Create<TransactionContext>();
         private readonly bool _shouldHandleConnectionState;
+        private IsolationLevel _isolationLevel = IsolationLevel.Unspecified;
         private IDisposable _transactionLifetimeLogger;
 
         public TransactionContext(IDbConnection connection)
@@ -58,7 +60,7 @@ namespace Backend.Fx.Patterns.Transactions
             }
 
             Logger.Debug("Beginning transaction");
-            CurrentTransaction = Connection.BeginTransaction();
+            CurrentTransaction = Connection.BeginTransaction(_isolationLevel);
             _transactionLifetimeLogger = Logger.DebugDuration("Transaction open");
         }
 
@@ -89,6 +91,16 @@ namespace Backend.Fx.Patterns.Transactions
             {
                 Connection.Close();
             }
+        }
+
+        public void SetIsolationLevel(IsolationLevel isolationLevel)
+        {
+            if (CurrentTransaction != null)
+            {
+                throw new InvalidOperationException("Isolation level cannot be changed after the transaction has been started");
+            }
+
+            _isolationLevel = isolationLevel;
         }
 
         private void Dispose(bool disposing)
