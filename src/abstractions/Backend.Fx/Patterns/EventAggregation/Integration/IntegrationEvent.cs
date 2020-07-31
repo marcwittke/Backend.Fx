@@ -25,9 +25,9 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
         
         public Guid CorrelationId { get; private set; }
         
-        internal void SetCorrelation(Correlation correlation)
+        internal void SetCorrelationId(Guid correlationId)
         {
-            CorrelationId = correlation.Id;
+            CorrelationId = correlationId;
         }
 
         protected IntegrationEvent(int tenantId)

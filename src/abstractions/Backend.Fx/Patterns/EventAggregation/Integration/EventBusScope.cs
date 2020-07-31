@@ -32,7 +32,7 @@
 
         public async Task RaiseEvents()
         {
-            while (_integrationEvents.TryDequeue(out var integrationEvent))
+            while (_integrationEvents.TryDequeue(out IIntegrationEvent integrationEvent))
             {
                 await _eventBus.Publish(integrationEvent);
             }

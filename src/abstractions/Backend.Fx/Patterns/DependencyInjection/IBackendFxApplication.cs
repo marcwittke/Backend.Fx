@@ -36,11 +36,19 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// <returns></returns>
         Task Boot(CancellationToken cancellationToken = default(CancellationToken));
 
-        IDisposable BeginScope(IIdentity identity = null, TenantId tenantId = null, Guid? correlationId = null);
+        IDisposable BeginScope(IIdentity identity = null, TenantId tenantId = null);
 
-        void Invoke(Action action, IIdentity identity, TenantId tenantId, Guid? correlationId = null);
+        /// <param name="action">The action to be invoked by the application</param>
+        /// <param name="identity">The acting identity</param>
+        /// <param name="tenantId">The targeted tenant id</param>
+        /// <param name="configureScope">An optional action that is used to configure the scope before beginning the unit of work</param>
+        void Invoke(Action action, IIdentity identity, TenantId tenantId, Action<ICompositionRoot> configureScope = null);
 
-        Task InvokeAsync(Func<Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId, Guid? correlationId = null);
+        /// <param name="awaitableAsyncAction">The async action to be invoked by the application</param>
+        /// <param name="identity">The acting identity</param>
+        /// <param name="tenantId">The targeted tenant id</param>
+        /// <param name="configureScope">An optional action that is used to configure the scope before beginning the unit of work</param>
+        Task InvokeAsync(Func<Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId, Action<ICompositionRoot> configureScope = null);
 
         void Run<TJob>() where TJob : class, IJob;
 
