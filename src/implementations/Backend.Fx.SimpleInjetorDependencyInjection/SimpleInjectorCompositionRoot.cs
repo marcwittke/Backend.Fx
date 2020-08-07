@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Domain;
@@ -17,6 +18,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
     {
         private static readonly ILogger Logger = LogManager.Create<SimpleInjectorCompositionRoot>();
 
+        private int _scopeSequenceNumber = 1;
         /// <summary>
         /// This constructor creates a composition root that prefers scoped lifestyle
         /// </summary>
@@ -30,7 +32,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             ScopedLifestyle = scopedLifestyle;
             Container.Options.LifestyleSelectionBehavior = lifestyleBehavior;
             Container.Options.DefaultScopedLifestyle = ScopedLifestyle;
-            Container.Register<ICurrentTHolder<Correlation>, CurrentCorrelationHolder>();
         }
 
         public Container Container { get; } = new Container();
@@ -84,10 +85,19 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
         }
         
         /// <inheritdoc />
-        public IDisposable BeginScope()
+        public IInjectionScope BeginScope()
         {
-            var scope = AsyncScopedLifestyle.BeginScope(Container);
-            return scope;
+            return new SimpleInjectorInjectionScope(Interlocked.Increment(ref _scopeSequenceNumber), AsyncScopedLifestyle.BeginScope(Container));
+        }
+
+        public IInstanceProvider InstanceProvider
+        {
+            get { return new SimpleInjectorInstanceProvider(Container); }
+        }
+
+        public bool TryGetCurrentScope(out IInjectionScope currentScope)
+        {
+            throw new NotImplementedException();
         }
 
         public bool TryGetCurrentCorrelation(out Correlation correlation)

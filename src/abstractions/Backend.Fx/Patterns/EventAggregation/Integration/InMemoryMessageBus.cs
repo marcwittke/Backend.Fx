@@ -1,22 +1,15 @@
-﻿using Backend.Fx.Patterns.DependencyInjection;
-
-namespace Backend.Fx.Patterns.EventAggregation.Integration
+﻿namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
     using System;
     using System.Threading.Tasks;
     using Environment.MultiTenancy;
 
-    public class InMemoryEventBus : EventBus
+    public class InMemoryMessageBus : MessageBus
     {
-        public InMemoryEventBus(IBackendFxApplication application)
-                : base(application)
-        {
-        }
-
         public override void Connect()
         { }
 
-        protected override Task PublishOnEventBus(IIntegrationEvent integrationEvent)
+        protected override Task PublishOnMessageBus(IIntegrationEvent integrationEvent)
         {
             Task.Run(() => Process(integrationEvent.GetType().FullName, new InMemoryProcessingContext(integrationEvent)));
             

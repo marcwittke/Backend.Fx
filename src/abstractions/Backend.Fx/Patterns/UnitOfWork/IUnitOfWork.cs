@@ -26,16 +26,16 @@
         private readonly int _instanceId = _index++;
         private readonly IClock _clock;
         private readonly IDomainEventAggregator _eventAggregator;
-        private readonly IEventBusScope _eventBusScope;
+        private readonly IMessageBusScope _messageBusScope;
         private bool? _isCompleted;
         private IDisposable _lifetimeLogger;
 
         protected UnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder,
-                             IDomainEventAggregator eventAggregator, IEventBusScope eventBusScope)
+                             IDomainEventAggregator eventAggregator, IMessageBusScope messageBusScope)
         {
             _clock = clock;
             _eventAggregator = eventAggregator;
-            _eventBusScope = eventBusScope;
+            _messageBusScope = messageBusScope;
             IdentityHolder = identityHolder;
         }
 
@@ -59,7 +59,7 @@
             Flush(); // we have to flush before raising events, therefore the handlers find the latest changes in the DB
             _eventAggregator.RaiseEvents();
             Flush(); // event handlers change the DB state, so we have to flush again
-            AsyncHelper.RunSync(()=>_eventBusScope.RaiseEvents());
+            AsyncHelper.RunSync(()=>_messageBusScope.RaiseEvents());
             _isCompleted = true;
         }
 

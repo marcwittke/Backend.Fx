@@ -12,50 +12,73 @@ namespace Backend.Fx.Environment.MultiTenancy
     /// </summary>
     public interface ITenantService
     {
-        TenantId CreateDemonstrationTenant(string name, string description, string defaultCultureName);
-        TenantId CreateProductionTenant(string name, string description, string defaultCultureName);
+        TenantId CreateTenant(TenantCreationParameters param);
         void ActivateTenant(TenantId tenantId);
         void DeactivateTenant(TenantId tenantId);
+        TenantId[] GetActiveTenantIds();
+        TenantId[] GetActiveDemonstrationTenantIds();
+        TenantId[] GetActiveProductionTenantIds();
     }
 
     public class TenantService : ITenantService
     {
-        private readonly IEventBus _eventBus;
+        private readonly IMessageBus _messageBus;
         private readonly ITenantRepository _tenantRepository;
         private static readonly ILogger Logger = LogManager.Create<TenantService>();
         
-        public TenantService(IEventBus eventBus, ITenantRepository tenantRepository)
+        public TenantService(IMessageBus messageBus, ITenantRepository tenantRepository)
         {
-            _eventBus = eventBus;
+            _messageBus = messageBus;
             _tenantRepository = tenantRepository;
         }
 
-        public TenantId CreateDemonstrationTenant(string name, string description, string defaultCultureName)
+        public TenantId CreateTenant(TenantCreationParameters param)
         {
-            Logger.Info($"Creating demonstration tenant: {name}");
-            return CreateTenant(name, description, true, defaultCultureName);
+            Logger.Info($"Creating tenant: {param.Name}");
+            return CreateTenant(param.Name, param.Description, param.IsDemonstrationTenant, param.DefaultCultureName);
         }
 
-        public TenantId CreateProductionTenant(string name, string description, string defaultCultureName)
-        {
-            Logger.Info($"Creating production tenant: {name}");
-            return CreateTenant(name, description, false, defaultCultureName);
-        }
-        
         public void ActivateTenant(TenantId tenantId)
         {
-            var tenant = _tenantRepository.GetTenant(tenantId);
+            Tenant tenant = _tenantRepository.GetTenant(tenantId);
             tenant.State = TenantState.Active;
             _tenantRepository.SaveTenant(tenant);
-            _eventBus.Publish(new TenantActivated(tenant.Id, tenant.Name, tenant.Description, tenant.IsDemoTenant, tenant.DefaultCultureName));
+            _messageBus.Publish(new TenantActivated(tenant.Id, tenant.Name, tenant.Description, tenant.IsDemoTenant, tenant.DefaultCultureName));
         }
 
         public void DeactivateTenant(TenantId tenantId)
         {
-            var tenant = _tenantRepository.GetTenant(tenantId);
+            Tenant tenant = _tenantRepository.GetTenant(tenantId);
             tenant.State = TenantState.Inactive;
             _tenantRepository.SaveTenant(tenant);
-            _eventBus.Publish(new TenantDeactivated(tenant.Id, tenant.Name, tenant.Description, tenant.IsDemoTenant, tenant.DefaultCultureName));
+            _messageBus.Publish(new TenantDeactivated(tenant.Id, tenant.Name, tenant.Description, tenant.IsDemoTenant, tenant.DefaultCultureName));
+        }
+        
+        public TenantId[] GetActiveTenantIds()
+        {
+            return _tenantRepository
+                   .GetTenants()
+                   .Where(t => t.State == TenantState.Active)
+                   .Select(t => new TenantId(t.Id))
+                   .ToArray();
+        }
+
+        public TenantId[] GetActiveDemonstrationTenantIds()
+        {
+            return _tenantRepository
+                   .GetTenants()
+                   .Where(t => t.State == TenantState.Active && t.IsDemoTenant)
+                   .Select(t => new TenantId(t.Id))
+                   .ToArray();
+        }
+
+        public TenantId[] GetActiveProductionTenantIds()
+        {
+            return _tenantRepository
+                   .GetTenants()
+                   .Where(t => t.State == TenantState.Active && !t.IsDemoTenant)
+                   .Select(t => new TenantId(t.Id))
+                   .ToArray();
         }
         
         protected virtual TenantId CreateTenant([NotNull] string name, string description, bool isDemo, string defaultCultureName)
@@ -70,10 +93,10 @@ namespace Backend.Fx.Environment.MultiTenancy
                 throw new ArgumentException($"There is already a tenant named {name}");
             }
 
-            Tenant tenant = new Tenant(name, description, isDemo, defaultCultureName);
+            var tenant = new Tenant(name, description, isDemo, defaultCultureName);
             _tenantRepository.SaveTenant(tenant);
             var tenantId = new TenantId(tenant.Id);
-            _eventBus.Publish(new TenantCreated(tenant.Id, tenant.Name, tenant.Description, tenant.IsDemoTenant, tenant.DefaultCultureName));
+            _messageBus.Publish(new TenantCreated(tenant.Id, tenant.Name, tenant.Description, tenant.IsDemoTenant, tenant.DefaultCultureName));
             return tenantId;
         }
     }

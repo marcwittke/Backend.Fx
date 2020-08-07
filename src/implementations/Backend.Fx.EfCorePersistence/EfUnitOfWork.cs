@@ -13,8 +13,8 @@ namespace Backend.Fx.EfCorePersistence
     {
         
         public EfUnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder, IDomainEventAggregator eventAggregator,
-            IEventBusScope eventBusScope, DbContext dbContext)
-            : base(clock, identityHolder, eventAggregator, eventBusScope)
+            IMessageBusScope messageBusScope, DbContext dbContext)
+            : base(clock, identityHolder, eventAggregator, messageBusScope)
         {
             DbContext = dbContext;
             DbContext.ChangeTracker.AutoDetectChangesEnabled = false;

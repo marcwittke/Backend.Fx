@@ -21,7 +21,7 @@ namespace Backend.Fx.BuildingBlocks
 
         public override bool Equals(object obj)
         {
-            Identified other = obj as Identified;
+            var other = obj as Identified;
             if (other == null)
             {
                 return false;

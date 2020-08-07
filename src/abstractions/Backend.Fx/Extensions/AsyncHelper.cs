@@ -89,8 +89,8 @@
         {
             private bool _done;
             public Exception InnerException { private get; set; }
-            readonly AutoResetEvent _workItemsWaiting = new AutoResetEvent(false);
-            readonly Queue<Tuple<SendOrPostCallback, object>> _items = new Queue<Tuple<SendOrPostCallback, object>>();
+            private readonly AutoResetEvent _workItemsWaiting = new AutoResetEvent(false);
+            private readonly Queue<Tuple<SendOrPostCallback, object>> _items = new Queue<Tuple<SendOrPostCallback, object>>();
 
             public override void Send(SendOrPostCallback d, object state)
             {

@@ -35,7 +35,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
             IUnitOfWork unitOfWork = new EfUnitOfWork(clock ?? new FrozenClock(),
                 currentIdentityHolder,
                 A.Fake<IDomainEventAggregator>(),
-                A.Fake<IEventBusScope>(),
+                A.Fake<IMessageBusScope>(),
                 dbContext);
 
             ITransactionContext transactionContext = new TransactionContext(Connection);

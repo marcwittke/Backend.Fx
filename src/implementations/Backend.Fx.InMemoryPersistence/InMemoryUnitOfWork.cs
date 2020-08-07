@@ -13,8 +13,8 @@ namespace Backend.Fx.InMemoryPersistence
         public int CommitCalls { get; private set; }
         
         public InMemoryUnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder, 
-                                  IDomainEventAggregator eventAggregator, IEventBusScope eventBusScope) 
-                : base(clock, identityHolder, eventAggregator, eventBusScope)
+                                  IDomainEventAggregator eventAggregator, IMessageBusScope messageBusScope) 
+                : base(clock, identityHolder, eventAggregator, messageBusScope)
         { }
 
         protected override void UpdateTrackingProperties(string userId, DateTime utcNow)

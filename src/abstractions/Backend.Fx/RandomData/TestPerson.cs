@@ -103,7 +103,7 @@
         public int Age
         {
             get {
-                var today = DateTime.Today;
+                DateTime today = DateTime.Today;
                 var age = today.Year - DateOfBirth.Year;
                 if (DateOfBirth > today.AddYears(-age))
                 {
@@ -124,7 +124,7 @@
 
         private static string SanitizeForUserName(string s)
         {
-            s = new string((s.Where(char.IsLetterOrDigit).ToArray()));
+            s = new string(s.Where(char.IsLetterOrDigit).ToArray());
             foreach (var invalidCharacterReplacement in InvalidCharacterReplacements)
             {
                 s = s.Replace(invalidCharacterReplacement.Key, invalidCharacterReplacement.Value);

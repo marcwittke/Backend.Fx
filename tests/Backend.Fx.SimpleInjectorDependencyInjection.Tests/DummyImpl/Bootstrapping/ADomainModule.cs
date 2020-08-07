@@ -5,7 +5,7 @@ using SimpleInjector;
 
 namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Bootstrapping
 {
-    public class ADomainModule : DomainModule
+    public class ADomainModule : SimpleInjectorDomainModule
     {
         public ADomainModule(params Assembly[] domainAssemblies)
             : base(domainAssemblies)

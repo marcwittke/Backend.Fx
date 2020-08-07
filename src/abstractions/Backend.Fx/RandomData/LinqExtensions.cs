@@ -22,7 +22,7 @@
                 throw new ArgumentNullException(nameof(source));
             }
 
-            T[] sourceAsArray = source as T[] ?? source.ToArray();
+            var sourceAsArray = source as T[] ?? source.ToArray();
 
             int n = sourceAsArray.Length;
             while (n > 1)
@@ -106,7 +106,7 @@
                     return true;
                 }
                 
-                var idProperty = typeof(T).GetProperty(nameof(Identified.Id), BindingFlags.Instance | BindingFlags.Public);
+                PropertyInfo idProperty = typeof(T).GetProperty(nameof(Identified.Id), BindingFlags.Instance | BindingFlags.Public);
                 if (idProperty != null)
                 {
                     sourceQueryable = sourceQueryable.OrderBy(nameof(Identified.Id));

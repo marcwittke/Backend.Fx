@@ -12,9 +12,9 @@ namespace Backend.Fx.AspNetCore.Mvc.DependencyInjection
             _application = application;
         }
 
-        public object GetInstance(Type t)
+        protected object GetInstance(Type t)
         {
-            return _application.CompositionRoot.GetInstance(t);
+            return _application.CompositionRoot.InstanceProvider.GetInstance(t);
         }
     }
 }

@@ -5,8 +5,10 @@ using System.Threading.Tasks;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.InMemoryPersistence;
 using Backend.Fx.Logging;
+using Backend.Fx.Patterns.DataGeneration;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
+using FakeItEasy;
 using Xunit;
 
 namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Bootstrapping
@@ -18,24 +20,25 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Bootstrap
 
         public AnApplication(ICompositionRoot compositionRoot)
             : this(compositionRoot, new InMemoryTenantRepository())
-        { }
+        {
+        }
 
         public AnApplication(ICompositionRoot compositionRoot, ITenantRepository tenantRepository)
-            : base(compositionRoot, new TenantIdService(tenantRepository), new ExceptionLogger(Logger))
+            : base(compositionRoot,
+                   new InMemoryMessageBus(new BackendFxApplicationInvoker(compositionRoot, A.Fake<IExceptionLogger>())))
         {
             _tenantRepository = tenantRepository;
         }
 
         public void EnsureProdTenant()
         {
-
             var prodTenantId = TenantIdService.GetActiveProductionTenantIds().FirstOrDefault();
             if (prodTenantId == null)
             {
                 ManualResetEventSlim prodTenantActivated = new ManualResetEventSlim(false);
-                var eventBus = CompositionRoot.GetInstance<IEventBus>();
-                eventBus.Subscribe(new DelegateIntegrationEventHandler<TenantActivated>(ta => prodTenantActivated.Set()));
-                ProdTenantId = new TenantService(eventBus, _tenantRepository).CreateProductionTenant("prod", "unit test created", "en-US");
+                var messageBus = CompositionRoot.GetInstance<IMessageBus>();
+                messageBus.Subscribe(new DelegateIntegrationMessageHandler<TenantActivated>(ta => prodTenantActivated.Set()));
+                ProdTenantId = new TenantService(messageBus, _tenantRepository).CreateProductionTenant("prod", "unit test created", "en-US");
                 Assert.True(prodTenantActivated.Wait(Debugger.IsAttached ? int.MaxValue : 10000));
             }
             else
@@ -46,13 +49,12 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Bootstrap
 
         public void EnsureDemoTenant()
         {
-            var demoTenantId = TenantIdService.GetActiveDemonstrationTenantIds().FirstOrDefault();
+            TenantId demoTenantId = TenantIdService.GetActiveDemonstrationTenantIds().FirstOrDefault();
             if (demoTenantId == null)
             {
-                ManualResetEventSlim demoTenantActivated = new ManualResetEventSlim(false);
-                var eventBus = CompositionRoot.GetInstance<IEventBus>();
-                eventBus.Subscribe(new DelegateIntegrationEventHandler<TenantActivated>(ta => demoTenantActivated.Set()));
-                DemoTenantId = new TenantService(eventBus, _tenantRepository).CreateDemonstrationTenant("demo", "unit test created", "en-US");
+                var demoTenantActivated = new ManualResetEventSlim(false);
+                MessageBus.Subscribe(new DelegateIntegrationMessageHandler<TenantActivated>(ta => demoTenantActivated.Set()));
+                DemoTenantId = new TenantService(MessageBus, _tenantRepository).CreateTenant("demo", "unit test created", "en-US");
                 Assert.True(demoTenantActivated.Wait(Debugger.IsAttached ? int.MaxValue : 10000));
             }
             else
@@ -67,8 +69,10 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Bootstrap
 
         protected override Task OnBooted(CancellationToken cancellationToken)
         {
-            var tenantService = new TenantService(CompositionRoot.GetInstance<IEventBus>(), _tenantRepository);
+            var tenantService = new TenantService(MessageBus, _tenantRepository);
             this.RegisterSeedActionForNewlyCreatedTenants(tenantService);
+
+            new DataGenerationContext(new TenantIdService(), CompositionRoot,)
             this.SeedDataForAllActiveTenants();
             return Task.CompletedTask;
         }

@@ -1,26 +1,27 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Environment.Persistence;
 using Backend.Fx.Logging;
+using Backend.Fx.Patterns.EventAggregation.Integration;
 
 namespace Backend.Fx.Patterns.DependencyInjection
 {
-    public abstract class BackendFxDbApplication : BackendFxApplication
+    public class BackendFxDbApplication : BackendFxApplication
     {
         /// <summary>
         /// Initializes the application's runtime instance
         /// </summary>
         /// <param name="compositionRoot">The composition root of the dependency injection framework</param>
+        /// <param name="messageBus">The message bus implementation used by this application instance</param>
+        /// <param name="infrastructureModule"></param>
+        /// <param name="exceptionLogger">The exception logger used by this application instance</param>
         /// <param name="databaseBootstrapper">The database manager for the current application</param>
-        /// <param name="tenantIdService"></param>
-        /// <param name="exceptionLogger">The exception logger used by jobs and integration event handling</param>
-        protected BackendFxDbApplication(
-                          ICompositionRoot compositionRoot,
-                          ITenantIdService tenantIdService,
-                          IExceptionLogger exceptionLogger,
-                          IDatabaseBootstrapper databaseBootstrapper) 
-            : base(compositionRoot, tenantIdService, exceptionLogger)
+        public BackendFxDbApplication(ICompositionRoot compositionRoot,
+                                         IMessageBus messageBus,
+                                         IInfrastructureModule infrastructureModule,
+                                         IExceptionLogger exceptionLogger,
+                                         IDatabaseBootstrapper databaseBootstrapper)
+            : base(compositionRoot, messageBus, infrastructureModule, exceptionLogger)
         {
             DatabaseBootstrapper = databaseBootstrapper;
         }
