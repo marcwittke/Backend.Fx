@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.Authentication;
@@ -32,6 +33,13 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             A.CallTo(() => _fakes.InjectionScope.Dispose()).MustHaveHappenedTwiceExactly();
         }
 
+        [Fact]
+        public async Task CatchesFrameworkExceptions()
+        {
+            A.CallTo(() => _fakes.CompositionRoot.BeginScope()).Throws<InvalidOperationException>();
+            await _sut.InvokeAsync(ip=> Task.CompletedTask, new AnonymousIdentity(), new TenantId(111));
+        }
+        
         [Fact]
         public async Task BeginsNewUnitOfWorkForEveryInvocation()
         {
@@ -80,6 +88,13 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         public async Task LogsException()
         {
             await _sut.InvokeAsync(ip => throw new InvalidOperationException(), new AnonymousIdentity(), new TenantId(111));
+            A.CallTo(() => _fakes.ExceptionLogger.LogException(A<InvalidOperationException>._)).MustHaveHappenedOnceExactly();
+        }
+        
+        [Fact]
+        public async Task LogsTargetInvocationExceptionUnwrapped()
+        {
+            await _sut.InvokeAsync(ip=> throw new TargetInvocationException(new InvalidOperationException()), new AnonymousIdentity(), new TenantId(111));
             A.CallTo(() => _fakes.ExceptionLogger.LogException(A<InvalidOperationException>._)).MustHaveHappenedOnceExactly();
         }
 

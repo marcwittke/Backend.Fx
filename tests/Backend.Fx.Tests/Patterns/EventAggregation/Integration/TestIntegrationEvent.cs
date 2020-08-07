@@ -9,7 +9,8 @@
 
         public string StringParam { get; }
 
-        public ManualResetEventSlim Processed = new ManualResetEventSlim(false);
+        public ManualResetEventSlim TypedProcessed { get; } = new ManualResetEventSlim(false);
+        public ManualResetEventSlim DynamicProcessed { get; } = new ManualResetEventSlim(false);
 
         public TestIntegrationEvent(int intParam, string stringParam) : base(55)
         {

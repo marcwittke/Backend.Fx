@@ -4,6 +4,7 @@ using Backend.Fx.Environment.Persistence;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
+using FakeItEasy;
 using Xunit;
 
 namespace Backend.Fx.Tests.Patterns.DependencyInjection
@@ -27,7 +28,13 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             Assert.True(_sut.OnDatabaseBootCalled);
             Assert.True(_sut.OnDatabaseBootedCalled);
         }
-        
+
+        [Fact]
+        public void CallsDatabaseBootstrapperDisposeOnDispose()
+        {
+            _sut.Dispose();
+            A.CallTo(() => _fakes.DatabaseBootstrapper.Dispose()).MustHaveHappenedOnceExactly();
+        }
         
         private class TestApplication : BackendFxDbApplication
         {

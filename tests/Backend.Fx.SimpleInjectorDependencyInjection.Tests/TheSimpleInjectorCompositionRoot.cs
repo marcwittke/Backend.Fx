@@ -4,14 +4,10 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.DateAndTime;
-using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.Patterns.DependencyInjection;
-using Backend.Fx.Patterns.EventAggregation.Integration;
 using Backend.Fx.Patterns.IdGeneration;
 using Backend.Fx.SimpleInjectorDependencyInjection.Modules;
 using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Bootstrapping;
 using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Domain;
-using FakeItEasy;
 using SimpleInjector;
 using Xunit;
 
@@ -35,16 +31,9 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
 
         public TheSimpleInjectorCompositionRoot()
         {
-
-            var tenantManager = A.Fake<ITenantIdService>();
-            TenantId[] tenantIds = { new TenantId(999) };
-            A.CallTo(() => tenantManager.GetActiveTenantIds()).Returns(tenantIds);
-
-
             _sut = new SimpleInjectorCompositionRoot();
-            var domainAssembly = typeof(AnAggregate).GetTypeInfo().Assembly;
+            Assembly domainAssembly = typeof(AnAggregate).GetTypeInfo().Assembly;
             _sut.RegisterModules(
-                new InfrastructureModule(A.Fake<IMessageBus>()),
                 new ADomainModule(domainAssembly),
                 new APersistenceModule(domainAssembly));
             
@@ -118,7 +107,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
             object[] singletonInstances = new object[parallelScopeCount];
             Task[] tasks = new Task[parallelScopeCount];
 
-            ManualResetEvent waiter = new ManualResetEvent(false);
+            var waiter = new ManualResetEvent(false);
 
             // resolving a singleton service and a scoped service in a massive parallel scenario
             for (int index = 0; index < parallelScopeCount; index++)

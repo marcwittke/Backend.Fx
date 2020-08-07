@@ -8,7 +8,13 @@ using Backend.Fx.Patterns.DependencyInjection;
 
 namespace Backend.Fx.Patterns.DataGeneration
 {
-    public class DataGenerationContext
+    public interface IDataGenerationContext
+    {
+        void SeedDataForAllActiveTenants();
+        void SeedDataForTenant(TenantId tenantId, bool isDemoTenant);
+    }
+
+    public class DataGenerationContext : IDataGenerationContext
     {
         private static readonly ILogger Logger = LogManager.Create<DataGenerationContext>();
 

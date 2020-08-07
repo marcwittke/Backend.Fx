@@ -115,14 +115,12 @@ namespace Backend.Fx.Patterns.Transactions
                     {
                         Connection.Close();
                     }
+                    _transactionLifetimeLogger?.Dispose();
                 }
                 catch (Exception ex)
                 {
                     Logger.Error(ex, "Dispose failed");
                 }
-
-                _transactionLifetimeLogger?.Dispose();
-                CurrentTransaction?.Dispose();
             }
         }
     }
