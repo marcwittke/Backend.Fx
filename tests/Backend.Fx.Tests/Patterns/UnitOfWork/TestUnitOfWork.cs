@@ -30,8 +30,8 @@
             base.Dispose(disposing);
         }
 
-        public TestUnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder, IDomainEventAggregator eventAggregator, IEventBusScope eventBusScope) 
-                : base(clock, identityHolder, eventAggregator, eventBusScope)
+        public TestUnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder, IDomainEventAggregator eventAggregator, IMessageBusScope messageBusScope) 
+                : base(clock, identityHolder, eventAggregator, messageBusScope)
         { }
     }
 }

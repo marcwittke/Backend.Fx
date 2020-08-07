@@ -1,6 +1,4 @@
-﻿using Backend.Fx.Patterns.DependencyInjection;
-
-namespace Backend.Fx.RabbitMq
+﻿namespace Backend.Fx.RabbitMq
 {
     using System;
     using System.Text;
@@ -13,17 +11,15 @@ namespace Backend.Fx.RabbitMq
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
 
-    public class RabbitMqEventBus : EventBus
+    public class RabbitMqMessageBus : MessageBus
     {
-        private static readonly ILogger Logger = LogManager.Create<RabbitMqEventBus>();
+        private static readonly ILogger Logger = LogManager.Create<RabbitMqMessageBus>();
         private readonly RabbitMqChannel _channel;
         
-        public RabbitMqEventBus(IBackendFxApplication application,
-                                IConnectionFactory connectionFactory,
-                                int retryCount,
-                                string brokerName,
-                                string queueName)
-                : base(application)
+        public RabbitMqMessageBus(IConnectionFactory connectionFactory,
+                                  int retryCount,
+                                  string brokerName,
+                                  string queueName)
         {
             _channel = new RabbitMqChannel(connectionFactory, brokerName, queueName, retryCount);
         }
@@ -44,7 +40,7 @@ namespace Backend.Fx.RabbitMq
             Process(args.RoutingKey, new RabbitMqEventProcessingContext(args.Body));
         }
 
-        protected override Task PublishOnEventBus(IIntegrationEvent integrationEvent)
+        protected override Task PublishOnMessageBus(IIntegrationEvent integrationEvent)
         {
             Logger.Info($"Publishing {integrationEvent.GetType().Name}");
             _channel.EnsureOpen();

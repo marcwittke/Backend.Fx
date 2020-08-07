@@ -9,40 +9,39 @@ using Backend.Fx.Patterns.DependencyInjection;
 
 namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
-    public abstract class EventBus : IEventBus
+    public abstract class MessageBus : IMessageBus
     {
-        private static readonly ILogger Logger = LogManager.Create<EventBus>();
-        private readonly IBackendFxApplication _application;
-
+        private static readonly ILogger Logger = LogManager.Create<MessageBus>();
+        
         /// <summary>
         /// Holds the registered handlers.
         /// Each event type name (key) matches to various subscriptions
         /// </summary>
         private readonly ConcurrentDictionary<string, List<ISubscription>> _subscriptions = new ConcurrentDictionary<string, List<ISubscription>>();
 
-        protected EventBus(IBackendFxApplication application)
-        {
-            Logger.Debug($"Instantiating {GetType()}");
-            _application = application;
-        }
+        private IBackendFxApplicationInvoker _invoker;
 
         public abstract void Connect();
 
+        public void ProvideInvoker(IBackendFxApplicationInvoker invoker)
+        {
+            _invoker = invoker;
+        }
+
         public Task Publish(IIntegrationEvent integrationEvent)
         {
-            Guid correlationId = _application.CompositionRoot.TryGetCurrentCorrelation(out Correlation correlation) ? correlation.Id : Guid.NewGuid();
-            ((IntegrationEvent) integrationEvent).SetCorrelationId(correlationId);
-            return PublishOnEventBus(integrationEvent);
+            return PublishOnMessageBus(integrationEvent);
         }
 
-        protected abstract Task PublishOnEventBus(IIntegrationEvent integrationEvent);
+        protected abstract Task PublishOnMessageBus(IIntegrationEvent integrationEvent);
 
 
         /// <inheritdoc />
-        public void Subscribe<THandler>(string eventName) where THandler : IIntegrationEventHandler
+        public void Subscribe<THandler>(string eventName) where THandler : IIntegrationMessageHandler
         {
             Logger.Info($"Subscribing to {eventName}");
-            var subscription = new DynamicSubscription(_application, typeof(THandler));
+            EnsureInvoker();
+            var subscription = new DynamicSubscription(typeof(THandler));
             _subscriptions.AddOrUpdate(eventName,
                                        s => new List<ISubscription> {subscription},
                                        (s, list) =>
@@ -54,12 +53,12 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
         }
 
         /// <inheritdoc />
-        public void Subscribe<THandler, TEvent>() where THandler : IIntegrationEventHandler<TEvent> where TEvent : IIntegrationEvent
+        public void Subscribe<THandler, TEvent>() where THandler : IIntegrationMessageHandler<TEvent> where TEvent : IIntegrationEvent
         {
             string eventName = typeof(TEvent).FullName ?? typeof(TEvent).Name;
-
             Logger.Info($"Subscribing to {eventName}");
-            var subscription = new TypedSubscription(_application, typeof(THandler));
+            EnsureInvoker();
+            var subscription = new TypedSubscription(typeof(THandler));
             _subscriptions.AddOrUpdate(eventName,
                                        s => new List<ISubscription> {subscription},
                                        (s, list) =>
@@ -70,12 +69,12 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
             Subscribe(eventName);
         }
 
-        public void Subscribe<TEvent>(IIntegrationEventHandler<TEvent> handler)
+        public void Subscribe<TEvent>(IIntegrationMessageHandler<TEvent> handler)
             where TEvent : IIntegrationEvent
         {
             string eventName = typeof(TEvent).FullName ?? typeof(TEvent).Name;
-
             Logger.Info($"Subscribing to {eventName}");
+            EnsureInvoker();
             var subscription = new SingletonSubscription<TEvent>(handler);
             _subscriptions.AddOrUpdate(eventName,
                                        s => new List<ISubscription> {subscription},
@@ -87,7 +86,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
             Subscribe(eventName);
         }
 
-        public void Unsubscribe<THandler>(string eventName) where THandler : IIntegrationEventHandler
+        public void Unsubscribe<THandler>(string eventName) where THandler : IIntegrationMessageHandler
         {
             Logger.Info($"Unsubscribing from {eventName}");
             if (_subscriptions.TryGetValue(eventName, out var handlers))
@@ -98,7 +97,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
             Unsubscribe(eventName);
         }
 
-        public void Unsubscribe<THandler, TEvent>() where THandler : IIntegrationEventHandler<TEvent> where TEvent : IIntegrationEvent
+        public void Unsubscribe<THandler, TEvent>() where THandler : IIntegrationMessageHandler<TEvent> where TEvent : IIntegrationEvent
         {
             string eventName = typeof(TEvent).FullName;
             Debug.Assert(eventName != null, nameof(eventName) + " != null");
@@ -112,7 +111,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
             Unsubscribe(eventName);
         }
 
-        public void Unsubscribe<TEvent>(IIntegrationEventHandler<TEvent> handler) where TEvent : IIntegrationEvent
+        public void Unsubscribe<TEvent>(IIntegrationMessageHandler<TEvent> handler) where TEvent : IIntegrationEvent
         {
             string eventName = typeof(TEvent).FullName;
             Debug.Assert(eventName != null, nameof(eventName) + " != null");
@@ -132,15 +131,17 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
         protected void Process(string eventName, EventProcessingContext context)
         {
             Logger.Info($"Processing a {eventName} event");
+            EnsureInvoker();
+
             if (_subscriptions.TryGetValue(eventName, out List<ISubscription> subscriptions))
             {
                 foreach (ISubscription subscription in subscriptions)
                 {
-                    _application.Invoke(
-                        () => subscription.Process(eventName, context),
+                    _invoker.Invoke(
+                        instanceProvider => subscription.Process(instanceProvider, context),
                         new SystemIdentity(),
                         context.TenantId,
-                        compositionRoot => ConfigureProcessingScope(compositionRoot, context));
+                        context.CorrelationId);
                 }
             }
             else
@@ -149,9 +150,12 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
             }
         }
 
-        protected virtual void ConfigureProcessingScope(ICompositionRoot compositionRoot, EventProcessingContext context)
+        private void EnsureInvoker()
         {
-            compositionRoot.GetInstance<ICurrentTHolder<Correlation>>().Current.Resume(context.CorrelationId);
+            if (_invoker == null)
+            {
+                throw new InvalidOperationException("Before using the message bus you have to provide the application invoker by calling ProvideInvoker()");
+            }
         }
 
         protected virtual void Dispose(bool disposing)

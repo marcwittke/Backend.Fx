@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.DateAndTime;
 using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.Logging;
+using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using Backend.Fx.Patterns.IdGeneration;
 using Backend.Fx.SimpleInjectorDependencyInjection.Modules;
@@ -21,7 +21,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
     {
         private readonly SimpleInjectorCompositionRoot _sut;
         
-        private class ADomainModule  : DomainModule 
+        private class ADomainModule  : SimpleInjectorDomainModule 
         {
             public ADomainModule(params Assembly[] domainAssemblies) : base(domainAssemblies)
             { }
@@ -44,7 +44,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
             _sut = new SimpleInjectorCompositionRoot();
             var domainAssembly = typeof(AnAggregate).GetTypeInfo().Assembly;
             _sut.RegisterModules(
-                new InfrastructureModule(new DebugExceptionLogger(), A.Fake<IEventBus>()),
+                new InfrastructureModule(A.Fake<IMessageBus>()),
                 new ADomainModule(domainAssembly),
                 new APersistenceModule(domainAssembly));
             

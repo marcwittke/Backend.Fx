@@ -1,9 +1,11 @@
-﻿namespace Backend.Fx.Patterns.EventAggregation.Integration
+﻿using Backend.Fx.Patterns.DependencyInjection;
+
+namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
     using System.Collections.Concurrent;
     using System.Threading.Tasks;
     
-    public interface IEventBusScope
+    public interface IMessageBusScope
     { 
         /// <summary>
         /// Enqueue an event to be raised later. 
@@ -15,18 +17,21 @@
         Task RaiseEvents();
     }
 
-    public class EventBusScope : IEventBusScope
+    public class MessageBusScope : IMessageBusScope
     {
         private readonly ConcurrentQueue<IIntegrationEvent> _integrationEvents = new ConcurrentQueue<IIntegrationEvent>();
-        private readonly IEventBus _eventBus;
+        private readonly IMessageBus _messageBus;
+        private readonly ICurrentTHolder<Correlation> _correlationHolder;
 
-        public EventBusScope(IEventBus eventBus)
+        public MessageBusScope(IMessageBus messageBus, ICurrentTHolder<Correlation> correlationHolder)
         {
-            _eventBus = eventBus;
+            _messageBus = messageBus;
+            _correlationHolder = correlationHolder;
         }
         
-        void IEventBusScope.Publish(IIntegrationEvent integrationEvent)
+        void IMessageBusScope.Publish(IIntegrationEvent integrationEvent)
         {
+            ((IntegrationEvent) integrationEvent).SetCorrelationId(_correlationHolder.Current.Id);
             _integrationEvents.Enqueue(integrationEvent);
         }
 
@@ -34,7 +39,7 @@
         {
             while (_integrationEvents.TryDequeue(out IIntegrationEvent integrationEvent))
             {
-                await _eventBus.Publish(integrationEvent);
+                await _messageBus.Publish(integrationEvent);
             }
         }
     }

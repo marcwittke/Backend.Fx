@@ -13,7 +13,7 @@ namespace Backend.Fx.AspNetCore.Mvc.DependencyInjection
 
         public virtual object Create(ControllerContext c)
         {
-            var instance = GetInstance(c.ActionDescriptor.ControllerTypeInfo.AsType());
+            object instance = GetInstance(c.ActionDescriptor.ControllerTypeInfo.AsType());
             if (instance == null)
             {
                 Logger.Warn($"Activation of {c.ActionDescriptor.ControllerTypeInfo.AsType()} returned NULL");

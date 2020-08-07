@@ -69,7 +69,7 @@
                         throw new InvalidOperationException();
                     if (x)
                     {
-                        var c = thisComponents.Current.CompareTo(otherComponents.Current);
+                        var c = thisComponents.Current?.CompareTo(otherComponents.Current) ?? 0;
                         if (c != 0)
                             return c;
                     }

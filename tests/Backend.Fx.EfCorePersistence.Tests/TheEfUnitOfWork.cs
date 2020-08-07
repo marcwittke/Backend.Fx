@@ -101,7 +101,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 var sut = new EfUnitOfWork(new FrozenClock(),
                     CurrentIdentityHolder.CreateSystem(),
                     domainEventAggregator,
-                    A.Fake<IEventBusScope>(),
+                    A.Fake<IMessageBusScope>(),
                     // ReSharper disable once AccessToDisposedClosure
                     new TestDbContext(dbs.OptionsBuilder.Options));
 

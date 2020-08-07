@@ -49,7 +49,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Bootstrap
             var uowRegistration = Lifestyle.Scoped.CreateRegistration(
                     ()  => new InMemoryUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), 
                                                   container.GetInstance<IDomainEventAggregator>(), 
-                                                  container.GetInstance<IEventBusScope>()), 
+                                                  container.GetInstance<IMessageBusScope>()), 
                     container);
             container.AddRegistration(typeof(IUnitOfWork), uowRegistration);
             container.AddRegistration(typeof(ICanFlush), uowRegistration);

@@ -1,47 +1,89 @@
 ﻿using System;
-using System.Reflection;
-using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.Extensions;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.Jobs;
-using Backend.Fx.Patterns.UnitOfWork;
+using Backend.Fx.Patterns.EventAggregation.Domain;
+using Backend.Fx.Patterns.EventAggregation.Integration;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.Patterns.DependencyInjection
 {
     /// <summary>
     /// The root object of the whole backend fx application framework
     /// </summary>
-    public abstract class BackendFxApplication : IBackendFxApplication
+    public interface IBackendFxApplication : IDisposable
+    {
+        /// <summary>
+        /// The async invoker runs a given action asynchronously in an application scope with injection facilities 
+        /// </summary>
+        IBackendFxApplicationAsyncInvoker AsyncInvoker { get; }
+        
+        /// <summary>
+        /// The composition root of the dependency injection framework
+        /// </summary>
+        ICompositionRoot CompositionRoot { get; }
+        
+        /// <summary>
+        /// The invoker runs a given action in an application scope with injection facilities 
+        /// </summary>
+        IBackendFxApplicationInvoker Invoker { get; }
+        
+        /// <summary>
+        /// The message bus to send and receive event messages
+        /// </summary>
+        IMessageBus MessageBus { get; }
+
+        /// <summary>
+        /// allows synchronously awaiting application startup
+        /// </summary>
+        bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Initializes ans starts the application (async)
+        /// </summary>
+        /// <returns></returns>
+        Task Boot(CancellationToken cancellationToken = default);
+    }
+    
+    
+    public class BackendFxApplication : IBackendFxApplication
     {
         private static readonly ILogger Logger = LogManager.Create<BackendFxApplication>();
         private readonly ManualResetEventSlim _isBooted = new ManualResetEventSlim(false);
-        private int _scopeIndex = 1;
 
         /// <summary>
         /// Initializes the application's runtime instance
         /// </summary>
         /// <param name="compositionRoot">The composition root of the dependency injection framework</param>
-        /// <param name="tenantIdService">This service provides all known tenant ids</param>
-        /// <param name="exceptionLogger">The exception logger used for job execution and integration event handling</param>
-        protected BackendFxApplication(ICompositionRoot compositionRoot, ITenantIdService tenantIdService, IExceptionLogger exceptionLogger)
+        /// <param name="messageBus">The message bus implementation used by this application instance</param>
+        /// <param name="infrastructureModule">Minimum infrastructure components module, is registered automatically</param>
+        /// <param name="exceptionLogger">The exception logger for this application</param>
+        public BackendFxApplication(ICompositionRoot compositionRoot, IMessageBus messageBus, IInfrastructureModule infrastructureModule, IExceptionLogger exceptionLogger)
         {
+            var invoker = new BackendFxApplicationInvoker(compositionRoot, exceptionLogger);
+            AsyncInvoker = invoker;
+            Invoker = invoker;
+            MessageBus = messageBus;
+            MessageBus.ProvideInvoker(invoker);
             CompositionRoot = compositionRoot;
-            TenantIdService = tenantIdService;
-            ExceptionLogger = exceptionLogger;
+            infrastructureModule.RegisterCorrelationHolder<CurrentCorrelationHolder>();
+            infrastructureModule.RegisterDomainEventAggregator(() => new DomainEventAggregator(compositionRoot));
+            infrastructureModule.RegisterIdentityHolder<CurrentIdentityHolder>();
+            infrastructureModule.RegisterMessageBusScope(() => new MessageBusScope(compositionRoot.InstanceProvider.GetInstance<IMessageBus>(),
+                                                                                   compositionRoot.InstanceProvider.GetInstance<ICurrentTHolder<Correlation>>()));
+            infrastructureModule.RegisterTenantHolder<CurrentTenantIdHolder>();
         }
 
-        public IExceptionLogger ExceptionLogger { get; }
+        public IBackendFxApplicationAsyncInvoker AsyncInvoker { get; }
 
-        /// <inheritdoc />
         public ICompositionRoot CompositionRoot { get; }
 
-        public ITenantIdService TenantIdService { get; }
+        public IBackendFxApplicationInvoker Invoker { get; }
 
-        /// <inheritdoc />
+        public IMessageBus MessageBus { get; }
+        
         public async Task Boot(CancellationToken cancellationToken = default)
         {
             Logger.Info("Booting application");
@@ -55,84 +97,6 @@ namespace Backend.Fx.Patterns.DependencyInjection
         public bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue, CancellationToken cancellationToken = default)
         {
             return _isBooted.Wait(timeoutMilliSeconds, cancellationToken);
-        }
-
-        public IDisposable BeginScope(IIdentity identity = null, TenantId tenantId = null)
-        {
-            var scopeIndex = _scopeIndex++;
-            tenantId = tenantId ?? new TenantId(null);
-            identity = identity ?? new AnonymousIdentity();
-
-            IDisposable scopeDurationLogger = Logger.InfoDuration(
-                $"Starting scope {scopeIndex} for {identity.Name} in tenant {(tenantId.HasValue ? tenantId.Value.ToString() : "null")}",
-                $"Ended scope {scopeIndex} for {identity.Name} in tenant {(tenantId.HasValue ? tenantId.Value.ToString() : "null")}");
-            IDisposable scope = CompositionRoot.BeginScope();
-            CompositionRoot.GetInstance<ICurrentTHolder<TenantId>>().ReplaceCurrent(tenantId);
-            CompositionRoot.GetInstance<ICurrentTHolder<IIdentity>>().ReplaceCurrent(identity);
-            
-            return new MultipleDisposable(scope, scopeDurationLogger);
-        }
-        
-        public void Run<TJob>() where TJob : class, IJob
-        {
-            var tenantIds = TenantIdService.GetActiveTenantIds();
-            foreach (TenantId tenantId in tenantIds)
-            {
-                Invoke(() => CompositionRoot.GetInstance<TJob>().Run(), new SystemIdentity(), tenantId);
-            }
-        }
-
-        public void Run<TJob>(TenantId tenantId) where TJob : class, IJob
-        {
-            Invoke(() => CompositionRoot.GetInstance<TJob>().Run(), new SystemIdentity(), tenantId);
-        }
-
-        public void Invoke(Action action, IIdentity identity, TenantId tenantId, Action<ICompositionRoot> configureScope = null)
-        {
-            using (BeginScope(identity, tenantId))
-            {
-                configureScope?.Invoke(CompositionRoot);
-                var unitOfWork = CompositionRoot.GetInstance<IUnitOfWork>();
-                try
-                {
-                    unitOfWork.Begin();
-                    action.Invoke();
-                    unitOfWork.Complete();
-                }
-                catch (TargetInvocationException ex)
-                {
-                    ExceptionLogger.LogException(ex.InnerException ?? ex);
-                }
-                catch (Exception ex)
-                {
-                    Logger.Info(ex);
-                    ExceptionLogger.LogException(ex);
-                }
-            }
-        }
-
-        public async Task InvokeAsync(Func<Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId, Action<ICompositionRoot> configureScope = null)
-        {
-            using (BeginScope(identity, tenantId))
-            {
-                configureScope?.Invoke(CompositionRoot);
-                var unitOfWork = CompositionRoot.GetInstance<IUnitOfWork>();
-                try
-                {
-                    unitOfWork.Begin();
-                    await awaitableAsyncAction.Invoke();
-                    unitOfWork.Complete();
-                }
-                catch (TargetInvocationException ex)
-                {
-                    ExceptionLogger.LogException(ex.InnerException ?? ex);
-                }
-                catch (Exception ex)
-                {
-                    Logger.Info(ex);
-                    ExceptionLogger.LogException(ex);
-                }
-            }
         }
 
         /// <summary>
@@ -150,7 +114,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        protected virtual async Task OnBooted(CancellationToken cancellationToken)
+        protected virtual async Task OnBooted([UsedImplicitly] CancellationToken cancellationToken)
         {
             await Task.CompletedTask;
         }

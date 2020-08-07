@@ -1,8 +1,10 @@
-﻿namespace Backend.Fx.Patterns.EventAggregation.Integration
+﻿using Backend.Fx.Patterns.DependencyInjection;
+
+namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
     public interface ISubscription
     {
-        void Process(string eventName, EventProcessingContext context);
+        void Process(IInstanceProvider instanceProvider, EventProcessingContext context);
         bool Matches(object handler);
     }
 }

@@ -9,31 +9,30 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
-    public class SerializingEventBus : EventBus 
+    public class SerializingMessageBus : MessageBus
     {
-        public SerializingEventBus(IBackendFxApplication application) 
-            : base(application)
-        { }
-
         public override void Connect()
-        { }
+        {
+        }
 
-        protected override Task PublishOnEventBus(IIntegrationEvent integrationEvent)
+        protected override Task PublishOnMessageBus(IIntegrationEvent integrationEvent)
         {
             var jsonString = JsonConvert.SerializeObject(integrationEvent);
-            return Task.Run(()=>Process(integrationEvent.GetType().FullName, new SerializingProcessingContext(jsonString)));
+            return Task.Run(() => Process(integrationEvent.GetType().FullName, new SerializingProcessingContext(jsonString)));
         }
 
         protected override void Subscribe(string eventName)
-        {}
+        {
+        }
 
         protected override void Unsubscribe(string eventName)
-        {}
+        {
+        }
 
-        private class SerializingProcessingContext : EventProcessingContext 
+        private class SerializingProcessingContext : EventProcessingContext
         {
             private readonly string _jsonString;
-            
+
             public SerializingProcessingContext(string jsonString)
             {
                 _jsonString = jsonString;
@@ -42,8 +41,8 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
                 CorrelationId = eventStub.correlationId;
             }
 
-            public override TenantId TenantId {get; }
-            
+            public override TenantId TenantId { get; }
+
             public override dynamic DynamicEvent => JObject.Parse(_jsonString);
             public override Guid CorrelationId { get; }
 
