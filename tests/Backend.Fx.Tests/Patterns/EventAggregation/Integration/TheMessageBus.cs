@@ -21,7 +21,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             sw.Start();
             await Sut.Publish(Invoker.IntegrationEvent);
             Assert.True(sw.ElapsedMilliseconds < 900);
-            Assert.True(Invoker.IntegrationEvent.Processed.Wait(Debugger.IsAttached ? int.MaxValue : 10000));
+            Assert.True(Invoker.IntegrationEvent.TypedProcessed.Wait(Debugger.IsAttached ? int.MaxValue : 10000));
             Assert.True(sw.ElapsedMilliseconds > 1000);
         }
     }
@@ -46,7 +46,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         {
             Sut.Subscribe<TypedMessageHandler, TestIntegrationEvent>();
             await Sut.Publish(Invoker.IntegrationEvent);
-            Assert.True(Invoker.IntegrationEvent.Processed.Wait(Debugger.IsAttached ? int.MaxValue : 10000));
+            Assert.True(Invoker.IntegrationEvent.TypedProcessed.Wait(Debugger.IsAttached ? int.MaxValue : 10000));
             A.CallTo(() => Invoker.TypedHandler.Handle(A<TestIntegrationEvent>
                                                         .That
                                                         .Matches(evt => evt.IntParam == 34 && evt.StringParam == "gaga")))
@@ -60,7 +60,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         {
             Sut.Subscribe<DynamicMessageHandler>(typeof(TestIntegrationEvent).FullName);
             await Sut.Publish(Invoker.IntegrationEvent);
-            Assert.True(Invoker.IntegrationEvent.Processed.Wait(Debugger.IsAttached ? int.MaxValue : 10000));
+            Assert.True(Invoker.IntegrationEvent.DynamicProcessed.Wait(Debugger.IsAttached ? int.MaxValue : 10000));
 
             A.CallTo(() => Invoker.TypedHandler.Handle(A<TestIntegrationEvent>._)).MustNotHaveHappened();
             A.CallTo(() => Invoker.DynamicHandler.Handle(A<object>._)).MustHaveHappenedOnceExactly();
@@ -73,7 +73,8 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             Sut.Subscribe<TypedMessageHandler, TestIntegrationEvent>();
             
             await Sut.Publish(Invoker.IntegrationEvent);
-            Assert.True(Invoker.IntegrationEvent.Processed.Wait(Debugger.IsAttached ? int.MaxValue : 10000));
+            Assert.True(Invoker.IntegrationEvent.TypedProcessed.Wait(Debugger.IsAttached ? int.MaxValue : 10000));
+            Assert.True(Invoker.IntegrationEvent.DynamicProcessed.Wait(Debugger.IsAttached ? int.MaxValue : 10000));
 
             A.CallTo(() => Invoker.TypedHandler.Handle(A<TestIntegrationEvent>
                                                         .That
@@ -94,8 +95,8 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
 
             public TestInvoker()
             {
-                A.CallTo(() => TypedHandler.Handle(A<TestIntegrationEvent>._)).Invokes((TestIntegrationEvent e) => IntegrationEvent.Processed.Set());
-                A.CallTo(() => DynamicHandler.Handle(new object())).WithAnyArguments().Invokes((object e) => IntegrationEvent.Processed.Set());
+                A.CallTo(() => TypedHandler.Handle(A<TestIntegrationEvent>._)).Invokes((TestIntegrationEvent e) => IntegrationEvent.TypedProcessed.Set());
+                A.CallTo(() => DynamicHandler.Handle(new object())).WithAnyArguments().Invokes((object e) => IntegrationEvent.DynamicProcessed.Set());
 
                 A.CallTo(() => FakeInstanceProvider.GetInstance(A<Type>.That.IsEqualTo(typeof(TypedMessageHandler))))
                  .Returns(new TypedMessageHandler(TypedHandler));

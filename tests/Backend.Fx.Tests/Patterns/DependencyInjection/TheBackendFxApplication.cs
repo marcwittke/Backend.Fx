@@ -21,6 +21,18 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         public TheBackendFxApplication()
         {
             _fakes = new DITestFakes();
+
+            Func<IDomainEventAggregator> domainEventAggregatorFactory = () => null;
+            A.CallTo(() => _fakes.InfrastructureModule.RegisterDomainEventAggregator(A<Func<IDomainEventAggregator>>._))
+             .Invokes((Func<IDomainEventAggregator> f) => domainEventAggregatorFactory = f);
+            A.CallTo(() => _fakes.InstanceProvider.GetInstance<IDomainEventAggregator>()).ReturnsLazily(()=>domainEventAggregatorFactory.Invoke());
+            
+            Func<IMessageBusScope> messageBusScopeFactory = ()=>null;
+            A.CallTo(() => _fakes.InfrastructureModule.RegisterMessageBusScope(A<Func<IMessageBusScope>>._))
+             .Invokes((Func<IMessageBusScope> f) => messageBusScopeFactory = f);
+            A.CallTo(() => _fakes.InstanceProvider.GetInstance<IMessageBusScope>()).ReturnsLazily(()=>messageBusScopeFactory.Invoke());
+            
+            
             _sut = new TestApplication(_fakes.CompositionRoot, _fakes.MessageBus, _fakes.InfrastructureModule, _fakes.ExceptionLogger);
         }
 
@@ -67,6 +79,41 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             _sut.Boot();
             Assert.True(_sut.OnBootCalled);
             Assert.True(_sut.OnBootedCalled);
+        }
+        
+        [Fact]
+        public void ProvidesInvoker()
+        {
+            Assert.IsType<BackendFxApplicationInvoker>(_sut.Invoker);
+        }
+
+        [Fact]
+        public void ProvidesAsyncInvoker()
+        {
+            Assert.IsType<BackendFxApplicationInvoker>(_sut.AsyncInvoker);
+        }
+        
+        [Fact]
+        public void ProvidesDomainEventAggregator()
+        {
+            using (IInjectionScope scope = _sut.CompositionRoot.BeginScope())
+            {
+                var domainEventAggregator =  scope.InstanceProvider.GetInstance<IDomainEventAggregator>();
+                Assert.NotNull(domainEventAggregator);
+            }
+
+            A.CallTo(() => _fakes.InstanceProvider.GetInstance<IDomainEventAggregator>()).MustHaveHappenedOnceExactly();
+        }
+        
+        [Fact]
+        public void ProvidesMessageBusScope()
+        {
+            using (IInjectionScope scope = _sut.CompositionRoot.BeginScope())
+            {
+                var messageBusScope =  scope.InstanceProvider.GetInstance<IMessageBusScope>();
+                Assert.NotNull(messageBusScope);
+            }
+            A.CallTo(() => _fakes.InstanceProvider.GetInstance<IMessageBusScope>()).MustHaveHappenedOnceExactly();
         }
 
         [Fact]

@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Security.Principal;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
@@ -29,6 +30,13 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             _sut.Invoke(ip=>{}, new AnonymousIdentity(), new TenantId(111));
             A.CallTo(() =>_fakes.CompositionRoot.BeginScope()).MustHaveHappenedTwiceExactly();
             A.CallTo(() =>_fakes.InjectionScope.Dispose()).MustHaveHappenedTwiceExactly();
+        }
+
+        [Fact]
+        public void CatchesFrameworkExceptions()
+        {
+            A.CallTo(() => _fakes.CompositionRoot.BeginScope()).Throws<InvalidOperationException>();
+            _sut.Invoke(ip=>{}, new AnonymousIdentity(), new TenantId(111));
         }
         
         [Fact]
@@ -80,7 +88,15 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         {
             _sut.Invoke(ip=> throw new InvalidOperationException(), new AnonymousIdentity(), new TenantId(111));
             A.CallTo(() => _fakes.ExceptionLogger.LogException(A<InvalidOperationException>._)).MustHaveHappenedOnceExactly();
+        } 
+        
+        [Fact]
+        public void LogsTargetInvocationExceptionUnwrapped()
+        {
+            _sut.Invoke(ip=> throw new TargetInvocationException(new InvalidOperationException()), new AnonymousIdentity(), new TenantId(111));
+            A.CallTo(() => _fakes.ExceptionLogger.LogException(A<InvalidOperationException>._)).MustHaveHappenedOnceExactly();
         }
+        
         
         [Fact]
         public void ProvidesInstanceProviderForInvocation()

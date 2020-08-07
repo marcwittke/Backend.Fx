@@ -14,7 +14,7 @@
         public void Handle(TestIntegrationEvent eventData)
         {
             _integrationMessageHandlerImplementation.Handle(eventData);
-            eventData.Processed.Set();
+            eventData.TypedProcessed.Set();
         }
     }
 }

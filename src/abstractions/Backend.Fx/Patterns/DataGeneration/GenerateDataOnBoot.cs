@@ -4,20 +4,21 @@ using System.Threading.Tasks;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.Patterns.DataGeneration
 {
     public class GenerateDataOnBoot : IBackendFxApplication
     {
         private readonly IBackendFxApplication _application;
-        private readonly DataGenerationModule _dataGenerationModule;
-        private readonly DataGenerationContext _dataGenerationContext;
+        private readonly IModule _dataGenerationModule;
+        public IDataGenerationContext DataGenerationContext { get; [UsedImplicitly] private set; }
 
-        public GenerateDataOnBoot(IBackendFxApplication application, ITenantService tenantService, DataGenerationModule dataGenerationModule)
+        public GenerateDataOnBoot(IBackendFxApplication application, ITenantService tenantService, IModule dataGenerationModule)
         {
             _application = application;
             _dataGenerationModule = dataGenerationModule;
-            _dataGenerationContext = new DataGenerationContext(tenantService,
+            DataGenerationContext = new DataGenerationContext(tenantService,
                                                                _application.CompositionRoot,
                                                                _application.Invoker);
         }
@@ -42,7 +43,7 @@ namespace Backend.Fx.Patterns.DataGeneration
         {
             _application.CompositionRoot.RegisterModules(_dataGenerationModule);
             await _application.Boot(cancellationToken);
-            _dataGenerationContext.SeedDataForAllActiveTenants();
+            DataGenerationContext.SeedDataForAllActiveTenants();
         }
     }
 }

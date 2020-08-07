@@ -1,3 +1,4 @@
+using System;
 using System.Security.Principal;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Environment.Persistence;
@@ -26,6 +27,8 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         public IMessageBus MessageBus { get; } = A.Fake<IMessageBus>();
         public IInfrastructureModule InfrastructureModule { get; } = A.Fake<IInfrastructureModule>();
         public IDatabaseBootstrapper DatabaseBootstrapper { get; } = A.Fake<IDatabaseBootstrapper>();
+        
+        public IBackendFxApplicationInvoker Invoker { get; }= A.Fake<IBackendFxApplicationInvoker>();
 
         public DITestFakes()
         {
@@ -38,6 +41,9 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             A.CallTo(() => InjectionScope.InstanceProvider).Returns(InstanceProvider);
 
             A.CallTo(() => CompositionRoot.BeginScope()).Returns(InjectionScope);
+
+            A.CallTo(() => Invoker.Invoke(A<Action<IInstanceProvider>>._, A<IIdentity>._, A<TenantId>._, A<Guid?>._))
+             .Invokes((Action<IInstanceProvider> a, IIdentity i, TenantId t, Guid? g) => a.Invoke(InstanceProvider));
         }
     }
 }

@@ -11,7 +11,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         [Fact]
         public void ThrowsOnValidation()
         {
-            SimpleInjectorCompositionRoot sut = new SimpleInjectorCompositionRoot();
+            var sut = new SimpleInjectorCompositionRoot();
             sut.RegisterModules(new BadModule());
             Assert.Throws<InvalidOperationException>(() => sut.Verify());
         }

@@ -7,7 +7,7 @@ using SimpleInjector;
 
 namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
 {
-    public class SimpleInjectorDataGenerationModule : DataGenerationModule
+    public class SimpleInjectorDataGenerationModule : IModule
     {
         private static readonly ILogger Logger = LogManager.Create<SimpleInjectorDataGenerationModule>();
         private readonly Assembly[] _domainAssemblies;
@@ -16,8 +16,8 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
         {
             _domainAssemblies = domainAssemblies;
         }
-        
-        protected override void RegisterDataGenerators(ICompositionRoot compositionRoot)
+ 
+        public void Register(ICompositionRoot compositionRoot)
         {
             Container container = ((SimpleInjectorCompositionRoot) compositionRoot).Container;
             // initial data generation subsystem
