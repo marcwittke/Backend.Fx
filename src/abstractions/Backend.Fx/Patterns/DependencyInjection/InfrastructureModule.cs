@@ -1,21 +1,23 @@
 ﻿using System;
-using System.Security.Principal;
-using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.Patterns.EventAggregation.Domain;
-using Backend.Fx.Patterns.EventAggregation.Integration;
+using System.Reflection;
 
 namespace Backend.Fx.Patterns.DependencyInjection
 {
     public interface IInfrastructureModule
     {
-        void RegisterCorrelationHolder<T>() where T : class, ICurrentTHolder<Correlation>;
+        void RegisterScoped<TService, TImpl>()
+            where TImpl : class, TService
+            where TService : class;
+        
+        void RegisterScoped<TService>(Func<TService> factory)
+            where TService : class;
 
-        void RegisterDomainEventAggregator(Func<IDomainEventAggregator> factory);
+        void RegisterScoped(Type serviceType, Type implementationType);
+        void RegisterScoped(Type serviceType, Assembly[] assembliesToScan);
 
-        void RegisterIdentityHolder<T>() where T : class, ICurrentTHolder<IIdentity>;
+        void RegisterDecorator<TService, TImpl>() where TService : class where TImpl : class, TService;
 
-        void RegisterMessageBusScope(Func<IMessageBusScope> factory);
-
-        void RegisterTenantHolder<T>() where T : class, ICurrentTHolder<TenantId>;
+        void RegisterSingleton<TService, TImpl>() where TService : class where TImpl : class, TService;
+        void RegisterInstance<TService>(TService instance) where TService : class;
     }
 }

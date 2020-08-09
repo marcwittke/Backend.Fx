@@ -14,7 +14,7 @@ namespace Backend.Fx.Patterns.DataGeneration
         private readonly IModule _dataGenerationModule;
         public IDataGenerationContext DataGenerationContext { get; [UsedImplicitly] private set; }
 
-        public GenerateDataOnBoot(IBackendFxApplication application, ITenantService tenantService, IModule dataGenerationModule)
+        public GenerateDataOnBoot(ITenantService tenantService, IModule dataGenerationModule, IBackendFxApplication application)
         {
             _application = application;
             _dataGenerationModule = dataGenerationModule;
@@ -34,12 +34,12 @@ namespace Backend.Fx.Patterns.DataGeneration
 
         public IMessageBus MessageBus => _application.MessageBus;
 
-        public bool WaitForBoot(int timeoutMilliSeconds = Int32.MaxValue, CancellationToken cancellationToken = default(CancellationToken))
+        public bool WaitForBoot(int timeoutMilliSeconds = Int32.MaxValue, CancellationToken cancellationToken = default)
         {
             return _application.WaitForBoot(timeoutMilliSeconds, cancellationToken);
         }
 
-        public async Task Boot(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task Boot(CancellationToken cancellationToken = default)
         {
             _application.CompositionRoot.RegisterModules(_dataGenerationModule);
             await _application.Boot(cancellationToken);

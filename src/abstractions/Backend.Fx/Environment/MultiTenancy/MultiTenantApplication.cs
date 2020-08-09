@@ -43,11 +43,9 @@ namespace Backend.Fx.Environment.MultiTenancy
             return _application.WaitForBoot(timeoutMilliSeconds, cancellationToken);
         }
 
-        public async Task Boot(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task Boot(CancellationToken cancellationToken = default)
         {
             _application.CompositionRoot.RegisterModules(_multiTenancyModule);
-
-            await _application.Boot(cancellationToken);
 
             MessageBus.Subscribe(new DelegateIntegrationMessageHandler<TenantCreated>(tenantCreated =>
             {
@@ -63,6 +61,8 @@ namespace Backend.Fx.Environment.MultiTenancy
                     Logger.Error(ex, $"Seeding data for recently created {(tenantCreated.IsDemoTenant ? "demo " : "")}tenant {tenantCreated.TenantId} failed.");
                 }
             }));
+            
+            await _application.Boot(cancellationToken);
         }
     }
 }

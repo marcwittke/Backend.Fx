@@ -5752,7 +5752,7 @@
         {
             "Austria",
             "Germany",
-            "Switzerland",
+            "Switzerland"
         };
     }
 }

@@ -5,6 +5,17 @@ namespace Backend.Fx.RandomData
 {
     public class TestChemical
     {
+        public TestChemical(string name, string description, string alternativeNames, string formula, decimal molecularWeight, string casRegistryNumber, string molFile)
+        {
+            Name = name;
+            Description = description;
+            AlternativeNames = alternativeNames;
+            Formula = formula;
+            MolecularWeight = molecularWeight;
+            CasRegistryNumber = casRegistryNumber;
+            MolFile = molFile;
+        }
+
         public string Name { get; }
         public string Description { get; }
         public string AlternativeNames { get; }
@@ -183,18 +194,7 @@ namespace Backend.Fx.RandomData
                 "Wasser",
                 "Wasser (H2O) ist eine chemische Verbindung aus den Elementen Sauerstoff (O) und Wasserstoff (H). Wasser ist als Flüssigkeit durchsichtig, weitgehend farb-, geruch- und geschmacklos. Wasser ist die einzige chemische Verbindung auf der Erde, die in der Natur als Flüssigkeit, als Festkörper und als Gas vorkommt. Die Bezeichnung Wasser wird dabei für den flüssigen Aggregatzustand verwendet. Im festen Zustand spricht man von Eis, im gasförmigen Zustand von Wasserdampf. Wasser ist Grundlage des Lebens auf der Erde.",
                 "Water vapor; Distilled water; Ice; H2O; Dihydrogen oxide; steam; Tritiotope", "H2O", 18.0153m, "7732-18-5",
-                "\n\n\n  3  2  0  0  0  0  0  0  0  0999 V2000\n   -0.2308   -0.3260    0.0000 O   0  0  0  0  0\n    0.7373   -0.2766    0.0000 H   0  0  0  0  0\n   -0.5064    0.6026    0.0000 H   0  0  0  0  0\n  1  2  1  0  0  0\n  1  3  1  0  0  0\nM  END\n"),
+                "\n\n\n  3  2  0  0  0  0  0  0  0  0999 V2000\n   -0.2308   -0.3260    0.0000 O   0  0  0  0  0\n    0.7373   -0.2766    0.0000 H   0  0  0  0  0\n   -0.5064    0.6026    0.0000 H   0  0  0  0  0\n  1  2  1  0  0  0\n  1  3  1  0  0  0\nM  END\n")
         };
-
-        public TestChemical(string name, string description, string alternativeNames, string formula, decimal molecularWeight, string casRegistryNumber, string molFile)
-        {
-            Name = name;
-            Description = description;
-            AlternativeNames = alternativeNames;
-            Formula = formula;
-            MolecularWeight = molecularWeight;
-            CasRegistryNumber = casRegistryNumber;
-            MolFile = molFile;
-        }
     }
 }

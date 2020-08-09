@@ -14,15 +14,13 @@ namespace Backend.Fx.AspNetCore
     {
         private static readonly ILogger Logger = LogManager.Create(typeof(BackendFxApplicationIntegration));
 
-        public static void AddBackendFxApplication<TBackendFxMiddleware>(this IServiceCollection services, IBackendFxApplication application)
-            where TBackendFxMiddleware : BackendFxMiddleware
+        public static void AddBackendFxApplication(this IServiceCollection services, IBackendFxApplication application)
         {
-            services.AddSingleton<TBackendFxMiddleware>();
             services.AddSingleton(application);
         }
 
         public static void UseBackendFxApplication<TBackendFxMiddleware>(this IApplicationBuilder app)
-            where TBackendFxMiddleware : BackendFxMiddleware
+            where TBackendFxMiddleware : IBackendFxMiddleware
         {
             app.UseMiddleware<TBackendFxMiddleware>();
 
@@ -53,7 +51,7 @@ namespace Backend.Fx.AspNetCore
                            Task.Run(() => application.Boot()).Wait();
                        }
 
-                       Logger.Info("Anicors API startup finished successfully");
+                       Logger.Info("Application startup finished successfully");
                    }
                    catch (Exception ex)
                    {

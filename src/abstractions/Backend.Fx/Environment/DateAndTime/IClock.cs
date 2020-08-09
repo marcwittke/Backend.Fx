@@ -9,7 +9,5 @@ namespace Backend.Fx.Environment.DateAndTime
     public interface IClock
     {
         DateTime UtcNow { get; }
-
-        void OverrideUtcNow(DateTime utcNow);
     }
 }

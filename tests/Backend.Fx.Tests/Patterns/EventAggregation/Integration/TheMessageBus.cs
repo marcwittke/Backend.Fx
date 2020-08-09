@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Security.Principal;
+using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Patterns.DependencyInjection;
@@ -118,6 +119,54 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
              .MustHaveHappenedOnceExactly();
 
             A.CallTo(() => Invoker.DynamicHandler.Handle(A<object>._)).MustNotHaveHappened();
+        }
+        
+        [Fact]
+        public async Task DoesNotCallUnsubscribedTypedEventHandler()
+        {
+            Sut.Subscribe<TypedMessageHandler, TestIntegrationEvent>();
+            Sut.Unsubscribe<TypedMessageHandler, TestIntegrationEvent>();
+            await Sut.Publish(Invoker.IntegrationEvent);
+            A.CallTo(() => Invoker.TypedHandler.Handle(A<TestIntegrationEvent>
+                                                       .That
+                                                       .Matches(evt => evt.IntParam == 34 && evt.StringParam == "gaga")))
+             .MustNotHaveHappened();
+        }
+        
+        [Fact]
+        public async void DoesNotCallUnsubscribedDynamicEventHandler()
+        {
+            Sut.Subscribe<DynamicMessageHandler>(typeof(TestIntegrationEvent).FullName);
+            Sut.Unsubscribe<DynamicMessageHandler>(typeof(TestIntegrationEvent).FullName);
+            await Sut.Publish(Invoker.IntegrationEvent);
+            A.CallTo(() => Invoker.DynamicHandler.Handle(A<object>._)).MustNotHaveHappened();
+        }
+        
+        [Fact]
+        public async void DoesNotCallUnsubscribedDelegateEventHandler()
+        {
+            var handled = new ManualResetEvent(false);
+            var handler = new DelegateIntegrationMessageHandler<TestIntegrationEvent>(ev => handled.Set());
+            Sut.Subscribe(handler);
+            Sut.Unsubscribe(handler);
+            await Sut.Publish(Invoker.IntegrationEvent);
+            Assert.False(handled.WaitOne(Debugger.IsAttached ? int.MaxValue : 1000));
+        }
+
+        [Fact]
+        public void CannCallConnectButItDoesNothing()
+        {
+            Sut.Connect();
+        }
+        
+        [Fact]
+        public async void DelegateIntegrationMessageHandler()
+        {
+            var handled = new ManualResetEvent(false);
+            var handler = new DelegateIntegrationMessageHandler<TestIntegrationEvent>(ev => handled.Set());
+            Sut.Subscribe(handler);
+            await Sut.Publish(Invoker.IntegrationEvent);
+            Assert.True(handled.WaitOne(Debugger.IsAttached ? int.MaxValue : 10000));
         }
     }
 }

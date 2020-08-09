@@ -10,24 +10,21 @@ namespace Backend.Fx.RandomData
     public static class LinqExtensions
     {
         /// <summary>
-        /// https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
+        ///     https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="source"></param>
         /// <returns></returns>
         public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source)
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
+            if (source == null) throw new ArgumentNullException(nameof(source));
 
             var sourceAsArray = source as T[] ?? source.ToArray();
 
-            int n = sourceAsArray.Length;
+            var n = sourceAsArray.Length;
             while (n > 1)
             {
-                int k = TestRandom.Instance.Next(n--);
+                var k = TestRandom.Instance.Next(n--);
                 T temp = sourceAsArray[n];
                 sourceAsArray[n] = sourceAsArray[k];
                 sourceAsArray[k] = temp;
@@ -38,57 +35,41 @@ namespace Backend.Fx.RandomData
 
         public static T Random<T>(this IEnumerable<T> source)
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
+            if (source == null) throw new ArgumentNullException(nameof(source));
 
             // ReSharper disable once PossibleMultipleEnumeration
-            if (TryAsQueryable(source, out IQueryable<T> sourceQueryable, out int count))
+            if (TryAsQueryable(source, out var sourceQueryable, out var count))
             {
                 if (count == 0)
-                {
                     throw new ArgumentException(
                         $"The enumerable of {typeof(T).Name} does not contain any items, therefore no random item can be returned.", nameof(source));
-                }
-                
+
                 return sourceQueryable.Skip(TestRandom.Next(count - 1)).First();
             }
 
             // ReSharper disable once PossibleMultipleEnumeration
             var sourceArray = source as T[] ?? source.ToArray();
             if (sourceArray.Length == 0)
-            {
                 throw new ArgumentException(
                     $"The enumerable of {typeof(T).Name} does not contain any items, therefore no random item can be returned.", nameof(source));
-            }
             return sourceArray.ElementAt(TestRandom.Next(sourceArray.Length));
         }
 
         public static T RandomOrDefault<T>(this IEnumerable<T> source)
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
+            if (source == null) throw new ArgumentNullException(nameof(source));
 
             // ReSharper disable once PossibleMultipleEnumeration
-            if (TryAsQueryable(source, out IQueryable<T> sourceQueryable, out int count))
+            if (TryAsQueryable(source, out var sourceQueryable, out var count))
             {
-                if (count == 0)
-                {
-                    return default;
-                }
-                
+                if (count == 0) return default;
+
                 return sourceQueryable.Skip(TestRandom.Next(count - 1)).FirstOrDefault();
             }
 
             // ReSharper disable once PossibleMultipleEnumeration
             var sourceArray = source as T[] ?? source.ToArray();
-            if (sourceArray.Length == 0)
-            {
-                return default;
-            }
+            if (sourceArray.Length == 0) return default;
             return sourceArray.ElementAt(TestRandom.Next(sourceArray.Length));
         }
 
@@ -105,12 +86,9 @@ namespace Backend.Fx.RandomData
                     outQueryable = new T[0].AsQueryable();
                     return true;
                 }
-                
+
                 PropertyInfo idProperty = typeof(T).GetProperty(nameof(Identified.Id), BindingFlags.Instance | BindingFlags.Public);
-                if (idProperty != null)
-                {
-                    sourceQueryable = sourceQueryable.OrderBy(nameof(Identified.Id));
-                }
+                if (idProperty != null) sourceQueryable = sourceQueryable.OrderBy(nameof(Identified.Id));
 
                 outQueryable = sourceQueryable;
                 return true;

@@ -23,7 +23,7 @@ namespace Backend.Fx.RandomData
         public string City { get; }
 
         public string Country { get; }
-        
+
         protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return Street;

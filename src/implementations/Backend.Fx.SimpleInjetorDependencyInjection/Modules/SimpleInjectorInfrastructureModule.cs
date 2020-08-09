@@ -1,9 +1,6 @@
 using System;
-using System.Security.Principal;
-using Backend.Fx.Environment.MultiTenancy;
+using System.Reflection;
 using Backend.Fx.Patterns.DependencyInjection;
-using Backend.Fx.Patterns.EventAggregation.Domain;
-using Backend.Fx.Patterns.EventAggregation.Integration;
 using SimpleInjector;
 
 namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
@@ -16,29 +13,40 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
         {
             _container = container;
         }
-        public void RegisterCorrelationHolder<T>() where T : class, ICurrentTHolder<Correlation>
+
+        public void RegisterScoped<TService, TImpl>() where TService : class where TImpl : class, TService
         {
-            _container.Register<T>();
+            _container.Register<TService, TImpl>();
         }
 
-        public void RegisterDomainEventAggregator(Func<IDomainEventAggregator> factory)
+        public void RegisterScoped<TService>(Func<TService> factory) where TService : class
         {
             _container.Register(factory);
         }
 
-        public void RegisterIdentityHolder<T>() where T : class, ICurrentTHolder<IIdentity>
+        public void RegisterScoped(Type serviceType, Assembly[] assembliesToScan)
         {
-            _container.Register<T>();
+            _container.Register(serviceType, assembliesToScan);
         }
 
-        public void RegisterMessageBusScope(Func<IMessageBusScope> factory)
+        public void RegisterDecorator<TService, TImpl>() where TService : class where TImpl : class, TService
         {
-            _container.Register(factory);
+            _container.RegisterDecorator<TService, TImpl>();
         }
 
-        public void RegisterTenantHolder<T>() where T : class, ICurrentTHolder<TenantId>
+        public void RegisterScoped(Type serviceType, Type implementationType)
         {
-            _container.Register<T>();
+            _container.Register(serviceType, implementationType);
+        }
+
+        public void RegisterSingleton<TService, TImpl>() where TService : class where TImpl : class, TService
+        {
+            _container.RegisterSingleton<TService, TImpl>();
+        }
+
+        public void RegisterInstance<TService>(TService instance) where TService : class
+        {
+            _container.RegisterInstance(instance);
         }
     }
 }
