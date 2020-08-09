@@ -1,10 +1,9 @@
 ﻿using System;
+using System.Linq;
+using System.Reflection;
 
 namespace Backend.Fx.Extensions
 {
-    using System.Linq;
-    using System.Reflection;
-
     public static class ReflectionEx
     {
         public static bool IsImplementationOfOpenGenericInterface(this Type t, Type openGenericInterface)

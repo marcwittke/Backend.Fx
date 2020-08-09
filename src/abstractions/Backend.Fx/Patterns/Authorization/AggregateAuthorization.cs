@@ -1,10 +1,10 @@
-﻿namespace Backend.Fx.Patterns.Authorization
-{
-    using System;
-    using System.Linq;
-    using System.Linq.Expressions;
-    using BuildingBlocks;
+﻿using System;
+using System.Linq;
+using System.Linq.Expressions;
+using Backend.Fx.BuildingBlocks;
 
+namespace Backend.Fx.Patterns.Authorization
+{
     public abstract class AggregateAuthorization<TAggregateRoot> : IAggregateAuthorization<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
         /// <inheritdoc />>

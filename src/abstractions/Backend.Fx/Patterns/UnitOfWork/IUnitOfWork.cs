@@ -12,7 +12,7 @@
     /// <summary>
     /// Maintains a list of objects affected by a business transaction and coordinates the writing out of changes and the resolution of concurrency problems.
     /// </summary>
-    public interface IUnitOfWork 
+    public interface IUnitOfWork
     {
         void Begin();
         void Complete();
@@ -46,20 +46,20 @@
             Logger.Debug("Flushing unit of work #" + _instanceId);
             UpdateTrackingProperties(IdentityHolder.Current.Name, _clock.UtcNow);
         }
-    
+
         public virtual void Begin()
         {
             _lifetimeLogger = Logger.DebugDuration($"Beginning unit of work #{_instanceId}", $"Disposing unit of work #{_instanceId}");
             _isCompleted = false;
         }
-        
+
         public virtual void Complete()
         {
             Logger.Debug("Completing unit of work #" + _instanceId);
             Flush(); // we have to flush before raising events, therefore the handlers find the latest changes in the DB
             _eventAggregator.RaiseEvents();
             Flush(); // event handlers change the DB state, so we have to flush again
-            AsyncHelper.RunSync(()=>_messageBusScope.RaiseEvents());
+            AsyncHelper.RunSync(() => _messageBusScope.RaiseEvents());
             _isCompleted = true;
         }
 
@@ -73,6 +73,7 @@
                 {
                     Logger.Info($"Canceling unit of work #{_instanceId}.");
                 }
+
                 _lifetimeLogger?.Dispose();
                 _lifetimeLogger = null;
             }

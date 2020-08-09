@@ -1,11 +1,10 @@
-﻿using Xunit;
+﻿using System;
+using Backend.Fx.Patterns.EventAggregation.Domain;
+using FakeItEasy;
+using Xunit;
 
 namespace Backend.Fx.Tests.Patterns.EventAggregation.Domain
 {
-    using System;
-    using FakeItEasy;
-    using Fx.Patterns.EventAggregation.Domain;
-
     public class TheEventAggregator
     {
         [Fact]
@@ -13,8 +12,8 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Domain
         {
             var handler1 = new TestDomainEventHandler();
             var handler2 = new TestDomainEventHandler();
-            IDomainEventHandlerProvider fakeDomainEventHandlerProvider = A.Fake<IDomainEventHandlerProvider>();
-            A.CallTo(() => fakeDomainEventHandlerProvider.GetAllEventHandlers<TestDomainEvent>()).Returns(new[] { handler1, handler2 });
+            var fakeDomainEventHandlerProvider = A.Fake<IDomainEventHandlerProvider>();
+            A.CallTo(() => fakeDomainEventHandlerProvider.GetAllEventHandlers<TestDomainEvent>()).Returns(new[] {handler1, handler2});
 
             IDomainEventAggregator sut = new DomainEventAggregator(fakeDomainEventHandlerProvider);
 
@@ -36,8 +35,8 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Domain
         public void DoesNotSwallowExceptionOnDomainEventHandling()
         {
             IDomainEventHandler<TestDomainEvent> handler = new FailingDomainEventHandler();
-            IDomainEventHandlerProvider fakeDomainEventHandlerProvider = A.Fake<IDomainEventHandlerProvider>();
-            A.CallTo(() => fakeDomainEventHandlerProvider.GetAllEventHandlers<TestDomainEvent>()).Returns(new[] { handler });
+            var fakeDomainEventHandlerProvider = A.Fake<IDomainEventHandlerProvider>();
+            A.CallTo(() => fakeDomainEventHandlerProvider.GetAllEventHandlers<TestDomainEvent>()).Returns(new[] {handler});
 
             IDomainEventAggregator sut = new DomainEventAggregator(fakeDomainEventHandlerProvider);
             sut.PublishDomainEvent(new TestDomainEvent(444));

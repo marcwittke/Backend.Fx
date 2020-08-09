@@ -8,7 +8,7 @@ namespace Backend.Fx.AspNetCore.Scoping
     public abstract class HoldCurrentMiddleware<T> : IMiddleware where T : class
     {
         private readonly ICurrentTHolder<T> _currentTHolder;
-        
+
         [UsedImplicitly]
         protected HoldCurrentMiddleware(ICurrentTHolder<T> currentTHolder)
         {

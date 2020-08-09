@@ -7,7 +7,7 @@
     {
         public static void ForAll<T>(this IEnumerable<T> enumerable, Action<T> action)
         {
-            foreach (var item in enumerable)
+            foreach (T item in enumerable)
             {
                 action(item);
             }

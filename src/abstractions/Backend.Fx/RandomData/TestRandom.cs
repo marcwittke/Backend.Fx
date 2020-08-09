@@ -1,8 +1,8 @@
-﻿namespace Backend.Fx.RandomData
-{
-    using System;
-    using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
+namespace Backend.Fx.RandomData
+{
     public static class TestRandom
     {
         public static Random Instance { get; set; } = new Random(429756);
@@ -30,7 +30,8 @@
             return Instance.Next(min, max);
         }
 
-        public static bool NextBool() {
+        public static bool NextBool()
+        {
             return Instance.Next(2) == 1;
         }
 
@@ -65,8 +66,8 @@
                 password[i] = rnd < 60
                                   ? letters.Random()
                                   : rnd < 90
-                                        ? numbers.Random()
-                                        : specials.Random();
+                                      ? numbers.Random()
+                                      : specials.Random();
             }
 
             return new string(password);
@@ -74,7 +75,7 @@
 
         public static decimal NextDecimal(decimal minimum, decimal maximum)
         {
-            return (decimal)Instance.NextDouble() * (maximum - minimum) + minimum;
+            return (decimal) Instance.NextDouble() * (maximum - minimum) + minimum;
         }
 
         public static bool NextProbability(int p)

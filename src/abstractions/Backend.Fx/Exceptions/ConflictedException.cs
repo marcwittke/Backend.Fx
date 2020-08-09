@@ -1,20 +1,23 @@
-﻿namespace Backend.Fx.Exceptions
-{
-    using System;
+﻿using System;
 
+namespace Backend.Fx.Exceptions
+{
     public class ConflictedException : ClientException
     {
         public ConflictedException()
-                : base("Conflicted")
-        { }
+            : base("Conflicted")
+        {
+        }
 
         public ConflictedException(string message)
-                : base(message)
-        { }
+            : base(message)
+        {
+        }
 
         public ConflictedException(string message, Exception innerException)
-                : base(message, innerException)
-        { }
+            : base(message, innerException)
+        {
+        }
 
         public static IExceptionBuilder UseBuilder()
         {

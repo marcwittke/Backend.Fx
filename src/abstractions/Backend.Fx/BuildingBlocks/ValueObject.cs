@@ -1,9 +1,9 @@
-﻿namespace Backend.Fx.BuildingBlocks
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
+namespace Backend.Fx.BuildingBlocks
+{
     /// <summary>
     ///     An object that contains attributes but has no conceptual identity.
     ///     https://en.wikipedia.org/wiki/Domain-driven_design#Building_blocks
@@ -29,7 +29,7 @@
             unchecked
             {
                 var hash = 17;
-                foreach (var obj in GetEqualityComponents()) hash = hash * 23 + (obj != null ? obj.GetHashCode() : 0);
+                foreach (object obj in GetEqualityComponents()) hash = hash * 23 + (obj != null ? obj.GetHashCode() : 0);
 
                 return hash;
             }

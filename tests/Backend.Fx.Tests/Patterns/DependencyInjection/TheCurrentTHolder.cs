@@ -10,17 +10,17 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         private readonly TenantId _instance2 = new TenantId(2);
 
         [Fact]
-        public void HoldsCurrent()
-        {
-            TenantId current = _sut.Current;
-            Assert.False(current.HasValue);
-        }
-
-        [Fact]
         public void CanReplaceCurrent()
         {
             _sut.ReplaceCurrent(_instance2);
             Assert.StrictEqual(_instance2, _sut.Current);
+        }
+
+        [Fact]
+        public void HoldsCurrent()
+        {
+            TenantId current = _sut.Current;
+            Assert.False(current.HasValue);
         }
     }
 }

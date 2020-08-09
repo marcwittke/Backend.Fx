@@ -8,8 +8,6 @@ namespace Backend.Fx.EfCorePersistence.Tests
 {
     public class TheReadonlyTransactionContext
     {
-        private readonly DatabaseFixture _fixture;
-
         public TheReadonlyTransactionContext()
         {
             _fixture = new SqliteDatabaseFixture();
@@ -17,10 +15,12 @@ namespace Backend.Fx.EfCorePersistence.Tests
             _fixture.CreateDatabase();
         }
 
+        private readonly DatabaseFixture _fixture;
+
         [Fact]
         public void OpensTransaction()
         {
-            using(DbSession dbs = _fixture.UseDbSession())
+            using (DbSession dbs = _fixture.UseDbSession())
             {
                 IUnitOfWork sut = dbs.BeginUnitOfWork(true);
                 Assert.NotNull(sut.GetDbContext());

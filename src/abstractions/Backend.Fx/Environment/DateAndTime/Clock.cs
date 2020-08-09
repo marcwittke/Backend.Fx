@@ -1,8 +1,8 @@
-﻿namespace Backend.Fx.Environment.DateAndTime
-{
-    using System;
-    using Logging;
+﻿using System;
+using Backend.Fx.Logging;
 
+namespace Backend.Fx.Environment.DateAndTime
+{
     public abstract class Clock : IClock
     {
         private static readonly ILogger Logger = LogManager.Create<Clock>();

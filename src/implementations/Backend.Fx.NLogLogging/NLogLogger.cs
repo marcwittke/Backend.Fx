@@ -1,12 +1,14 @@
-﻿namespace Backend.Fx.NLogLogging
+﻿using System;
+using System.Diagnostics;
+using System.Globalization;
+using Backend.Fx.Logging;
+using NLog;
+
+namespace Backend.Fx.NLogLogging
 {
-    using System;
-    using System.Diagnostics;
-    using System.Globalization;
     using BackendFxILogger = Logging.ILogger;
-    
     using NLogILogger = NLog.ILogger;
-    using NLogLogLevel = NLog.LogLevel;
+    using NLogLogLevel = LogLevel;
 
     [DebuggerStepThrough]
     public class NLogLogger : BackendFxILogger
@@ -19,6 +21,7 @@
         }
 
         #region fatal
+
         public Exception Fatal(Exception exception)
         {
             _nlogLogger.Fatal(exception);
@@ -35,9 +38,11 @@
             _nlogLogger.Fatal(exception, CultureInfo.InvariantCulture, format, args);
             return exception;
         }
+
         #endregion
 
         #region error
+
         public Exception Error(Exception exception)
         {
             _nlogLogger.Error(exception);
@@ -54,9 +59,11 @@
             _nlogLogger.Error(exception, CultureInfo.InvariantCulture, format, args);
             return exception;
         }
+
         #endregion
 
         #region warn
+
         public Exception Warn(Exception exception)
         {
             _nlogLogger.Warn(exception);
@@ -73,9 +80,11 @@
             _nlogLogger.Warn(exception, CultureInfo.InvariantCulture, format, args);
             return exception;
         }
+
         #endregion
 
         #region info
+
         public Exception Info(Exception exception)
         {
             _nlogLogger.Info(exception);
@@ -84,12 +93,12 @@
 
         public IDisposable InfoDuration(string activity)
         {
-            return new Logging.DurationLogger(s => Info(s), activity);
+            return new DurationLogger(s => Info(s), activity);
         }
 
         public IDisposable InfoDuration(string beginMessage, string endMessage)
         {
-            return new Logging.DurationLogger(s => Info(s), beginMessage, endMessage);
+            return new DurationLogger(s => Info(s), beginMessage, endMessage);
         }
 
         public void Info(string format, params object[] args)
@@ -102,9 +111,11 @@
             _nlogLogger.Info(exception, CultureInfo.InvariantCulture, format, args);
             return exception;
         }
+
         #endregion
 
         #region debug
+
         public bool IsDebugEnabled()
         {
             return _nlogLogger.IsDebugEnabled;
@@ -118,17 +129,16 @@
 
         public IDisposable DebugDuration(string activity)
         {
-            return new Logging.DurationLogger(s => Debug(s), activity);
+            return new DurationLogger(s => Debug(s), activity);
         }
 
         public IDisposable DebugDuration(string beginMessage, string endMessage)
         {
-            return new Logging.DurationLogger(s => Debug(s), beginMessage, endMessage);
+            return new DurationLogger(s => Debug(s), beginMessage, endMessage);
         }
 
         public void Debug(string format, params object[] args)
         {
-            
             _nlogLogger.Debug(CultureInfo.InvariantCulture, format, args);
         }
 
@@ -137,9 +147,11 @@
             _nlogLogger.Debug(exception, CultureInfo.InvariantCulture, format, args);
             return exception;
         }
+
         #endregion
 
         #region trace
+
         public bool IsTraceEnabled()
         {
             return _nlogLogger.IsEnabled(NLogLogLevel.Trace);
@@ -153,32 +165,26 @@
 
         public IDisposable TraceDuration(string activity)
         {
-            return new Logging.DurationLogger(s => Trace(s), activity);
+            return new DurationLogger(s => Trace(s), activity);
         }
 
         public IDisposable TraceDuration(string beginMessage, string endMessage)
         {
-            return new Logging.DurationLogger(s => Trace(s), beginMessage, endMessage);
+            return new DurationLogger(s => Trace(s), beginMessage, endMessage);
         }
 
         public void Trace(string format, params object[] args)
         {
-            if (IsTraceEnabled())
-            {
-                _nlogLogger.Trace(CultureInfo.InvariantCulture, format, args);
-            }
-
+            if (IsTraceEnabled()) _nlogLogger.Trace(CultureInfo.InvariantCulture, format, args);
         }
 
         public Exception Trace(Exception exception, string format, params object[] args)
         {
-            if (IsTraceEnabled())
-            {
-                _nlogLogger.Trace(exception, CultureInfo.InvariantCulture, format, args);
-            }
+            if (IsTraceEnabled()) _nlogLogger.Trace(exception, CultureInfo.InvariantCulture, format, args);
 
             return exception;
         }
+
         #endregion
     }
 }

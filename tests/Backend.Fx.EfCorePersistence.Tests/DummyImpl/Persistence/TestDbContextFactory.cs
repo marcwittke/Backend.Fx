@@ -5,7 +5,8 @@ using Microsoft.EntityFrameworkCore.Design;
 
 namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence
 {
-    [UsedImplicitly, Obsolete("Only for migration support at design time")]
+    [UsedImplicitly]
+    [Obsolete("Only for migration support at design time")]
     public class TestDbContextFactory : IDesignTimeDbContextFactory<TestDbContext>
     {
         public TestDbContext CreateDbContext(string[] args)

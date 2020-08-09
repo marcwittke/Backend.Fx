@@ -19,17 +19,17 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// The async invoker runs a given action asynchronously in an application scope with injection facilities 
         /// </summary>
         IBackendFxApplicationAsyncInvoker AsyncInvoker { get; }
-        
+
         /// <summary>
         /// The composition root of the dependency injection framework
         /// </summary>
         ICompositionRoot CompositionRoot { get; }
-        
+
         /// <summary>
         /// The invoker runs a given action in an application scope with injection facilities 
         /// </summary>
         IBackendFxApplicationInvoker Invoker { get; }
-        
+
         /// <summary>
         /// The message bus to send and receive event messages
         /// </summary>
@@ -46,8 +46,8 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// <returns></returns>
         Task Boot(CancellationToken cancellationToken = default);
     }
-    
-    
+
+
     public class BackendFxApplication : IBackendFxApplication
     {
         private static readonly ILogger Logger = LogManager.Create<BackendFxApplication>();
@@ -83,7 +83,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
         public IBackendFxApplicationInvoker Invoker { get; }
 
         public IMessageBus MessageBus { get; }
-        
+
         public async Task Boot(CancellationToken cancellationToken = default)
         {
             Logger.Info("Booting application");

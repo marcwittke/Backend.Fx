@@ -3,7 +3,7 @@ using Backend.Fx.Patterns.DependencyInjection;
 
 namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
-    public class SingletonSubscription<TEvent>: ISubscription where TEvent : IIntegrationEvent
+    public class SingletonSubscription<TEvent> : ISubscription where TEvent : IIntegrationEvent
     {
         private static readonly ILogger Logger = LogManager.Create<SingletonSubscription<TEvent>>();
         private readonly IIntegrationMessageHandler<TEvent> _handler;
@@ -17,7 +17,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
         {
             using (Logger.InfoDuration($"Invoking subscribed handler {_handler.GetType().Name}"))
             {
-                _handler.Handle((TEvent)context.GetTypedEvent(typeof(TEvent)));
+                _handler.Handle((TEvent) context.GetTypedEvent(typeof(TEvent)));
             }
         }
 

@@ -8,14 +8,14 @@ namespace Backend.Fx.Patterns.DependencyInjection
 {
     public interface IInfrastructureModule
     {
-         void RegisterCorrelationHolder<T>() where T : class, ICurrentTHolder<Correlation>;
+        void RegisterCorrelationHolder<T>() where T : class, ICurrentTHolder<Correlation>;
 
-         void RegisterDomainEventAggregator(Func<IDomainEventAggregator> factory);
+        void RegisterDomainEventAggregator(Func<IDomainEventAggregator> factory);
 
-         void RegisterIdentityHolder<T>() where T : class, ICurrentTHolder<IIdentity>;
+        void RegisterIdentityHolder<T>() where T : class, ICurrentTHolder<IIdentity>;
 
-         void RegisterMessageBusScope(Func<IMessageBusScope> factory);
+        void RegisterMessageBusScope(Func<IMessageBusScope> factory);
 
-         void RegisterTenantHolder<T>() where T : class, ICurrentTHolder<TenantId>;
+        void RegisterTenantHolder<T>() where T : class, ICurrentTHolder<TenantId>;
     }
 }

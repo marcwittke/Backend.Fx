@@ -12,39 +12,19 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
 {
     public class TheSequentializingBackendFxApplicationInvoker
     {
+        public TheSequentializingBackendFxApplicationInvoker()
+        {
+            var fakes = new DiTestFakes();
+            _invoker = new BackendFxApplicationInvoker(fakes.CompositionRoot, fakes.ExceptionLogger);
+            _decoratedInvoker = new SequentializingBackendFxApplicationInvoker(_invoker);
+        }
+
         private readonly int _actionDuration = 100;
         private readonly IBackendFxApplicationInvoker _invoker;
         private readonly IBackendFxApplicationInvoker _decoratedInvoker;
 
-        public TheSequentializingBackendFxApplicationInvoker()
+        private async Task InvokeSomeActions(int count, IBackendFxApplicationInvoker invoker)
         {
-            var fakes = new DITestFakes();
-            _invoker = new  BackendFxApplicationInvoker(fakes.CompositionRoot, fakes.ExceptionLogger);
-            _decoratedInvoker = new SequentializingBackendFxApplicationInvoker(_invoker);
-        }
-
-        [Fact]
-        public async Task IsReallyNeeded()
-        {
-            // negative test: without sequentialization all tasks run in parallel
-            int count = 10;
-            var sw = new Stopwatch();
-            sw.Start();
-            await InvokeSomeActions(count, _invoker);
-            Assert.True(sw.ElapsedMilliseconds < _actionDuration * count);
-        }
-        
-        [Fact]
-        public async Task SequentializesInvocations()
-        {
-            int count = 10;
-            var sw = new Stopwatch();
-            sw.Start();
-            await InvokeSomeActions(count, _decoratedInvoker);
-            Assert.True(sw.ElapsedMilliseconds >= _actionDuration * count);
-        }
-        
-        private async Task InvokeSomeActions(int count, IBackendFxApplicationInvoker invoker) {
             var tasks = Enumerable
                         .Range(0, count)
                         .Select(i => Task.Run(() => invoker.Invoke(OneSecondAction, new AnonymousIdentity(), new TenantId(1))))
@@ -58,6 +38,27 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             Console.WriteLine("start");
             Thread.Sleep(_actionDuration);
             Console.WriteLine("end");
+        }
+
+        [Fact]
+        public async Task IsReallyNeeded()
+        {
+            // negative test: without sequentialization all tasks run in parallel
+            var count = 10;
+            var sw = new Stopwatch();
+            sw.Start();
+            await InvokeSomeActions(count, _invoker);
+            Assert.True(sw.ElapsedMilliseconds < _actionDuration * count);
+        }
+
+        [Fact]
+        public async Task SequentializesInvocations()
+        {
+            var count = 10;
+            var sw = new Stopwatch();
+            sw.Start();
+            await InvokeSomeActions(count, _decoratedInvoker);
+            Assert.True(sw.ElapsedMilliseconds >= _actionDuration * count);
         }
     }
 }

@@ -19,8 +19,8 @@ namespace Backend.Fx.Patterns.DataGeneration
             _application = application;
             _dataGenerationModule = dataGenerationModule;
             DataGenerationContext = new DataGenerationContext(tenantService,
-                                                               _application.CompositionRoot,
-                                                               _application.Invoker);
+                                                              _application.CompositionRoot,
+                                                              _application.Invoker);
         }
 
         public void Dispose()
@@ -33,7 +33,7 @@ namespace Backend.Fx.Patterns.DataGeneration
         public IBackendFxApplicationInvoker Invoker => _application.Invoker;
 
         public IMessageBus MessageBus => _application.MessageBus;
-        
+
         public bool WaitForBoot(int timeoutMilliSeconds = Int32.MaxValue, CancellationToken cancellationToken = default(CancellationToken))
         {
             return _application.WaitForBoot(timeoutMilliSeconds, cancellationToken);

@@ -1,12 +1,14 @@
+using Backend.Fx.BuildingBlocks;
+using JetBrains.Annotations;
+
 namespace Backend.Fx.ConfigurationSettings
 {
-    using BuildingBlocks;
-    using JetBrains.Annotations;
-
     public class Setting : AggregateRoot
     {
         [UsedImplicitly]
-        private Setting() { }
+        private Setting()
+        {
+        }
 
         public Setting(int id, string key) : base(id)
         {

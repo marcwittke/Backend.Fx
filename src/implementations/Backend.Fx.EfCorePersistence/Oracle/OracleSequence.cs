@@ -1,20 +1,32 @@
-﻿using Backend.Fx.EfCorePersistence.Bootstrapping;
+﻿using System;
+using System.Data;
+using Backend.Fx.EfCorePersistence.Bootstrapping;
+using Backend.Fx.Logging;
 using Backend.Fx.Patterns.IdGeneration;
 
 namespace Backend.Fx.EfCorePersistence.Oracle
 {
-    using System;
-    using System.Data;
-    using Logging;
-
     public abstract class OracleSequence : ISequence
     {
-        private readonly IDbConnectionFactory _dbConnectionFactory;
         private static readonly ILogger Logger = LogManager.Create<OracleSequence>();
+        private readonly IDbConnectionFactory _dbConnectionFactory;
 
         protected OracleSequence(IDbConnectionFactory dbConnectionFactory)
         {
             _dbConnectionFactory = dbConnectionFactory;
+        }
+
+        protected abstract string SequenceName { get; }
+        protected abstract string SchemaName { get; }
+
+        private string SchemaPrefix
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(SchemaName)) return string.Empty;
+
+                return SchemaName + ".";
+            }
         }
 
         public void EnsureSequence()
@@ -38,7 +50,7 @@ namespace Backend.Fx.EfCorePersistence.Oracle
                 else
                 {
                     Logger.Info($"Sequence {SchemaPrefix}{SequenceName} does not exist yet and will be created now");
-                    using (var cmd = dbConnection.CreateCommand())
+                    using (IDbCommand cmd = dbConnection.CreateCommand())
                     {
                         cmd.CommandText = $"CREATE SEQUENCE {SchemaPrefix}{SequenceName} START WITH 1 INCREMENT BY {Increment}";
                         cmd.ExecuteNonQuery();
@@ -67,20 +79,5 @@ namespace Backend.Fx.EfCorePersistence.Oracle
         }
 
         public abstract int Increment { get; }
-        protected abstract string SequenceName { get; }
-        protected abstract string SchemaName { get; }
-
-        private string SchemaPrefix
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(SchemaName))
-                {
-                    return string.Empty;
-                }
-
-                return SchemaName + ".";
-            }
-        }
     }
 }

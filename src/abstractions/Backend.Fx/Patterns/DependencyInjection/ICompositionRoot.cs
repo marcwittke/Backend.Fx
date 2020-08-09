@@ -1,8 +1,8 @@
-﻿namespace Backend.Fx.Patterns.DependencyInjection
-{
-    using System;
-    using EventAggregation.Domain;
+﻿using System;
+using Backend.Fx.Patterns.EventAggregation.Domain;
 
+namespace Backend.Fx.Patterns.DependencyInjection
+{
     /// <summary>
     /// Encapsulates the injection framework of choice. The implementation follows the Register/Resolve/Release pattern.
     /// Usage of this interface is only allowed for framework integration (or tests). NEVER (!) access the injector from
@@ -17,12 +17,5 @@
 
         IInjectionScope BeginScope();
         IInstanceProvider InstanceProvider { get; }
-
-        /// <summary>
-        /// Gets the current correlation, when inside a scope, otherwise this method will return false
-        /// </summary>
-        /// <param name="correlation"></param>
-        /// <returns></returns>
-        bool TryGetCurrentCorrelation(out Correlation correlation);
     }
 }

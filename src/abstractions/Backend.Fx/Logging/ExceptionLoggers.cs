@@ -1,9 +1,9 @@
-﻿namespace Backend.Fx.Logging
-{
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 
+namespace Backend.Fx.Logging
+{
     public class ExceptionLoggers : ICollection<IExceptionLogger>, IExceptionLogger
     {
         private static readonly ILogger Logger = LogManager.Create<ExceptionLoggers>();
@@ -11,7 +11,7 @@
 
         public void LogException(Exception ex)
         {
-            foreach (var exceptionLogger in _collectionImplementation)
+            foreach (IExceptionLogger exceptionLogger in _collectionImplementation)
             {
                 try
                 {
@@ -19,8 +19,7 @@
                 }
                 catch (Exception ex2)
                 {
-                    Logger.Error(ex,
-                        $"{exceptionLogger.GetType().Name} failed to log the {ex2.GetType()} mith message {ex.Message}");
+                    Logger.Error(ex, $"{exceptionLogger.GetType().Name} failed to log the {ex2.GetType()} mith message {ex.Message}");
                 }
             }
         }
@@ -32,7 +31,7 @@
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable)_collectionImplementation).GetEnumerator();
+            return ((IEnumerable) _collectionImplementation).GetEnumerator();
         }
 
         public void Add(IExceptionLogger item)

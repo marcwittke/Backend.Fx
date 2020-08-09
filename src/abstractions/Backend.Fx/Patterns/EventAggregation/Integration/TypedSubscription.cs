@@ -23,7 +23,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
             Type interfaceType = _handlerType.GetInterfaces().First(x => x.GetTypeInfo().IsGenericType && x.GetGenericTypeDefinition() == typeof(IIntegrationMessageHandler<>));
             Type eventType = interfaceType.GetGenericArguments().Single(t => typeof(IIntegrationEvent).IsAssignableFrom(t));
             IIntegrationEvent integrationEvent = context.GetTypedEvent(eventType);
-            MethodInfo handleMethod = _handlerType.GetRuntimeMethod("Handle", new[] { eventType });
+            MethodInfo handleMethod = _handlerType.GetRuntimeMethod("Handle", new[] {eventType});
             Debug.Assert(handleMethod != null, $"No method with signature `Handle({eventType.Name} event)` found on {_handlerType.Name}");
 
             Logger.Info($"Getting subscribed handler instance of type {_handlerType.Name}");
@@ -31,13 +31,13 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
 
             using (Logger.InfoDuration($"Invoking subscribed handler {_handlerType.GetDetailedTypeName()}"))
             {
-                handleMethod.Invoke(handlerInstance, new object[] { integrationEvent });
+                handleMethod.Invoke(handlerInstance, new object[] {integrationEvent});
             }
         }
 
         public bool Matches(object handler)
         {
-            return (Type)handler == _handlerType;
+            return (Type) handler == _handlerType;
         }
     }
 }

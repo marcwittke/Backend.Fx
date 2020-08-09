@@ -18,7 +18,7 @@ namespace Backend.Fx.NLogLogging
             lock (SyncLock)
             {
                 if (LogManager.Configuration != null) return;
-                
+
                 Logging.LogManager.Initialize(new NLogLoggerFactory());
                 var config = new LoggingConfiguration();
 
@@ -36,7 +36,7 @@ namespace Backend.Fx.NLogLogging
                     FileName = @"${basedir}/" + logfilename,
                     Layout = new Log4JXmlEventLayout(),
                     MaxArchiveFiles = 1,
-                    ArchiveAboveSize = 10 * 1024 * 1024,
+                    ArchiveAboveSize = 10 * 1024 * 1024
                 };
                 config.AddTarget("file", fileTarget);
                 config.LoggingRules.Add(new LoggingRule(appRootNamespace + ".*", LogLevel.Debug, fileTarget));

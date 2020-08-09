@@ -1,8 +1,8 @@
-﻿namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
-{
-    using System.Threading;
-    using Fx.Patterns.EventAggregation.Integration;
+﻿using System.Threading;
+using Backend.Fx.Patterns.EventAggregation.Integration;
 
+namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
+{
     public class LongRunningMessageHandler : IIntegrationMessageHandler<TestIntegrationEvent>
     {
         private readonly IIntegrationMessageHandler<TestIntegrationEvent> _handler;
@@ -17,4 +17,5 @@
             Thread.Sleep(1000);
             _handler.Handle(eventData);
         }
-    }}
+    }
+}

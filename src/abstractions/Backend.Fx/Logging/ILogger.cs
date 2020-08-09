@@ -1,13 +1,13 @@
 ﻿// ReSharper disable UnusedMethodReturnValue.Global
+using System;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.Logging
 {
-    using System;
-    using JetBrains.Annotations;
-
     public interface ILogger
     {
         #region fatal
+
         Exception Fatal(Exception exception);
 
         [StringFormatMethod("format")]
@@ -15,9 +15,11 @@ namespace Backend.Fx.Logging
 
         [StringFormatMethod("format")]
         Exception Fatal(Exception exception, string format, params object[] args);
+
         #endregion
 
         #region error
+
         Exception Error(Exception exception);
 
         [StringFormatMethod("format")]
@@ -25,9 +27,11 @@ namespace Backend.Fx.Logging
 
         [StringFormatMethod("format")]
         Exception Error(Exception exception, string format, params object[] args);
+
         #endregion
 
         #region warn
+
         Exception Warn(Exception exception);
 
         [StringFormatMethod("format")]
@@ -35,9 +39,11 @@ namespace Backend.Fx.Logging
 
         [StringFormatMethod("format")]
         Exception Warn(Exception exception, string format, params object[] args);
+
         #endregion
 
         #region info
+
         Exception Info(Exception exception);
 
         IDisposable InfoDuration(string activity);
@@ -49,9 +55,11 @@ namespace Backend.Fx.Logging
 
         [StringFormatMethod("format")]
         Exception Info(Exception exception, string format, params object[] args);
+
         #endregion
 
         #region debug
+
         bool IsDebugEnabled();
 
         Exception Debug(Exception exception);
@@ -65,9 +73,11 @@ namespace Backend.Fx.Logging
 
         [StringFormatMethod("format")]
         Exception Debug(Exception exception, string format, params object[] args);
+
         #endregion
 
         #region Trace
+
         bool IsTraceEnabled();
 
         Exception Trace(Exception exception);
@@ -81,6 +91,7 @@ namespace Backend.Fx.Logging
 
         [StringFormatMethod("format")]
         Exception Trace(Exception exception, string format, params object[] args);
+
         #endregion
     }
 }

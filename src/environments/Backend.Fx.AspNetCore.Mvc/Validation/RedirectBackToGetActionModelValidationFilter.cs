@@ -29,7 +29,6 @@ namespace Backend.Fx.AspNetCore.Mvc.Validation
                 {
                     ViewName = context.RouteData.Values["action"].ToString(),
                     ViewData = viewData,
-
                 };
             }
         }
@@ -46,14 +45,15 @@ namespace Backend.Fx.AspNetCore.Mvc.Validation
                 BeforeRedirect(viewData);
                 context.Result = new ViewResult
                 {
-                        ViewName = context.RouteData.Values["action"].ToString(),
-                        ViewData = viewData,
-
+                    ViewName = context.RouteData.Values["action"].ToString(),
+                    ViewData = viewData,
                 };
                 context.ExceptionHandled = true;
             }
         }
 
-        protected virtual void BeforeRedirect(ViewDataDictionary viewData) { }
+        protected virtual void BeforeRedirect(ViewDataDictionary viewData)
+        {
+        }
     }
 }

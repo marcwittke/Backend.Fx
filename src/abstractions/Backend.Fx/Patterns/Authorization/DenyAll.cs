@@ -1,9 +1,9 @@
-﻿namespace Backend.Fx.Patterns.Authorization
-{
-    using System;
-    using System.Linq.Expressions;
-    using BuildingBlocks;
+﻿using System;
+using System.Linq.Expressions;
+using Backend.Fx.BuildingBlocks;
 
+namespace Backend.Fx.Patterns.Authorization
+{
     public class DenyAll<TAggregateRoot> : AggregateAuthorization<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
         public override Expression<Func<TAggregateRoot, bool>> HasAccessExpression

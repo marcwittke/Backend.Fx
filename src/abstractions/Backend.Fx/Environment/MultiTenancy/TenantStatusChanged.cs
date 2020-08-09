@@ -4,12 +4,11 @@ namespace Backend.Fx.Environment.MultiTenancy
 {
     public abstract class TenantStatusChanged : IntegrationEvent
     {
-        protected TenantStatusChanged(int tenantId, string name, string description, bool isDemoTenant, string defaultCultureName) : base(tenantId)
+        protected TenantStatusChanged(int tenantId, string name, string description, bool isDemoTenant) : base(tenantId)
         {
             Name = name;
             Description = description;
             IsDemoTenant = isDemoTenant;
-            DefaultCultureName = defaultCultureName;
         }
 
         public string Name { get; }
@@ -17,7 +16,5 @@ namespace Backend.Fx.Environment.MultiTenancy
         public string Description { get; }
 
         public bool IsDemoTenant { get; }
-
-        public string DefaultCultureName { get; }
     }
 }

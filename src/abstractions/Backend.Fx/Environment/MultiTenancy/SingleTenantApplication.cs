@@ -14,7 +14,8 @@ namespace Backend.Fx.Environment.MultiTenancy
         private readonly IModule _multiTenancyModule;
         private readonly TenantCreationParameters _tenantCreationParameters;
 
-        public SingleTenantApplication(IBackendFxApplication application, ITenantService tenantService, IModule multiTenancyModule, TenantCreationParameters tenantCreationParameters)
+        public SingleTenantApplication(IBackendFxApplication application, ITenantService tenantService, IModule multiTenancyModule,
+                                       TenantCreationParameters tenantCreationParameters)
         {
             _application = application;
             _tenantService = tenantService;
@@ -45,10 +46,10 @@ namespace Backend.Fx.Environment.MultiTenancy
         public async Task Boot(CancellationToken cancellationToken = default(CancellationToken))
         {
             _application.CompositionRoot.RegisterModules(_multiTenancyModule);
-            
+
             await _application.Boot(cancellationToken);
 
-            TenantId = _tenantService.GetActiveTenantIds().SingleOrDefault() 
+            TenantId = _tenantService.GetActiveTenantIds().SingleOrDefault()
                        ?? _tenantService.CreateTenant(_tenantCreationParameters);
         }
     }

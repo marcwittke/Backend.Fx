@@ -55,6 +55,9 @@ namespace Backend.Fx.Patterns.DependencyInjection
                         $"Ended scope {injectionScope.SequenceNumber} (correlation [{correlation.Id}]) for {identity.Name} in tenant {(tenantId.HasValue ? tenantId.Value.ToString() : "null")}")
                     )
                     {
+                        //!!!!! unit of work is not mandatory, but should be enabled via decorator
+                        // how to access the instance provider ?
+                        // how to hook the uow decorator after opening the scope, but before executing the action?
                         var unitOfWork = injectionScope.InstanceProvider.GetInstance<IUnitOfWork>();
                         try
                         {

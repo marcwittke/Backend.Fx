@@ -11,7 +11,7 @@ namespace Backend.Fx.NetCore.Logging
     public class FrameworkToBackendFxLogger : NetFxILogger
     {
         private readonly ILogger _logger;
-        
+
         public FrameworkToBackendFxLogger(ILogger logger)
         {
             _logger = logger;

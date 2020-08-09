@@ -3,7 +3,7 @@
     public abstract class SequenceHiLoIdGenerator : HiLoIdGenerator, IEntityIdGenerator
     {
         private readonly ISequence _sequence;
-        
+
         protected SequenceHiLoIdGenerator(ISequence sequence)
         {
             _sequence = sequence;

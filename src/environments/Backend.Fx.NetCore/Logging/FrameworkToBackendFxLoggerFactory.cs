@@ -6,7 +6,9 @@ namespace Backend.Fx.NetCore.Logging
     [DebuggerStepThrough]
     public class FrameworkToBackendFxLoggerFactory : Microsoft.Extensions.Logging.ILoggerFactory
     {
-        public void Dispose() { }
+        public void Dispose()
+        {
+        }
 
         public Microsoft.Extensions.Logging.ILogger CreateLogger(string categoryName)
         {
@@ -14,6 +16,7 @@ namespace Backend.Fx.NetCore.Logging
         }
 
         public void AddProvider(Microsoft.Extensions.Logging.ILoggerProvider provider)
-        { }
+        {
+        }
     }
 }

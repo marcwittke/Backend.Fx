@@ -6,7 +6,7 @@ namespace Backend.Fx.Patterns.Transactions
     public class ReadonlyDecorator : ITransactionContext
     {
         private static readonly ILogger Logger = LogManager.Create<ReadonlyDecorator>();
-        
+
         private readonly ITransactionContext _transactionContext;
 
         public ReadonlyDecorator(ITransactionContext transactionContext)
@@ -24,7 +24,7 @@ namespace Backend.Fx.Patterns.Transactions
         }
 
         public void RollbackTransaction() => _transactionContext.RollbackTransaction();
-        
+
         public void SetIsolationLevel(IsolationLevel isolationLevel)
         {
             _transactionContext.SetIsolationLevel(isolationLevel);

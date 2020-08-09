@@ -14,7 +14,7 @@ namespace Backend.Fx.Environment.MultiTenancy
             _tenantService = tenantService;
             _invoker = invoker;
         }
-        
+
         public void Invoke(Action<IInstanceProvider> action)
         {
             var correlationId = Guid.NewGuid();

@@ -12,6 +12,8 @@ namespace Backend.Fx.NetCore.Logging
             return new FrameworkToBackendFxLogger(LogManager.Create(name));
         }
 
-        public void Dispose() { }
+        public void Dispose()
+        {
+        }
     }
 }

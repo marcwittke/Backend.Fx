@@ -1,13 +1,12 @@
-﻿namespace Backend.Fx.AspNetCore.Security
+﻿using System;
+using System.Threading.Tasks;
+using JetBrains.Annotations;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
+
+namespace Backend.Fx.AspNetCore.Security
 {
-    using System;
-    using System.Threading.Tasks;
-    using JetBrains.Annotations;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.Extensions.Options;
-    using Microsoft.Extensions.Primitives;
-
-
     public class SecurityHeadersMiddleware
     {
         private readonly RequestDelegate _next;
@@ -24,12 +23,10 @@
         [UsedImplicitly]
         public async Task Invoke(HttpContext context)
         {
-            var csp = _securityOptionsAccessor.Value.ContentSecurityPolicy;
+            ContentSecurityPolicyOptions csp = _securityOptionsAccessor.Value.ContentSecurityPolicy;
             if (csp?.ContentSecurityPolicy != null && csp.ContentSecurityPolicy.Length > 0)
             {
-                string cspHeaderKey = csp.ReportOnly ?
-                    "Content-Security-Policy-Report-Only" :
-                    "Content-Security-Policy";
+                string cspHeaderKey = csp.ReportOnly ? "Content-Security-Policy-Report-Only" : "Content-Security-Policy";
 
                 string completeCsp = csp.ContentSecurityPolicy;
 

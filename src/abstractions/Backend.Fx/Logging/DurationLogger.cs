@@ -1,8 +1,8 @@
-﻿namespace Backend.Fx.Logging
-{
-    using System;
-    using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 
+namespace Backend.Fx.Logging
+{
     [DebuggerStepThrough]
     public class DurationLogger : IDisposable
     {
@@ -12,7 +12,9 @@
         private readonly Stopwatch _stopwatch = new Stopwatch();
 
         public DurationLogger(Action<string> logAction, string activity)
-            : this(logAction, activity, activity) {}
+            : this(logAction, activity, activity)
+        {
+        }
 
         public DurationLogger(Action<string> logAction, string beginMessage, string endMessage)
         {

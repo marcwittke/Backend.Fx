@@ -1,10 +1,10 @@
-﻿namespace Backend.Fx.Logging
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 
+namespace Backend.Fx.Logging
+{
     [DebuggerStepThrough]
     public static class ExceptionExtensions
     {

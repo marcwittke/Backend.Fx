@@ -1,8 +1,8 @@
-﻿namespace Backend.Fx.Logging
-{
-    using System;
-    using Exceptions;
+﻿using System;
+using Backend.Fx.Exceptions;
 
+namespace Backend.Fx.Logging
+{
     public interface IExceptionLogger
     {
         void LogException(Exception exception);

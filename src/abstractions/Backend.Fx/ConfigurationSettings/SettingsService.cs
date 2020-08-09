@@ -1,9 +1,9 @@
+using System.Linq;
+using Backend.Fx.BuildingBlocks;
+using Backend.Fx.Patterns.IdGeneration;
+
 namespace Backend.Fx.ConfigurationSettings
 {
-    using System.Linq;
-    using BuildingBlocks;
-    using Patterns.IdGeneration;
-
     public abstract class SettingsService
     {
         private readonly string _category;
@@ -27,6 +27,7 @@ namespace Backend.Fx.ConfigurationSettings
             {
                 return default(T);
             }
+
             var serializer = _settingSerializerFactory.GetSerializer<T>();
             return setting.GetValue(serializer);
         }
@@ -40,6 +41,7 @@ namespace Backend.Fx.ConfigurationSettings
                 setting = new Setting(_idGenerator.NextId(), categoryKey);
                 _settingRepository.Add(setting);
             }
+
             var serializer = _settingSerializerFactory.GetSerializer<T>();
             setting.SetValue(serializer, value);
         }

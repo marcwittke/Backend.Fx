@@ -11,7 +11,7 @@ namespace Backend.Fx.Environment.MultiTenancy
     public class MultiTenantApplication : IBackendFxApplication
     {
         private static readonly ILogger Logger = LogManager.Create<MultiTenantApplication>();
-        
+
         private readonly IBackendFxApplication _application;
         private readonly ITenantService _tenantService;
         private readonly IModule _multiTenancyModule;
@@ -31,13 +31,13 @@ namespace Backend.Fx.Environment.MultiTenancy
         }
 
         public IBackendFxApplicationAsyncInvoker AsyncInvoker => _application.AsyncInvoker;
-        
+
         public ICompositionRoot CompositionRoot => _application.CompositionRoot;
-        
+
         public IBackendFxApplicationInvoker Invoker => _application.Invoker;
 
         public IMessageBus MessageBus => _application.MessageBus;
-        
+
         public bool WaitForBoot(int timeoutMilliSeconds = Int32.MaxValue, CancellationToken cancellationToken = default(CancellationToken))
         {
             return _application.WaitForBoot(timeoutMilliSeconds, cancellationToken);
@@ -46,9 +46,9 @@ namespace Backend.Fx.Environment.MultiTenancy
         public async Task Boot(CancellationToken cancellationToken = default(CancellationToken))
         {
             _application.CompositionRoot.RegisterModules(_multiTenancyModule);
-            
+
             await _application.Boot(cancellationToken);
-            
+
             MessageBus.Subscribe(new DelegateIntegrationMessageHandler<TenantCreated>(tenantCreated =>
             {
                 Logger.Info($"Seeding data for recently created {(tenantCreated.IsDemoTenant ? "demo " : "")}tenant {tenantCreated.TenantId}");

@@ -6,7 +6,8 @@ namespace Backend.Fx.AspNetCore.Mvc.DependencyInjection
     public class BackendFxApplicationViewComponentActivator : BackendFxApplicationActivator, IViewComponentActivator
     {
         public BackendFxApplicationViewComponentActivator(IBackendFxApplication application) : base(application)
-        { }
+        {
+        }
 
         public object Create(ViewComponentContext context)
         {
@@ -14,6 +15,7 @@ namespace Backend.Fx.AspNetCore.Mvc.DependencyInjection
         }
 
         public void Release(ViewComponentContext context, object viewComponent)
-        { }
+        {
+        }
     }
 }

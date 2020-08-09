@@ -1,25 +1,57 @@
-﻿namespace Backend.Fx.RandomData
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace Backend.Fx.RandomData
 {
-    public static class TestPhoneGenerator
+    public class LandLineGenerator : Generator<string>
     {
-        public static string Mobile()
+        public static string Generate()
         {
-            var phone = Numbers.MobileNetworks.Random();
-            while (phone.Length < TestRandom.Instance.Next(11, 12))
-            {
-                phone += Numbers.Ciphers.Random();
-            }
-            return phone;
+            return new LandLineGenerator().First();
+        }
+        
+        public override IEnumerator<string> GetEnumerator()
+        {
+            return new Enumerator();
         }
 
-        public static string LandLine()
+        private class Enumerator : GeneratingEnumerator<string>
         {
-            var phone = Numbers.LandLineNetworks.Random();
-            while (phone.Length < TestRandom.Instance.Next(8, 11))
+            protected override string Next()
             {
-                phone += Numbers.Ciphers.Random();
+                var generated = Numbers.LandLineNetworks.Random();
+                while (generated.Length < TestRandom.Instance.Next(8, 11))
+                {
+                    generated += Numbers.Ciphers.Random();
+                }
+                return generated;
             }
-            return phone;
+        }
+    }
+    
+    public class MobileLineGenerator : Generator<string>
+    {
+        public static string Generate()
+        {
+            return new MobileLineGenerator().First();
+        }
+        
+        public override IEnumerator<string> GetEnumerator()
+        {
+            return new Enumerator();
+        }
+
+        private class Enumerator : GeneratingEnumerator<string>
+        {
+            protected override string Next()
+            {
+                var generated = Numbers.MobileNetworks.Random();
+                while (generated.Length < TestRandom.Instance.Next(11))
+                {
+                    generated += Numbers.Ciphers.Random();
+                }
+                return generated;
+            }
         }
     }
 }

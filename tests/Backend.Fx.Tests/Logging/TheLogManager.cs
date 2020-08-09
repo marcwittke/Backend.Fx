@@ -1,16 +1,13 @@
-﻿using Xunit;
+﻿using System;
+using System.Security;
+using Backend.Fx.Logging;
+using FakeItEasy;
+using Xunit;
 
 namespace Backend.Fx.Tests.Logging
 {
-    using System;
-    using System.Security;
-    using FakeItEasy;
-    using Fx.Logging;
-
     public class TheLogManager
     {
-        private readonly ILoggerFactory _loggerFactory;
-
         public TheLogManager()
         {
             _loggerFactory = A.Fake<ILoggerFactory>();
@@ -19,13 +16,15 @@ namespace Backend.Fx.Tests.Logging
             A.CallTo(() => _loggerFactory.Create(A<string>.Ignored)).Returns(logger);
         }
 
+        private readonly ILoggerFactory _loggerFactory;
+
         [Fact]
         public void DoesNotThrowOnZeroConfig()
         {
             Exception ex = new SecurityException("very bad");
-            string msg = "the log message";
+            var msg = "the log message";
             ILogger logger = LogManager.Create<TheLogManager>();
-            
+
             logger.Fatal(ex);
             logger.Fatal(ex, msg);
             logger.Fatal(msg);
@@ -56,7 +55,7 @@ namespace Backend.Fx.Tests.Logging
             LogManager.Initialize(_loggerFactory);
             LogManager.Create<TheLogManager>();
             A.CallTo(() => _loggerFactory.Create(A<string>.That.Matches(s => s == "Backend.Fx.Tests.Logging.TheLogManager")))
-                .MustHaveHappenedOnceExactly();
+             .MustHaveHappenedOnceExactly();
         }
     }
 }

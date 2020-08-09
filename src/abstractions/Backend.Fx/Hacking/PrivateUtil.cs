@@ -13,7 +13,8 @@ namespace Backend.Fx.Hacking
             {
                 throw new InvalidOperationException($"No private default constructor found in {typeof(T).Name}");
             }
-            var instance = (T)constructor.Invoke(null);
+
+            var instance = (T) constructor.Invoke(null);
             return instance;
         }
     }

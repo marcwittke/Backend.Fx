@@ -1,17 +1,17 @@
-﻿namespace Backend.Fx.AspNetCore.ErrorHandling
-{
-    using System;
-    using System.Globalization;
-    using System.Net;
-    using System.Threading.Tasks;
-    using Exceptions;
-    using JetBrains.Annotations;
-    using Microsoft.AspNetCore.Http;
+﻿using System;
+using System.Globalization;
+using System.Net;
+using System.Threading.Tasks;
+using Backend.Fx.Exceptions;
+using JetBrains.Annotations;
+using Microsoft.AspNetCore.Http;
 
+namespace Backend.Fx.AspNetCore.ErrorHandling
+{
     public abstract class ErrorHandlingMiddleware
     {
         private readonly RequestDelegate _next;
-        
+
         /// <summary>
         ///     This constructor is being called by the framework DI container
         /// </summary>
@@ -48,23 +48,23 @@
                 }
                 catch (NotFoundException nfex)
                 {
-                    await HandleClientError(context, (int)HttpStatusCode.NotFound, HttpStatusCode.NotFound.ToString(), nfex);
+                    await HandleClientError(context, (int) HttpStatusCode.NotFound, HttpStatusCode.NotFound.ToString(), nfex);
                 }
                 catch (ConflictedException confex)
                 {
-                    await HandleClientError(context, (int)HttpStatusCode.Conflict, HttpStatusCode.Conflict.ToString(), confex);
+                    await HandleClientError(context, (int) HttpStatusCode.Conflict, HttpStatusCode.Conflict.ToString(), confex);
                 }
                 catch (ForbiddenException uex)
                 {
-                    await HandleClientError(context, (int)HttpStatusCode.Forbidden, HttpStatusCode.Forbidden.ToString(), uex);
+                    await HandleClientError(context, (int) HttpStatusCode.Forbidden, HttpStatusCode.Forbidden.ToString(), uex);
                 }
                 catch (UnauthorizedException uex)
                 {
-                    await HandleClientError(context, (int)HttpStatusCode.Unauthorized, HttpStatusCode.Unauthorized.ToString(), uex);
+                    await HandleClientError(context, (int) HttpStatusCode.Unauthorized, HttpStatusCode.Unauthorized.ToString(), uex);
                 }
                 catch (ClientException cex)
                 {
-                    await HandleClientError(context, (int)HttpStatusCode.BadRequest, HttpStatusCode.BadRequest.ToString(), cex);
+                    await HandleClientError(context, (int) HttpStatusCode.BadRequest, HttpStatusCode.BadRequest.ToString(), cex);
                 }
                 catch (Exception ex)
                 {
@@ -83,5 +83,4 @@
 
         protected abstract Task HandleServerError(HttpContext context, Exception exception);
     }
-
 }

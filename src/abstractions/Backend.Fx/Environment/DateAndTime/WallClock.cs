@@ -4,5 +4,6 @@
     /// The real system clock
     /// </summary>
     public class WallClock : Clock
-    { }
+    {
+    }
 }

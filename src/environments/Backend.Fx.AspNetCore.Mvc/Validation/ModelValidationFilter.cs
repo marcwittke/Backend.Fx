@@ -12,7 +12,7 @@ namespace Backend.Fx.AspNetCore.Mvc.Validation
     {
         public abstract void OnActionExecuting(ActionExecutingContext context);
         public abstract void OnActionExecuted(ActionExecutedContext context);
-        
+
         protected void LogErrors(FilterContext context, string controllerName, Errors errors)
         {
             ILogger logger = LogManager.Create(controllerName);

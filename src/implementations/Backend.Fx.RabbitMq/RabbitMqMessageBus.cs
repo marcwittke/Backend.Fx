@@ -1,21 +1,21 @@
-﻿namespace Backend.Fx.RabbitMq
-{
-    using System;
-    using System.Text;
-    using System.Threading.Tasks;
-    using Environment.MultiTenancy;
-    using Logging;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
-    using Patterns.EventAggregation.Integration;
-    using RabbitMQ.Client;
-    using RabbitMQ.Client.Events;
+﻿using System;
+using System.Text;
+using System.Threading.Tasks;
+using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Logging;
+using Backend.Fx.Patterns.EventAggregation.Integration;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 
+namespace Backend.Fx.RabbitMq
+{
     public class RabbitMqMessageBus : MessageBus
     {
         private static readonly ILogger Logger = LogManager.Create<RabbitMqMessageBus>();
         private readonly RabbitMqChannel _channel;
-        
+
         public RabbitMqMessageBus(IConnectionFactory connectionFactory,
                                   int retryCount,
                                   string brokerName,
@@ -33,7 +33,7 @@
                 Logger.Info("Channel to RabbitMQ opened");
             }
         }
-        
+
         private void ChannelOnMessageReceived(object sender, BasicDeliverEventArgs args)
         {
             Logger.Debug($"RabbitMQ message with routing key {args.RoutingKey} received");
@@ -47,7 +47,7 @@
             _channel.PublishEvent(integrationEvent);
             return Task.CompletedTask;
         }
-        
+
         protected override void Subscribe(string eventName)
         {
             Logger.Info($"Subscribing to {eventName}");
@@ -64,7 +64,6 @@
         protected override void Dispose(bool disposing)
         {
             if (disposing)
-            {
                 if (_channel != null)
                 {
                     Logger.Info("Closing RabbitMQ channel...");
@@ -72,7 +71,6 @@
                     _channel.Dispose();
                     Logger.Info("RabbitMQ channel closed");
                 }
-            }
 
             base.Dispose(disposing);
         }
@@ -82,15 +80,12 @@
             private readonly string _jsonString;
 
             public RabbitMqEventProcessingContext(object rawReceivedMessage)
-            { 
+            {
                 Logger.Debug($"Deserializing a message of type {rawReceivedMessage?.GetType().FullName ?? "???"}");
-                if (!(rawReceivedMessage is byte[] rawEventPayloadBytes))
-                {
-                    throw new InvalidOperationException("Raw event payload is not a binary JSON string");
-                }
+                if (!(rawReceivedMessage is byte[] rawEventPayloadBytes)) throw new InvalidOperationException("Raw event payload is not a binary JSON string");
 
                 _jsonString = Encoding.UTF8.GetString(rawEventPayloadBytes);
-                var eventStub = JsonConvert.DeserializeAnonymousType(_jsonString, new {tenantId = 0, correlationId = Guid.Empty} );
+                var eventStub = JsonConvert.DeserializeAnonymousType(_jsonString, new {tenantId = 0, correlationId = Guid.Empty});
                 TenantId = new TenantId(eventStub.tenantId);
                 CorrelationId = eventStub.correlationId;
             }
@@ -105,5 +100,5 @@
                 return (IIntegrationEvent) JsonConvert.DeserializeObject(_jsonString, eventType);
             }
         }
-    }   
+    }
 }

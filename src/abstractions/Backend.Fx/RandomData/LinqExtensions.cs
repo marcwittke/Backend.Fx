@@ -1,12 +1,12 @@
-﻿namespace Backend.Fx.RandomData
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Linq.Dynamic.Core;
-    using System.Reflection;
-    using BuildingBlocks;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Dynamic.Core;
+using System.Reflection;
+using Backend.Fx.BuildingBlocks;
 
+namespace Backend.Fx.RandomData
+{
     public static class LinqExtensions
     {
         /// <summary>
@@ -77,7 +77,7 @@
             {
                 if (count == 0)
                 {
-                    return default(T);
+                    return default;
                 }
                 
                 return sourceQueryable.Skip(TestRandom.Next(count - 1)).FirstOrDefault();
@@ -87,7 +87,7 @@
             var sourceArray = source as T[] ?? source.ToArray();
             if (sourceArray.Length == 0)
             {
-                return default(T);
+                return default;
             }
             return sourceArray.ElementAt(TestRandom.Next(sourceArray.Length));
         }

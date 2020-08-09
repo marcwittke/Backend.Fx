@@ -2,7 +2,7 @@
 
 namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
-    public class DelegateIntegrationMessageHandler<TIntegrationEvent> 
+    public class DelegateIntegrationMessageHandler<TIntegrationEvent>
         : IIntegrationMessageHandler<TIntegrationEvent> where TIntegrationEvent : IIntegrationEvent
     {
         private readonly Action<TIntegrationEvent> _handleAction;

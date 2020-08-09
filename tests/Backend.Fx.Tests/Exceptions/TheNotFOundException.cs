@@ -1,10 +1,9 @@
-﻿using Xunit;
+﻿using Backend.Fx.Exceptions;
+using Backend.Fx.Tests.BuildingBlocks;
+using Xunit;
 
 namespace Backend.Fx.Tests.Exceptions
 {
-    using BuildingBlocks;
-    using Fx.Exceptions;
-
     public class TheNotFoundException
     {
         [Fact]
