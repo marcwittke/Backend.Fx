@@ -1,7 +1,7 @@
-﻿namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
-{
-    using Fx.Patterns.EventAggregation.Integration;
+﻿using Backend.Fx.Patterns.EventAggregation.Integration;
 
+namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
+{
     public class DynamicMessageHandler : IIntegrationMessageHandler
     {
         private readonly IIntegrationMessageHandler _integrationMessageHandlerImplementation;

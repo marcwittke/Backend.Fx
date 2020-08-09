@@ -12,7 +12,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
     public abstract class MessageBus : IMessageBus
     {
         private static readonly ILogger Logger = LogManager.Create<MessageBus>();
-        
+
         /// <summary>
         /// Holds the registered handlers.
         /// Each event type name (key) matches to various subscriptions

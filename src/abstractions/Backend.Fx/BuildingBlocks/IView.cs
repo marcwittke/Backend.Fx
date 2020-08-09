@@ -1,13 +1,14 @@
-﻿namespace Backend.Fx.BuildingBlocks
-{
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Linq.Expressions;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 
+namespace Backend.Fx.BuildingBlocks
+{
     public interface IView<out T> : IQueryable<T>
-    {}
+    {
+    }
 
     public abstract class View<T> : IView<T>
     {

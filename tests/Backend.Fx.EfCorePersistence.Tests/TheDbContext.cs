@@ -10,15 +10,15 @@ namespace Backend.Fx.EfCorePersistence.Tests
 {
     public class TheDbContext
     {
-        private readonly DatabaseFixture _fixture;
-        private static int _nextTenantId = 2675;
-        private readonly int _tenantId = _nextTenantId++;
-        
         public TheDbContext()
         {
             _fixture = new SqliteDatabaseFixture();
             _fixture.CreateDatabase();
         }
+
+        private readonly DatabaseFixture _fixture;
+        private static int _nextTenantId = 2675;
+        private readonly int _tenantId = _nextTenantId++;
 
         [Fact]
         public void CanClearAndReplaceDependentEntites()
@@ -55,18 +55,12 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 using (var dbContext = new TestDbContext(dbs.OptionsBuilder.Options))
                 {
                     Blog blog = dbContext.Blogs.Include(b => b.Posts).Single(b => b.Id == 1);
-                    
+
                     Assert.Equal(5, blog.Posts.Count);
-                    
-                    for (int i = 1; i <= 5; i++)
-                    {
-                        Assert.DoesNotContain(blog.Posts, p => p.Id == i);
-                    }
-                    
-                    for (int i = 6; i <= 10; i++)
-                    {
-                        Assert.Contains(blog.Posts, p => p.Id == i);
-                    }
+
+                    for (var i = 1; i <= 5; i++) Assert.DoesNotContain(blog.Posts, p => p.Id == i);
+
+                    for (var i = 6; i <= 10; i++) Assert.Contains(blog.Posts, p => p.Id == i);
                 }
             }
         }

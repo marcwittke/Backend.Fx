@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
 {
-    public abstract class DatabaseFixture 
+    public abstract class DatabaseFixture
     {
         public void CreateDatabase()
         {

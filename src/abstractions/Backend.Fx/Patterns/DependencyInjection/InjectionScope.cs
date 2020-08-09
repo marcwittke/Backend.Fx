@@ -8,9 +8,8 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
         IInstanceProvider InstanceProvider { get; }
     }
-    
-    
-    
+
+
     public abstract class InjectionScope : IInjectionScope
     {
         protected InjectionScope(int sequenceNumber)

@@ -1,11 +1,10 @@
-﻿using Xunit;
+﻿using System;
+using System.Threading;
+using Backend.Fx.Environment.DateAndTime;
+using Xunit;
 
 namespace Backend.Fx.Tests.Environment.DateAndTime
 {
-    using System;
-    using System.Threading;
-    using Fx.Environment.DateAndTime;
-
     public class TheFrozenClock
     {
         [Fact]

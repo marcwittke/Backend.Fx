@@ -7,7 +7,8 @@ namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain
     {
         [UsedImplicitly]
         private Blogger()
-        { }
+        {
+        }
 
         public Blogger(int id, string lastName, string firstName) : base(id)
         {

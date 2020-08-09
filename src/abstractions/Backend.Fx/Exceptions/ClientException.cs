@@ -1,24 +1,26 @@
-﻿namespace Backend.Fx.Exceptions
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using JetBrains.Annotations;
+
+namespace Backend.Fx.Exceptions
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using JetBrains.Annotations;
-
-
     public class ClientException : Exception
     {
         public ClientException()
-                : base("Bad request.")
-        { }
+            : base("Bad request.")
+        {
+        }
 
         public ClientException(string message)
-                : base(message)
-        { }
+            : base(message)
+        {
+        }
 
         public ClientException(string message, Exception innerException)
-                : base(message, innerException)
-        { }
+            : base(message, innerException)
+        {
+        }
 
         public Errors Errors { get; } = new Errors();
 
@@ -33,18 +35,18 @@
             string exceptionType = GetType().ToString();
 
             string message = string.IsNullOrEmpty(Message)
-                                     ? exceptionType
-                                     : exceptionType + ": " + Message;
+                                 ? exceptionType
+                                 : exceptionType + ": " + Message;
 
             string innerException = InnerException != null
-                                            ? " ---> "
-                                              + InnerException
-                                              + Environment.NewLine
-                                              + "   End of inner exception stack trace"
-                                            : null;
+                                        ? " ---> "
+                                          + InnerException
+                                          + System.Environment.NewLine
+                                          + "   End of inner exception stack trace"
+                                        : null;
 
-            return string.Join(Environment.NewLine,
-                               new[] { message, Errors.ToString(), innerException, StackTrace }.Where(s => s != null));
+            return string.Join(System.Environment.NewLine,
+                               new[] {message, Errors.ToString(), innerException, StackTrace}.Where(s => s != null));
         }
     }
 

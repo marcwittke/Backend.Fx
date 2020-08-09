@@ -1,15 +1,14 @@
-﻿using Xunit;
+﻿using Backend.Fx.Environment.Authentication;
+using Xunit;
 
 namespace Backend.Fx.Tests.Environment.Authentication
 {
-    using Fx.Environment.Authentication;
-
     public class TheSystemIdentity
     {
         [Fact]
-        public void IsAuthenticated()
+        public void HasAuthenticationTypeSystemInternal()
         {
-            Assert.True(new SystemIdentity().IsAuthenticated);
+            Assert.Equal("system internal", new SystemIdentity().AuthenticationType);
         }
 
         [Fact]
@@ -19,9 +18,9 @@ namespace Backend.Fx.Tests.Environment.Authentication
         }
 
         [Fact]
-        public void HasAuthenticationTypeSystemInternal()
+        public void IsAuthenticated()
         {
-            Assert.Equal("system internal", new SystemIdentity().AuthenticationType);
+            Assert.True(new SystemIdentity().IsAuthenticated);
         }
     }
 }

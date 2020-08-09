@@ -1,15 +1,14 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using Backend.Fx.BuildingBlocks;
+using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Fx.EfCorePersistence
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Linq.Expressions;
-    using BuildingBlocks;
-    using Microsoft.EntityFrameworkCore;
-    
     public class EntityQueryable<TEntity> : IQueryable<TEntity> where TEntity : Entity
     {
         [CanBeNull] private DbContext _dbContext;
@@ -21,16 +20,17 @@ namespace Backend.Fx.EfCorePersistence
 
         public DbContext DbContext
         {
-            get => _dbContext ?? throw new InvalidOperationException("This EntityQueryable does not have a DbContext yet. You might either make sure a proper DbContext gets injected or the DbContext is initialized later using a derived class");
+            get => _dbContext ?? throw new InvalidOperationException(
+                       "This EntityQueryable does not have a DbContext yet. You might either make sure a proper DbContext gets injected or the DbContext is initialized later using a derived class")
+            ;
             protected set
             {
-                if (_dbContext != null)
-                {
-                    throw new InvalidOperationException("This EntityQueryable has already a DbContext assigned. It is not allowed to change it later.");
-                }
+                if (_dbContext != null) throw new InvalidOperationException("This EntityQueryable has already a DbContext assigned. It is not allowed to change it later.");
                 _dbContext = value;
             }
         }
+
+        private IQueryable<TEntity> InnerQueryable => DbContext.Set<TEntity>();
 
         public IEnumerator<TEntity> GetEnumerator()
         {
@@ -39,7 +39,7 @@ namespace Backend.Fx.EfCorePersistence
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable)InnerQueryable).GetEnumerator();
+            return ((IEnumerable) InnerQueryable).GetEnumerator();
         }
 
         public Type ElementType => InnerQueryable.ElementType;
@@ -47,7 +47,5 @@ namespace Backend.Fx.EfCorePersistence
         public Expression Expression => InnerQueryable.Expression;
 
         public IQueryProvider Provider => InnerQueryable.Provider;
-
-        private IQueryable<TEntity> InnerQueryable => DbContext.Set<TEntity>();
     }
 }

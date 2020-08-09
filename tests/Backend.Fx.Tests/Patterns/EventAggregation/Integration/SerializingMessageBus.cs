@@ -1,14 +1,12 @@
-﻿using Backend.Fx.Patterns.DependencyInjection;
+﻿using System;
+using System.Threading.Tasks;
+using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Patterns.EventAggregation.Integration;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
 {
-    using System;
-    using System.Threading.Tasks;
-    using Fx.Environment.MultiTenancy;
-    using Fx.Patterns.EventAggregation.Integration;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
-
     public class SerializingMessageBus : MessageBus
     {
         public override void Connect()

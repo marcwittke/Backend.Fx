@@ -1,6 +1,5 @@
 using System;
 using System.Security.Principal;
-using System.Threading;
 using Backend.Fx.Environment.MultiTenancy;
 
 namespace Backend.Fx.Patterns.DependencyInjection

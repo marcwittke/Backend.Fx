@@ -1,13 +1,12 @@
-﻿using Xunit;
+﻿using Backend.Fx.Environment.Authentication;
+using Backend.Fx.Environment.DateAndTime;
+using Backend.Fx.Patterns.EventAggregation.Domain;
+using Backend.Fx.Patterns.EventAggregation.Integration;
+using FakeItEasy;
+using Xunit;
 
 namespace Backend.Fx.Tests.Patterns.UnitOfWork
 {
-    using FakeItEasy;
-    using Fx.Environment.Authentication;
-    using Fx.Environment.DateAndTime;
-    using Fx.Patterns.EventAggregation.Domain;
-    using Fx.Patterns.EventAggregation.Integration;
-
     public class TheUnitOfWork
     {
         private readonly IDomainEventAggregator _eventAggregator = A.Fake<IDomainEventAggregator>();
@@ -16,7 +15,7 @@ namespace Backend.Fx.Tests.Patterns.UnitOfWork
         [Fact]
         public void RaisesDomainEventsOnComplete()
         {
-            TestUnitOfWork sut = new TestUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), _eventAggregator, _messageBusScope);
+            var sut = new TestUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), _eventAggregator, _messageBusScope);
             sut.Begin();
             sut.Complete();
             sut.Dispose();
@@ -26,7 +25,7 @@ namespace Backend.Fx.Tests.Patterns.UnitOfWork
         [Fact]
         public void RaisesIntegrationEventsOnComplete()
         {
-            TestUnitOfWork sut = new TestUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), _eventAggregator, _messageBusScope);
+            var sut = new TestUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), _eventAggregator, _messageBusScope);
             sut.Begin();
             sut.Complete();
             sut.Dispose();
@@ -36,7 +35,7 @@ namespace Backend.Fx.Tests.Patterns.UnitOfWork
         [Fact]
         public void RaisesNoDomainEventsOnDispose()
         {
-            TestUnitOfWork sut = new TestUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), _eventAggregator, _messageBusScope);
+            var sut = new TestUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), _eventAggregator, _messageBusScope);
             sut.Begin();
             sut.Dispose();
             A.CallTo(() => _eventAggregator.RaiseEvents()).MustNotHaveHappened();
@@ -45,7 +44,7 @@ namespace Backend.Fx.Tests.Patterns.UnitOfWork
         [Fact]
         public void RaisesNoIntegrationEventsOnDispose()
         {
-            TestUnitOfWork sut = new TestUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), _eventAggregator, _messageBusScope);
+            var sut = new TestUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), _eventAggregator, _messageBusScope);
             sut.Begin();
             sut.Dispose();
             A.CallTo(() => _messageBusScope.RaiseEvents()).MustNotHaveHappened();
@@ -54,7 +53,7 @@ namespace Backend.Fx.Tests.Patterns.UnitOfWork
         [Fact]
         public void UpdatesTrackingPropertiesOnFlush()
         {
-            TestUnitOfWork sut = new TestUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), _eventAggregator, _messageBusScope);
+            var sut = new TestUnitOfWork(new FrozenClock(), CurrentIdentityHolder.CreateSystem(), _eventAggregator, _messageBusScope);
             sut.Begin();
             sut.Flush();
             Assert.Equal(1, sut.UpdateTrackingPropertiesCount);

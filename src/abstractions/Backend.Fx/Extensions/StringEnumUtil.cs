@@ -1,13 +1,13 @@
-﻿namespace Backend.Fx.Extensions
-{
-    using System;
-    using System.Linq;
+﻿using System;
+using System.Linq;
 
+namespace Backend.Fx.Extensions
+{
     public static class StringEnumUtil
     {
         public static TEnum Parse<TEnum>(this string value) where TEnum : struct
         {
-            if(Enum.TryParse(value, true, out TEnum enumValue))
+            if (Enum.TryParse(value, true, out TEnum enumValue))
             {
                 return enumValue;
             }

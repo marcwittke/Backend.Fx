@@ -1,7 +1,7 @@
-﻿namespace Backend.Fx.Patterns.DependencyInjection
-{
-    using Logging;
+﻿using Backend.Fx.Logging;
 
+namespace Backend.Fx.Patterns.DependencyInjection
+{
     /// <summary>
     /// Holds a current instance of T that might be replaced during the scope
     /// </summary>
@@ -30,6 +30,7 @@
                     _current = ProvideInstance();
                     Logger.Debug($"Initial instance of {typeof(T).Name} is: {Describe(_current)}");
                 }
+
                 return _current;
             }
         }

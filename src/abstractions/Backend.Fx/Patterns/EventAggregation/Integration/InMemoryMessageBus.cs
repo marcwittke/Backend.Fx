@@ -7,21 +7,24 @@
     public class InMemoryMessageBus : MessageBus
     {
         public override void Connect()
-        { }
+        {
+        }
 
         protected override Task PublishOnMessageBus(IIntegrationEvent integrationEvent)
         {
             Task.Run(() => Process(integrationEvent.GetType().FullName, new InMemoryProcessingContext(integrationEvent)));
-            
+
             // the returning Task is about publishing the event, not processing!
             return Task.CompletedTask;
         }
 
         protected override void Subscribe(string eventName)
-        { }
+        {
+        }
 
         protected override void Unsubscribe(string eventName)
-        { }
+        {
+        }
 
         private class InMemoryProcessingContext : EventProcessingContext
         {

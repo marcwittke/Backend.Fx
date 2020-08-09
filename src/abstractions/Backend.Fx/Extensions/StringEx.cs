@@ -1,7 +1,7 @@
-﻿namespace Backend.Fx.Extensions
-{
-    using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
+namespace Backend.Fx.Extensions
+{
     public static class StringEx
     {
         public static string Cut(this string s, int length)

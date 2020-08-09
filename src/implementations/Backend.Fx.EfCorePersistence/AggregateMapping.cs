@@ -1,11 +1,11 @@
-﻿namespace Backend.Fx.EfCorePersistence
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq.Expressions;
-    using BuildingBlocks;
-    using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using Backend.Fx.BuildingBlocks;
+using Microsoft.EntityFrameworkCore;
 
+namespace Backend.Fx.EfCorePersistence
+{
     public abstract class AggregateMapping<T> : IAggregateMapping<T> where T : AggregateRoot
     {
         public abstract IEnumerable<Expression<Func<T, object>>> IncludeDefinitions { get; }

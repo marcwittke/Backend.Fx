@@ -13,16 +13,9 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
 {
     public class TheDataGenerationContext
     {
-        private readonly DataGenerationContext _sut;
-        private readonly IDemoDataGenerator[] _demoDataGenerators = {new DemoDataGenerator1(), new DemoDataGenerator2()};
-        private readonly IProductiveDataGenerator[] _prodDataGenerators = {new ProdDataGenerator1()};
-        private readonly TenantId[] _demoTenants = {new TenantId(1), new TenantId(2)};
-        private readonly TenantId[] _prodTenants = {new TenantId(11), new TenantId(12)};
-        private DITestFakes _fakes;
-
         public TheDataGenerationContext()
         {
-            _fakes = new DITestFakes();
+            _fakes = new DiTestFakes();
             A.CallTo(() => _fakes.InstanceProvider.GetInstances<IDataGenerator>()).Returns(_demoDataGenerators.Concat(_prodDataGenerators.Cast<IDataGenerator>()).ToArray());
 
             var messageBus = new InMemoryMessageBus();
@@ -37,6 +30,13 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
                 _fakes.Invoker);
         }
 
+        private readonly DataGenerationContext _sut;
+        private readonly IDemoDataGenerator[] _demoDataGenerators = {new DemoDataGenerator1(), new DemoDataGenerator2()};
+        private readonly IProductiveDataGenerator[] _prodDataGenerators = {new ProdDataGenerator1()};
+        private readonly TenantId[] _demoTenants = {new TenantId(1), new TenantId(2)};
+        private readonly TenantId[] _prodTenants = {new TenantId(11), new TenantId(12)};
+        private readonly DiTestFakes _fakes;
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -45,49 +45,13 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
             _sut.SeedDataForTenant(new TenantId(123), isDemoTenant);
 
             foreach (IProductiveDataGenerator dataGenerator in _prodDataGenerators)
-            {
                 A.CallTo(() => ((ProdDataGenerator) dataGenerator).Impl.Generate()).MustHaveHappenedOnceExactly();
-            }
 
             foreach (IDemoDataGenerator dataGenerator in _demoDataGenerators)
-            {
                 if (isDemoTenant)
-                {
                     A.CallTo(() => ((DemoDataGenerator) dataGenerator).Impl.Generate()).MustHaveHappenedOnceExactly();
-                }
                 else
-                {
                     A.CallTo(() => ((DemoDataGenerator) dataGenerator).Impl.Generate()).MustNotHaveHappened();
-                }
-            }
-        }
-
-        [Fact]
-        public void CallsDataGeneratorWhenSeedingForAllTenants()
-        {
-            _sut.SeedDataForAllActiveTenants();
-
-            var tenantIds = _demoTenants.Concat(_prodTenants).ToArray();
-            foreach (TenantId tenantId in tenantIds)
-            {
-                int expectedScopeCount = _prodDataGenerators.Length;
-                if (_demoTenants.Contains(tenantId))
-                {
-                    expectedScopeCount += _demoDataGenerators.Length;
-                }
-                A.CallTo(() => _fakes.Invoker.Invoke(A<Action<IInstanceProvider>>._, A<IIdentity>._, A<TenantId>.That.IsSameAs(tenantId), A<Guid?>._))
-                 .MustHaveHappenedANumberOfTimesMatching(i => i == expectedScopeCount);
-                
-                foreach (IProductiveDataGenerator dataGenerator in _prodDataGenerators)
-                {
-                    A.CallTo(() => ((ProdDataGenerator) dataGenerator).Impl.Generate()).MustHaveHappenedANumberOfTimesMatching(i => i == tenantIds.Length);
-                }
-                
-                foreach (IDemoDataGenerator dataGenerator in _demoDataGenerators)
-                {
-                    A.CallTo(() => ((DemoDataGenerator) dataGenerator).Impl.Generate()).MustHaveHappenedANumberOfTimesMatching(i => i == _demoTenants.Length);
-                }
-            }
         }
 
         private abstract class DemoDataGenerator : IDemoDataGenerator
@@ -96,7 +60,7 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
 
             protected DemoDataGenerator()
             {
-                Impl= A.Fake<IDemoDataGenerator>(o => o.Named(GetType().Name));
+                Impl = A.Fake<IDemoDataGenerator>(o => o.Named(GetType().Name));
             }
 
             public int Priority => Impl.Priority;
@@ -121,8 +85,9 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
 
             protected ProdDataGenerator()
             {
-                Impl= A.Fake<IProductiveDataGenerator>(o => o.Named(GetType().Name));
+                Impl = A.Fake<IProductiveDataGenerator>(o => o.Named(GetType().Name));
             }
+
             public int Priority => Impl.Priority;
 
             public void Generate()
@@ -133,6 +98,27 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
 
         private class ProdDataGenerator1 : ProdDataGenerator
         {
+        }
+
+        [Fact]
+        public void CallsDataGeneratorWhenSeedingForAllTenants()
+        {
+            _sut.SeedDataForAllActiveTenants();
+
+            var tenantIds = _demoTenants.Concat(_prodTenants).ToArray();
+            foreach (TenantId tenantId in tenantIds)
+            {
+                var expectedScopeCount = _prodDataGenerators.Length;
+                if (_demoTenants.Contains(tenantId)) expectedScopeCount += _demoDataGenerators.Length;
+                A.CallTo(() => _fakes.Invoker.Invoke(A<Action<IInstanceProvider>>._, A<IIdentity>._, A<TenantId>.That.IsSameAs(tenantId), A<Guid?>._))
+                 .MustHaveHappenedANumberOfTimesMatching(i => i == expectedScopeCount);
+
+                foreach (IProductiveDataGenerator dataGenerator in _prodDataGenerators)
+                    A.CallTo(() => ((ProdDataGenerator) dataGenerator).Impl.Generate()).MustHaveHappenedANumberOfTimesMatching(i => i == tenantIds.Length);
+
+                foreach (IDemoDataGenerator dataGenerator in _demoDataGenerators)
+                    A.CallTo(() => ((DemoDataGenerator) dataGenerator).Impl.Generate()).MustHaveHappenedANumberOfTimesMatching(i => i == _demoTenants.Length);
+            }
         }
     }
 }

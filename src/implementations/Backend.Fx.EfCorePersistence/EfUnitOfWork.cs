@@ -11,9 +11,8 @@ namespace Backend.Fx.EfCorePersistence
 {
     public class EfUnitOfWork : UnitOfWork
     {
-        
         public EfUnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder, IDomainEventAggregator eventAggregator,
-            IMessageBusScope messageBusScope, DbContext dbContext)
+                            IMessageBusScope messageBusScope, DbContext dbContext)
             : base(clock, identityHolder, eventAggregator, messageBusScope)
         {
             DbContext = dbContext;
@@ -28,7 +27,7 @@ namespace Backend.Fx.EfCorePersistence
             base.Flush();
             DbContext.SaveChanges();
         }
-        
+
         protected override void UpdateTrackingProperties(string userId, DateTime utcNow)
         {
             DbContext.UpdateTrackingProperties(userId, utcNow);
@@ -36,10 +35,7 @@ namespace Backend.Fx.EfCorePersistence
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                DbContext?.Dispose();
-            }
+            if (disposing) DbContext?.Dispose();
             base.Dispose(disposing);
         }
     }

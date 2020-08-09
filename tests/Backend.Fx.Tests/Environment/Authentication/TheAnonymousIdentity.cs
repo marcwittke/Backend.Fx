@@ -1,17 +1,10 @@
-﻿using Xunit;
+﻿using Backend.Fx.Environment.Authentication;
+using Xunit;
 
 namespace Backend.Fx.Tests.Environment.Authentication
 {
-    using Fx.Environment.Authentication;
-
     public class TheAnonymousIdentity
     {
-        [Fact]
-        public void IsNotAuthenticated()
-        {
-            Assert.False(new AnonymousIdentity().IsAuthenticated);
-        }
-
         [Fact]
         public void HasNameAnonymous()
         {
@@ -22,6 +15,12 @@ namespace Backend.Fx.Tests.Environment.Authentication
         public void HasNoAuthenticationType()
         {
             Assert.Equal(string.Empty, new AnonymousIdentity().AuthenticationType);
+        }
+
+        [Fact]
+        public void IsNotAuthenticated()
+        {
+            Assert.False(new AnonymousIdentity().IsAuthenticated);
         }
     }
 }

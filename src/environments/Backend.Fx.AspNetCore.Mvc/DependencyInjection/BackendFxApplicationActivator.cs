@@ -6,7 +6,7 @@ namespace Backend.Fx.AspNetCore.Mvc.DependencyInjection
     public abstract class BackendFxApplicationActivator
     {
         private readonly IBackendFxApplication _application;
-        
+
         protected BackendFxApplicationActivator(IBackendFxApplication application)
         {
             _application = application;

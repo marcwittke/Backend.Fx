@@ -16,7 +16,7 @@ namespace Backend.Fx.Hacking
         {
             if (!(exp.Body is MemberExpression body))
             {
-                UnaryExpression ubody = (UnaryExpression)exp.Body;
+                var ubody = (UnaryExpression) exp.Body;
                 body = ubody.Operand as MemberExpression;
             }
 

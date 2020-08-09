@@ -12,11 +12,6 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
 {
     public class TheGenerateDataOnBootDecorator
     {
-        private readonly GenerateDataOnBoot _sut;
-        private readonly IModule _dataGenerationModule;
-        private readonly IDataGenerationContext _dataGenerationContext;
-        private readonly ICompositionRoot _compositionRoot;
-
         public TheGenerateDataOnBootDecorator()
         {
             _compositionRoot = A.Fake<ICompositionRoot>();
@@ -31,19 +26,10 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
             _sut.SetPrivate(f => f.DataGenerationContext, _dataGenerationContext);
         }
 
-        [Fact]
-        public async Task RegistersDataGenerationModuleOnBoot()
-        {
-            await _sut.Boot();
-            A.CallTo(() => _compositionRoot.RegisterModules(A<IModule[]>.That.Contains(_dataGenerationModule))).MustHaveHappenedOnceExactly();
-        }
-
-        [Fact]
-        public async Task RunsDataGeneratorsOnBoot()
-        {
-            await _sut.Boot();
-            A.CallTo(() => _dataGenerationContext.SeedDataForAllActiveTenants()).MustHaveHappenedOnceExactly();
-        }
+        private readonly GenerateDataOnBoot _sut;
+        private readonly IModule _dataGenerationModule;
+        private readonly IDataGenerationContext _dataGenerationContext;
+        private readonly ICompositionRoot _compositionRoot;
 
         [Fact]
         public void DelegatesAllOtherCalls()
@@ -71,6 +57,20 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
             var b = sut.WaitForBoot();
             A.CallTo(() => app.WaitForBoot(A<int>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
             // ReSharper restore UnusedVariable
+        }
+
+        [Fact]
+        public async Task RegistersDataGenerationModuleOnBoot()
+        {
+            await _sut.Boot();
+            A.CallTo(() => _compositionRoot.RegisterModules(A<IModule[]>.That.Contains(_dataGenerationModule))).MustHaveHappenedOnceExactly();
+        }
+
+        [Fact]
+        public async Task RunsDataGeneratorsOnBoot()
+        {
+            await _sut.Boot();
+            A.CallTo(() => _dataGenerationContext.SeedDataForAllActiveTenants()).MustHaveHappenedOnceExactly();
         }
     }
 }

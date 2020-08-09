@@ -12,14 +12,14 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
 {
     public class TheBackendFxApplicationAsyncInvoker
     {
-        private readonly IBackendFxApplicationAsyncInvoker _sut;
-        private readonly DITestFakes _fakes;
-
         public TheBackendFxApplicationAsyncInvoker()
         {
-            _fakes = new DITestFakes();
+            _fakes = new DiTestFakes();
             _sut = new BackendFxApplicationInvoker(_fakes.CompositionRoot, _fakes.ExceptionLogger);
         }
+
+        private readonly IBackendFxApplicationAsyncInvoker _sut;
+        private readonly DiTestFakes _fakes;
 
         [Fact]
         public async Task BeginsNewScopeForEveryInvocation()
@@ -34,13 +34,6 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         }
 
         [Fact]
-        public async Task CatchesFrameworkExceptions()
-        {
-            A.CallTo(() => _fakes.CompositionRoot.BeginScope()).Throws<InvalidOperationException>();
-            await _sut.InvokeAsync(ip=> Task.CompletedTask, new AnonymousIdentity(), new TenantId(111));
-        }
-        
-        [Fact]
         public async Task BeginsNewUnitOfWorkForEveryInvocation()
         {
             await _sut.InvokeAsync(ip => Task.CompletedTask, new AnonymousIdentity(), new TenantId(111));
@@ -53,27 +46,10 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         }
 
         [Fact]
-        public async Task MaintainsTenantIdOnInvocation()
+        public async Task CatchesFrameworkExceptions()
         {
-            var tenantId = new TenantId(123);
-            await _sut.InvokeAsync(ip => Task.CompletedTask, new AnonymousIdentity(), tenantId);
-            A.CallTo(() => _fakes.TenantIdHolder.ReplaceCurrent(A<TenantId>.That.IsEqualTo(tenantId))).MustHaveHappenedOnceExactly();
-        }
-
-        [Fact]
-        public async Task MaintainsIdentityOnInvocation()
-        {
-            var identity = new GenericIdentity("me");
-            await _sut.InvokeAsync(ip => Task.CompletedTask, identity, new TenantId(123));
-            A.CallTo(() => _fakes.IdentityHolder.ReplaceCurrent(A<IIdentity>.That.IsEqualTo(identity))).MustHaveHappenedOnceExactly();
-        }
-
-        [Fact]
-        public async Task MaintainsCorrelationIdOnInvocation()
-        {
-            var correlationId = Guid.NewGuid();
-            await _sut.InvokeAsync(ip => Task.CompletedTask, new AnonymousIdentity(), new TenantId(123), correlationId);
-            Assert.Equal(correlationId, _fakes.CurrentCorrelationHolder.Current.Id);
+            A.CallTo(() => _fakes.CompositionRoot.BeginScope()).Throws<InvalidOperationException>();
+            await _sut.InvokeAsync(ip => Task.CompletedTask, new AnonymousIdentity(), new TenantId(111));
         }
 
         [Fact]
@@ -90,12 +66,36 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             await _sut.InvokeAsync(ip => throw new InvalidOperationException(), new AnonymousIdentity(), new TenantId(111));
             A.CallTo(() => _fakes.ExceptionLogger.LogException(A<InvalidOperationException>._)).MustHaveHappenedOnceExactly();
         }
-        
+
         [Fact]
         public async Task LogsTargetInvocationExceptionUnwrapped()
         {
-            await _sut.InvokeAsync(ip=> throw new TargetInvocationException(new InvalidOperationException()), new AnonymousIdentity(), new TenantId(111));
+            await _sut.InvokeAsync(ip => throw new TargetInvocationException(new InvalidOperationException()), new AnonymousIdentity(), new TenantId(111));
             A.CallTo(() => _fakes.ExceptionLogger.LogException(A<InvalidOperationException>._)).MustHaveHappenedOnceExactly();
+        }
+
+        [Fact]
+        public async Task MaintainsCorrelationIdOnInvocation()
+        {
+            var correlationId = Guid.NewGuid();
+            await _sut.InvokeAsync(ip => Task.CompletedTask, new AnonymousIdentity(), new TenantId(123), correlationId);
+            Assert.Equal(correlationId, _fakes.CurrentCorrelationHolder.Current.Id);
+        }
+
+        [Fact]
+        public async Task MaintainsIdentityOnInvocation()
+        {
+            var identity = new GenericIdentity("me");
+            await _sut.InvokeAsync(ip => Task.CompletedTask, identity, new TenantId(123));
+            A.CallTo(() => _fakes.IdentityHolder.ReplaceCurrent(A<IIdentity>.That.IsEqualTo(identity))).MustHaveHappenedOnceExactly();
+        }
+
+        [Fact]
+        public async Task MaintainsTenantIdOnInvocation()
+        {
+            var tenantId = new TenantId(123);
+            await _sut.InvokeAsync(ip => Task.CompletedTask, new AnonymousIdentity(), tenantId);
+            A.CallTo(() => _fakes.TenantIdHolder.ReplaceCurrent(A<TenantId>.That.IsEqualTo(tenantId))).MustHaveHappenedOnceExactly();
         }
 
         [Fact]

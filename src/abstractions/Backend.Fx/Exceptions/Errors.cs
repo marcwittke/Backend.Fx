@@ -1,10 +1,10 @@
-﻿namespace Backend.Fx.Exceptions
-{
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
+namespace Backend.Fx.Exceptions
+{
     public class Errors : IReadOnlyDictionary<string, string[]>
     {
         private const string GenericErrorKey = "";
@@ -88,7 +88,7 @@
 
         public override string ToString()
         {
-            StringBuilder b = new StringBuilder();
+            var b = new StringBuilder();
             b.Append("Errors: ");
             b.Append(Count.ToString());
             b.AppendLine();

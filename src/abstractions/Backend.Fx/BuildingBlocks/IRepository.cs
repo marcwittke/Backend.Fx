@@ -1,8 +1,8 @@
-﻿namespace Backend.Fx.BuildingBlocks
-{
-    using System.Collections.Generic;
-    using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 
+namespace Backend.Fx.BuildingBlocks
+{
     /// <summary>
     /// Encapsulates methods for retrieving domain objects 
     /// See https://en.wikipedia.org/wiki/Domain-driven_design#Building_blocks
@@ -19,6 +19,5 @@
         bool Any();
         TAggregateRoot[] Resolve(IEnumerable<int> ids);
         IQueryable<TAggregateRoot> AggregateQueryable { get; }
-        
     }
 }

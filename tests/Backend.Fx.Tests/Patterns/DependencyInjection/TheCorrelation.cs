@@ -9,17 +9,17 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         private readonly Correlation _sut = new Correlation();
 
         [Fact]
-        public void InitializesWithId()
-        {
-            Assert.NotEqual(Guid.Empty, _sut.Id);
-        }
-        
-        [Fact]
         public void CanResume()
         {
             var resumedCorrelationId = Guid.NewGuid();
             _sut.Resume(resumedCorrelationId);
             Assert.Equal(resumedCorrelationId, _sut.Id);
+        }
+
+        [Fact]
+        public void InitializesWithId()
+        {
+            Assert.NotEqual(Guid.Empty, _sut.Id);
         }
     }
 }

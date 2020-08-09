@@ -10,15 +10,17 @@ namespace Backend.Fx.InMemoryPersistence
 {
     public class InMemoryUnitOfWork : UnitOfWork
     {
+        public InMemoryUnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder,
+                                  IDomainEventAggregator eventAggregator, IMessageBusScope messageBusScope)
+            : base(clock, identityHolder, eventAggregator, messageBusScope)
+        {
+        }
+
         public int CommitCalls { get; private set; }
-        
-        public InMemoryUnitOfWork(IClock clock, ICurrentTHolder<IIdentity> identityHolder, 
-                                  IDomainEventAggregator eventAggregator, IMessageBusScope messageBusScope) 
-                : base(clock, identityHolder, eventAggregator, messageBusScope)
-        { }
 
         protected override void UpdateTrackingProperties(string userId, DateTime utcNow)
-        { }
+        {
+        }
 
         public override void Complete()
         {

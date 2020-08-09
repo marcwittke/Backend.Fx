@@ -13,12 +13,26 @@ namespace Backend.Fx.Tests.ConfigurationSettings
 {
     public class TheSettingsService
     {
+        public TheSettingsService()
+        {
+            var settingAuthorization = A.Fake<IAggregateAuthorization<Setting>>();
+            A.CallTo(() => settingAuthorization.HasAccessExpression).Returns(setting => true);
+            A.CallTo(() => settingAuthorization.Filter(A<IQueryable<Setting>>._)).ReturnsLazily((IQueryable<Setting> q) => q);
+            A.CallTo(() => settingAuthorization.CanCreate(A<Setting>._)).Returns(true);
+
+            _idGenerator = A.Fake<IEntityIdGenerator>();
+            var nextId = 1;
+            A.CallTo(() => _idGenerator.NextId()).ReturnsLazily(() => nextId++);
+            _settingRepository = new InMemoryRepository<Setting>(new InMemoryStore<Setting>(), CurrentTenantIdHolder.Create(999), settingAuthorization);
+        }
+
         public class MySettingsService : SettingsService
         {
-            public MySettingsService(IEntityIdGenerator idGenerator, IRepository<Setting> repo) 
+            public MySettingsService(IEntityIdGenerator idGenerator, IRepository<Setting> repo)
                 : base("My", idGenerator, repo, new SettingSerializerFactory())
             {
             }
+
             public int SmtpPort
             {
                 get => ReadSetting<int?>(nameof(SmtpPort)) ?? 25;
@@ -35,29 +49,23 @@ namespace Backend.Fx.Tests.ConfigurationSettings
         private readonly InMemoryRepository<Setting> _settingRepository;
         private readonly IEntityIdGenerator _idGenerator;
 
-        public TheSettingsService()
+        [Fact]
+        public void ReadsNonExistingSettingAsDefaultFromRepository()
         {
-            var settingAuthorization = A.Fake<IAggregateAuthorization<Setting>>();
-            A.CallTo(() => settingAuthorization.HasAccessExpression).Returns(setting => true);
-            A.CallTo(() => settingAuthorization.Filter(A<IQueryable<Setting>>._)).ReturnsLazily((IQueryable<Setting> q) => q);
-            A.CallTo(() => settingAuthorization.CanCreate(A<Setting>._)).Returns(true);
-
-            _idGenerator = A.Fake<IEntityIdGenerator>();
-            int nextId=1;
-            A.CallTo(() => _idGenerator.NextId()).ReturnsLazily(() => nextId++);
-            _settingRepository = new InMemoryRepository<Setting>(new InMemoryStore<Setting>(), CurrentTenantIdHolder.Create(999), settingAuthorization);
+            var sut = new MySettingsService(_idGenerator, _settingRepository);
+            Assert.Null(sut.SmtpHost);
         }
 
         [Fact]
-        public void StoresSettingsInRepository()
+        public void ReadsNullSettingFromRepository()
         {
-            MySettingsService sut = new MySettingsService(_idGenerator, _settingRepository) {SmtpPort = 333};
-            Assert.Equal(333, sut.SmtpPort);
+            var setting = new Setting(3, "My.SmtpHost");
+            setting.SetPrivate(set => set.SerializedValue, null);
 
-            Setting[] settings = _settingRepository.GetAll();
-            Assert.Single(settings);
-            Assert.Equal("333", settings[0].SerializedValue);
-            Assert.Equal("My.SmtpPort", settings[0].Key);
+            _settingRepository.Add(setting);
+
+            var sut = new MySettingsService(_idGenerator, _settingRepository);
+            Assert.Null(sut.SmtpHost);
         }
 
         [Fact]
@@ -68,27 +76,20 @@ namespace Backend.Fx.Tests.ConfigurationSettings
 
             _settingRepository.Add(setting);
 
-            MySettingsService sut = new MySettingsService(_idGenerator, _settingRepository);
+            var sut = new MySettingsService(_idGenerator, _settingRepository);
             Assert.Equal(333, sut.SmtpPort);
         }
 
         [Fact]
-        public void ReadsNullSettingFromRepository()
+        public void StoresSettingsInRepository()
         {
-            var setting = new Setting(3,"My.SmtpHost");
-            setting.SetPrivate(set => set.SerializedValue, null);
+            var sut = new MySettingsService(_idGenerator, _settingRepository) {SmtpPort = 333};
+            Assert.Equal(333, sut.SmtpPort);
 
-            _settingRepository.Add(setting);
-
-            MySettingsService sut = new MySettingsService(_idGenerator, _settingRepository);
-            Assert.Null(sut.SmtpHost);
-        }
-
-        [Fact]
-        public void ReadsNonExistingSettingAsDefaultFromRepository()
-        {
-            MySettingsService sut = new MySettingsService(_idGenerator, _settingRepository);
-            Assert.Null(sut.SmtpHost);
+            var settings = _settingRepository.GetAll();
+            Assert.Single(settings);
+            Assert.Equal("333", settings[0].SerializedValue);
+            Assert.Equal("My.SmtpPort", settings[0].Key);
         }
     }
 }

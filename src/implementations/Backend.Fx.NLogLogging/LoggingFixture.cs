@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Reflection;
+using Backend.Fx.Logging;
 
 namespace Backend.Fx.NLogLogging
 {
     /// <summary>
-    /// To be implemented and used as AssemblyFixture
-    /// Configures NLog and shuts down logging after test execution
+    ///     To be implemented and used as AssemblyFixture
+    ///     Configures NLog and shuts down logging after test execution
     /// </summary>
     public abstract class LoggingFixture : IDisposable
     {
@@ -15,7 +16,7 @@ namespace Backend.Fx.NLogLogging
         {
             Configurations.ForTests(appRootNamespace, GetType().GetTypeInfo().Assembly.GetName().Name + ".xlog");
 
-            _lifetimeLogger = Logging.LogManager.Create<LoggingFixture>().InfoDuration("Test run started", "Test run finished");
+            _lifetimeLogger = LogManager.Create<LoggingFixture>().InfoDuration("Test run started", "Test run finished");
         }
 
         public void Dispose()

@@ -32,6 +32,7 @@ namespace Backend.Fx.AspNetCore.Bootstrapping
             {
                 Logger.Info("Queuing Request while application is booting...");
             }
+
             await _next.Invoke(context);
         }
     }

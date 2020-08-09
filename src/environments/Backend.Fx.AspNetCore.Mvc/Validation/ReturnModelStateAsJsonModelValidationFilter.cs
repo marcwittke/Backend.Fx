@@ -22,6 +22,7 @@ namespace Backend.Fx.AspNetCore.Mvc.Validation
         }
 
         public override void OnActionExecuted(ActionExecutedContext context)
-        {}
+        {
+        }
     }
 }

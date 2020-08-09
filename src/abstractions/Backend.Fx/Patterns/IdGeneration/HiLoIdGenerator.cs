@@ -1,8 +1,8 @@
+using System.Threading;
+using Backend.Fx.Logging;
+
 namespace Backend.Fx.Patterns.IdGeneration
 {
-    using System.Threading;
-    using Logging;
-
     public abstract class HiLoIdGenerator : IIdGenerator
     {
         private static readonly ILogger Logger = LogManager.Create<HiLoIdGenerator>();

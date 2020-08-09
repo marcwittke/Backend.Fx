@@ -15,29 +15,30 @@ namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
 
         public SqlServerDatabaseFixture()
         {
-            string dbName = $"TestFixture_{_testindex++:000}";
+            var dbName = $"TestFixture_{_testindex++:000}";
             var sqlConnectionStringBuilder = new SqlConnectionStringBuilder("Server=.\\SQLExpress;Trusted_Connection=True;");
             using (IDbConnection connection = new SqlConnection(sqlConnectionStringBuilder.ConnectionString))
             {
                 connection.Open();
 
-                using (var dropCommand = connection.CreateCommand())
+                using (IDbCommand dropCommand = connection.CreateCommand())
                 {
                     dropCommand.CommandText = $"IF EXISTS(SELECT * FROM sys.Databases WHERE Name='{dbName}') ALTER DATABASE [{dbName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE";
                     dropCommand.ExecuteNonQuery();
                 }
 
-                using (var dropCommand = connection.CreateCommand())
+                using (IDbCommand dropCommand = connection.CreateCommand())
                 {
                     dropCommand.CommandText = $"IF EXISTS(SELECT * FROM sys.Databases WHERE Name='{dbName}') DROP DATABASE [{dbName}]";
                     dropCommand.ExecuteNonQuery();
                 }
 
-                using (var createCommand = connection.CreateCommand())
+                using (IDbCommand createCommand = connection.CreateCommand())
                 {
                     createCommand.CommandText = $"CREATE DATABASE [{dbName}]";
                     createCommand.ExecuteNonQuery();
                 }
+
                 connection.Close();
             }
 
@@ -50,7 +51,7 @@ namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
             return new DbContextOptionsBuilder<TestDbContext>().UseSqlServer(_connectionString).Options;
         }
 
-        
+
         protected override DbContextOptionsBuilder<TestDbContext> GetDbContextOptionsBuilder(DbConnection connection)
         {
             return new DbContextOptionsBuilder<TestDbContext>().UseSqlServer(connection);

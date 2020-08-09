@@ -1,17 +1,17 @@
-﻿namespace Backend.Fx.RabbitMq
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Net.Sockets;
-    using System.Text;
-    using Logging;
-    using Newtonsoft.Json;
-    using Patterns.EventAggregation.Integration;
-    using Polly;
-    using RabbitMQ.Client;
-    using RabbitMQ.Client.Events;
-    using RabbitMQ.Client.Exceptions;
+﻿using System;
+using System.Collections.Generic;
+using System.Net.Sockets;
+using System.Text;
+using Backend.Fx.Logging;
+using Backend.Fx.Patterns.EventAggregation.Integration;
+using Newtonsoft.Json;
+using Polly;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Exceptions;
 
+namespace Backend.Fx.RabbitMq
+{
     public class RabbitMqChannel : IDisposable
     {
         private static readonly ILogger Logger = LogManager.Create<RabbitMqChannel>();
@@ -19,8 +19,8 @@
         private readonly IConnectionFactory _connectionFactory;
         private readonly string _queueName;
         private readonly int _retryCount;
-        private readonly object _syncRoot = new object();
         private readonly HashSet<string> _subscribedEventNames = new HashSet<string>();
+        private readonly object _syncRoot = new object();
 
         private IConnection _connection;
         private EventingBasicConsumer _consumer;
@@ -37,10 +37,7 @@
 
         public void Dispose()
         {
-            if (_isDisposed)
-            {
-                return;
-            }
+            if (_isDisposed) return;
 
             _isDisposed = true;
 
@@ -65,10 +62,7 @@
             if (_model != null)
             {
                 _model.CallbackException -= OnCallbackException;
-                if (_model.IsOpen)
-                {
-                    _model.Close();
-                }
+                if (_model.IsOpen) _model.Close();
 
                 _model.Dispose();
                 _model = null;
@@ -79,10 +73,7 @@
                 _connection.ConnectionShutdown -= OnConnectionShutdown;
                 _connection.CallbackException -= OnCallbackException;
                 _connection.ConnectionBlocked -= OnConnectionBlocked;
-                if (_connection.IsOpen)
-                {
-                    _connection.Close();
-                }
+                if (_connection.IsOpen) _connection.Close();
 
                 _connection.Dispose();
                 _connection = null;
@@ -91,10 +82,7 @@
 
         public bool EnsureOpen()
         {
-            if (!_isDisposed && _connection?.IsOpen == true && _model?.IsOpen == true && _consumer?.IsRunning == true)
-            {
-                return true;
-            }
+            if (!_isDisposed && _connection?.IsOpen == true && _model?.IsOpen == true && _consumer?.IsRunning == true) return true;
 
             return Open();
         }
@@ -132,10 +120,7 @@
                     _model.BasicConsume(_queueName, false, _consumer);
                     _model.CallbackException += OnCallbackException;
 
-                    foreach (var subscribedEventName in _subscribedEventNames)
-                    {
-                        _model.QueueBind(_queueName, _brokerName, subscribedEventName);
-                    }
+                    foreach (var subscribedEventName in _subscribedEventNames) _model.QueueBind(_queueName, _brokerName, subscribedEventName);
 
                     return true;
                 }
@@ -175,10 +160,7 @@
 
         private void OnCallbackException(object sender, CallbackExceptionEventArgs e)
         {
-            if (_isDisposed)
-            {
-                return;
-            }
+            if (_isDisposed) return;
 
             Logger.Warn(e.Exception, "A RabbitMQ connection threw an exception.");
             Open();
@@ -186,10 +168,7 @@
 
         private void OnConnectionBlocked(object sender, ConnectionBlockedEventArgs e)
         {
-            if (_isDisposed)
-            {
-                return;
-            }
+            if (_isDisposed) return;
 
             Logger.Warn($"A RabbitMQ connection is blocked with reason {e.Reason}");
             Open();
@@ -197,10 +176,7 @@
 
         private void OnConnectionShutdown(object sender, ShutdownEventArgs reason)
         {
-            if (_isDisposed)
-            {
-                return;
-            }
+            if (_isDisposed) return;
 
             Logger.Warn($"A RabbitMQ connection is shut down with reason {reason}.");
             Open();

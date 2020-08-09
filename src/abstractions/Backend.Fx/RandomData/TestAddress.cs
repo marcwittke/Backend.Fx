@@ -1,6 +1,9 @@
-﻿namespace Backend.Fx.RandomData
+﻿using System.Collections.Generic;
+using Backend.Fx.BuildingBlocks;
+
+namespace Backend.Fx.RandomData
 {
-    public class TestAddress
+    public class TestAddress : ValueObject
     {
         public TestAddress(string street, string number, string postalCode, string city, string country)
         {
@@ -20,5 +23,14 @@
         public string City { get; }
 
         public string Country { get; }
+        
+        protected override IEnumerable<object> GetEqualityComponents()
+        {
+            yield return Street;
+            yield return Number;
+            yield return PostalCode;
+            yield return City;
+            yield return Country;
+        }
     }
 }

@@ -115,6 +115,7 @@ namespace Backend.Fx.Patterns.Transactions
                     {
                         Connection.Close();
                     }
+
                     _transactionLifetimeLogger?.Dispose();
                 }
                 catch (Exception ex)

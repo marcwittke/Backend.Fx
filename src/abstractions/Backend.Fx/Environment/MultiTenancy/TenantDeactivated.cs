@@ -1,23 +1,10 @@
-﻿using Backend.Fx.Patterns.EventAggregation.Integration;
-
-namespace Backend.Fx.Environment.MultiTenancy
+﻿namespace Backend.Fx.Environment.MultiTenancy
 {
-    public class TenantDeactivated : IntegrationEvent
+    public class TenantDeactivated : TenantStatusChanged
     {
-        public TenantDeactivated(int tenantId, string name, string description, bool isDemoTenant, string defaultCultureName) : base(tenantId)
+        public TenantDeactivated(int tenantId, string name, string description, bool isDemoTenant)
+            : base(tenantId, name, description, isDemoTenant)
         {
-            Name = name;
-            Description = description;
-            IsDemoTenant = isDemoTenant;
-            DefaultCultureName = defaultCultureName;
         }
-
-        public string Name { get; }
-
-        public string Description { get; }
-
-        public bool IsDemoTenant { get; }
-
-        public string DefaultCultureName { get; }
     }
 }

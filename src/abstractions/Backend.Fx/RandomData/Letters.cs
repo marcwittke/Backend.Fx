@@ -1,6 +1,6 @@
 ﻿namespace Backend.Fx.RandomData
 {
-    public class Letters
+    public static class Letters
     {
         public static string UpperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         public static string LowerCase = "abcdefghijklmnopqrstuvwxyz";

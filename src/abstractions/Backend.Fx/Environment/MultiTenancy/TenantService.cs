@@ -25,7 +25,7 @@ namespace Backend.Fx.Environment.MultiTenancy
         private readonly IMessageBus _messageBus;
         private readonly ITenantRepository _tenantRepository;
         private static readonly ILogger Logger = LogManager.Create<TenantService>();
-        
+
         public TenantService(IMessageBus messageBus, ITenantRepository tenantRepository)
         {
             _messageBus = messageBus;
@@ -35,7 +35,7 @@ namespace Backend.Fx.Environment.MultiTenancy
         public TenantId CreateTenant(TenantCreationParameters param)
         {
             Logger.Info($"Creating tenant: {param.Name}");
-            return CreateTenant(param.Name, param.Description, param.IsDemonstrationTenant, param.DefaultCultureName);
+            return CreateTenant(param.Name, param.Description, param.IsDemonstrationTenant);
         }
 
         public void ActivateTenant(TenantId tenantId)
@@ -43,7 +43,7 @@ namespace Backend.Fx.Environment.MultiTenancy
             Tenant tenant = _tenantRepository.GetTenant(tenantId);
             tenant.State = TenantState.Active;
             _tenantRepository.SaveTenant(tenant);
-            _messageBus.Publish(new TenantActivated(tenant.Id, tenant.Name, tenant.Description, tenant.IsDemoTenant, tenant.DefaultCultureName));
+            _messageBus.Publish(new TenantActivated(tenant.Id, tenant.Name, tenant.Description, tenant.IsDemoTenant));
         }
 
         public void DeactivateTenant(TenantId tenantId)
@@ -51,9 +51,9 @@ namespace Backend.Fx.Environment.MultiTenancy
             Tenant tenant = _tenantRepository.GetTenant(tenantId);
             tenant.State = TenantState.Inactive;
             _tenantRepository.SaveTenant(tenant);
-            _messageBus.Publish(new TenantDeactivated(tenant.Id, tenant.Name, tenant.Description, tenant.IsDemoTenant, tenant.DefaultCultureName));
+            _messageBus.Publish(new TenantDeactivated(tenant.Id, tenant.Name, tenant.Description, tenant.IsDemoTenant));
         }
-        
+
         public TenantId[] GetActiveTenantIds()
         {
             return _tenantRepository
@@ -80,8 +80,8 @@ namespace Backend.Fx.Environment.MultiTenancy
                    .Select(t => new TenantId(t.Id))
                    .ToArray();
         }
-        
-        protected virtual TenantId CreateTenant([NotNull] string name, string description, bool isDemo, string defaultCultureName)
+
+        protected virtual TenantId CreateTenant([NotNull] string name, string description, bool isDemo)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -93,10 +93,10 @@ namespace Backend.Fx.Environment.MultiTenancy
                 throw new ArgumentException($"There is already a tenant named {name}");
             }
 
-            var tenant = new Tenant(name, description, isDemo, defaultCultureName);
+            var tenant = new Tenant(name, description, isDemo);
             _tenantRepository.SaveTenant(tenant);
             var tenantId = new TenantId(tenant.Id);
-            _messageBus.Publish(new TenantCreated(tenant.Id, tenant.Name, tenant.Description, tenant.IsDemoTenant, tenant.DefaultCultureName));
+            _messageBus.Publish(new TenantCreated(tenant.Id, tenant.Name, tenant.Description, tenant.IsDemoTenant));
             return tenantId;
         }
     }

@@ -1,10 +1,11 @@
-﻿namespace Backend.Fx.RandomData
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Backend.Fx.BuildingBlocks;
 
-    public class TestPerson
+namespace Backend.Fx.RandomData
+{
+    public class TestPerson : ValueObject
     {
         public enum Genders
         {
@@ -130,6 +131,16 @@
                 s = s.Replace(invalidCharacterReplacement.Key, invalidCharacterReplacement.Value);
             }
             return s;
+        }
+
+        protected override IEnumerable<object> GetEqualityComponents()
+        {
+            yield return DateOfBirth;
+            yield return FirstName;
+            yield return Gender;
+            yield return LastName;
+            yield return MiddleName;
+            yield return Title;
         }
     }
 }

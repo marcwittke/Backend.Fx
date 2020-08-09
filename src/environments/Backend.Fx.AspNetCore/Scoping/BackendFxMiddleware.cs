@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Backend.Fx.AspNetCore.Scoping
 {
-    public abstract class BackendFxMiddleware : IMiddleware 
+    public abstract class BackendFxMiddleware : IMiddleware
     {
         private readonly IBackendFxApplicationAsyncInvoker _invoker;
 
@@ -19,7 +19,7 @@ namespace Backend.Fx.AspNetCore.Scoping
         {
             TenantId tenantId = FindMatchingTenantId(context);
             IIdentity identity = context.User.Identity;
-            
+
             await _invoker.InvokeAsync(_ => next.Invoke(context), identity, tenantId);
         }
 

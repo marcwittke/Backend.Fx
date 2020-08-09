@@ -22,7 +22,7 @@ namespace Backend.Fx.EfCorePersistence
             dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
             dbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
-        
+
         public static void RegisterRowVersionProperty(this ModelBuilder modelBuilder)
         {
             modelBuilder.Model
@@ -43,15 +43,15 @@ namespace Backend.Fx.EfCorePersistence
         {
             //CAVE: IAggregateMapping implementations must reside in the same assembly as the Applications DbContext-type
             var aggregateDefinitionTypeInfos = dbContext
-                .GetType()
-                .GetTypeInfo()
-                .Assembly
-                .ExportedTypes
-                .Select(t => t.GetTypeInfo())
-                .Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericType && typeof(IAggregateMapping).GetTypeInfo().IsAssignableFrom(t));
+                                               .GetType()
+                                               .GetTypeInfo()
+                                               .Assembly
+                                               .ExportedTypes
+                                               .Select(t => t.GetTypeInfo())
+                                               .Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericType && typeof(IAggregateMapping).GetTypeInfo().IsAssignableFrom(t));
             foreach (TypeInfo typeInfo in aggregateDefinitionTypeInfos)
             {
-                var aggregateMapping = (IAggregateMapping)Activator.CreateInstance(typeInfo.AsType());
+                var aggregateMapping = (IAggregateMapping) Activator.CreateInstance(typeInfo.AsType());
                 aggregateMapping.ApplyEfMapping(modelBuilder);
             }
         }
@@ -60,7 +60,7 @@ namespace Backend.Fx.EfCorePersistence
         {
             userId ??= "anonymous";
             var isTraceEnabled = Logger.IsTraceEnabled();
-            int count = 0;
+            var count = 0;
 
             // Modifying an entity (also removing an entity from an aggregate) should leave the aggregate root as modified
             dbContext.ChangeTracker
@@ -71,57 +71,45 @@ namespace Backend.Fx.EfCorePersistence
                      .ForAll(entry =>
                      {
                          EntityEntry aggregateRootEntry = FindAggregateRootEntry(dbContext.ChangeTracker, entry);
-                         if (aggregateRootEntry.State == EntityState.Unchanged)
-                         {
-                             aggregateRootEntry.State = EntityState.Modified;
-                         }
+                         if (aggregateRootEntry.State == EntityState.Unchanged) aggregateRootEntry.State = EntityState.Modified;
                      });
 
             dbContext.ChangeTracker
-                .Entries<Entity>()
-                .Where(entry => entry.State == EntityState.Added || entry.State == EntityState.Modified)
-                .ForAll(entry =>
-                {
-                    try
-                    {
-                        count++;
-                        Entity entity = entry.Entity;
+                     .Entries<Entity>()
+                     .Where(entry => entry.State == EntityState.Added || entry.State == EntityState.Modified)
+                     .ForAll(entry =>
+                     {
+                         try
+                         {
+                             count++;
+                             Entity entity = entry.Entity;
 
-                        if (entry.State == EntityState.Added)
-                        {
-                            if (isTraceEnabled)
-                            {
-                                Logger.Trace("tracking that {0}[{1}] was created by {2} at {3:T} UTC", entity.GetType().Name, entity.Id, userId, utcNow);
-                            }
-                            entity.SetCreatedProperties(userId, utcNow);
-                        }
-                        else if (entry.State == EntityState.Modified)
-                        {
-                            if (isTraceEnabled)
-                            {
-                                Logger.Trace("tracking that {0}[{1}] was modified by {2} at {3:T} UTC", entity.GetType().Name, entity.Id, userId, utcNow);
-                            }
-                            entity.SetModifiedProperties(userId, utcNow);
-                            
-                            // this line causes the recent changes of tracking properties to be detected before flushing
-                            entry.State = EntityState.Modified;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Warn(ex, "Updating tracking properties failed");
-                        throw;
-                    }
-                });
-            if (count > 0)
-            {
-                Logger.Debug($"Tracked {count} entities as created/changed on {utcNow:u} by {userId}");
-            }
+                             if (entry.State == EntityState.Added)
+                             {
+                                 if (isTraceEnabled) Logger.Trace("tracking that {0}[{1}] was created by {2} at {3:T} UTC", entity.GetType().Name, entity.Id, userId, utcNow);
+                                 entity.SetCreatedProperties(userId, utcNow);
+                             }
+                             else if (entry.State == EntityState.Modified)
+                             {
+                                 if (isTraceEnabled) Logger.Trace("tracking that {0}[{1}] was modified by {2} at {3:T} UTC", entity.GetType().Name, entity.Id, userId, utcNow);
+                                 entity.SetModifiedProperties(userId, utcNow);
+
+                                 // this line causes the recent changes of tracking properties to be detected before flushing
+                                 entry.State = EntityState.Modified;
+                             }
+                         }
+                         catch (Exception ex)
+                         {
+                             Logger.Warn(ex, "Updating tracking properties failed");
+                             throw;
+                         }
+                     });
+            if (count > 0) Logger.Debug($"Tracked {count} entities as created/changed on {utcNow:u} by {userId}");
         }
 
         /// <summary>
-        /// This method finds the EntityEntry&lt;AggregateRoot&gt; of an EntityEntry&lt;Entity&gt;
-        /// assuming it has been loaded and is being tracked by the change tracker.
+        ///     This method finds the EntityEntry&lt;AggregateRoot&gt; of an EntityEntry&lt;Entity&gt;
+        ///     assuming it has been loaded and is being tracked by the change tracker.
         /// </summary>
         private static EntityEntry FindAggregateRootEntry(ChangeTracker changeTracker, EntityEntry entry)
         {
@@ -134,32 +122,26 @@ namespace Backend.Fx.EfCorePersistence
                 if (navigation.CurrentValue == null)
                 {
                     // orphaned entity, original value contains the foreign key value
-                    if (navigation.Metadata.ForeignKey.Properties.Count > 1)
-                    {
-                        throw new InvalidOperationException("Foreign Keys with multiple properties are not supported.");
-                    }
+                    if (navigation.Metadata.ForeignKey.Properties.Count > 1) throw new InvalidOperationException("Foreign Keys with multiple properties are not supported.");
 
                     IProperty property = navigation.Metadata.ForeignKey.Properties[0];
-                    navigationTargetForeignKeyValue = (int)entry.OriginalValues[property];
+                    navigationTargetForeignKeyValue = (int) entry.OriginalValues[property];
                 }
                 else
                 {
                     // added or modified entity, current value contains the foreign key value
-                    navigationTargetForeignKeyValue = ((Entity)navigation.CurrentValue).Id;
+                    navigationTargetForeignKeyValue = ((Entity) navigation.CurrentValue).Id;
                 }
 
                 // assumption: an entity cannot be loaded on its own. Everything on the navigation path starting from the 
                 // aggregate root must have been loaded before, therefore we can find it using the change tracker
-                EntityEntry<Entity> navigationTargetEntry = changeTracker
-                        .Entries<Entity>()
-                        .Single(ent => Equals(ent.Entity.GetType().GetTypeInfo(), navTargetTypeInfo)
-                                       && ent.Property(nameof(Entity.Id)).CurrentValue.Equals(navigationTargetForeignKeyValue));
+                var navigationTargetEntry = changeTracker
+                                            .Entries<Entity>()
+                                            .Single(ent => Equals(ent.Entity.GetType().GetTypeInfo(), navTargetTypeInfo)
+                                                           && ent.Property(nameof(Entity.Id)).CurrentValue.Equals(navigationTargetForeignKeyValue));
 
                 // if the target is AggregateRoot, no (further) recursion is needed
-                if (typeof(AggregateRoot).GetTypeInfo().IsAssignableFrom(navTargetTypeInfo))
-                {
-                    return navigationTargetEntry;
-                }
+                if (typeof(AggregateRoot).GetTypeInfo().IsAssignableFrom(navTargetTypeInfo)) return navigationTargetEntry;
 
                 // recurse in case of "Entity -> Entity -> AggregateRoot"
                 Logger.Debug("Recursing...");
@@ -172,7 +154,6 @@ namespace Backend.Fx.EfCorePersistence
         public static void TraceChangeTrackerState(this DbContext dbContext)
         {
             if (Logger.IsTraceEnabled())
-            {
                 try
                 {
                     var added = dbContext.ChangeTracker.Entries().Where(entry => entry.State == EntityState.Added).ToArray();
@@ -182,34 +163,25 @@ namespace Backend.Fx.EfCorePersistence
 
                     var stateDumpBuilder = new StringBuilder();
                     stateDumpBuilder.AppendFormat("{0} entities added{1}{2}", added.Length, deleted.Length == 0 ? "." : ":", System.Environment.NewLine);
-                    foreach (var entry in added)
-                    {
+                    foreach (EntityEntry entry in added)
                         stateDumpBuilder.AppendFormat("added: {0}[{1}]{2}", entry.Entity.GetType().Name, GetPrimaryKeyValue(entry), System.Environment.NewLine);
-                    }
                     stateDumpBuilder.AppendFormat("{0} entities modified{1}{2}", modified.Length, deleted.Length == 0 ? "." : ":", System.Environment.NewLine);
-                    foreach (var entry in modified)
-                    {
+                    foreach (EntityEntry entry in modified)
                         stateDumpBuilder.AppendFormat("modified: {0}[{1}]{2}", entry.Entity.GetType().Name, GetPrimaryKeyValue(entry), System.Environment.NewLine);
-                    }
                     stateDumpBuilder.AppendFormat("{0} entities deleted{1}{2}", deleted.Length, deleted.Length == 0 ? "." : ":", System.Environment.NewLine);
-                    foreach (var entry in deleted)
-                    {
+                    foreach (EntityEntry entry in deleted)
                         stateDumpBuilder.AppendFormat("deleted: {0}[{1}]{2}", entry.Entity.GetType().Name, GetPrimaryKeyValue(entry), System.Environment.NewLine);
-                    }
                     stateDumpBuilder.AppendFormat("{0} entities unchanged{1}{2}", unchanged.Length, deleted.Length == 0 ? "." : ":", System.Environment.NewLine);
-                    foreach (var entry in unchanged)
-                    {
+                    foreach (EntityEntry entry in unchanged)
                         stateDumpBuilder.AppendFormat("unchanged: {0}[{1}]{2}", entry.Entity.GetType().Name, GetPrimaryKeyValue(entry), System.Environment.NewLine);
-                    }
                     Logger.Trace(stateDumpBuilder.ToString());
                 }
                 catch (Exception ex)
                 {
                     Logger.Warn(ex, "Change tracker state could not be dumped");
                 }
-            }
         }
-        
+
         private static string GetPrimaryKeyValue(EntityEntry entry)
         {
             return (entry.Entity as Entity)?.Id.ToString(CultureInfo.InvariantCulture) ?? "?";

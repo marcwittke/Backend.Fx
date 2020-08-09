@@ -1,18 +1,17 @@
-﻿namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
-{
-    using System;
-    using Fx.Patterns.EventAggregation.Integration;
+﻿using System;
+using Backend.Fx.Patterns.EventAggregation.Integration;
 
+namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
+{
     public class ThrowingTypedMessageHandler : IIntegrationMessageHandler<TestIntegrationEvent>
     {
+        public const string ExceptionMessage = "From ThrowingTypedEventHandler";
         private readonly IIntegrationMessageHandler<TestIntegrationEvent> _handler;
 
         public ThrowingTypedMessageHandler(IIntegrationMessageHandler<TestIntegrationEvent> handler)
         {
             _handler = handler;
         }
-
-        public const string ExceptionMessage = "From ThrowingTypedEventHandler";
 
         public void Handle(TestIntegrationEvent eventData)
         {

@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using Backend.Fx.BuildingBlocks;
 
 namespace Backend.Fx.Environment.MultiTenancy
 {
-    using System;
-    using System.Diagnostics;
-    using BuildingBlocks;
-
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
     public class TenantId : ValueObject
     {
@@ -38,7 +37,6 @@ namespace Backend.Fx.Environment.MultiTenancy
         {
             get
             {
-
                 if (HasValue)
                 {
                     return $"TenantId: {Value}";

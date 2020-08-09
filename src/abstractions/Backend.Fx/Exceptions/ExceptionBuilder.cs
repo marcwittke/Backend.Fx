@@ -1,7 +1,7 @@
-﻿namespace Backend.Fx.Exceptions
-{
-    using System;
+﻿using System;
 
+namespace Backend.Fx.Exceptions
+{
     public interface IExceptionBuilder : IDisposable
     {
         void Add(string error);

@@ -21,9 +21,9 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
         public DateTime CreationDate { get; } = DateTime.UtcNow;
 
         public int TenantId { get; }
-        
+
         public Guid CorrelationId { get; private set; }
-        
+
         internal void SetCorrelationId(Guid correlationId)
         {
             CorrelationId = correlationId;

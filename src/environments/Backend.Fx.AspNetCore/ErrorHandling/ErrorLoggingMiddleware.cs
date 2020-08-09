@@ -1,11 +1,11 @@
-﻿namespace Backend.Fx.AspNetCore.ErrorHandling
-{
-    using System;
-    using System.Threading.Tasks;
-    using JetBrains.Annotations;
-    using Logging;
-    using Microsoft.AspNetCore.Http;
+﻿using System;
+using System.Threading.Tasks;
+using JetBrains.Annotations;
+using Backend.Fx.Logging;
+using Microsoft.AspNetCore.Http;
 
+namespace Backend.Fx.AspNetCore.ErrorHandling
+{
     public class ErrorLoggingMiddleware
     {
         private readonly RequestDelegate _next;
@@ -27,11 +27,12 @@
             }
             catch (Exception exception)
             {
-                if (!context.Items.ContainsKey("ExceptionLogged")) 
+                if (!context.Items.ContainsKey("ExceptionLogged"))
                 {
                     _exceptionLogger.LogException(exception);
                     context.Items["ExceptionLogged"] = true;
                 }
+
                 throw;
             }
         }

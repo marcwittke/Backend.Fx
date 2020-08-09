@@ -15,7 +15,7 @@ namespace Backend.Fx.Tests.Environment.DateAndTime
         public void IsTheSystemClock()
         {
             IClock sut = new WallClock();
-            
+
             Assert.Equal(DateTime.UtcNow, sut.UtcNow, _tolerantDateTimeComparer);
 
             Thread.Sleep(100);
