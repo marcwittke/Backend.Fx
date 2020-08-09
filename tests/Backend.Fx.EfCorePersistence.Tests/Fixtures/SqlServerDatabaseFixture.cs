@@ -1,8 +1,9 @@
 using System;
 using System.Data;
-using System.Data.Common;
 using System.Data.SqlClient;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
+using Backend.Fx.Environment.Persistence;
+using Backend.Fx.Patterns.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
@@ -52,15 +53,17 @@ namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
         }
 
 
-        protected override DbContextOptionsBuilder<TestDbContext> GetDbContextOptionsBuilder(DbConnection connection)
+        public override DbContextOptionsBuilder<TestDbContext> GetDbContextOptionsBuilder(IDbConnection connection)
         {
-            return new DbContextOptionsBuilder<TestDbContext>().UseSqlServer(connection);
+            return new DbContextOptionsBuilder<TestDbContext>().UseSqlServer((SqlConnection) connection);
         }
 
-        public override DbSession UseDbSession()
+        public override DbConnectionOperationDecorator UseOperation()
         {
-            var sqlConnection = new SqlConnection(_connectionString);
-            return new DbSession(sqlConnection, GetDbContextOptionsBuilder(sqlConnection));
+            var sqliteConnection = new SqlConnection(_connectionString);
+            IOperation operation = new Operation();
+            operation = new DbTransactionOperationDecorator(sqliteConnection, operation);
+            return new DbConnectionOperationDecorator(sqliteConnection, operation);
         }
     }
 }

@@ -4,7 +4,6 @@ using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
-using Backend.Fx.Patterns.UnitOfWork;
 using Backend.Fx.RandomData;
 using FakeItEasy;
 
@@ -19,7 +18,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             A.CallTo(() => InstanceProvider.GetInstance<ICurrentTHolder<Correlation>>()).Returns(CurrentCorrelationHolder);
             A.CallTo(() => InstanceProvider.GetInstance<ICurrentTHolder<TenantId>>()).Returns(TenantIdHolder);
             A.CallTo(() => InstanceProvider.GetInstance<ICurrentTHolder<IIdentity>>()).Returns(IdentityHolder);
-            A.CallTo(() => InstanceProvider.GetInstance<IUnitOfWork>()).Returns(UnitOfWork);
+            A.CallTo(() => InstanceProvider.GetInstance<IOperation>()).Returns(Operation);
 
             A.CallTo(() => InjectionScope.SequenceNumber).Returns(_sequenceNumber++);
             A.CallTo(() => InjectionScope.InstanceProvider).Returns(InstanceProvider);
@@ -30,10 +29,9 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
              .Invokes((Action<IInstanceProvider> a, IIdentity i, TenantId t, Guid? g) => a.Invoke(InstanceProvider));
         }
 
-        public IUnitOfWork UnitOfWork { get; } = A.Fake<IUnitOfWork>();
         public ICurrentTHolder<TenantId> TenantIdHolder { get; } = A.Fake<ICurrentTHolder<TenantId>>();
         public ICurrentTHolder<IIdentity> IdentityHolder { get; } = A.Fake<ICurrentTHolder<IIdentity>>();
-
+        public IOperation Operation { get; } = A.Fake<IOperation>();
         public ICompositionRoot CompositionRoot { get; } = A.Fake<ICompositionRoot>();
         public CurrentCorrelationHolder CurrentCorrelationHolder { get; } = new CurrentCorrelationHolder();
         public IInjectionScope InjectionScope { get; } = A.Fake<IInjectionScope>();

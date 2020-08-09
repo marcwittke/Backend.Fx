@@ -53,6 +53,25 @@ namespace Backend.Fx.Tests.BuildingBlocks
         }
 
         [Fact]
+        public void ThrowsOnAttemptToAddNull()
+        {
+            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), 
+                                                                                 CurrentTenantIdHolder.Create(234),
+                                                                                 new AllowAll<TheAggregateRoot.TestAggregateRoot>());
+            Assert.Throws<ArgumentNullException>(() => sut.AddRange(null!));
+            Assert.Throws<ArgumentNullException>(() => sut.Add(null!));
+        }
+        
+        [Fact]
+        public void ThrowsOnAttemptToDeleteNull()
+        {
+            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), 
+                                                                                 CurrentTenantIdHolder.Create(234),
+                                                                                 new AllowAll<TheAggregateRoot.TestAggregateRoot>());
+            Assert.Throws<ArgumentNullException>(() => sut.Delete(null!));
+        }
+        
+        [Fact]
         public void DeletesItemFromMyTenant()
         {
             var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
@@ -148,10 +167,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
             var agg3 = new TheAggregateRoot.TestAggregateRoot(12123125, "whatever") {TenantId = 234};
             var agg4 = new TheAggregateRoot.TestAggregateRoot(12123126, "whatever") {TenantId = 234};
 
-            sut.Add(agg1);
-            sut.Add(agg2);
-            sut.Add(agg3);
-            sut.Add(agg4);
+            sut.AddRange(new[] {agg1, agg2, agg3, agg4});
 
             Assert.Equal(4, sut.GetAll().Length);
             Assert.Contains(agg1, sut.GetAll());
@@ -311,6 +327,24 @@ namespace Backend.Fx.Tests.BuildingBlocks
         }
 
         [Fact]
+        public void ThrowsOnAddRangeWhenTenantIdIsEmpty()
+        {
+            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), CurrentTenantIdHolder.Create(null),
+                                                                                 authorization);
+
+            A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
+            A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(true);
+            A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._)).ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
+            Assert.Throws<InvalidOperationException>(() => sut.Add(new TheAggregateRoot.TestAggregateRoot(77, "whatever")));
+
+            // even when I don't have permissions
+            A.CallTo(() => authorization.HasAccessExpression).Returns(agg => false);
+            A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(false);
+            Assert.Throws<ForbiddenException>(() => sut.AddRange(new[] {new TheAggregateRoot.TestAggregateRoot(78, "whatever")}));
+        }
+
+        [Fact]
         public void ThrowsOnAddWhenUnauthorized()
         {
             var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
@@ -321,6 +355,19 @@ namespace Backend.Fx.Tests.BuildingBlocks
             A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._)).ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
             A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(false);
             Assert.Throws<ForbiddenException>(() => sut.Add(new TheAggregateRoot.TestAggregateRoot(44, "whatever")));
+        }
+
+        [Fact]
+        public void ThrowsOnAddRangeWhenUnauthorized()
+        {
+            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(), CurrentTenantIdHolder.Create(234),
+                                                                                 authorization);
+
+            A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
+            A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._)).ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
+            A.CallTo(() => authorization.CanCreate(A<TheAggregateRoot.TestAggregateRoot>._)).Returns(false);
+            Assert.Throws<ForbiddenException>(() => sut.AddRange(new[] {new TheAggregateRoot.TestAggregateRoot(44, "whatever")}));
         }
 
         [Fact]

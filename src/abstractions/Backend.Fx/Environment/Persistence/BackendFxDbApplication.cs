@@ -46,7 +46,5 @@ namespace Backend.Fx.Environment.Persistence
             _databaseBootstrapper.EnsureDatabaseExistence();
             await _backendFxApplication.Boot(cancellationToken);
         }
-        
-
     }
 }

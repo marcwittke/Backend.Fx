@@ -19,9 +19,8 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
             _dataGenerationContext = A.Fake<IDataGenerationContext>();
             var backendFxApplication = A.Fake<IBackendFxApplication>();
             A.CallTo(() => backendFxApplication.CompositionRoot).Returns(_compositionRoot);
-            _sut = new GenerateDataOnBoot(backendFxApplication,
-                                          A.Fake<ITenantService>(),
-                                          _dataGenerationModule);
+            _sut = new GenerateDataOnBoot(A.Fake<ITenantService>(),
+                                          _dataGenerationModule, backendFxApplication);
 
             _sut.SetPrivate(f => f.DataGenerationContext, _dataGenerationContext);
         }
@@ -35,7 +34,7 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
         public void DelegatesAllOtherCalls()
         {
             var app = A.Fake<IBackendFxApplication>();
-            IBackendFxApplication sut = new GenerateDataOnBoot(app, A.Fake<ITenantService>(), A.Fake<IModule>());
+            IBackendFxApplication sut = new GenerateDataOnBoot(A.Fake<ITenantService>(), A.Fake<IModule>(), app);
 
 
             // ReSharper disable UnusedVariable

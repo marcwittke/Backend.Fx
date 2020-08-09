@@ -5,20 +5,14 @@ namespace Backend.Fx.Environment.DateAndTime
     /// <summary>
     /// Best practice for web (service) applications: time does not advance during a single request
     /// </summary>
-    public class FrozenClock : Clock
+    public class FrozenClock : IClock
     {
-        public FrozenClock() : this(DateTime.UtcNow)
+        // ReSharper disable once UnusedParameter.Local
+        public FrozenClock(IClock clock)
         {
+            UtcNow = DateTime.UtcNow;
         }
 
-        private FrozenClock(DateTime utcNow)
-        {
-            OverrideUtcNow(utcNow);
-        }
-
-        public static IClock WithFrozenUtcNow(DateTime utcNow)
-        {
-            return new FrozenClock(utcNow);
-        }
+        public DateTime UtcNow { get; }
     }
 }

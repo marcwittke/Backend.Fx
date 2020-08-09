@@ -1,10 +1,10 @@
 using System;
 using System.Diagnostics;
+using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Domain;
 using Backend.Fx.Patterns.EventAggregation.Integration;
@@ -20,68 +20,34 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             _fakes = new DiTestFakes();
 
             Func<IDomainEventAggregator> domainEventAggregatorFactory = () => null;
-            A.CallTo(() => _fakes.InfrastructureModule.RegisterDomainEventAggregator(A<Func<IDomainEventAggregator>>._))
+            A.CallTo(() => _fakes.InfrastructureModule.RegisterScoped(A<Func<IDomainEventAggregator>>._))
              .Invokes((Func<IDomainEventAggregator> f) => domainEventAggregatorFactory = f);
             A.CallTo(() => _fakes.InstanceProvider.GetInstance<IDomainEventAggregator>()).ReturnsLazily(() => domainEventAggregatorFactory.Invoke());
 
             Func<IMessageBusScope> messageBusScopeFactory = () => null;
-            A.CallTo(() => _fakes.InfrastructureModule.RegisterMessageBusScope(A<Func<IMessageBusScope>>._))
+            A.CallTo(() => _fakes.InfrastructureModule.RegisterScoped(A<Func<IMessageBusScope>>._))
              .Invokes((Func<IMessageBusScope> f) => messageBusScopeFactory = f);
             A.CallTo(() => _fakes.InstanceProvider.GetInstance<IMessageBusScope>()).ReturnsLazily(() => messageBusScopeFactory.Invoke());
 
 
-            _sut = new TestApplication(_fakes.CompositionRoot, _fakes.MessageBus, _fakes.InfrastructureModule, _fakes.ExceptionLogger);
+            _sut = new BackendFxApplication(_fakes.CompositionRoot, _fakes.MessageBus, _fakes.InfrastructureModule, _fakes.ExceptionLogger);
         }
 
-        private readonly TestApplication _sut;
+        private readonly IBackendFxApplication _sut;
         private readonly DiTestFakes _fakes;
 
-        private class TestApplication : BackendFxApplication
-        {
-            public TestApplication(ICompositionRoot compositionRoot, IMessageBus messageBus, IInfrastructureModule infrastructureModule, IExceptionLogger exceptionLogger)
-                : base(compositionRoot, messageBus, infrastructureModule, exceptionLogger)
-            {
-            }
-
-            public int BootDuration { get; set; }
-
-            public bool OnBootCalled { get; set; }
-            public bool OnBootedCalled { get; set; }
-
-            protected override Task OnBoot(CancellationToken cancellationToken)
-            {
-                OnBootCalled = true;
-                Thread.Sleep(BootDuration);
-                return base.OnBoot(cancellationToken);
-            }
-
-            protected override Task OnBooted(CancellationToken cancellationToken)
-            {
-                OnBootedCalled = true;
-                return base.OnBooted(cancellationToken);
-            }
-        }
-
-        [Fact]
-        public void CallsBootExtensionPointsOnBoot()
-        {
-            Assert.False(_sut.OnBootCalled);
-            Assert.False(_sut.OnBootedCalled);
-            _sut.Boot();
-            Assert.True(_sut.OnBootCalled);
-            Assert.True(_sut.OnBootedCalled);
-        }
-
+        
         [Fact]
         public void CanWaitForBoot()
         {
+            int bootTime = 200;
+            A.CallTo(() => _fakes.CompositionRoot.Verify()).Invokes(() => Thread.Sleep(bootTime));
             var sw = new Stopwatch();
-            _sut.BootDuration = 200;
-
+            
             Task.Factory.StartNew(() => _sut.Boot());
             sw.Start();
             Assert.True(_sut.WaitForBoot());
-            Assert.True(sw.ElapsedMilliseconds >= _sut.BootDuration);
+            Assert.True(sw.ElapsedMilliseconds >= bootTime);
         }
 
         [Fact]
@@ -137,11 +103,11 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         [Fact]
         public void RegistersInfrastructureModule()
         {
-            A.CallTo(() => _fakes.InfrastructureModule.RegisterCorrelationHolder<CurrentCorrelationHolder>()).MustHaveHappenedOnceExactly();
-            A.CallTo(() => _fakes.InfrastructureModule.RegisterDomainEventAggregator(A<Func<IDomainEventAggregator>>._)).MustHaveHappenedOnceExactly();
-            A.CallTo(() => _fakes.InfrastructureModule.RegisterIdentityHolder<CurrentIdentityHolder>()).MustHaveHappenedOnceExactly();
-            A.CallTo(() => _fakes.InfrastructureModule.RegisterMessageBusScope(A<Func<IMessageBusScope>>._)).MustHaveHappenedOnceExactly();
-            A.CallTo(() => _fakes.InfrastructureModule.RegisterTenantHolder<CurrentTenantIdHolder>()).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakes.InfrastructureModule.RegisterScoped<ICurrentTHolder<Correlation>, CurrentCorrelationHolder>()).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakes.InfrastructureModule.RegisterScoped(A<Func<IDomainEventAggregator>>._)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakes.InfrastructureModule.RegisterScoped<ICurrentTHolder<IIdentity>,CurrentIdentityHolder>()).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakes.InfrastructureModule.RegisterScoped(A<Func<IMessageBusScope>>._)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakes.InfrastructureModule.RegisterScoped<ICurrentTHolder<TenantId>,CurrentTenantIdHolder>()).MustHaveHappenedOnceExactly();
         }
 
         [Fact]

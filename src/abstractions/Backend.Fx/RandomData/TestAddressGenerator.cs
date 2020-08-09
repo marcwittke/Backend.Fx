@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 
 namespace Backend.Fx.RandomData
 {
@@ -9,23 +8,16 @@ namespace Backend.Fx.RandomData
         {
             return new TestAddressGenerator().First();
         }
-        
-        public override IEnumerator<TestAddress> GetEnumerator()
-        {
-            return new Enumerator();
-        }
 
-        private class Enumerator : GeneratingEnumerator<TestAddress>
+
+        protected override TestAddress Next()
         {
-            protected override TestAddress Next()
-            {
-                return new TestAddress(
-                    Names.Streets.Random(),
-                    Numbers.RandomHouseNumber(),
-                    Numbers.RandomPostalCode(),
-                    Names.Cities.Random(),
-                    Names.Countries.Random());
-            }
+            return new TestAddress(
+                Names.Streets.Random(),
+                Numbers.RandomHouseNumber(),
+                Numbers.RandomPostalCode(),
+                Names.Cities.Random(),
+                Names.Countries.Random());
         }
     }
 }

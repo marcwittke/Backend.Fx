@@ -6,7 +6,11 @@ using Microsoft.AspNetCore.Http;
 
 namespace Backend.Fx.AspNetCore.Scoping
 {
-    public abstract class BackendFxMiddleware : IMiddleware
+    public interface IBackendFxMiddleware : IMiddleware
+    {
+    }
+
+    public abstract class BackendFxMiddleware : IBackendFxMiddleware
     {
         private readonly IBackendFxApplicationAsyncInvoker _invoker;
 

@@ -9,10 +9,7 @@ namespace Backend.Fx.RandomData
 
         public static IEnumerable<int> Next(int amount, Func<int> generate)
         {
-            for (var i = 0; i < amount; i++)
-            {
-                yield return generate();
-            }
+            for (var i = 0; i < amount; i++) yield return generate();
         }
 
         public static int Next()

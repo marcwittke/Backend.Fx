@@ -20,12 +20,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
         public void Register(ICompositionRoot compositionRoot)
         {
             Container container = ((SimpleInjectorCompositionRoot) compositionRoot).Container;
-            // initial data generation subsystem
-            foreach (Type dataGeneratorType in container.GetTypesToRegister(typeof(IDataGenerator), _domainAssemblies))
-            {
-                Logger.Debug($"Appending {dataGeneratorType.Name} to list of IDataGenerators");
-                container.Collection.Append(typeof(IDataGenerator), dataGeneratorType);
-            }
+            container.Collection.Register<IDataGenerator>(container.GetTypesToRegister(typeof(IDataGenerator), _domainAssemblies));
         }
     }
 }

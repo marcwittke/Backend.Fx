@@ -8,10 +8,7 @@ namespace Backend.Fx.Patterns.Authorization
     public abstract class AggregateAuthorization<TAggregateRoot> : IAggregateAuthorization<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
         /// <inheritdoc />>
-        public virtual Expression<Func<TAggregateRoot, bool>> HasAccessExpression
-        {
-            get { return agg => true; }
-        }
+        public abstract Expression<Func<TAggregateRoot, bool>> HasAccessExpression { get; }
 
         /// <inheritdoc />>
         public virtual IQueryable<TAggregateRoot> Filter(IQueryable<TAggregateRoot> queryable)
@@ -20,10 +17,7 @@ namespace Backend.Fx.Patterns.Authorization
         }
 
         /// <inheritdoc />>
-        public virtual bool CanCreate(TAggregateRoot t)
-        {
-            return true;
-        }
+        public abstract bool CanCreate(TAggregateRoot t);
 
         /// <summary>
         /// Implement a guard that might disallow modifying an existing aggregate.

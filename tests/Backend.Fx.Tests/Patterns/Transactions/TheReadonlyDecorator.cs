@@ -1,5 +1,5 @@
-﻿using System.Data;
-using Backend.Fx.Patterns.Transactions;
+﻿using Backend.Fx.Environment.Persistence;
+using Backend.Fx.Patterns.DependencyInjection;
 using FakeItEasy;
 using Xunit;
 
@@ -7,28 +7,31 @@ namespace Backend.Fx.Tests.Patterns.Transactions
 {
     public class TheReadonlyDecorator
     {
+        private readonly IOperation _operation;
+        private readonly IOperation _sut;
+
+        public TheReadonlyDecorator()
+        {
+            _operation = A.Fake<IOperation>();
+            _sut = new ReadonlyDbTransactionOperationDecorator(_operation);
+        }
         [Fact]
         public void DelegatesOtherCalls()
         {
-            var transactionContext = A.Fake<ITransactionContext>();
-            ITransactionContext sut = new ReadonlyDecorator(transactionContext);
+            _sut.Begin();
+            A.CallTo(() => _operation.Begin()).MustHaveHappenedOnceExactly();
 
-            // ReSharper disable once UnusedVariable
-            IDbTransaction x = sut.CurrentTransaction;
-            A.CallTo(() => transactionContext.CurrentTransaction).MustHaveHappenedOnceExactly();
-
-            sut.SetIsolationLevel(IsolationLevel.Chaos);
-            A.CallTo(() => transactionContext.SetIsolationLevel(A<IsolationLevel>.That.IsEqualTo(IsolationLevel.Chaos))).MustHaveHappenedOnceExactly();
+            _sut.Cancel();
+            A.CallTo(() => _operation.Cancel()).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
-        public void RollsBackOnComplete()
+        public void CancelsOperationOnComplete()
         {
-            var transactionContext = A.Fake<ITransactionContext>();
-            ITransactionContext sut = new ReadonlyDecorator(transactionContext);
-            sut.BeginTransaction();
-            sut.CommitTransaction();
-            A.CallTo(() => transactionContext.CommitTransaction()).MustNotHaveHappened();
+            _sut.Begin();
+            _sut.Complete();
+            A.CallTo(() => _operation.Complete()).MustNotHaveHappened();
+            A.CallTo(() => _operation.Cancel()).MustHaveHappenedOnceExactly();
         }
     }
 }

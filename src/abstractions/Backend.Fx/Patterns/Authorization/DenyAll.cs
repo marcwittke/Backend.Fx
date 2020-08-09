@@ -15,10 +15,5 @@ namespace Backend.Fx.Patterns.Authorization
         {
             return false;
         }
-
-        public override bool CanModify(TAggregateRoot t)
-        {
-            return false;
-        }
     }
 }

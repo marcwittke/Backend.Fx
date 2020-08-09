@@ -19,13 +19,13 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
     /// the collections of <see cref="IDomainEventHandler{TDomainEvent}"/>s, <see cref="IJob"/>s and <see cref="DataGenerator"/>s 
     /// found in the given list of domain assemblies.
     /// </summary>
-    public abstract class SimpleInjectorDomainModule : SimpleInjectorModule
+    public class SimpleInjectorDomainModule : SimpleInjectorModule
     {
         private static readonly ILogger Logger = LogManager.Create<SimpleInjectorDomainModule>();
         private readonly Assembly[] _domainAssemblies;
         private readonly string _domainAssembliesForLogging;
 
-        protected SimpleInjectorDomainModule(params Assembly[] domainAssemblies)
+        public SimpleInjectorDomainModule(params Assembly[] domainAssemblies)
         {
             _domainAssemblies = domainAssemblies;
             _domainAssembliesForLogging = string.Join(",", _domainAssemblies.Select(ass => ass.GetName().Name));

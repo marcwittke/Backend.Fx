@@ -14,8 +14,8 @@ namespace Backend.Fx.Environment.MultiTenancy
         private readonly IModule _multiTenancyModule;
         private readonly TenantCreationParameters _tenantCreationParameters;
 
-        public SingleTenantApplication(IBackendFxApplication application, ITenantService tenantService, IModule multiTenancyModule,
-                                       TenantCreationParameters tenantCreationParameters)
+        public SingleTenantApplication(ITenantService tenantService, IModule multiTenancyModule,
+                                       TenantCreationParameters tenantCreationParameters, IBackendFxApplication application)
         {
             _application = application;
             _tenantService = tenantService;

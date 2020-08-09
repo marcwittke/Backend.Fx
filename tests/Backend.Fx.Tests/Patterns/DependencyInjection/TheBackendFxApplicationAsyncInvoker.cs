@@ -34,15 +34,15 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         }
 
         [Fact]
-        public async Task BeginsNewUnitOfWorkForEveryInvocation()
+        public async Task BeginsNewOperationForEveryInvocation()
         {
             await _sut.InvokeAsync(ip => Task.CompletedTask, new AnonymousIdentity(), new TenantId(111));
-            A.CallTo(() => _fakes.UnitOfWork.Begin()).MustHaveHappenedOnceExactly();
-            A.CallTo(() => _fakes.UnitOfWork.Complete()).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakes.Operation.Begin()).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakes.Operation.Complete()).MustHaveHappenedOnceExactly();
 
             await _sut.InvokeAsync(ip => Task.CompletedTask, new AnonymousIdentity(), new TenantId(111));
-            A.CallTo(() => _fakes.UnitOfWork.Begin()).MustHaveHappenedTwiceExactly();
-            A.CallTo(() => _fakes.UnitOfWork.Complete()).MustHaveHappenedTwiceExactly();
+            A.CallTo(() => _fakes.Operation.Begin()).MustHaveHappenedTwiceExactly();
+            A.CallTo(() => _fakes.Operation.Complete()).MustHaveHappenedTwiceExactly();
         }
 
         [Fact]
@@ -53,11 +53,11 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         }
 
         [Fact]
-        public async Task DoesNotCompleteUnitOfWorkOnException()
+        public async Task DoesNotCompleteOperationOnException()
         {
             await _sut.InvokeAsync(ip => throw new InvalidOperationException(), new AnonymousIdentity(), new TenantId(111));
-            A.CallTo(() => _fakes.UnitOfWork.Begin()).MustHaveHappenedOnceExactly();
-            A.CallTo(() => _fakes.UnitOfWork.Complete()).MustNotHaveHappened();
+            A.CallTo(() => _fakes.Operation.Begin()).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakes.Operation.Complete()).MustNotHaveHappened();
         }
 
         [Fact]

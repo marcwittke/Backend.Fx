@@ -1,12 +1,13 @@
 ﻿using System;
+using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.Authentication;
+using Backend.Fx.Environment.DateAndTime;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.EventAggregation.Domain;
 using Backend.Fx.Patterns.EventAggregation.Integration;
-using JetBrains.Annotations;
 
 namespace Backend.Fx.Patterns.DependencyInjection
 {
@@ -60,7 +61,10 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// <param name="messageBus">The message bus implementation used by this application instance</param>
         /// <param name="infrastructureModule">Minimum infrastructure components module, is registered automatically</param>
         /// <param name="exceptionLogger">The exception logger for this application</param>
-        public BackendFxApplication(ICompositionRoot compositionRoot, IMessageBus messageBus, IInfrastructureModule infrastructureModule, IExceptionLogger exceptionLogger)
+        public BackendFxApplication(ICompositionRoot compositionRoot,
+                                    IMessageBus messageBus,
+                                    IInfrastructureModule infrastructureModule,
+                                    IExceptionLogger exceptionLogger)
         {
             var invoker = new BackendFxApplicationInvoker(compositionRoot, exceptionLogger);
             AsyncInvoker = invoker;
@@ -68,12 +72,14 @@ namespace Backend.Fx.Patterns.DependencyInjection
             MessageBus = messageBus;
             MessageBus.ProvideInvoker(invoker);
             CompositionRoot = compositionRoot;
-            infrastructureModule.RegisterCorrelationHolder<CurrentCorrelationHolder>();
-            infrastructureModule.RegisterDomainEventAggregator(() => new DomainEventAggregator(compositionRoot));
-            infrastructureModule.RegisterIdentityHolder<CurrentIdentityHolder>();
-            infrastructureModule.RegisterMessageBusScope(() => new MessageBusScope(compositionRoot.InstanceProvider.GetInstance<IMessageBus>(),
-                                                                                   compositionRoot.InstanceProvider.GetInstance<ICurrentTHolder<Correlation>>()));
-            infrastructureModule.RegisterTenantHolder<CurrentTenantIdHolder>();
+            infrastructureModule.RegisterScoped<IClock, WallClock>();
+            infrastructureModule.RegisterScoped<ICurrentTHolder<Correlation>, CurrentCorrelationHolder>();
+            infrastructureModule.RegisterScoped<ICurrentTHolder<IIdentity>, CurrentIdentityHolder>();
+            infrastructureModule.RegisterScoped<ICurrentTHolder<TenantId>, CurrentTenantIdHolder>();
+            infrastructureModule.RegisterScoped<IOperation, Operation>();
+            infrastructureModule.RegisterScoped<IDomainEventAggregator>(() => new DomainEventAggregator(compositionRoot));
+            infrastructureModule.RegisterScoped<IMessageBusScope>(
+                () => new MessageBusScope(MessageBus, compositionRoot.InstanceProvider.GetInstance<ICurrentTHolder<Correlation>>()));
         }
 
         public IBackendFxApplicationAsyncInvoker AsyncInvoker { get; }
@@ -84,14 +90,12 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
         public IMessageBus MessageBus { get; }
 
-        public async Task Boot(CancellationToken cancellationToken = default)
+        public Task Boot(CancellationToken cancellationToken = default)
         {
             Logger.Info("Booting application");
-            await OnBoot(cancellationToken);
             CompositionRoot.Verify();
-
-            await OnBooted(cancellationToken);
             _isBooted.Set();
+            return Task.CompletedTask;
         }
 
         public bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue, CancellationToken cancellationToken = default)
@@ -99,27 +103,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
             return _isBooted.Wait(timeoutMilliSeconds, cancellationToken);
         }
 
-        /// <summary>
-        /// Extension point to do additional initialization before composition root is initialized
-        /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        protected virtual async Task OnBoot(CancellationToken cancellationToken)
-        {
-            await Task.CompletedTask;
-        }
-
-        /// <summary>
-        /// Extension point to do additional initialization after composition root is initialized
-        /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        protected virtual async Task OnBooted([UsedImplicitly] CancellationToken cancellationToken)
-        {
-            await Task.CompletedTask;
-        }
-
-        protected virtual void Dispose(bool disposing)
+        protected void Dispose(bool disposing)
         {
             if (disposing)
             {
