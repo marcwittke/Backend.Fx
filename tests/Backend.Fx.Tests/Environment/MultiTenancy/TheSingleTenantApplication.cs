@@ -10,7 +10,6 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
     public class TheSingleTenantApplication
     {
         private readonly IBackendFxApplication _sut;
-        private readonly IModule _multiTenancyModule = A.Fake<IModule>();
         private readonly ITenantService _tenantService = A.Fake<ITenantService>();
         private readonly TenantCreationParameters _tenantCreationParameters = new TenantCreationParameters("n", "d", false);
         private readonly ICompositionRoot _compositionRoot = A.Fake<ICompositionRoot>();
@@ -21,17 +20,9 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
 
             A.CallTo(() => application.CompositionRoot).Returns(_compositionRoot);
 
-            _sut = new SingleTenantApplication(_tenantService,
-                                               _multiTenancyModule,
-                                               _tenantCreationParameters,
+            _sut = new SingleTenantApplication(_tenantCreationParameters,
+                                               _tenantService,
                                                application);
-        }
-
-        [Fact]
-        public void RegistersMultiTenancyModuleOnBoot()
-        {
-            _sut.Boot();
-            A.CallTo(() => _compositionRoot.RegisterModules(A<IModule>.That.IsEqualTo(_multiTenancyModule))).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
@@ -53,11 +44,11 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
         public void DelegatesAllCalls()
         {
             var application = A.Fake<IBackendFxApplication>();
-            var sut = new SingleTenantApplication(A.Fake<ITenantService>(),
-                                                  A.Fake<IModule>(),
-                                                  _tenantCreationParameters,
+            var sut = new SingleTenantApplication(_tenantCreationParameters,
+                                                  A.Fake<ITenantService>(),
                                                   application);
 
+            Fake.ClearRecordedCalls(application);
             // ReSharper disable once UnusedVariable
             IBackendFxApplicationAsyncInvoker ai = sut.AsyncInvoker;
             A.CallTo(() => application.AsyncInvoker).MustHaveHappenedOnceExactly();

@@ -26,7 +26,7 @@ namespace Backend.Fx.Environment.Persistence
         }
 
 
-        public void Begin()
+        public virtual void Begin()
         {
             if (_state != TxState.NotStarted)
             {
@@ -42,7 +42,7 @@ namespace Backend.Fx.Environment.Persistence
 
             Logger.Debug("Beginning transaction");
             CurrentTransaction = _dbConnection.BeginTransaction(_isolationLevel);
-            _transactionLifetimeLogger = Logger.DebugDuration("Transaction open");
+            _transactionLifetimeLogger = Logger.DebugDuration("Transaction open", "Transaction terminated");
             _state = TxState.Active;
             _operation.Begin();
         }

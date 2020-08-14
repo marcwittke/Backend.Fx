@@ -1,18 +1,22 @@
 ﻿using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 
 namespace Backend.Fx.AspNetCore.Versioning
 {
-    public class VersionHeaderMiddleware : IMiddleware
+    [UsedImplicitly]
+    public class VersionHeaderMiddleware 
     {
+        private readonly RequestDelegate _next;
         private readonly string _assemblyName;
         private readonly string _version;
 
-        public VersionHeaderMiddleware()
+        public VersionHeaderMiddleware(RequestDelegate next)
         {
+            _next = next;
             var entryAssembly = Assembly.GetEntryAssembly();
             if (entryAssembly == null)
             {
@@ -29,10 +33,10 @@ namespace Backend.Fx.AspNetCore.Versioning
             _version = entryAssemblyName.Version.ToString(3);
         }
 
-        public async Task InvokeAsync(HttpContext context, RequestDelegate next)
+        public async Task InvokeAsync(HttpContext context)
         {
             context.Response.Headers.Add(_assemblyName, new StringValues(_version));
-            await next.Invoke(context);
+            await _next.Invoke(context);
         }
     }
 }

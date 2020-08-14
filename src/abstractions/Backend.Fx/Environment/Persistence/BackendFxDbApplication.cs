@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.Patterns.EventAggregation.Domain;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 
 namespace Backend.Fx.Environment.Persistence

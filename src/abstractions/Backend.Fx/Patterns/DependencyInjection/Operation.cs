@@ -22,7 +22,6 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
         public virtual void Begin()
         {
-            Logger.Debug($"Beginning operation #{_instanceId}.");
             if (_isActive != null)
             {
                 throw new InvalidOperationException($"Cannot begin an operation that is {(_isActive.Value ? "active" : "terminated")}");
@@ -34,7 +33,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
         public virtual void Complete()
         {
-            Logger.Debug($"Completing operation #{_instanceId}.");
+            Logger.Info($"Completing operation #{_instanceId}.");
             if (_isActive != true)
             {
                 throw new InvalidOperationException($"Cannot begin an operation that is {(_isActive == false ? "terminated" : "not active")}");

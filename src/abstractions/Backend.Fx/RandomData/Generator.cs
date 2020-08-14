@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -9,6 +10,8 @@ namespace Backend.Fx.RandomData
 
         public IEnumerator<T> GetEnumerator()
         {
+            const int maxRetries = 1000;
+            int retries = 0;
             while (true)
             {
                 T next;
@@ -17,6 +20,11 @@ namespace Backend.Fx.RandomData
                 {
                     next = Next();
                     hashCode = next.GetHashCode();
+
+                    if (retries++ > maxRetries)
+                    {
+                        throw new Exception($"Tried {maxRetries} times to generate a unique {typeof(T).Name} but did not succeed, aborting now.");
+                    }
                 } while (_identicalPreventionMemory.Contains(hashCode));
 
                 _identicalPreventionMemory.Add(hashCode);

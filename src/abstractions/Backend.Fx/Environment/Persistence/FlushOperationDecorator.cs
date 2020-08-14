@@ -1,14 +1,13 @@
-using Backend.Fx.Environment.Persistence;
 using Backend.Fx.Patterns.DependencyInjection;
 
-namespace Backend.Fx.EfCorePersistence.Bootstrapping
+namespace Backend.Fx.Environment.Persistence
 {
-    public class EfFlushOperationDecorator : IOperation
+    public class FlushOperationDecorator : IOperation
     {
         private readonly IOperation _operationImplementation;
         private readonly ICanFlush _canFlush;
 
-        public EfFlushOperationDecorator(IOperation operationImplementation, ICanFlush canFlush)
+        public FlushOperationDecorator(ICanFlush canFlush, IOperation operationImplementation)
         {
             _operationImplementation = operationImplementation;
             _canFlush = canFlush;

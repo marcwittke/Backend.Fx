@@ -9,6 +9,17 @@ namespace Backend.Fx.Logging
         private static readonly ILogger Logger = LogManager.Create<ExceptionLoggers>();
         private readonly ICollection<IExceptionLogger> _collectionImplementation = new List<IExceptionLogger>();
 
+        public ExceptionLoggers()
+        { }
+
+        public ExceptionLoggers(params IExceptionLogger[] exceptionLoggers)
+        {
+            foreach (IExceptionLogger exceptionLogger in exceptionLoggers)
+            {
+                _collectionImplementation.Add(exceptionLogger);    
+            }
+        }
+        
         public void LogException(Exception ex)
         {
             foreach (IExceptionLogger exceptionLogger in _collectionImplementation)
@@ -19,7 +30,7 @@ namespace Backend.Fx.Logging
                 }
                 catch (Exception ex2)
                 {
-                    Logger.Error(ex, $"{exceptionLogger.GetType().Name} failed to log the {ex2.GetType()} mith message {ex.Message}");
+                    Logger.Error(ex, $"{exceptionLogger.GetType().Name} failed to log the {ex2.GetType()} with message {ex.Message}");
                 }
             }
         }

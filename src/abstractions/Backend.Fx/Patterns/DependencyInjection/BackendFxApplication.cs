@@ -59,26 +59,24 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// </summary>
         /// <param name="compositionRoot">The composition root of the dependency injection framework</param>
         /// <param name="messageBus">The message bus implementation used by this application instance</param>
-        /// <param name="infrastructureModule">Minimum infrastructure components module, is registered automatically</param>
         /// <param name="exceptionLogger">The exception logger for this application</param>
         public BackendFxApplication(ICompositionRoot compositionRoot,
                                     IMessageBus messageBus,
-                                    IInfrastructureModule infrastructureModule,
                                     IExceptionLogger exceptionLogger)
         {
             var invoker = new BackendFxApplicationInvoker(compositionRoot, exceptionLogger);
             AsyncInvoker = invoker;
             Invoker = invoker;
             MessageBus = messageBus;
-            MessageBus.ProvideInvoker(invoker);
+            MessageBus.IntegrateApplication(this);
             CompositionRoot = compositionRoot;
-            infrastructureModule.RegisterScoped<IClock, WallClock>();
-            infrastructureModule.RegisterScoped<ICurrentTHolder<Correlation>, CurrentCorrelationHolder>();
-            infrastructureModule.RegisterScoped<ICurrentTHolder<IIdentity>, CurrentIdentityHolder>();
-            infrastructureModule.RegisterScoped<ICurrentTHolder<TenantId>, CurrentTenantIdHolder>();
-            infrastructureModule.RegisterScoped<IOperation, Operation>();
-            infrastructureModule.RegisterScoped<IDomainEventAggregator>(() => new DomainEventAggregator(compositionRoot));
-            infrastructureModule.RegisterScoped<IMessageBusScope>(
+            CompositionRoot.InfrastructureModule.RegisterScoped<IClock, WallClock>();
+            CompositionRoot.InfrastructureModule.RegisterScoped<ICurrentTHolder<Correlation>, CurrentCorrelationHolder>();
+            CompositionRoot.InfrastructureModule.RegisterScoped<ICurrentTHolder<IIdentity>, CurrentIdentityHolder>();
+            CompositionRoot.InfrastructureModule.RegisterScoped<ICurrentTHolder<TenantId>, CurrentTenantIdHolder>();
+            CompositionRoot.InfrastructureModule.RegisterScoped<IOperation, Operation>();
+            CompositionRoot.InfrastructureModule.RegisterScoped<IDomainEventAggregator>(() => new DomainEventAggregator(compositionRoot));
+            CompositionRoot.InfrastructureModule.RegisterScoped<IMessageBusScope>(
                 () => new MessageBusScope(MessageBus, compositionRoot.InstanceProvider.GetInstance<ICurrentTHolder<Correlation>>()));
         }
 

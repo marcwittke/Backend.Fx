@@ -7,19 +7,16 @@ using Backend.Fx.Patterns.EventAggregation.Integration;
 
 namespace Backend.Fx.Environment.MultiTenancy
 {
-    public class SingleTenantApplication : IBackendFxApplication
+    public class SingleTenantApplication : TenantApplication, IBackendFxApplication
     {
-        private readonly IBackendFxApplication _application;
         private readonly ITenantService _tenantService;
-        private readonly IModule _multiTenancyModule;
+        private readonly IBackendFxApplication _application;
         private readonly TenantCreationParameters _tenantCreationParameters;
 
-        public SingleTenantApplication(ITenantService tenantService, IModule multiTenancyModule,
-                                       TenantCreationParameters tenantCreationParameters, IBackendFxApplication application)
+        public SingleTenantApplication(TenantCreationParameters tenantCreationParameters, ITenantService tenantService, IBackendFxApplication application) : base(application)
         {
-            _application = application;
             _tenantService = tenantService;
-            _multiTenancyModule = multiTenancyModule;
+            _application = application;
             _tenantCreationParameters = tenantCreationParameters;
         }
 
@@ -38,14 +35,14 @@ namespace Backend.Fx.Environment.MultiTenancy
 
         public TenantId TenantId { get; private set; }
 
-        public bool WaitForBoot(int timeoutMilliSeconds = Int32.MaxValue, CancellationToken cancellationToken = default(CancellationToken))
+        public bool WaitForBoot(int timeoutMilliSeconds = Int32.MaxValue, CancellationToken cancellationToken = default)
         {
             return _application.WaitForBoot(timeoutMilliSeconds, cancellationToken);
         }
 
-        public async Task Boot(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task Boot(CancellationToken cancellationToken = default)
         {
-            _application.CompositionRoot.RegisterModules(_multiTenancyModule);
+            EnableDataGenerationForNewTenants();
 
             await _application.Boot(cancellationToken);
 

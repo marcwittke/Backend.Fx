@@ -24,6 +24,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             A.CallTo(() => InjectionScope.InstanceProvider).Returns(InstanceProvider);
 
             A.CallTo(() => CompositionRoot.BeginScope()).Returns(InjectionScope);
+            A.CallTo(() => CompositionRoot.InfrastructureModule).Returns(InfrastructureModule);
 
             A.CallTo(() => Invoker.Invoke(A<Action<IInstanceProvider>>._, A<IIdentity>._, A<TenantId>._, A<Guid?>._))
              .Invokes((Action<IInstanceProvider> a, IIdentity i, TenantId t, Guid? g) => a.Invoke(InstanceProvider));

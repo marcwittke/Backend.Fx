@@ -20,7 +20,13 @@ namespace Backend.Fx.Environment.MultiTenancy
         TenantId[] GetActiveProductionTenantIds();
     }
 
-    public class TenantService : ITenantService
+    public interface ITenantIdProvider
+    {
+        TenantId[] GetActiveDemonstrationTenantIds();
+        TenantId[] GetActiveProductionTenantIds();
+    }
+
+    public class TenantService : ITenantService, ITenantIdProvider
     {
         private readonly IMessageBus _messageBus;
         private readonly ITenantRepository _tenantRepository;
