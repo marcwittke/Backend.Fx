@@ -1,14 +1,13 @@
-using Backend.Fx.Environment.Persistence;
 using Backend.Fx.Patterns.EventAggregation.Domain;
 
-namespace Backend.Fx.EfCorePersistence.Bootstrapping
+namespace Backend.Fx.Environment.Persistence
 {
-    public class EfFlushDomainEventAggregatorDecorator : IDomainEventAggregator
+    public class FlushDomainEventAggregatorDecorator : IDomainEventAggregator
     {
         private readonly ICanFlush _canFlush;
         private readonly IDomainEventAggregator _domainEventAggregatorImplementation;
 
-        public EfFlushDomainEventAggregatorDecorator(ICanFlush canFlush, IDomainEventAggregator domainEventAggregatorImplementation)
+        public FlushDomainEventAggregatorDecorator(ICanFlush canFlush, IDomainEventAggregator domainEventAggregatorImplementation)
         {
             _canFlush = canFlush;
             _domainEventAggregatorImplementation = domainEventAggregatorImplementation;

@@ -16,7 +16,7 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
 
         public TheMultiTenantApplication()
         {
-            _sut = new MultiTenantApplication(_application, _tenantService, _multiTenancyModule);
+            _sut = new MultiTenantApplication(_application);
         }
 
         

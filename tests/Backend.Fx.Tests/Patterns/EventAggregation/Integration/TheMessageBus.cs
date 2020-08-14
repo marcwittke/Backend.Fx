@@ -34,9 +34,14 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
 
     public abstract class TheMessageBus<TMessageBus> where TMessageBus : MessageBus, new()
     {
+        private readonly IBackendFxApplication _fakeApplication = A.Fake<IBackendFxApplication>();
+        
         protected TheMessageBus()
         {
-            Sut.ProvideInvoker(Invoker);
+            A.CallTo(() => _fakeApplication.Invoker).Returns(Invoker);
+            A.CallTo(() => _fakeApplication.WaitForBoot(A<int>._, A<CancellationToken>._)).Returns(true);
+            
+            Sut.IntegrateApplication(_fakeApplication);
         }
 
         protected TestInvoker Invoker { get; } = new TestInvoker();

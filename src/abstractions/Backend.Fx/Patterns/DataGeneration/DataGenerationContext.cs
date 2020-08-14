@@ -10,7 +10,6 @@ namespace Backend.Fx.Patterns.DataGeneration
 {
     public interface IDataGenerationContext
     {
-        void SeedDataForAllActiveTenants();
         void SeedDataForTenant(TenantId tenantId, bool isDemoTenant);
     }
 
@@ -18,35 +17,15 @@ namespace Backend.Fx.Patterns.DataGeneration
     {
         private static readonly ILogger Logger = LogManager.Create<DataGenerationContext>();
 
-        private readonly ITenantService _tenantService;
         private readonly ICompositionRoot _compositionRoot;
         private readonly IBackendFxApplicationInvoker _invoker;
 
-        public DataGenerationContext(ITenantService tenantService, ICompositionRoot compositionRoot, IBackendFxApplicationInvoker invoker)
+        public DataGenerationContext(ICompositionRoot compositionRoot, IBackendFxApplicationInvoker invoker)
         {
-            _tenantService = tenantService;
             _compositionRoot = compositionRoot;
             _invoker = invoker;
         }
-
-        public void SeedDataForAllActiveTenants()
-        {
-            using (Logger.InfoDuration("Seeding data"))
-            {
-                var prodTenantIds = _tenantService.GetActiveProductionTenantIds();
-                foreach (TenantId prodTenantId in prodTenantIds)
-                {
-                    SeedDataForTenant(prodTenantId, false);
-                }
-
-                var demoTenantIds = _tenantService.GetActiveDemonstrationTenantIds();
-                foreach (TenantId demoTenantId in demoTenantIds)
-                {
-                    SeedDataForTenant(demoTenantId, true);
-                }
-            }
-        }
-
+       
         public void SeedDataForTenant(TenantId tenantId, bool isDemoTenant)
         {
             using (Logger.InfoDuration($"Seeding data for tenant {tenantId.Value}"))

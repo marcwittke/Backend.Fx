@@ -20,7 +20,7 @@ namespace Backend.Fx.Environment.MultiTenancy
             Name = name;
             Description = description;
             IsDemoTenant = isDemoTenant;
-            State = TenantState.Created;
+            State = TenantState.Active;
         }
 
         [Key] public int Id { get; set; }
@@ -36,7 +36,6 @@ namespace Backend.Fx.Environment.MultiTenancy
 
     public enum TenantState
     {
-        Created = 0,
         Active = 2,
         Inactive = -1
     }

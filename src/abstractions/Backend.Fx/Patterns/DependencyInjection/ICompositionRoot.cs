@@ -17,5 +17,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
         IInjectionScope BeginScope();
         IInstanceProvider InstanceProvider { get; }
+        
+        IInfrastructureModule InfrastructureModule { get; }
     }
 }
