@@ -68,7 +68,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
             AsyncInvoker = invoker;
             Invoker = invoker;
             MessageBus = messageBus;
-            MessageBus.IntegrateApplication(this);
+            MessageBus.IntegrateApplication(new SequentializingBackendFxApplicationInvoker(new WaitForBootInvoker(this, Invoker)));
             CompositionRoot = compositionRoot;
             CompositionRoot.InfrastructureModule.RegisterScoped<IClock, WallClock>();
             CompositionRoot.InfrastructureModule.RegisterScoped<ICurrentTHolder<Correlation>, CurrentCorrelationHolder>();

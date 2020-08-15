@@ -85,7 +85,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         [Fact]
         public void IntegratesWithMessageBus()
         {
-            A.CallTo(() => _fakes.MessageBus.IntegrateApplication(_sut)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakes.MessageBus.IntegrateApplication(_sut.Invoker)).MustHaveHappenedOnceExactly();
         }
 
         [Fact]

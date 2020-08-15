@@ -24,7 +24,7 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
             A.CallTo(() => application.WaitForBoot(A<int>._, A<CancellationToken>._)).Returns(true);
             
             var messageBus = new InMemoryMessageBus();
-            messageBus.IntegrateApplication(application);
+            messageBus.IntegrateApplication(application.Invoker);
             
             var tenantIdProvider = A.Fake<ITenantIdProvider>();
             A.CallTo(() => tenantIdProvider.GetActiveDemonstrationTenantIds()).Returns(_demoTenants);

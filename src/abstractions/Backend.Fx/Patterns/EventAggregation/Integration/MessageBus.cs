@@ -19,13 +19,13 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
         /// </summary>
         private readonly ConcurrentDictionary<string, List<ISubscription>> _subscriptions = new ConcurrentDictionary<string, List<ISubscription>>();
 
-        private IBackendFxApplication _application;
+        private IBackendFxApplicationInvoker _invoker;
 
         public abstract void Connect();
 
-        public void IntegrateApplication(IBackendFxApplication application)
+        public void IntegrateApplication(IBackendFxApplicationInvoker invoker)
         {
-            _application = application;
+            _invoker = invoker;
         }
 
         public Task Publish(IIntegrationEvent integrationEvent)
@@ -137,8 +137,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
             {
                 foreach (ISubscription subscription in subscriptions)
                 {
-                    _application.WaitForBoot();
-                    _application.Invoker.Invoke(
+                    _invoker.Invoke(
                         instanceProvider => subscription.Process(instanceProvider, context),
                         new SystemIdentity(),
                         context.TenantId,
@@ -153,7 +152,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
 
         private void EnsureInvoker()
         {
-            if (_application == null)
+            if (_invoker == null)
             {
                 throw new InvalidOperationException("Before using the message bus you have to provide the application invoker by calling ProvideInvoker()");
             }

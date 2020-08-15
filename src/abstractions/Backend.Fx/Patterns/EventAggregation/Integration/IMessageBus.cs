@@ -52,6 +52,6 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
         void Unsubscribe<TEvent>(IIntegrationMessageHandler<TEvent> handler)
             where TEvent : IIntegrationEvent;
 
-        void IntegrateApplication(IBackendFxApplication application);
+        void IntegrateApplication(IBackendFxApplicationInvoker invoker);
     }
 }
