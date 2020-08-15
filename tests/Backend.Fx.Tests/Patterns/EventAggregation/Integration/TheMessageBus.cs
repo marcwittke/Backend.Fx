@@ -41,7 +41,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             A.CallTo(() => _fakeApplication.Invoker).Returns(Invoker);
             A.CallTo(() => _fakeApplication.WaitForBoot(A<int>._, A<CancellationToken>._)).Returns(true);
             
-            Sut.IntegrateApplication(_fakeApplication);
+            Sut.IntegrateApplication(_fakeApplication.Invoker);
         }
 
         protected TestInvoker Invoker { get; } = new TestInvoker();
