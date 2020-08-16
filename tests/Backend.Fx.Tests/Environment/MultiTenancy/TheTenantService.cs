@@ -22,11 +22,6 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
         private readonly IMessageBus _messageBus = A.Fake<IMessageBus>();
         private readonly InMemoryTenantRepository _tenantRepository = new InMemoryTenantRepository();
 
-        private void FakeAutoActivation()
-        {
-            A.CallTo(() => _messageBus.Publish(A<IIntegrationEvent>._)).Invokes((IIntegrationEvent iev) => { _sut.ActivateTenant(new TenantId(iev.TenantId)); });
-        }
-
         [Fact]
         public void CannotCreateTenantWithoutName()
         {
@@ -68,19 +63,8 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
         [Fact]
         public void RaisesTenantActivatedEvent()
         {
-            FakeAutoActivation();
             var ev = new ManualResetEvent(false);
             A.CallTo(() => _messageBus.Publish(A<TenantActivated>._)).Invokes(() => ev.Set());
-            Task.Run(() => _sut.CreateTenant(new TenantCreationParameters
-                                                 {Name = "prod", Description = "unit test created", IsDemonstrationTenant = false}));
-            Assert.True(ev.WaitOne(Debugger.IsAttached ? int.MaxValue : 10000));
-        }
-
-        [Fact]
-        public void RaisesTenantCreatedEvent()
-        {
-            var ev = new ManualResetEvent(false);
-            A.CallTo(() => _messageBus.Publish(A<TenantCreated>._)).Invokes(() => ev.Set());
             Task.Run(() => _sut.CreateTenant(new TenantCreationParameters
                                                  {Name = "prod", Description = "unit test created", IsDemonstrationTenant = false}));
             Assert.True(ev.WaitOne(Debugger.IsAttached ? int.MaxValue : 10000));

@@ -1,9 +1,11 @@
+using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 
 namespace Backend.Fx.Environment.Persistence
 {
     public class ReadonlyDbTransactionOperationDecorator : IOperation
     {
+        private static readonly ILogger Logger = LogManager.Create<ReadonlyDbTransactionOperationDecorator>();
         private readonly IOperation _operationImplementation;
 
         public ReadonlyDbTransactionOperationDecorator(IOperation operationImplementation)
@@ -18,6 +20,7 @@ namespace Backend.Fx.Environment.Persistence
 
         public void Complete()
         {
+            Logger.Debug("Canceling operation instead of completing it due to classification as readonly operation");
             _operationImplementation.Cancel();
         }
 

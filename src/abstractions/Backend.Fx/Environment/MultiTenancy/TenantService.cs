@@ -28,9 +28,9 @@ namespace Backend.Fx.Environment.MultiTenancy
 
     public class TenantService : ITenantService, ITenantIdProvider
     {
+        private static readonly ILogger Logger = LogManager.Create<TenantService>();
         private readonly IMessageBus _messageBus;
         private readonly ITenantRepository _tenantRepository;
-        private static readonly ILogger Logger = LogManager.Create<TenantService>();
 
         public TenantService(IMessageBus messageBus, ITenantRepository tenantRepository)
         {
@@ -46,6 +46,7 @@ namespace Backend.Fx.Environment.MultiTenancy
 
         public void ActivateTenant(TenantId tenantId)
         {
+            Logger.Info($"Activating tenant: {tenantId}");
             Tenant tenant = _tenantRepository.GetTenant(tenantId);
             tenant.State = TenantState.Active;
             _tenantRepository.SaveTenant(tenant);
@@ -54,6 +55,7 @@ namespace Backend.Fx.Environment.MultiTenancy
 
         public void DeactivateTenant(TenantId tenantId)
         {
+            Logger.Info($"Deactivating tenant: {tenantId}");
             Tenant tenant = _tenantRepository.GetTenant(tenantId);
             tenant.State = TenantState.Inactive;
             _tenantRepository.SaveTenant(tenant);
@@ -62,33 +64,41 @@ namespace Backend.Fx.Environment.MultiTenancy
 
         public TenantId[] GetActiveTenantIds()
         {
-            return _tenantRepository
-                   .GetTenants()
-                   .Where(t => t.State == TenantState.Active)
-                   .Select(t => new TenantId(t.Id))
-                   .ToArray();
+            var activeTenantIds = _tenantRepository
+                                  .GetTenants()
+                                  .Where(t => t.State == TenantState.Active)
+                                  .Select(t => new TenantId(t.Id))
+                                  .ToArray();
+            Logger.Trace($"Active TenantIds: {string.Join(",",activeTenantIds.Select(t => t.ToString()))}");
+            return activeTenantIds;
         }
 
         public TenantId[] GetActiveDemonstrationTenantIds()
         {
-            return _tenantRepository
-                   .GetTenants()
-                   .Where(t => t.State == TenantState.Active && t.IsDemoTenant)
-                   .Select(t => new TenantId(t.Id))
-                   .ToArray();
+            var activeDemonstrationTenantIds = _tenantRepository
+                                               .GetTenants()
+                                               .Where(t => t.State == TenantState.Active && t.IsDemoTenant)
+                                               .Select(t => new TenantId(t.Id))
+                                               .ToArray();
+            Logger.Trace($"Active Demonstration TenantIds: {string.Join(",",activeDemonstrationTenantIds.Select(t => t.ToString()))}");
+            return activeDemonstrationTenantIds;
         }
 
         public TenantId[] GetActiveProductionTenantIds()
         {
-            return _tenantRepository
-                   .GetTenants()
-                   .Where(t => t.State == TenantState.Active && !t.IsDemoTenant)
-                   .Select(t => new TenantId(t.Id))
-                   .ToArray();
+            var activeProductionTenantIds = _tenantRepository
+                                            .GetTenants()
+                                            .Where(t => t.State == TenantState.Active && !t.IsDemoTenant)
+                                            .Select(t => new TenantId(t.Id))
+                                            .ToArray();
+            Logger.Trace($"Active Production TenantIds: {string.Join(",",activeProductionTenantIds.Select(t => t.ToString()))}");
+            return activeProductionTenantIds;
         }
 
         protected virtual TenantId CreateTenant([NotNull] string name, string description, bool isDemo)
         {
+            Logger.Info($"Creating Tenant {name}");
+            
             if (string.IsNullOrWhiteSpace(name))
             {
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(name));
@@ -102,7 +112,7 @@ namespace Backend.Fx.Environment.MultiTenancy
             var tenant = new Tenant(name, description, isDemo);
             _tenantRepository.SaveTenant(tenant);
             var tenantId = new TenantId(tenant.Id);
-            _messageBus.Publish(new TenantCreated(tenant.Id, tenant.Name, tenant.Description, tenant.IsDemoTenant));
+            _messageBus.Publish(new TenantActivated(tenant.Id, tenant.Name, tenant.Description, tenant.IsDemoTenant));
             return tenantId;
         }
     }
