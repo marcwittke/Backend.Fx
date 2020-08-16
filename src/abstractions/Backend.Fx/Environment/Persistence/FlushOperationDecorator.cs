@@ -1,9 +1,11 @@
+using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 
 namespace Backend.Fx.Environment.Persistence
 {
     public class FlushOperationDecorator : IOperation
     {
+        private static readonly ILogger Logger = LogManager.Create<FlushOperationDecorator>();
         private readonly IOperation _operationImplementation;
         private readonly ICanFlush _canFlush;
 
@@ -20,6 +22,7 @@ namespace Backend.Fx.Environment.Persistence
 
         public void Complete()
         {
+            Logger.Debug("Flushing before completion of operation");
             _canFlush.Flush();
             _operationImplementation.Complete();
         }

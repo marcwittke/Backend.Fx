@@ -46,6 +46,11 @@ namespace Backend.Fx.Environment.MultiTenancy
             }
         }
 
+        public override string ToString()
+        {
+            return _id?.ToString() ?? "NULL";
+        }
+
         protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return _id;

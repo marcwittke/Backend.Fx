@@ -22,16 +22,16 @@ namespace Backend.Fx.Environment.MultiTenancy
         
         protected void EnableDataGenerationForNewTenants()
         {
-            _application.MessageBus.Subscribe(new DelegateIntegrationMessageHandler<TenantCreated>(tenantCreated =>
+            _application.MessageBus.Subscribe(new DelegateIntegrationMessageHandler<TenantActivated>(tenantCreated =>
             {
-                Logger.Info($"Seeding data for recently created {(tenantCreated.IsDemoTenant ? "demo " : "")}tenant {tenantCreated.TenantId}");
+                Logger.Info($"Seeding data for recently activated {(tenantCreated.IsDemoTenant ? "demo " : "")}tenant {tenantCreated.TenantId}");
                 try
                 {
                     _dataGenerationContext.SeedDataForTenant(new TenantId(tenantCreated.TenantId), tenantCreated.IsDemoTenant);
                 }
                 catch (Exception ex)
                 {
-                    Logger.Error(ex, $"Seeding data for recently created {(tenantCreated.IsDemoTenant ? "demo " : "")}tenant {tenantCreated.TenantId} failed.");
+                    Logger.Error(ex, $"Seeding data for recently activated {(tenantCreated.IsDemoTenant ? "demo " : "")}tenant {tenantCreated.TenantId} failed.");
                 }
             }));
         }

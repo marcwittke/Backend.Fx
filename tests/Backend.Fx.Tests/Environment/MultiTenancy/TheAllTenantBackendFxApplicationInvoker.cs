@@ -16,20 +16,30 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
         }
 
         private readonly AllTenantBackendFxApplicationInvoker _sut;
-        private readonly ITenantService _tenantService = A.Fake<ITenantService>();
+        private readonly ITenantIdProvider _tenantService = A.Fake<ITenantIdProvider>();
         private readonly IBackendFxApplicationInvoker _invoker = A.Fake<IBackendFxApplicationInvoker>();
 
         [Fact]
         public void InvokesActionForAllTenants()
         {
-            var tenantIds = Enumerable.Range(0, 10).Select(i => new TenantId(i)).ToArray();
-            A.CallTo(() => _tenantService.GetActiveTenantIds()).Returns(tenantIds);
+            var demoTenantIds = Enumerable.Range(0, 10).Select(i => new TenantId(i)).ToArray();
+            var prodTenantIds = Enumerable.Range(10, 10).Select(i => new TenantId(i)).ToArray();
+            A.CallTo(() => _tenantService.GetActiveDemonstrationTenantIds()).Returns(demoTenantIds);
+            A.CallTo(() => _tenantService.GetActiveProductionTenantIds()).Returns(prodTenantIds);
 
             _sut.Invoke(_ => { });
 
-            foreach (TenantId tenantId in tenantIds)
+            foreach (TenantId tenantId in demoTenantIds)
+            {
                 A.CallTo(() => _invoker.Invoke(A<Action<IInstanceProvider>>._, A<IIdentity>._, A<TenantId>.That.IsSameAs(tenantId), A<Guid?>._))
                  .MustHaveHappenedOnceExactly();
+            }
+            
+            foreach (TenantId tenantId in prodTenantIds)
+            {
+                A.CallTo(() => _invoker.Invoke(A<Action<IInstanceProvider>>._, A<IIdentity>._, A<TenantId>.That.IsSameAs(tenantId), A<Guid?>._))
+                 .MustHaveHappenedOnceExactly();
+            }
         }
     }
 }

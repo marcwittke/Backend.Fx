@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 
@@ -9,6 +10,7 @@ namespace Backend.Fx.Environment.MultiTenancy
 {
     public class SingleTenantApplication : TenantApplication, IBackendFxApplication
     {
+        private static readonly ILogger Logger = LogManager.Create<SingleTenantApplication>();
         private readonly ITenantService _tenantService;
         private readonly IBackendFxApplication _application;
         private readonly TenantCreationParameters _tenantCreationParameters;
@@ -46,6 +48,7 @@ namespace Backend.Fx.Environment.MultiTenancy
 
             await _application.Boot(cancellationToken);
 
+            Logger.Info($"Ensuring existence of single tenant {_tenantCreationParameters.Name}");
             TenantId = _tenantService.GetActiveTenantIds().SingleOrDefault()
                        ?? _tenantService.CreateTenant(_tenantCreationParameters);
         }
