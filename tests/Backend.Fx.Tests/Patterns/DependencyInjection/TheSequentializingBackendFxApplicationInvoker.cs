@@ -15,7 +15,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         public TheSequentializingBackendFxApplicationInvoker()
         {
             var fakes = new DiTestFakes();
-            _invoker = new BackendFxApplicationInvoker(fakes.CompositionRoot, fakes.ExceptionLogger);
+            _invoker = new BackendFxApplicationInvoker(fakes.CompositionRoot);
             _decoratedInvoker = new SequentializingBackendFxApplicationInvoker(_invoker);
         }
 

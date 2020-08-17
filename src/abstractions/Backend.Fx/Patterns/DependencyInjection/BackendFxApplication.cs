@@ -59,12 +59,9 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// </summary>
         /// <param name="compositionRoot">The composition root of the dependency injection framework</param>
         /// <param name="messageBus">The message bus implementation used by this application instance</param>
-        /// <param name="exceptionLogger">The exception logger for this application</param>
-        public BackendFxApplication(ICompositionRoot compositionRoot,
-                                    IMessageBus messageBus,
-                                    IExceptionLogger exceptionLogger)
+        public BackendFxApplication(ICompositionRoot compositionRoot, IMessageBus messageBus)
         {
-            var invoker = new BackendFxApplicationInvoker(compositionRoot, exceptionLogger);
+            var invoker = new BackendFxApplicationInvoker(compositionRoot);
             AsyncInvoker = invoker;
             Invoker = invoker;
             MessageBus = messageBus;

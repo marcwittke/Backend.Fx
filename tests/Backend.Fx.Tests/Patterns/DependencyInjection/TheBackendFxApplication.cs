@@ -30,7 +30,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             A.CallTo(() => _fakes.InstanceProvider.GetInstance<IMessageBusScope>()).ReturnsLazily(() => messageBusScopeFactory.Invoke());
 
 
-            _sut = new BackendFxApplication(_fakes.CompositionRoot, _fakes.MessageBus, _fakes.ExceptionLogger);
+            _sut = new BackendFxApplication(_fakes.CompositionRoot, _fakes.MessageBus);
         }
 
         private readonly IBackendFxApplication _sut;

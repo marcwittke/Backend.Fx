@@ -11,7 +11,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
     {
         public TheBackendFxDbApplication()
         {
-            IBackendFxApplication application = new BackendFxApplication(_fakes.CompositionRoot, _fakes.MessageBus, _fakes.ExceptionLogger);
+            IBackendFxApplication application = new BackendFxApplication(_fakes.CompositionRoot, _fakes.MessageBus);
             _sut = new BackendFxDbApplication(_databaseBootstrapper, _databaseAvailabilityAwaiter, application);
         }
 
