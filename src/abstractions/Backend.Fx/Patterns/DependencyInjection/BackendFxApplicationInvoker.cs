@@ -1,5 +1,4 @@
 using System;
-using System.Reflection;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.Authentication;
@@ -35,12 +34,10 @@ namespace Backend.Fx.Patterns.DependencyInjection
     {
         private readonly ICompositionRoot _compositionRoot;
         private static readonly ILogger Logger = LogManager.Create<BackendFxApplicationInvoker>();
-        private readonly IExceptionLogger _exceptionLogger;
 
-        public BackendFxApplicationInvoker(ICompositionRoot compositionRoot, IExceptionLogger exceptionLogger)
+        public BackendFxApplicationInvoker(ICompositionRoot compositionRoot)
         {
             _compositionRoot = compositionRoot;
-            _exceptionLogger = exceptionLogger;
         }
 
 
@@ -52,34 +49,22 @@ namespace Backend.Fx.Patterns.DependencyInjection
                 {
                     using (UseDurationLogger(injectionScope))
                     {
+                        var operation = injectionScope.InstanceProvider.GetInstance<IOperation>();
                         try
                         {
-                            var operation = injectionScope.InstanceProvider.GetInstance<IOperation>();
-                            try
-                            {
-                                operation.Begin();
-                                action.Invoke(injectionScope.InstanceProvider);
-                                injectionScope.InstanceProvider.GetInstance<IDomainEventAggregator>().RaiseEvents();
-                                operation.Complete();
-                            }
-                            catch
-                            {
-                                operation.Cancel();
-                                throw;
-                            }
+                            operation.Begin();
+                            action.Invoke(injectionScope.InstanceProvider);
+                            injectionScope.InstanceProvider.GetInstance<IDomainEventAggregator>().RaiseEvents();
+                            operation.Complete();
+                        }
+                        catch
+                        {
+                            operation.Cancel();
+                            throw;
+                        }
 
-                            var messageBusScope = injectionScope.InstanceProvider.GetInstance<IMessageBusScope>();
-                            AsyncHelper.RunSync(() => messageBusScope.RaiseEvents());
-                        }
-                        catch (TargetInvocationException ex)
-                        {
-                            _exceptionLogger.LogException(ex.InnerException ?? ex);
-                        }
-                        catch (Exception ex)
-                        {
-                            Logger.Warn(ex);
-                            _exceptionLogger.LogException(ex);
-                        }
+                        var messageBusScope = injectionScope.InstanceProvider.GetInstance<IMessageBusScope>();
+                        AsyncHelper.RunSync(() => messageBusScope.RaiseEvents());
                     }
                 }
             }
@@ -97,33 +82,21 @@ namespace Backend.Fx.Patterns.DependencyInjection
                 {
                     using (UseDurationLogger(injectionScope))
                     {
+                        var operation = injectionScope.InstanceProvider.GetInstance<IOperation>();
                         try
                         {
-                            var operation = injectionScope.InstanceProvider.GetInstance<IOperation>();
-                            try
-                            {
-                                operation.Begin();
-                                await awaitableAsyncAction.Invoke(injectionScope.InstanceProvider);
-                                injectionScope.InstanceProvider.GetInstance<IDomainEventAggregator>().RaiseEvents();
-                                operation.Complete();
-                            }
-                            catch
-                            {
-                                operation.Cancel();
-                                throw;
-                            }
+                            operation.Begin();
+                            await awaitableAsyncAction.Invoke(injectionScope.InstanceProvider);
+                            injectionScope.InstanceProvider.GetInstance<IDomainEventAggregator>().RaiseEvents();
+                            operation.Complete();
+                        }
+                        catch
+                        {
+                            operation.Cancel();
+                            throw;
+                        }
 
-                            await injectionScope.InstanceProvider.GetInstance<IMessageBusScope>().RaiseEvents();
-                        }
-                        catch (TargetInvocationException ex)
-                        {
-                            _exceptionLogger.LogException(ex.InnerException ?? ex);
-                        }
-                        catch (Exception ex)
-                        {
-                            Logger.Warn(ex);
-                            _exceptionLogger.LogException(ex);
-                        }
+                        await injectionScope.InstanceProvider.GetInstance<IMessageBusScope>().RaiseEvents();
                     }
                 }
             }

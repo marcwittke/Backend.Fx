@@ -15,7 +15,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         public TheBackendFxApplicationAsyncInvoker()
         {
             _fakes = new DiTestFakes();
-            _sut = new BackendFxApplicationInvoker(_fakes.CompositionRoot, _fakes.ExceptionLogger);
+            _sut = new BackendFxApplicationInvoker(_fakes.CompositionRoot);
         }
 
         private readonly IBackendFxApplicationAsyncInvoker _sut;
@@ -58,20 +58,6 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             await _sut.InvokeAsync(ip => throw new InvalidOperationException(), new AnonymousIdentity(), new TenantId(111));
             A.CallTo(() => _fakes.Operation.Begin()).MustHaveHappenedOnceExactly();
             A.CallTo(() => _fakes.Operation.Complete()).MustNotHaveHappened();
-        }
-
-        [Fact]
-        public async Task LogsException()
-        {
-            await _sut.InvokeAsync(ip => throw new InvalidOperationException(), new AnonymousIdentity(), new TenantId(111));
-            A.CallTo(() => _fakes.ExceptionLogger.LogException(A<InvalidOperationException>._)).MustHaveHappenedOnceExactly();
-        }
-
-        [Fact]
-        public async Task LogsTargetInvocationExceptionUnwrapped()
-        {
-            await _sut.InvokeAsync(ip => throw new TargetInvocationException(new InvalidOperationException()), new AnonymousIdentity(), new TenantId(111));
-            A.CallTo(() => _fakes.ExceptionLogger.LogException(A<InvalidOperationException>._)).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
