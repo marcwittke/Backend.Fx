@@ -26,7 +26,7 @@ namespace Backend.Fx.RabbitMq
 
         public override void Connect()
         {
-            Logger.Info("OPening a channel to RabbitMQ...");
+            Logger.Info("Opening a channel to RabbitMQ...");
             if (_channel.EnsureOpen())
             {
                 _channel.MessageReceived += ChannelOnMessageReceived;
