@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using Xunit;
 
@@ -12,6 +13,8 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
 {
     public class TheSequentializingBackendFxApplicationInvoker
     {
+        private static readonly ILogger Logger = LogManager.Create<TheSequentializingBackendFxApplicationInvoker>();
+        
         public TheSequentializingBackendFxApplicationInvoker()
         {
             var fakes = new DiTestFakes();
@@ -27,17 +30,17 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         {
             var tasks = Enumerable
                         .Range(0, count)
-                        .Select(i => Task.Run(() => invoker.Invoke(OneSecondAction, new AnonymousIdentity(), new TenantId(1))))
+                        .Select(i => Task.Run(() => invoker.Invoke(DoTheAction, new AnonymousIdentity(), new TenantId(1))))
                         .ToArray();
 
             await Task.WhenAll(tasks);
         }
 
-        private void OneSecondAction(IInstanceProvider _)
+        private void DoTheAction(IInstanceProvider _)
         {
-            Console.WriteLine("start");
+            Logger.Debug("start");
             Thread.Sleep(_actionDuration);
-            Console.WriteLine("end");
+            Logger.Debug("end");
         }
 
         [Fact]
@@ -48,7 +51,9 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             var sw = new Stopwatch();
             sw.Start();
             await InvokeSomeActions(count, _invoker);
-            Assert.True(sw.ElapsedMilliseconds < _actionDuration * count);
+            long actualDuration = sw.ElapsedMilliseconds;
+            var expectedDuration = _actionDuration * count;
+            Assert.True(actualDuration < expectedDuration, $"Actual duration of {actualDuration}ms is greater than maximum expected duration of {expectedDuration}ms");
         }
 
         [Fact]
