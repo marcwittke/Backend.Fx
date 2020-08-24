@@ -16,7 +16,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         protected override Task PublishOnMessageBus(IIntegrationEvent integrationEvent)
         {
             var jsonString = JsonConvert.SerializeObject(integrationEvent);
-            return Task.Run(() => Process(integrationEvent.GetType().FullName, new SerializingProcessingContext(jsonString)));
+            return Task.Run(() => Process(MessageNameProvider.GetMessageName<TestIntegrationEvent>(), new SerializingProcessingContext(jsonString)));
         }
 
         protected override void Subscribe(string messageName)
