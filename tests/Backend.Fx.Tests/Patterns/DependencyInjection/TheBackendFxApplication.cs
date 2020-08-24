@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Domain;
 using Backend.Fx.Patterns.EventAggregation.Integration;
@@ -30,7 +31,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             A.CallTo(() => _fakes.InstanceProvider.GetInstance<IMessageBusScope>()).ReturnsLazily(() => messageBusScopeFactory.Invoke());
 
 
-            _sut = new BackendFxApplication(_fakes.CompositionRoot, _fakes.MessageBus);
+            _sut = new BackendFxApplication(_fakes.CompositionRoot, _fakes.MessageBus, A.Fake<IExceptionLogger>());
         }
 
         private readonly IBackendFxApplication _sut;
@@ -59,9 +60,9 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         }
 
         [Fact]
-        public void ProvidesAsyncInvoker()
+        public void ProvidesExceptionLoggingAsyncInvoker()
         {
-            Assert.IsType<BackendFxApplicationInvoker>(_sut.AsyncInvoker);
+            Assert.IsType<ExceptionLoggingAsyncInvoker>(_sut.AsyncInvoker);
         }
 
         [Fact]
@@ -77,15 +78,15 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         }
 
         [Fact]
-        public void ProvidesInvoker()
+        public void ProvidesExceptionLoggingInvoker()
         {
-            Assert.IsType<BackendFxApplicationInvoker>(_sut.Invoker);
+            Assert.IsType<ExceptionLoggingInvoker>(_sut.Invoker);
         }
 
         [Fact]
         public void IntegratesWithMessageBus()
         {
-            A.CallTo(() => _fakes.MessageBus.IntegrateApplication(A<IBackendFxApplicationInvoker>._)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakes.MessageBus.ProvideInvoker(A<IBackendFxApplicationInvoker>._)).MustHaveHappenedOnceExactly();
         }
 
         [Fact]

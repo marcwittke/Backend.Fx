@@ -45,16 +45,18 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         }
 
         [Fact]
-        public void CatchesFrameworkExceptions()
+        public void DoesNotCatchFrameworkExceptions()
         {
-            A.CallTo(() => _fakes.CompositionRoot.BeginScope()).Throws<InvalidOperationException>();
-            _sut.Invoke(ip => { }, new AnonymousIdentity(), new TenantId(111));
+            A.CallTo(() => _fakes.CompositionRoot.BeginScope()).Throws<SimulatedException>();
+            Assert.Throws<SimulatedException>(() => _sut.Invoke(ip => { }, new AnonymousIdentity(), new TenantId(111)));
+            A.CallTo(() => _fakes.Operation.Begin()).MustNotHaveHappened();
+            A.CallTo(() => _fakes.Operation.Complete()).MustNotHaveHappened();
         }
 
         [Fact]
-        public void DoesNotCompleteOperationOnException()
+        public void DoesNotCatchOperationExceptions()
         {
-            _sut.Invoke(ip => throw new InvalidOperationException(), new AnonymousIdentity(), new TenantId(111));
+            Assert.Throws<SimulatedException>(() => _sut.Invoke(ip => throw new SimulatedException(), new AnonymousIdentity(), new TenantId(111)));
             A.CallTo(() => _fakes.Operation.Begin()).MustHaveHappenedOnceExactly();
             A.CallTo(() => _fakes.Operation.Complete()).MustNotHaveHappened();
         }

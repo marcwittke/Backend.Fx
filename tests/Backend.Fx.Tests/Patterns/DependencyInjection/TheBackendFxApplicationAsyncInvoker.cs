@@ -46,16 +46,18 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         }
 
         [Fact]
-        public async Task CatchesFrameworkExceptions()
+        public async Task DoesNotCatchFrameworkExceptions()
         {
-            A.CallTo(() => _fakes.CompositionRoot.BeginScope()).Throws<InvalidOperationException>();
-            await _sut.InvokeAsync(ip => Task.CompletedTask, new AnonymousIdentity(), new TenantId(111));
+            A.CallTo(() => _fakes.CompositionRoot.BeginScope()).Throws<SimulatedException>();
+            await Assert.ThrowsAsync<SimulatedException>(async () => await _sut.InvokeAsync(ip => Task.CompletedTask, new AnonymousIdentity(), new TenantId(111)));
+            A.CallTo(() => _fakes.Operation.Begin()).MustNotHaveHappened();
+            A.CallTo(() => _fakes.Operation.Complete()).MustNotHaveHappened();
         }
 
         [Fact]
-        public async Task DoesNotCompleteOperationOnException()
+        public async Task DoesNotCatchOperationExceptions()
         {
-            await _sut.InvokeAsync(ip => throw new InvalidOperationException(), new AnonymousIdentity(), new TenantId(111));
+            await Assert.ThrowsAsync<SimulatedException>(async () => await _sut.InvokeAsync(ip => throw new SimulatedException(), new AnonymousIdentity(), new TenantId(111)));
             A.CallTo(() => _fakes.Operation.Begin()).MustHaveHappenedOnceExactly();
             A.CallTo(() => _fakes.Operation.Complete()).MustNotHaveHappened();
         }

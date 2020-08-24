@@ -1,6 +1,4 @@
-using System;
 using System.Linq;
-using System.Security.Principal;
 using System.Threading;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Patterns.DataGeneration;
@@ -16,22 +14,22 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
     {
         public TheDataGenerationContext()
         {
-            _fakes = new DiTestFakes();
-            A.CallTo(() => _fakes.InstanceProvider.GetInstances<IDataGenerator>()).Returns(_demoDataGenerators.Concat(_prodDataGenerators.Cast<IDataGenerator>()).ToArray());
+            var fakes = new DiTestFakes();
+            A.CallTo(() => fakes.InstanceProvider.GetInstances<IDataGenerator>()).Returns(_demoDataGenerators.Concat(_prodDataGenerators.Cast<IDataGenerator>()).ToArray());
 
             var application = A.Fake<IBackendFxApplication>();
-            A.CallTo(() => application.Invoker).Returns(_fakes.Invoker);
+            A.CallTo(() => application.Invoker).Returns(fakes.Invoker);
             A.CallTo(() => application.WaitForBoot(A<int>._, A<CancellationToken>._)).Returns(true);
             
             var messageBus = new InMemoryMessageBus();
-            messageBus.IntegrateApplication(application.Invoker);
+            messageBus.ProvideInvoker(application.Invoker);
             
             var tenantIdProvider = A.Fake<ITenantIdProvider>();
             A.CallTo(() => tenantIdProvider.GetActiveDemonstrationTenantIds()).Returns(_demoTenants);
             A.CallTo(() => tenantIdProvider.GetActiveProductionTenantIds()).Returns(_prodTenants);
             
-            _sut = new DataGenerationContext(_fakes.CompositionRoot,
-                                             _fakes.Invoker);
+            _sut = new DataGenerationContext(fakes.CompositionRoot,
+                                             fakes.Invoker);
         }
 
         private readonly DataGenerationContext _sut;
@@ -39,7 +37,6 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
         private readonly IProductiveDataGenerator[] _prodDataGenerators = {new ProdDataGenerator1()};
         private readonly TenantId[] _demoTenants = {new TenantId(1), new TenantId(2)};
         private readonly TenantId[] _prodTenants = {new TenantId(11), new TenantId(12)};
-        private readonly DiTestFakes _fakes;
 
         [Theory]
         [InlineData(true)]

@@ -1,5 +1,6 @@
 using System.Threading;
 using Backend.Fx.Environment.Persistence;
+using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using FakeItEasy;
@@ -11,7 +12,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
     {
         public TheBackendFxDbApplication()
         {
-            IBackendFxApplication application = new BackendFxApplication(_fakes.CompositionRoot, _fakes.MessageBus);
+            IBackendFxApplication application = new BackendFxApplication(_fakes.CompositionRoot, _fakes.MessageBus, A.Fake<IExceptionLogger>());
             _sut = new BackendFxDbApplication(_databaseBootstrapper, _databaseAvailabilityAwaiter, application);
         }
 
