@@ -18,10 +18,10 @@ namespace Backend.Fx.RabbitMq
 
         public RabbitMqMessageBus(IConnectionFactory connectionFactory,
                                   int retryCount,
-                                  string brokerName,
-                                  string queueName)
+                                  string exchangeName,
+                                  string receiveQueueName)
         {
-            _channel = new RabbitMqChannel(connectionFactory, brokerName, queueName, retryCount);
+            _channel = new RabbitMqChannel(MessageNameProvider, connectionFactory, exchangeName, receiveQueueName, retryCount);
         }
 
         public override void Connect()
@@ -37,28 +37,37 @@ namespace Backend.Fx.RabbitMq
         private void ChannelOnMessageReceived(object sender, BasicDeliverEventArgs args)
         {
             Logger.Debug($"RabbitMQ message with routing key {args.RoutingKey} received");
-            Process(args.RoutingKey, new RabbitMqEventProcessingContext(args.Body));
+            try
+            {
+                Process(args.RoutingKey, new RabbitMqEventProcessingContext(args.Body));
+                _channel.Acknowledge(args.DeliveryTag);
+            }
+            catch
+            {
+                _channel.NAcknowledge(args.DeliveryTag);
+                throw;
+            }
         }
 
         protected override Task PublishOnMessageBus(IIntegrationEvent integrationEvent)
         {
-            Logger.Info($"Publishing {integrationEvent.GetType().Name}");
+            Logger.Info($"Publishing {MessageNameProvider.GetMessageName(integrationEvent)}");
             _channel.EnsureOpen();
             _channel.PublishEvent(integrationEvent);
             return Task.CompletedTask;
         }
 
-        protected override void Subscribe(string eventName)
+        protected override void Subscribe(string messageName)
         {
-            Logger.Info($"Subscribing to {eventName}");
+            Logger.Info($"Subscribing to {messageName}");
             _channel.EnsureOpen();
-            _channel.Subscribe(eventName);
+            _channel.Subscribe(messageName);
         }
 
-        protected override void Unsubscribe(string eventName)
+        protected override void Unsubscribe(string messageName)
         {
-            Logger.Info($"Unsubscribing from {eventName}");
-            _channel.Unsubscribe(eventName);
+            Logger.Info($"Unsubscribing from {messageName}");
+            _channel.Unsubscribe(messageName);
         }
 
         protected override void Dispose(bool disposing)

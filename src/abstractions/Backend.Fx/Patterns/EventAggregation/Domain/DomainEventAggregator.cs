@@ -45,8 +45,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Domain
                     () => injectedHandler.Handle(domainEvent));
 
                 _handleActions.Enqueue(handleAction);
-                Logger.Debug(
-                    $"Invocation of {injectedHandler.GetType().Name} for domain event {typeof(TDomainEvent).Name} registered. It will be executed on completion of unit of work");
+                Logger.Debug($"Invocation of {injectedHandler.GetType().Name} for domain event {typeof(TDomainEvent).Name} registered. It will be executed on completion of operation");
             }
         }
 

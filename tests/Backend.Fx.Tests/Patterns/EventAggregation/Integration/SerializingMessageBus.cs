@@ -19,11 +19,11 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             return Task.Run(() => Process(integrationEvent.GetType().FullName, new SerializingProcessingContext(jsonString)));
         }
 
-        protected override void Subscribe(string eventName)
+        protected override void Subscribe(string messageName)
         {
         }
 
-        protected override void Unsubscribe(string eventName)
+        protected override void Unsubscribe(string messageName)
         {
         }
 

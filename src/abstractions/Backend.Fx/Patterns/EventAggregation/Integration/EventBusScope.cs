@@ -9,8 +9,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
     {
         /// <summary>
         /// Enqueue an event to be raised later. 
-        /// Intention is to let events bubble up after an operation has terminated, e.g. when a wrapping
-        /// unit of work has completed.
+        /// Intention is to let events bubble up after an operation has terminated
         /// </summary>
         /// <param name="integrationEvent"></param>
         void Publish(IIntegrationEvent integrationEvent);
