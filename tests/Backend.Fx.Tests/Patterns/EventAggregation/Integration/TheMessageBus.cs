@@ -86,7 +86,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         [Fact]
         public async void CallsDynamicEventHandler()
         {
-            Sut.Subscribe<DynamicMessageHandler>(typeof(TestIntegrationEvent).FullName);
+            Sut.Subscribe<DynamicMessageHandler>(Sut.MessageNameProvider.GetMessageName<TestIntegrationEvent>());
             await Sut.Publish(Invoker.IntegrationEvent);
             Assert.True(Invoker.IntegrationEvent.DynamicProcessed.Wait(Debugger.IsAttached ? int.MaxValue : 10000));
 
@@ -97,7 +97,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         [Fact]
         public async void CallsMixedEventHandlers()
         {
-            Sut.Subscribe<DynamicMessageHandler>(typeof(TestIntegrationEvent).FullName);
+            Sut.Subscribe<DynamicMessageHandler>(Sut.MessageNameProvider.GetMessageName<TestIntegrationEvent>());
             Sut.Subscribe<TypedMessageHandler, TestIntegrationEvent>();
 
             await Sut.Publish(Invoker.IntegrationEvent);
@@ -141,8 +141,8 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         [Fact]
         public async void DoesNotCallUnsubscribedDynamicEventHandler()
         {
-            Sut.Subscribe<DynamicMessageHandler>(typeof(TestIntegrationEvent).FullName);
-            Sut.Unsubscribe<DynamicMessageHandler>(typeof(TestIntegrationEvent).FullName);
+            Sut.Subscribe<DynamicMessageHandler>(Sut.MessageNameProvider.GetMessageName<TestIntegrationEvent>());
+            Sut.Unsubscribe<DynamicMessageHandler>(Sut.MessageNameProvider.GetMessageName<TestIntegrationEvent>());
             await Sut.Publish(Invoker.IntegrationEvent);
             A.CallTo(() => Invoker.DynamicHandler.Handle(A<object>._)).MustNotHaveHappened();
         }

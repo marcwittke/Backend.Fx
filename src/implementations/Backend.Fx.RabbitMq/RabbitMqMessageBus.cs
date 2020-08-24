@@ -90,7 +90,7 @@ namespace Backend.Fx.RabbitMq
 
             public RabbitMqEventProcessingContext(object rawReceivedMessage)
             {
-                Logger.Debug($"Deserializing a message of type {rawReceivedMessage?.GetType().FullName ?? "???"}");
+                Logger.Trace($"Deserializing a message of type {rawReceivedMessage?.GetType().Name ?? "???"}");
                 if (!(rawReceivedMessage is byte[] rawEventPayloadBytes)) throw new InvalidOperationException("Raw event payload is not a binary JSON string");
 
                 _jsonString = Encoding.UTF8.GetString(rawEventPayloadBytes);
