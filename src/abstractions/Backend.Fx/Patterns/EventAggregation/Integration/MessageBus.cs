@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Logging;
@@ -24,7 +23,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
         public IMessageNameProvider MessageNameProvider { get; } = new DefaultMessageNameProvider();
         public abstract void Connect();
 
-        public void IntegrateApplication(IBackendFxApplicationInvoker invoker)
+        public void ProvideInvoker(IBackendFxApplicationInvoker invoker)
         {
             _invoker = invoker;
         }
@@ -101,8 +100,6 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
         public void Unsubscribe<THandler, TEvent>() where THandler : IIntegrationMessageHandler<TEvent> where TEvent : IIntegrationEvent
         {
             string eventName = MessageNameProvider.GetMessageName<TEvent>();
-            Debug.Assert(eventName != null, nameof(eventName) + " != null");
-
             Logger.Info($"Unsubscribing from {eventName}");
             if (_subscriptions.TryGetValue(eventName, out var handlers))
             {
@@ -115,8 +112,6 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
         public void Unsubscribe<TEvent>(IIntegrationMessageHandler<TEvent> handler) where TEvent : IIntegrationEvent
         {
             string eventName = MessageNameProvider.GetMessageName<TEvent>();
-            Debug.Assert(eventName != null, nameof(eventName) + " != null");
-
             Logger.Info($"Unsubscribing from {eventName}");
             if (_subscriptions.TryGetValue(eventName, out var handlers))
             {
@@ -129,25 +124,33 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
         protected abstract void Subscribe(string messageName);
         protected abstract void Unsubscribe(string messageName);
 
-        protected void Process(string eventName, EventProcessingContext context)
+        protected void Process(string messageName, EventProcessingContext context)
         {
-            Logger.Info($"Processing a {eventName} event");
+            Logger.Info($"Processing a {messageName} message");
             EnsureInvoker();
 
-            if (_subscriptions.TryGetValue(eventName, out List<ISubscription> subscriptions))
+            if (_subscriptions.TryGetValue(messageName, out List<ISubscription> subscriptions))
             {
                 foreach (ISubscription subscription in subscriptions)
                 {
-                    _invoker.Invoke(
-                        instanceProvider => subscription.Process(instanceProvider, context),
-                        new SystemIdentity(),
-                        context.TenantId,
-                        context.CorrelationId);
+                    try
+                    {
+                        _invoker.Invoke(
+                            instanceProvider => subscription.Process(instanceProvider, context),
+                            new SystemIdentity(),
+                            context.TenantId,
+                            context.CorrelationId);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Warn(ex, $"Processing a {messageName} message failed");
+                        throw;
+                    }
                 }
             }
             else
             {
-                Logger.Info($"No handler registered. Ignoring {eventName} event");
+                Logger.Info($"No handler registered. Ignoring {messageName} event");
             }
         }
 
@@ -178,7 +181,8 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
 
             public string GetMessageName(Type t)
             {
-                return t.Name;
+                var messageName = t.Name ?? throw new ArgumentException("Type name is null!");
+                return messageName;
             }
 
             public string GetMessageName(IIntegrationEvent integrationEvent)

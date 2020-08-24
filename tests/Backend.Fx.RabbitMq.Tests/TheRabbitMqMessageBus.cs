@@ -40,7 +40,7 @@ namespace Backend.Fx.RabbitMq.Tests
                 UserName = "anicors",
                 Password = "R4bb!tMQ"
             }, 5, "unittest", "testSender");
-            sender.IntegrateApplication(_senderInvoker);
+            sender.ProvideInvoker(_senderInvoker);
             sender.Connect();
 
             var receiver = new RabbitMqMessageBus(new ConnectionFactory
@@ -50,7 +50,7 @@ namespace Backend.Fx.RabbitMq.Tests
                 Password = "R4bb!tMQ"
             }, 5, "unittest", "testReceiver");
 
-            receiver.IntegrateApplication(_receiverInvoker);
+            receiver.ProvideInvoker(_receiverInvoker);
             receiver.Connect();
             receiver.Subscribe<TestIntegrationEventHandler, TestIntegrationEvent>();
 

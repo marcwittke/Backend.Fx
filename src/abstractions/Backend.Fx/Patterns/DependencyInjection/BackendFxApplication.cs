@@ -59,13 +59,16 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// </summary>
         /// <param name="compositionRoot">The composition root of the dependency injection framework</param>
         /// <param name="messageBus">The message bus implementation used by this application instance</param>
-        public BackendFxApplication(ICompositionRoot compositionRoot, IMessageBus messageBus)
+        /// <param name="exceptionLogger"></param>
+        public BackendFxApplication(ICompositionRoot compositionRoot, IMessageBus messageBus, IExceptionLogger exceptionLogger)
         {
             var invoker = new BackendFxApplicationInvoker(compositionRoot);
-            AsyncInvoker = invoker;
-            Invoker = invoker;
+            AsyncInvoker = new ExceptionLoggingAsyncInvoker(exceptionLogger, invoker);
+            Invoker = new ExceptionLoggingInvoker(exceptionLogger, invoker);
             MessageBus = messageBus;
-            MessageBus.IntegrateApplication(new SequentializingBackendFxApplicationInvoker(new WaitForBootInvoker(this, Invoker)));
+            MessageBus.ProvideInvoker(new SequentializingBackendFxApplicationInvoker(
+                                          new WaitForBootInvoker(this, 
+                                                                 new ExceptionLoggingAndHandlingInvoker(exceptionLogger, Invoker))));
             CompositionRoot = compositionRoot;
             CompositionRoot.InfrastructureModule.RegisterScoped<IClock, WallClock>();
             CompositionRoot.InfrastructureModule.RegisterScoped<ICurrentTHolder<Correlation>, CurrentCorrelationHolder>();

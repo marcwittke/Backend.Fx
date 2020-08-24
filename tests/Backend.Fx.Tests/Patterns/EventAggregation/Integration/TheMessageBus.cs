@@ -12,8 +12,13 @@ using Xunit;
 
 namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
 {
-    public sealed class TheInMemoryMessageBus : TheMessageBus<InMemoryMessageBus>
+    public sealed class TheInMemoryMessageBus : TheMessageBus
     {
+        public TheInMemoryMessageBus()
+        {
+            Sut.ProvideInvoker(FakeApplication.Invoker);
+        }
+        
         [Fact]
         public async Task HandlesEventsAsynchronously()
         {
@@ -25,27 +30,33 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             Assert.True(Invoker.IntegrationEvent.TypedProcessed.Wait(Debugger.IsAttached ? int.MaxValue : 10000));
             Assert.True(sw.ElapsedMilliseconds > 1000);
         }
+
+        protected override IMessageBus Sut { get; } = new InMemoryMessageBus();
     }
 
     [UsedImplicitly]
-    public sealed class TheSerializingMessageBus : TheMessageBus<SerializingMessageBus>
+    public sealed class TheSerializingMessageBus : TheMessageBus
     {
+        public TheSerializingMessageBus()
+        {
+            Sut.ProvideInvoker(FakeApplication.Invoker);
+        }
+
+        protected override IMessageBus Sut { get; } = new SerializingMessageBus();
     }
 
-    public abstract class TheMessageBus<TMessageBus> where TMessageBus : MessageBus, new()
+    public abstract class TheMessageBus
     {
-        private readonly IBackendFxApplication _fakeApplication = A.Fake<IBackendFxApplication>();
-        
+        protected IBackendFxApplication FakeApplication { get; } = A.Fake<IBackendFxApplication>();
+
         protected TheMessageBus()
         {
-            A.CallTo(() => _fakeApplication.Invoker).Returns(Invoker);
-            A.CallTo(() => _fakeApplication.WaitForBoot(A<int>._, A<CancellationToken>._)).Returns(true);
-            
-            Sut.IntegrateApplication(_fakeApplication.Invoker);
+            A.CallTo(() => FakeApplication.Invoker).Returns(Invoker);
+            A.CallTo(() => FakeApplication.WaitForBoot(A<int>._, A<CancellationToken>._)).Returns(true);
         }
 
         protected TestInvoker Invoker { get; } = new TestInvoker();
-        protected IMessageBus Sut { get; } = new TMessageBus();
+        protected abstract IMessageBus Sut { get; }
 
 
         public class TestInvoker : IBackendFxApplicationInvoker

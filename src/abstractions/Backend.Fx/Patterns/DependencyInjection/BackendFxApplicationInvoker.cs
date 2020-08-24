@@ -43,66 +43,54 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
         public void Invoke(Action<IInstanceProvider> action, IIdentity identity, TenantId tenantId, Guid? correlationId = null)
         {
-            try
+            Logger.Info($"Invoking synchronous action as {identity.Name} in {tenantId}");
+            using (IInjectionScope injectionScope = BeginScope(identity, tenantId, correlationId))
             {
-                using (IInjectionScope injectionScope = BeginScope(identity, tenantId, correlationId))
+                using (UseDurationLogger(injectionScope))
                 {
-                    using (UseDurationLogger(injectionScope))
+                    var operation = injectionScope.InstanceProvider.GetInstance<IOperation>();
+                    try
                     {
-                        var operation = injectionScope.InstanceProvider.GetInstance<IOperation>();
-                        try
-                        {
-                            operation.Begin();
-                            action.Invoke(injectionScope.InstanceProvider);
-                            injectionScope.InstanceProvider.GetInstance<IDomainEventAggregator>().RaiseEvents();
-                            operation.Complete();
-                        }
-                        catch
-                        {
-                            operation.Cancel();
-                            throw;
-                        }
-
-                        var messageBusScope = injectionScope.InstanceProvider.GetInstance<IMessageBusScope>();
-                        AsyncHelper.RunSync(() => messageBusScope.RaiseEvents());
+                        operation.Begin();
+                        action.Invoke(injectionScope.InstanceProvider);
+                        injectionScope.InstanceProvider.GetInstance<IDomainEventAggregator>().RaiseEvents();
+                        operation.Complete();
                     }
+                    catch
+                    {
+                        operation.Cancel();
+                        throw;
+                    }
+
+                    var messageBusScope = injectionScope.InstanceProvider.GetInstance<IMessageBusScope>();
+                    AsyncHelper.RunSync(() => messageBusScope.RaiseEvents());
                 }
-            }
-            catch (Exception exception)
-            {
-                Logger.Fatal(exception);
             }
         }
 
         public async Task InvokeAsync(Func<IInstanceProvider, Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId, Guid? correlationId = null)
         {
-            try
+            Logger.Info($"Invoking asynchronous action as {identity.Name} in {tenantId}");
+            using (IInjectionScope injectionScope = BeginScope(identity, tenantId, correlationId))
             {
-                using (IInjectionScope injectionScope = BeginScope(identity, tenantId, correlationId))
+                using (UseDurationLogger(injectionScope))
                 {
-                    using (UseDurationLogger(injectionScope))
+                    var operation = injectionScope.InstanceProvider.GetInstance<IOperation>();
+                    try
                     {
-                        var operation = injectionScope.InstanceProvider.GetInstance<IOperation>();
-                        try
-                        {
-                            operation.Begin();
-                            await awaitableAsyncAction.Invoke(injectionScope.InstanceProvider);
-                            injectionScope.InstanceProvider.GetInstance<IDomainEventAggregator>().RaiseEvents();
-                            operation.Complete();
-                        }
-                        catch
-                        {
-                            operation.Cancel();
-                            throw;
-                        }
-
-                        await injectionScope.InstanceProvider.GetInstance<IMessageBusScope>().RaiseEvents();
+                        operation.Begin();
+                        await awaitableAsyncAction.Invoke(injectionScope.InstanceProvider);
+                        injectionScope.InstanceProvider.GetInstance<IDomainEventAggregator>().RaiseEvents();
+                        operation.Complete();
                     }
+                    catch
+                    {
+                        operation.Cancel();
+                        throw;
+                    }
+
+                    await injectionScope.InstanceProvider.GetInstance<IMessageBusScope>().RaiseEvents();
                 }
-            }
-            catch (Exception exception)
-            {
-                Logger.Fatal(exception);
             }
         }
 
