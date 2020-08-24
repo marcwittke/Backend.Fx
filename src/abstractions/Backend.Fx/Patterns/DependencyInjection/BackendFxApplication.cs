@@ -89,6 +89,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
         {
             Logger.Info("Booting application");
             CompositionRoot.Verify();
+            MessageBus.Connect();
             _isBooted.Set();
             return Task.CompletedTask;
         }

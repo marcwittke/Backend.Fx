@@ -6,13 +6,19 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
     public interface IMessageBus : IDisposable
     {
+        /// <summary>
+        /// This instance is used to determine a message name from an integration event. The default implementation just
+        /// returns <code>event.GetType().Name</code>
+        /// </summary>
+        IMessageNameProvider MessageNameProvider { get; }
+
         void Connect();
 
         /// <summary>
         /// Directly publishes an event on the message bus without delay.
         /// In most cases you want to publish an event when the cause is considered as safely done, e.g. when the 
         /// wrapping transaction is committed. Use <see cref="IMessageBusScope"/> to let the framework raise all events
-        /// after committing the unit of work.
+        /// after completing the operation.
         /// </summary>
         /// <param name="integrationEvent"></param>
         /// <returns></returns>
@@ -22,8 +28,8 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
         /// Subscribes to an integration event with a dynamic event handler
         /// </summary>
         /// <typeparam name="THandler">The handler type</typeparam>
-        /// <param name="eventName">Th event name to subscribe to. (Should be Type.FullName to avoid namespace collisions)</param>
-        void Subscribe<THandler>(string eventName)
+        /// <param name="messageName">The event name to subscribe to. </param>
+        void Subscribe<THandler>(string messageName)
             where THandler : IIntegrationMessageHandler;
 
         /// <summary>
@@ -42,7 +48,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
         void Subscribe<TEvent>(IIntegrationMessageHandler<TEvent> handler)
             where TEvent : IIntegrationEvent;
 
-        void Unsubscribe<THandler>(string eventName)
+        void Unsubscribe<THandler>(string messageName)
             where THandler : IIntegrationMessageHandler;
 
         void Unsubscribe<THandler, TEvent>()
