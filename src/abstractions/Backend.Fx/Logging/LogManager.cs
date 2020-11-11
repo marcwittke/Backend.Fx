@@ -17,21 +17,15 @@ namespace Backend.Fx.Logging
 
         public static ILogger Create<T>()
         {
-            return Create(typeof(T));
+            return _factory.Create<T>();
         }
 
         public static ILogger Create(Type t)
         {
-            string s = t.FullName;
-            var indexOf = s?.IndexOf('[') ?? 0;
-            if (indexOf > 0)
-            {
-                s = s?.Substring(0, indexOf);
-            }
-
-            return Create(s);
+            return _factory.Create(t);
         }
 
+        [Obsolete]
         public static ILogger Create(string s)
         {
             return _factory.Create(s);

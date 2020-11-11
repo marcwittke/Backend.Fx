@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using Backend.Fx.Logging;
 using NLog;
 using NLog.Config;
@@ -18,6 +19,23 @@ namespace Backend.Fx.NLogLogging
         public ILogger Create(string s)
         {
             return new NLogLogger(LogManager.GetLogger(s));
+        }
+
+        public ILogger Create(Type t)
+        {
+            string s = t.FullName;
+            var indexOf = s?.IndexOf('[') ?? 0;
+            if (indexOf > 0)
+            {
+                s = s?.Substring(0, indexOf);
+            }
+
+            return Create(s);
+        }
+
+        public ILogger Create<T>()
+        {
+            return Create(typeof(T));
         }
 
         public void BeginActivity(int activityIndex)

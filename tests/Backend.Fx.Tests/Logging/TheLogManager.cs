@@ -48,14 +48,5 @@ namespace Backend.Fx.Tests.Logging
             logger.DebugDuration(msg).Dispose();
             logger.InfoDuration(msg).Dispose();
         }
-
-        [Fact]
-        public void TakesTypeFullNameAsLoggerName()
-        {
-            LogManager.Initialize(_loggerFactory);
-            LogManager.Create<TheLogManager>();
-            A.CallTo(() => _loggerFactory.Create(A<string>.That.Matches(s => s == "Backend.Fx.Tests.Logging.TheLogManager")))
-             .MustHaveHappenedOnceExactly();
-        }
     }
 }
