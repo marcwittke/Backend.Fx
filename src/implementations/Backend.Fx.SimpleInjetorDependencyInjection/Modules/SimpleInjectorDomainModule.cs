@@ -8,6 +8,7 @@ using Backend.Fx.Logging;
 using Backend.Fx.Patterns.Authorization;
 using Backend.Fx.Patterns.DataGeneration;
 using Backend.Fx.Patterns.EventAggregation.Domain;
+using Backend.Fx.Patterns.EventAggregation.Integration;
 using Backend.Fx.Patterns.Jobs;
 using SimpleInjector;
 
@@ -49,6 +50,13 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
             {
                 Logger.Debug($"Appending {domainEventHandlerType.Name} to list of IDomainEventHandler");
                 container.Collection.Append(typeof(IDomainEventHandler<>), domainEventHandlerType);
+            }
+            
+            // integration message handlers
+            foreach (Type integrationMessageHandlerType in container.GetTypesToRegister(typeof(IIntegrationMessageHandler<>), _domainAssemblies))
+            {
+                Logger.Debug($"Registering {integrationMessageHandlerType.Name}");
+                container.Register(integrationMessageHandlerType);
             }
         }
 
