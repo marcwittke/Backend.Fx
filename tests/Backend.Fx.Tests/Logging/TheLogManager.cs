@@ -10,13 +10,11 @@ namespace Backend.Fx.Tests.Logging
     {
         public TheLogManager()
         {
-            _loggerFactory = A.Fake<ILoggerFactory>();
+            var loggerFactory = A.Fake<ILoggerFactory>();
             var logger = A.Fake<ILogger>();
 
-            A.CallTo(() => _loggerFactory.Create(A<string>.Ignored)).Returns(logger);
+            A.CallTo(() => loggerFactory.Create<TheLogManager>()).Returns(logger);
         }
-
-        private readonly ILoggerFactory _loggerFactory;
 
         [Fact]
         public void DoesNotThrowOnZeroConfig()

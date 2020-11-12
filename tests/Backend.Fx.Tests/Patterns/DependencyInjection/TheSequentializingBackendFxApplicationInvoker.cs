@@ -43,17 +43,25 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             Logger.Debug("end");
         }
 
-        // fails on CI Pipeline due to CPU count [Fact]
+        [Fact]
         public async Task IsReallyNeeded()
         {
-            // negative test: without sequentialization all tasks run in parallel
-            var count = 10;
-            var sw = new Stopwatch();
-            sw.Start();
-            await InvokeSomeActions(count, _invoker);
-            long actualDuration = sw.ElapsedMilliseconds;
-            var expectedDuration = _actionDuration * count;
-            Assert.True(actualDuration < expectedDuration, $"Actual duration of {actualDuration}ms is greater than maximum expected duration of {expectedDuration}ms");
+            if (System.Environment.ProcessorCount > 1)
+            {
+                // negative test: without sequentialization all tasks run in parallel
+                var count = 10;
+                var sw = new Stopwatch();
+                sw.Start();
+                await InvokeSomeActions(count, _invoker);
+                long actualDuration = sw.ElapsedMilliseconds;
+                var expectedDuration = _actionDuration * count;
+                Assert.True(actualDuration < expectedDuration,
+                    $"Actual duration of {actualDuration}ms is greater than maximum expected duration of {expectedDuration}ms");
+            }
+            else
+            {
+                // fails on CI Pipeline due to CPU count   
+            }
         }
 
         [Fact]

@@ -20,7 +20,7 @@ namespace Backend.Fx.SerilogLogging
 
         public ILogger Create(string s)
         {
-            throw new NotSupportedException();
+            return new SerilogLogger(_rootLogger);
         }
 
         public ILogger Create(Type t)
@@ -40,7 +40,7 @@ namespace Backend.Fx.SerilogLogging
 
         public void Shutdown()
         {
-            _rootLogger.Dispose();
+            Log.CloseAndFlush();
         }
     }
 }
