@@ -4,7 +4,6 @@ namespace Backend.Fx.Logging
 {
     public interface ILoggerFactory
     {
-        [Obsolete]
         ILogger Create(string s);
         ILogger Create(Type t);
         ILogger Create<T>();

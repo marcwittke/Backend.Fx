@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using Backend.Fx.Logging;
 using Serilog;
@@ -20,7 +21,9 @@ namespace Backend.Fx.SerilogLogging
 
         public ILogger Create(string s)
         {
-            return new SerilogLogger(_rootLogger);
+            return TryGetContextTypeFromString(s, out Type t)
+                ? new SerilogLogger(_rootLogger.ForContext(t))
+                : new SerilogLogger(_rootLogger);
         }
 
         public ILogger Create(Type t)
@@ -41,6 +44,20 @@ namespace Backend.Fx.SerilogLogging
         public void Shutdown()
         {
             Log.CloseAndFlush();
+        }
+        
+        private static bool TryGetContextTypeFromString(string s, out Type type)
+        {
+            try
+            {
+                type = Type.GetType(s);
+            }
+            catch
+            {
+                type = null;
+            }
+            
+            return type != null;
         }
     }
 }

@@ -25,7 +25,6 @@ namespace Backend.Fx.Logging
             return _factory.Create(t);
         }
 
-        [Obsolete]
         public static ILogger Create(string s)
         {
             return _factory.Create(s);
