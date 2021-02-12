@@ -151,15 +151,16 @@ namespace Backend.Fx.EfCorePersistence
             Logger.Debug($"Searching aggregate root of {entry.Entity.GetType().Name}[{(entry.Entity as Identified)?.Id}]");
             foreach (NavigationEntry navigation in entry.Navigations)
             {
-                TypeInfo navTargetTypeInfo = navigation.Metadata.GetTargetType().ClrType.GetTypeInfo();
+                TypeInfo navTargetTypeInfo = navigation.Metadata.TargetEntityType.ClrType.GetTypeInfo();
                 int navigationTargetForeignKeyValue;
 
                 if (navigation.CurrentValue == null)
                 {
+                    var navigationMetadata = ((INavigation)navigation.Metadata);
                     // orphaned entity, original value contains the foreign key value
-                    if (navigation.Metadata.ForeignKey.Properties.Count > 1) throw new InvalidOperationException("Foreign Keys with multiple properties are not supported.");
+                    if (navigationMetadata.ForeignKey.Properties.Count > 1) throw new InvalidOperationException("Foreign Keys with multiple properties are not supported.");
 
-                    IProperty property = navigation.Metadata.ForeignKey.Properties[0];
+                    IProperty property = navigationMetadata.ForeignKey.Properties[0];
                     navigationTargetForeignKeyValue = (int) entry.OriginalValues[property];
                 }
                 else
