@@ -1,0 +1,29 @@
+name: continuous
+
+on:
+  push:
+    branches:
+      - master
+      - release/*
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  nuke-build:
+    name: nuke-build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Cache .tmp, ~/.nuget/packages
+        uses: actions/cache@v2
+        with:
+          path: |
+            .tmp
+            ~/.nuget/packages
+          key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
+      - name: Run './build.cmd Test Pack'
+        run: ./build.cmd Test Pack
+        env:
+            MYGET_TOKEN: ${{ secrets.MYGET_TOKEN }}
+            NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
