@@ -22,8 +22,8 @@ jobs:
             .tmp
             ~/.nuget/packages
           key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
-      - name: Run './build.cmd Test Pack'
-        run: ./build.cmd Test Pack
+      - name: nuke build
+        run: ./build.sh
         env:
             MYGET_TOKEN: ${{ secrets.MYGET_TOKEN }}
             NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
