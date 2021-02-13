@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Domain;
+using Backend.Fx.SimpleInjectorDependencyInjection.Modules;
 using SimpleInjector;
 using SimpleInjector.Advanced;
 using SimpleInjector.Lifestyles;
@@ -17,6 +19,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
     {
         private static readonly ILogger Logger = LogManager.Create<SimpleInjectorCompositionRoot>();
 
+        private int _scopeSequenceNumber = 1;
         /// <summary>
         /// This constructor creates a composition root that prefers scoped lifestyle
         /// </summary>
@@ -30,7 +33,8 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             ScopedLifestyle = scopedLifestyle;
             Container.Options.LifestyleSelectionBehavior = lifestyleBehavior;
             Container.Options.DefaultScopedLifestyle = ScopedLifestyle;
-            Container.Register<ICurrentTHolder<Correlation>, CurrentCorrelationHolder>();
+            InfrastructureModule = new SimpleInjectorInfrastructureModule(Container);
+            InstanceProvider = new SimpleInjectorInstanceProvider(Container);
         }
 
         public Container Container { get; } = new Container();
@@ -84,24 +88,14 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
         }
         
         /// <inheritdoc />
-        public IDisposable BeginScope()
+        public IInjectionScope BeginScope()
         {
-            var scope = AsyncScopedLifestyle.BeginScope(Container);
-            return scope;
+            return new SimpleInjectorInjectionScope(Interlocked.Increment(ref _scopeSequenceNumber), AsyncScopedLifestyle.BeginScope(Container));
         }
 
-        public bool TryGetCurrentCorrelation(out Correlation correlation)
-        {
-            Scope scope = ScopedLifestyle.GetCurrentScope(Container);
-            if (scope == null)
-            {
-                correlation = null;
-                return false;
-            }
+        public IInstanceProvider InstanceProvider { get; }
 
-            correlation = scope.GetInstance<ICurrentTHolder<Correlation>>().Current;
-            return true;
-        }
+        public IInfrastructureModule InfrastructureModule { get; }
 
         public Scope GetCurrentScope()
         {

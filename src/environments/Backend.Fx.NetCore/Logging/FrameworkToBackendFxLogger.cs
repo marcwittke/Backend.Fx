@@ -11,7 +11,7 @@ namespace Backend.Fx.NetCore.Logging
     public class FrameworkToBackendFxLogger : NetFxILogger
     {
         private readonly ILogger _logger;
-        
+
         public FrameworkToBackendFxLogger(ILogger logger)
         {
             _logger = logger;
@@ -19,25 +19,28 @@ namespace Backend.Fx.NetCore.Logging
 
         public void Log<TState>(NetFxLogLevel logLevel, Microsoft.Extensions.Logging.EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
+            var formatted = formatter(state, exception);
+            formatted = formatted?.Replace("{", "{{").Replace("}", "}}");
+
             switch (logLevel)
             {
                 case NetFxLogLevel.Critical:
-                    _logger.Fatal(exception, formatter(state, exception));
+                    _logger.Fatal(exception, formatted);
                     return;
                 case NetFxLogLevel.Debug:
-                    _logger.Debug(exception, formatter(state, exception));
+                    _logger.Debug(exception, formatted);
                     return;
                 case NetFxLogLevel.Error:
-                    _logger.Error(exception, formatter(state, exception));
+                    _logger.Error(exception, formatted);
                     return;
                 case NetFxLogLevel.Information:
-                    _logger.Info(exception, formatter(state, exception));
+                    _logger.Info(exception, formatted);
                     return;
                 case NetFxLogLevel.Trace:
-                    _logger.Trace(exception, formatter(state, exception));
+                    _logger.Trace(exception, formatted);
                     return;
                 case NetFxLogLevel.Warning:
-                    _logger.Warn(exception, formatter(state, exception));
+                    _logger.Warn(exception, formatted);
                     return;
                 default:
                     return;

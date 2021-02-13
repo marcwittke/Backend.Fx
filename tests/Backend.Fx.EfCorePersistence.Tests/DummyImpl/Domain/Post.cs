@@ -7,9 +7,11 @@ namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain
     public class Post : Entity
     {
         [UsedImplicitly]
-        private Post() { }
+        private Post()
+        {
+        }
 
-        public Post(int id, Blog blog, string name, bool isPublic=false) : base(id)
+        public Post(int id, Blog blog, string name, bool isPublic = false) : base(id)
         {
             Blog = blog;
             BlogId = blog.Id;
@@ -17,14 +19,13 @@ namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain
             TargetAudience = new TargetAudience {IsPublic = isPublic, Culture = "fr-FR"};
         }
 
-        [UsedImplicitly]
-        public int BlogId { get;  private set; }
-        [UsedImplicitly]
-        public Blog Blog { get; private set; }
-        [UsedImplicitly]
-        public string Name { get; private set; }
-        [UsedImplicitly]
-        public TargetAudience TargetAudience { get; set; }
+        [UsedImplicitly] public int BlogId { get; private set; }
+
+        [UsedImplicitly] public Blog Blog { get; private set; }
+
+        [UsedImplicitly] public string Name { get; private set; }
+
+        [UsedImplicitly] public TargetAudience TargetAudience { get; set; }
 
         public void SetName(string name)
         {
@@ -37,6 +38,7 @@ namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain
         public string Culture { get; set; }
 
         public bool IsPublic { get; set; }
+
         protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return Culture;

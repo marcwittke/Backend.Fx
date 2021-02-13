@@ -6,15 +6,15 @@ namespace Backend.Fx.AspNetCore.Mvc.DependencyInjection
     public abstract class BackendFxApplicationActivator
     {
         private readonly IBackendFxApplication _application;
-        
+
         protected BackendFxApplicationActivator(IBackendFxApplication application)
         {
             _application = application;
         }
 
-        public object GetInstance(Type t)
+        protected object GetInstance(Type t)
         {
-            return _application.CompositionRoot.GetInstance(t);
+            return _application.CompositionRoot.InstanceProvider.GetInstance(t);
         }
     }
 }

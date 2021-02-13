@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+
 // ReSharper disable RedundantArgumentDefaultValue
 
 namespace Backend.Fx.EfCorePersistence.Tests.Migrations
@@ -9,8 +10,8 @@ namespace Backend.Fx.EfCorePersistence.Tests.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Bloggers",
-                columns: table => new
+                "Bloggers",
+                table => new
                 {
                     Id = table.Column<int>(nullable: false),
                     CreatedOn = table.Column<DateTime>(nullable: false),
@@ -23,14 +24,11 @@ namespace Backend.Fx.EfCorePersistence.Tests.Migrations
                     Bio = table.Column<string>(nullable: true),
                     RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Bloggers", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_Bloggers", x => x.Id); });
 
             migrationBuilder.CreateTable(
-                name: "Blogs",
-                columns: table => new
+                "Blogs",
+                table => new
                 {
                     Id = table.Column<int>(nullable: false),
                     CreatedOn = table.Column<DateTime>(nullable: false),
@@ -41,31 +39,25 @@ namespace Backend.Fx.EfCorePersistence.Tests.Migrations
                     Name = table.Column<string>(nullable: true),
                     RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Blogs", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_Blogs", x => x.Id); });
 
             migrationBuilder.CreateTable(
-                name: "Tenants",
-                columns: table => new
+                "Tenants",
+                table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                              .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(nullable: false),
                     Description = table.Column<string>(nullable: true),
                     IsDemoTenant = table.Column<bool>(nullable: false),
                     State = table.Column<int>(nullable: false),
                     DefaultCultureName = table.Column<string>(nullable: true)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Tenants", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_Tenants", x => x.Id); });
 
             migrationBuilder.CreateTable(
-                name: "Posts",
-                columns: table => new
+                "Posts",
+                table => new
                 {
                     Id = table.Column<int>(nullable: false),
                     CreatedOn = table.Column<DateTime>(nullable: false),
@@ -82,32 +74,32 @@ namespace Backend.Fx.EfCorePersistence.Tests.Migrations
                 {
                     table.PrimaryKey("PK_Posts", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Posts_Blogs_BlogId",
-                        column: x => x.BlogId,
-                        principalTable: "Blogs",
-                        principalColumn: "Id",
+                        "FK_Posts_Blogs_BlogId",
+                        x => x.BlogId,
+                        "Blogs",
+                        "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Posts_BlogId",
-                table: "Posts",
-                column: "BlogId");
+                "IX_Posts_BlogId",
+                "Posts",
+                "BlogId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Bloggers");
+                "Bloggers");
 
             migrationBuilder.DropTable(
-                name: "Posts");
+                "Posts");
 
             migrationBuilder.DropTable(
-                name: "Tenants");
+                "Tenants");
 
             migrationBuilder.DropTable(
-                name: "Blogs");
+                "Blogs");
         }
     }
 }

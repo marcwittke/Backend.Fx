@@ -13,7 +13,7 @@ namespace Backend.Fx.Extensions
 
         public void Dispose()
         {
-            foreach (var disposable in _disposables)
+            foreach (IDisposable disposable in _disposables)
             {
                 disposable?.Dispose();
             }

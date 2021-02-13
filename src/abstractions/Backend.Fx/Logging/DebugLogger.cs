@@ -1,8 +1,8 @@
-﻿namespace Backend.Fx.Logging
-{
-    using System;
-    using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 
+namespace Backend.Fx.Logging
+{
     [DebuggerStepThrough]
     public class DebugLogger : ILogger
     {
@@ -169,6 +169,5 @@
         {
             System.Diagnostics.Debug.WriteLine(_type + format, args);
         }
-
     }
 }

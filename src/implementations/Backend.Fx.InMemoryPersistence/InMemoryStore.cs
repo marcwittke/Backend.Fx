@@ -5,9 +5,10 @@ using Backend.Fx.BuildingBlocks;
 namespace Backend.Fx.InMemoryPersistence
 {
     public interface IInMemoryStore<T> : IDictionary<int, T> where T : AggregateRoot
-    { }
-    
-    public class InMemoryStore<T> : IInMemoryStore<T> where T:AggregateRoot
+    {
+    }
+
+    public class InMemoryStore<T> : IInMemoryStore<T> where T : AggregateRoot
     {
         private readonly IDictionary<int, T> _dictionaryImplementation = new Dictionary<int, T>();
 

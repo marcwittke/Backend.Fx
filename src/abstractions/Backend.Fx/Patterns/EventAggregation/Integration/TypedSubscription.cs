@@ -11,35 +11,33 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
     public class TypedSubscription : ISubscription
     {
         private static readonly ILogger Logger = LogManager.Create<TypedSubscription>();
-        private readonly IBackendFxApplication _application;
         private readonly Type _handlerType;
 
-        public TypedSubscription(IBackendFxApplication application, Type handlerType)
+        public TypedSubscription(Type handlerType)
         {
-            _application = application;
             _handlerType = handlerType;
         }
 
-        public void Process(string eventName, EventProcessingContext context)
+        public void Process(IInstanceProvider instanceProvider, EventProcessingContext context)
         {
-            Type interfaceType = _handlerType.GetInterfaces().First(x => x.GetTypeInfo().IsGenericType && x.GetGenericTypeDefinition() == typeof(IIntegrationEventHandler<>));
-            var eventType = interfaceType.GetGenericArguments().Single(t => typeof(IIntegrationEvent).IsAssignableFrom(t));
-            var integrationEvent = context.GetTypedEvent(eventType);
-            MethodInfo handleMethod = _handlerType.GetRuntimeMethod("Handle", new[] { eventType });
-            Debug.Assert(handleMethod != null, $"No method with signature `Handle({eventName} event)` found on {_handlerType.Name}");
+            Type interfaceType = _handlerType.GetInterfaces().First(x => x.GetTypeInfo().IsGenericType && x.GetGenericTypeDefinition() == typeof(IIntegrationMessageHandler<>));
+            Type eventType = interfaceType.GetGenericArguments().Single(t => typeof(IIntegrationEvent).IsAssignableFrom(t));
+            IIntegrationEvent integrationEvent = context.GetTypedEvent(eventType);
+            MethodInfo handleMethod = _handlerType.GetRuntimeMethod("Handle", new[] {eventType});
+            Debug.Assert(handleMethod != null, $"No method with signature `Handle({eventType.Name} event)` found on {_handlerType.Name}");
 
             Logger.Info($"Getting subscribed handler instance of type {_handlerType.Name}");
-            object handlerInstance = _application.CompositionRoot.GetInstance(_handlerType);
+            object handlerInstance = instanceProvider.GetInstance(_handlerType);
 
             using (Logger.InfoDuration($"Invoking subscribed handler {_handlerType.GetDetailedTypeName()}"))
             {
-                handleMethod.Invoke(handlerInstance, new object[] { integrationEvent });
+                handleMethod.Invoke(handlerInstance, new object[] {integrationEvent});
             }
         }
 
         public bool Matches(object handler)
         {
-            return (Type)handler == _handlerType;
+            return (Type) handler == _handlerType;
         }
     }
 }

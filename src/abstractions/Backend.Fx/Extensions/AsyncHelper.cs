@@ -1,10 +1,10 @@
-﻿namespace Backend.Fx.Extensions
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Threading;
-    using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
+namespace Backend.Fx.Extensions
+{
     public static class AsyncHelper
     {
         /// <summary>
@@ -17,27 +17,27 @@
         /// </remarks>
         public static void RunSync(Func<Task> task)
         {
-            var oldContext = SynchronizationContext.Current;
+            SynchronizationContext oldContext = SynchronizationContext.Current;
             try
             {
                 var synch = new ExclusiveSynchronizationContext();
                 SynchronizationContext.SetSynchronizationContext(synch);
                 synch.Post(async _ =>
-                           {
-                               try
-                               {
-                                   await task();
-                               }
-                               catch (Exception e)
-                               {
-                                   synch.InnerException = e;
-                                   throw;
-                               }
-                               finally
-                               {
-                                   synch.EndMessageLoop();
-                               }
-                           }, null);
+                {
+                    try
+                    {
+                        await task();
+                    }
+                    catch (Exception e)
+                    {
+                        synch.InnerException = e;
+                        throw;
+                    }
+                    finally
+                    {
+                        synch.EndMessageLoop();
+                    }
+                }, null);
                 synch.BeginMessageLoop();
             }
             finally
@@ -54,34 +54,35 @@
         /// <returns></returns>
         public static T RunSync<T>(Func<Task<T>> task)
         {
-            T ret = default(T);
-            var oldContext = SynchronizationContext.Current;
+            var ret = default(T);
+            SynchronizationContext oldContext = SynchronizationContext.Current;
             try
             {
                 var exclusiveSynchronizationContext = new ExclusiveSynchronizationContext();
                 SynchronizationContext.SetSynchronizationContext(exclusiveSynchronizationContext);
                 exclusiveSynchronizationContext.Post(async _ =>
-                           {
-                               try
-                               {
-                                   ret = await task();
-                               }
-                               catch (Exception e)
-                               {
-                                   exclusiveSynchronizationContext.InnerException = e;
-                                   throw;
-                               }
-                               finally
-                               {
-                                   exclusiveSynchronizationContext.EndMessageLoop();
-                               }
-                           }, null);
+                {
+                    try
+                    {
+                        ret = await task();
+                    }
+                    catch (Exception e)
+                    {
+                        exclusiveSynchronizationContext.InnerException = e;
+                        throw;
+                    }
+                    finally
+                    {
+                        exclusiveSynchronizationContext.EndMessageLoop();
+                    }
+                }, null);
                 exclusiveSynchronizationContext.BeginMessageLoop();
             }
             finally
             {
                 SynchronizationContext.SetSynchronizationContext(oldContext);
             }
+
             return ret;
         }
 
@@ -89,8 +90,8 @@
         {
             private bool _done;
             public Exception InnerException { private get; set; }
-            readonly AutoResetEvent _workItemsWaiting = new AutoResetEvent(false);
-            readonly Queue<Tuple<SendOrPostCallback, object>> _items = new Queue<Tuple<SendOrPostCallback, object>>();
+            private readonly AutoResetEvent _workItemsWaiting = new AutoResetEvent(false);
+            private readonly Queue<Tuple<SendOrPostCallback, object>> _items = new Queue<Tuple<SendOrPostCallback, object>>();
 
             public override void Send(SendOrPostCallback d, object state)
             {
@@ -103,6 +104,7 @@
                 {
                     _items.Enqueue(Tuple.Create(d, state));
                 }
+
                 _workItemsWaiting.Set();
             }
 
@@ -123,6 +125,7 @@
                             task = _items.Dequeue();
                         }
                     }
+
                     if (task != null)
                     {
                         task.Item1(task.Item2);

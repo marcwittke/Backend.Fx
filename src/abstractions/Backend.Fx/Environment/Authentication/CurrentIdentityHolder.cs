@@ -1,8 +1,8 @@
-﻿namespace Backend.Fx.Environment.Authentication
-{
-    using System.Security.Principal;
-    using Patterns.DependencyInjection;
+﻿using System.Security.Principal;
+using Backend.Fx.Patterns.DependencyInjection;
 
+namespace Backend.Fx.Environment.Authentication
+{
     public class CurrentIdentityHolder : CurrentTHolder<IIdentity>
     {
         public override IIdentity ProvideInstance()

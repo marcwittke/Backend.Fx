@@ -1,10 +1,9 @@
-﻿using Xunit;
+﻿using System;
+using Backend.Fx.ConfigurationSettings;
+using Xunit;
 
 namespace Backend.Fx.Tests.ConfigurationSettings
 {
-    using System;
-    using Fx.ConfigurationSettings;
-
     public class TheSettingSerializerFactory
     {
         private readonly SettingSerializerFactory _sut = new SettingSerializerFactory();
@@ -17,10 +16,10 @@ namespace Backend.Fx.Tests.ConfigurationSettings
         }
 
         [Fact]
-        public void ProvidesBooleanSerializerForNullableInt()
+        public void ProvidesBooleanSerializerForNullableDateTime()
         {
-            var serializer = _sut.GetSerializer<int?>();
-            Assert.IsType<IntegerSerializer>(serializer);
+            var serializer = _sut.GetSerializer<DateTime?>();
+            Assert.IsType<DateTimeSerializer>(serializer);
         }
 
         [Fact]
@@ -31,10 +30,10 @@ namespace Backend.Fx.Tests.ConfigurationSettings
         }
 
         [Fact]
-        public void ProvidesBooleanSerializerForNullableDateTime()
+        public void ProvidesBooleanSerializerForNullableInt()
         {
-            var serializer = _sut.GetSerializer<DateTime?>();
-            Assert.IsType<DateTimeSerializer>(serializer);
+            var serializer = _sut.GetSerializer<int?>();
+            Assert.IsType<IntegerSerializer>(serializer);
         }
 
         [Fact]
@@ -47,13 +46,13 @@ namespace Backend.Fx.Tests.ConfigurationSettings
         [Fact]
         public void ProvidesNoSerializerForBool()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(()=>_sut.GetSerializer<bool>());
+            Assert.Throws<ArgumentOutOfRangeException>(() => _sut.GetSerializer<bool>());
         }
 
         [Fact]
-        public void ProvidesNoSerializerForInt()
+        public void ProvidesNoSerializerForDateTime()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => _sut.GetSerializer<int>());
+            Assert.Throws<ArgumentOutOfRangeException>(() => _sut.GetSerializer<DateTime>());
         }
 
         [Fact]
@@ -63,9 +62,9 @@ namespace Backend.Fx.Tests.ConfigurationSettings
         }
 
         [Fact]
-        public void ProvidesNoSerializerForDateTime()
+        public void ProvidesNoSerializerForInt()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => _sut.GetSerializer<DateTime>());
+            Assert.Throws<ArgumentOutOfRangeException>(() => _sut.GetSerializer<int>());
         }
     }
 }

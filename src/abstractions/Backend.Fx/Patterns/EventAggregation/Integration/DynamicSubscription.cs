@@ -8,22 +8,20 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
     public class DynamicSubscription : ISubscription
     {
         private static readonly ILogger Logger = LogManager.Create<DynamicSubscription>();
-        private readonly IBackendFxApplication _application;
         private readonly Type _handlerType;
 
-        public DynamicSubscription(IBackendFxApplication application, Type handlerType)
+        public DynamicSubscription(Type handlerType)
         {
-            _application = application;
             _handlerType = handlerType;
         }
 
-        public void Process(string eventName, EventProcessingContext context)
+        public void Process(IInstanceProvider instanceProvider, EventProcessingContext context)
         {
             Logger.Info($"Getting subscribed handler instance of type {_handlerType.Name}");
-            object handlerInstance = _application.CompositionRoot.GetInstance(_handlerType);
+            object handlerInstance = instanceProvider.GetInstance(_handlerType);
             using (Logger.InfoDuration($"Invoking subscribed handler {_handlerType.GetDetailedTypeName()}"))
             {
-                ((IIntegrationEventHandler)handlerInstance).Handle(context.DynamicEvent);
+                ((IIntegrationMessageHandler) handlerInstance).Handle(context.DynamicEvent);
             }
         }
 

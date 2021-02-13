@@ -1,14 +1,15 @@
-﻿namespace Backend.Fx.RandomData
-{
-    using System.Globalization;
-    using System.Linq;
+﻿using System.Globalization;
+using System.Linq;
 
-    public class Numbers
+namespace Backend.Fx.RandomData
+{
+    public static class Numbers
     {
         public static readonly string[] Ciphers = Enumerable.Range(0, 10).Select(i => i.ToString()).ToArray();
         public static readonly string[] PostalCodes = Enumerable.Range(9000, 90999).Select(i => i.ToString("00000")).ToArray();
 
-        public static readonly string[] LandLineNetworks = {
+        public static readonly string[] LandLineNetworks =
+        {
             "0201",
             "0202",
             "0203",
@@ -5220,7 +5221,9 @@
             "09977",
             "09978"
         };
-        public static readonly string[] MobileNetworks = {
+
+        public static readonly string[] MobileNetworks =
+        {
             "01510",
             "01511",
             "01512",
@@ -5285,14 +5288,9 @@
         {
             var next = TestRandom.Next(100);
             var nr = TestRandom.Next(100);
-            if (next < 10)
-            {
-                return $"{nr} - {nr + TestRandom.Next(1, 5)}";
-            }
-            if (next < 30)
-            {
-                return nr.ToString(CultureInfo.InvariantCulture) + "abcd".Random();
-            }
+            if (next < 10) return $"{nr} - {nr + TestRandom.Next(1, 5)}";
+
+            if (next < 30) return nr.ToString(CultureInfo.InvariantCulture) + "abcd".Random();
 
             return nr.ToString(CultureInfo.InvariantCulture);
         }

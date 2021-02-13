@@ -15,7 +15,9 @@ namespace Backend.Fx.EfCorePersistence.Mssql
         {
             _dbConnectionFactory = dbConnectionFactory;
         }
-        
+
+        protected abstract string SequenceName { get; }
+
         public void EnsureSequence()
         {
             Logger.Info($"Ensuring existence of mssql sequence {SequenceName}");
@@ -36,7 +38,7 @@ namespace Backend.Fx.EfCorePersistence.Mssql
                 else
                 {
                     Logger.Info($"Sequence {SequenceName} does not exist yet and will be created now");
-                    using (var cmd = dbConnection.CreateCommand())
+                    using (IDbCommand cmd = dbConnection.CreateCommand())
                     {
                         cmd.CommandText = $"CREATE SEQUENCE {SequenceName} START WITH 1 INCREMENT BY {Increment}";
                         cmd.ExecuteNonQuery();
@@ -64,6 +66,5 @@ namespace Backend.Fx.EfCorePersistence.Mssql
         }
 
         public abstract int Increment { get; }
-        protected abstract string SequenceName { get; }
     }
 }

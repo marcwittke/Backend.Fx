@@ -1,34 +1,23 @@
-﻿namespace Backend.Fx.RandomData
+﻿using System.Linq;
+
+namespace Backend.Fx.RandomData
 {
-    using System;
-    using System.Collections.Generic;
-
-    public class TestAddressGenerator
+    public class TestAddressGenerator : Generator<TestAddress>
     {
-        public int GenerateCount { get; set; } = 100;
-
-        public Random Random { get; set; } = TestRandom.Instance;
-
-        public IEnumerable<TestAddress> GenerateTestAddresses()
+        public static TestAddress Generate()
         {
-            var distinctCheck = new HashSet<string>();
-            for (var i = 0; i < GenerateCount; i++)
-            {
-                TestAddress generated = null;
+            return new TestAddressGenerator().First();
+        }
 
-                while (generated == null || distinctCheck.Contains(generated.Street + generated.Number))
-                {
-                    generated = new TestAddress(
-                        Names.Streets.Random(),
-                        Numbers.RandomHouseNumber(),
-                        Numbers.RandomPostalCode(),
-                        Names.Cities.Random(),
-                        Names.Countries.Random());
-                }
 
-                distinctCheck.Add(generated.Street + generated.Number);
-                yield return generated;
-            }
+        protected override TestAddress Next()
+        {
+            return new TestAddress(
+                Names.Streets.Random(),
+                Numbers.RandomHouseNumber(),
+                Numbers.RandomPostalCode(),
+                Names.Cities.Random(),
+                Names.Countries.Random());
         }
     }
 }

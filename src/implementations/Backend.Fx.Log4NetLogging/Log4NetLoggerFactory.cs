@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Reflection;
 using log4net.Repository;
 using BackendFxILogger = Backend.Fx.Logging.ILogger;
@@ -21,6 +22,23 @@ namespace Backend.Fx.Log4NetLogging
         public BackendFxILogger Create(string s)
         {
             return new Log4NetLogger(log4net.LogManager.GetLogger(_loggerRepository.Name, s));
+        }
+
+        public BackendFxILogger Create(Type t)
+        {
+            string s = t.FullName;
+            var indexOf = s?.IndexOf('[') ?? 0;
+            if (indexOf > 0)
+            {
+                s = s?.Substring(0, indexOf);
+            }
+
+            return Create(s);
+        }
+
+        public BackendFxILogger Create<T>()
+        {
+            return Create(typeof(T));
         }
 
         public void BeginActivity(int activityIndex)

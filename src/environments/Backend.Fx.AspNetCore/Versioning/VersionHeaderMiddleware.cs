@@ -1,18 +1,42 @@
-﻿namespace Backend.Fx.AspNetCore.Versioning
+﻿using System;
+using System.Reflection;
+using System.Threading.Tasks;
+using JetBrains.Annotations;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Primitives;
+
+namespace Backend.Fx.AspNetCore.Versioning
 {
-    using System.Reflection;
-    using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.Extensions.Primitives;
-
-    public class VersionHeaderMiddleware : IMiddleware
+    [UsedImplicitly]
+    public class VersionHeaderMiddleware 
     {
-        private readonly AssemblyName _entryAssemblyName = Assembly.GetEntryAssembly().GetName();
+        private readonly RequestDelegate _next;
+        private readonly string _assemblyName;
+        private readonly string _version;
 
-        public async Task InvokeAsync(HttpContext context, RequestDelegate next)
+        public VersionHeaderMiddleware(RequestDelegate next)
         {
-            context.Response.Headers.Add(_entryAssemblyName.Name, new StringValues(_entryAssemblyName.Version.ToString(3)));
-            await next.Invoke(context);
+            _next = next;
+            var entryAssembly = Assembly.GetEntryAssembly();
+            if (entryAssembly == null)
+            {
+                throw new InvalidOperationException("Unable to determine the entry assembly. The Version Header Middleware cannot be used in this environment");
+            }
+
+            AssemblyName entryAssemblyName = entryAssembly.GetName();
+            if (entryAssemblyName.Version == null)
+            {
+                throw new InvalidOperationException("Unable to determine the version of the entry assembly. The Version Header Middleware cannot be used in this environment");
+            }
+
+            _assemblyName = entryAssemblyName.Name;
+            _version = entryAssemblyName.Version.ToString(3);
+        }
+
+        public async Task InvokeAsync(HttpContext context)
+        {
+            context.Response.Headers.Add(_assemblyName, new StringValues(_version));
+            await _next.Invoke(context);
         }
     }
 }

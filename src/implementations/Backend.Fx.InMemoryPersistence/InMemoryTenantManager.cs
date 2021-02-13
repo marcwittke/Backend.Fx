@@ -7,7 +7,7 @@ namespace Backend.Fx.InMemoryPersistence
     public class InMemoryTenantRepository : ITenantRepository
     {
         private readonly Dictionary<int, Tenant> _store = new Dictionary<int, Tenant>();
-        
+
         public Tenant[] GetTenants()
         {
             return _store.Values.ToArray();
@@ -17,7 +17,7 @@ namespace Backend.Fx.InMemoryPersistence
         {
             return _store[tenantId.Value];
         }
-        
+
         public void SaveTenant(Tenant tenant)
         {
             if (tenant.Id == 0)
@@ -27,7 +27,6 @@ namespace Backend.Fx.InMemoryPersistence
             }
             else
             {
-                _store[tenant.Id].DefaultCultureName = tenant.DefaultCultureName;
                 _store[tenant.Id].Description = tenant.Description;
                 _store[tenant.Id].IsDemoTenant = tenant.IsDemoTenant;
                 _store[tenant.Id].Name = tenant.Name;

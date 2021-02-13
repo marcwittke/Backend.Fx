@@ -13,7 +13,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
         public virtual void Register(ICompositionRoot compositionRoot)
         {
             Logger.Debug($"Registering {GetType().Name}");
-            SimpleInjectorCompositionRoot simpleInjectorCompositionRoot = (SimpleInjectorCompositionRoot) compositionRoot;
+            var simpleInjectorCompositionRoot = (SimpleInjectorCompositionRoot) compositionRoot;
             Register(simpleInjectorCompositionRoot.Container, simpleInjectorCompositionRoot.ScopedLifestyle);
         }
     }

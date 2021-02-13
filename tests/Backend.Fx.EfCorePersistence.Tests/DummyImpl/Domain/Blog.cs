@@ -8,7 +8,9 @@ namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain
     public class Blog : AggregateRoot
     {
         [UsedImplicitly]
-        private Blog() { }
+        private Blog()
+        {
+        }
 
         public Blog(int id, string name) : base(id)
         {
@@ -19,7 +21,7 @@ namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain
 
         public ISet<Post> Posts { get; } = new HashSet<Post>();
 
-        public Post AddPost(IEntityIdGenerator idGenerator, string name, bool isPublic=false)
+        public Post AddPost(IEntityIdGenerator idGenerator, string name, bool isPublic = false)
         {
             var post = new Post(idGenerator.NextId(), this, name, isPublic);
             Posts.Add(post);
@@ -29,10 +31,7 @@ namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain
         public void Modify(string modified)
         {
             Name = modified;
-            foreach (var post in Posts)
-            {
-                post.SetName(modified);
-            }
+            foreach (Post post in Posts) post.SetName(modified);
         }
     }
 }

@@ -1,9 +1,9 @@
-﻿namespace Backend.Fx.Patterns.EventAggregation.Domain
-{
-    using System;
-    using System.Collections.Concurrent;
-    using Logging;
+﻿using System;
+using System.Collections.Concurrent;
+using Backend.Fx.Logging;
 
+namespace Backend.Fx.Patterns.EventAggregation.Domain
+{
     public class DomainEventAggregator : IDomainEventAggregator
     {
         private class HandleAction
@@ -39,19 +39,19 @@
         {
             foreach (var injectedHandler in _domainEventHandlerProvider.GetAllEventHandlers<TDomainEvent>())
             {
-                HandleAction handleAction = new HandleAction (
-                                                            typeof(TDomainEvent).Name,
-                                                            injectedHandler.GetType().Name,
-                                                            () => injectedHandler.Handle(domainEvent));
+                var handleAction = new HandleAction(
+                    typeof(TDomainEvent).Name,
+                    injectedHandler.GetType().Name,
+                    () => injectedHandler.Handle(domainEvent));
 
                 _handleActions.Enqueue(handleAction);
-                Logger.Debug($"Invocation of {injectedHandler.GetType().Name} for domain event {typeof(TDomainEvent).Name} registered. It will be executed on completion of unit of work");
+                Logger.Debug($"Invocation of {injectedHandler.GetType().Name} for domain event {typeof(TDomainEvent).Name} registered. It will be executed on completion of operation");
             }
         }
 
         public void RaiseEvents()
         {
-            while (_handleActions.TryDequeue(out var handleAction))
+            while (_handleActions.TryDequeue(out HandleAction handleAction))
             {
                 try
                 {

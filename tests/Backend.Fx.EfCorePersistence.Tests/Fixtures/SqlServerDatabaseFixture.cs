@@ -1,8 +1,9 @@
 using System;
 using System.Data;
-using System.Data.Common;
 using System.Data.SqlClient;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
+using Backend.Fx.Environment.Persistence;
+using Backend.Fx.Patterns.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
@@ -15,29 +16,30 @@ namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
 
         public SqlServerDatabaseFixture()
         {
-            string dbName = $"TestFixture_{_testindex++:000}";
+            var dbName = $"TestFixture_{_testindex++:000}";
             var sqlConnectionStringBuilder = new SqlConnectionStringBuilder("Server=.\\SQLExpress;Trusted_Connection=True;");
             using (IDbConnection connection = new SqlConnection(sqlConnectionStringBuilder.ConnectionString))
             {
                 connection.Open();
 
-                using (var dropCommand = connection.CreateCommand())
+                using (IDbCommand dropCommand = connection.CreateCommand())
                 {
                     dropCommand.CommandText = $"IF EXISTS(SELECT * FROM sys.Databases WHERE Name='{dbName}') ALTER DATABASE [{dbName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE";
                     dropCommand.ExecuteNonQuery();
                 }
 
-                using (var dropCommand = connection.CreateCommand())
+                using (IDbCommand dropCommand = connection.CreateCommand())
                 {
                     dropCommand.CommandText = $"IF EXISTS(SELECT * FROM sys.Databases WHERE Name='{dbName}') DROP DATABASE [{dbName}]";
                     dropCommand.ExecuteNonQuery();
                 }
 
-                using (var createCommand = connection.CreateCommand())
+                using (IDbCommand createCommand = connection.CreateCommand())
                 {
                     createCommand.CommandText = $"CREATE DATABASE [{dbName}]";
                     createCommand.ExecuteNonQuery();
                 }
+
                 connection.Close();
             }
 
@@ -50,16 +52,18 @@ namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
             return new DbContextOptionsBuilder<TestDbContext>().UseSqlServer(_connectionString).Options;
         }
 
-        
-        protected override DbContextOptionsBuilder<TestDbContext> GetDbContextOptionsBuilder(DbConnection connection)
+
+        public override DbContextOptionsBuilder<TestDbContext> GetDbContextOptionsBuilder(IDbConnection connection)
         {
-            return new DbContextOptionsBuilder<TestDbContext>().UseSqlServer(connection);
+            return new DbContextOptionsBuilder<TestDbContext>().UseSqlServer((SqlConnection) connection);
         }
 
-        public override DbSession UseDbSession()
+        public override DbConnectionOperationDecorator UseOperation()
         {
-            var sqlConnection = new SqlConnection(_connectionString);
-            return new DbSession(sqlConnection, GetDbContextOptionsBuilder(sqlConnection));
+            var sqliteConnection = new SqlConnection(_connectionString);
+            IOperation operation = new Operation();
+            operation = new DbTransactionOperationDecorator(sqliteConnection, operation);
+            return new DbConnectionOperationDecorator(sqliteConnection, operation);
         }
     }
 }

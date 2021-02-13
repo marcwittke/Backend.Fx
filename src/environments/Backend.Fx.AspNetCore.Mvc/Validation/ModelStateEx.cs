@@ -17,7 +17,7 @@ namespace Backend.Fx.AspNetCore.Mvc.Validation
 
         public static Errors ToErrorsDictionary(this ModelStateDictionary modelState)
         {
-            Errors errors = new Errors();
+            var errors = new Errors();
             foreach (var keyValuePair in modelState)
             {
                 errors.Add(keyValuePair.Key, keyValuePair.Value.Errors.Select(err => err.ErrorMessage));
@@ -26,7 +26,7 @@ namespace Backend.Fx.AspNetCore.Mvc.Validation
             return errors;
         }
 
-        
+
         public static void Add(this ModelStateDictionary modelState, Errors errors)
         {
             foreach (var keyValuePair in errors)

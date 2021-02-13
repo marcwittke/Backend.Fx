@@ -1,13 +1,16 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.BuildingBlocks
 {
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
     public abstract class Identified : IEquatable<Identified>
     {
-        [Key]
-        public int Id { get; set; }
+        [Key] public int Id { get; set; }
 
+        [UsedImplicitly] public string DebuggerDisplay => $"{GetType().Name}[{Id}]";
 
         public bool Equals(Identified other)
         {
@@ -21,7 +24,7 @@ namespace Backend.Fx.BuildingBlocks
 
         public override bool Equals(object obj)
         {
-            Identified other = obj as Identified;
+            var other = obj as Identified;
             if (other == null)
             {
                 return false;
@@ -40,7 +43,7 @@ namespace Backend.Fx.BuildingBlocks
             // ReSharper enable NonReadonlyMemberInGetHashCode
 
             // ReSharper disable once BaseObjectGetHashCodeCallInGetHashCode
-            return base.GetHashCode();            
+            return base.GetHashCode();
         }
 
         public static bool operator ==(Identified x, Identified y)

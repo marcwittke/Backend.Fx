@@ -1,17 +1,17 @@
-﻿namespace Backend.Fx.AspNetCore.ErrorHandling
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Net;
-    using System.Threading.Tasks;
-    using Exceptions;
-    using Logging;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.Net.Http.Headers;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Serialization;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
+using Backend.Fx.Exceptions;
+using Backend.Fx.Logging;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Net.Http.Headers;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
+namespace Backend.Fx.AspNetCore.ErrorHandling
+{
     public class JsonErrorHandlingMiddleware : ErrorHandlingMiddleware
     {
         private readonly bool _showInternalServerErrorDetails;
@@ -25,7 +25,7 @@
             },
         };
 
-        public JsonErrorHandlingMiddleware(RequestDelegate next, bool showInternalServerErrorDetails) 
+        public JsonErrorHandlingMiddleware(RequestDelegate next, bool showInternalServerErrorDetails)
             : base(next)
         {
             _showInternalServerErrorDetails = showInternalServerErrorDetails;
@@ -45,12 +45,12 @@
                 Logger.Warn("exception cannot be handled correctly, because the response has already started");
                 return;
             }
-            
+
             // convention: only the errors array will be transmitted to the client, allowing technical (possibly
             // revealing) information in the exception message.
             Errors errors = exception.HasErrors()
-                ? exception.Errors
-                : new Errors().Add($"HTTP{httpStatusCode}: {message}");
+                                ? exception.Errors
+                                : new Errors().Add($"HTTP{httpStatusCode}: {message}");
 
             context.Response.StatusCode = httpStatusCode;
             string serializedErrors = SerializeErrors(errors);
@@ -65,10 +65,11 @@
                 Logger.Warn("exception cannot be handled correctly, because the response has already started");
                 return;
             }
+
             context.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
             var responseContent = _showInternalServerErrorDetails
-                                          ? JsonConvert.SerializeObject(new { message = exception.Message, stackTrace = exception.StackTrace }, JsonSerializerSettings)
-                                          : JsonConvert.SerializeObject(new { message = "An internal error occured" }, JsonSerializerSettings);
+                                      ? JsonConvert.SerializeObject(new {message = exception.Message, stackTrace = exception.StackTrace}, JsonSerializerSettings)
+                                      : JsonConvert.SerializeObject(new {message = "An internal error occured"}, JsonSerializerSettings);
             context.Response.ContentType = "application/json; charset=utf-8";
             await context.Response.WriteAsync(responseContent);
         }

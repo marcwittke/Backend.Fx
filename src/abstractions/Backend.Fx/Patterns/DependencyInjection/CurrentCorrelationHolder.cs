@@ -9,12 +9,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
         protected override string Describe(Correlation instance)
         {
-            if (instance == null)
-            {
-                return "<NULL>";
-            }
-
-            return $"Correlation: {instance.Id}";
+            return $"Correlation: {instance?.Id.ToString() ?? "NULL"}";
         }
     }
 }

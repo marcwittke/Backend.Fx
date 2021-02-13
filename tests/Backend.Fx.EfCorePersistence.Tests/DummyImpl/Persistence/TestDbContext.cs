@@ -12,17 +12,17 @@ namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence
             Database.AutoTransactionsEnabled = false;
         }
 
+        public DbSet<Blogger> Bloggers { get; [UsedImplicitly] set; }
+
+        public DbSet<Blog> Blogs { get; [UsedImplicitly] set; }
+        public DbSet<Post> Posts { get; [UsedImplicitly] set; }
+        public DbSet<Tenant> Tenants { get; [UsedImplicitly] set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             this.ApplyAggregateMappings(modelBuilder);
             modelBuilder.RegisterRowVersionProperty();
             modelBuilder.RegisterEntityIdAsNeverGenerated();
         }
-        
-        public DbSet<Blogger> Bloggers { get; [UsedImplicitly] set; }
-
-        public DbSet<Blog> Blogs { get; [UsedImplicitly] set; }
-        public DbSet<Post> Posts { get; [UsedImplicitly] set; }
-        public DbSet<Tenant> Tenants { get; [UsedImplicitly] set; }
     }
 }

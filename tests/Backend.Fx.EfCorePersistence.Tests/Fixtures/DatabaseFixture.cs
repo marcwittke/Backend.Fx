@@ -1,10 +1,14 @@
-using System.Data.Common;
+using System.Data;
+using System.Security.Principal;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
+using Backend.Fx.Environment.Authentication;
+using Backend.Fx.Environment.DateAndTime;
+using Backend.Fx.Environment.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
 {
-    public abstract class DatabaseFixture 
+    public abstract class DatabaseFixture
     {
         public void CreateDatabase()
         {
@@ -16,8 +20,28 @@ namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
 
         protected abstract DbContextOptions<TestDbContext> GetDbContextOptionsForDbCreation();
 
-        protected abstract DbContextOptionsBuilder<TestDbContext> GetDbContextOptionsBuilder(DbConnection connection);
+        public abstract DbContextOptionsBuilder<TestDbContext> GetDbContextOptionsBuilder(IDbConnection connection);
 
-        public abstract DbSession UseDbSession();
+        public abstract DbConnectionOperationDecorator UseOperation();
+
+        public TestDbSession CreateTestDbSession(DbConnectionOperationDecorator operation = null, IIdentity asIdentity = null, IClock clock = null)
+        {
+            CurrentIdentityHolder CreateAsIdentity()
+            {
+                var cih = new CurrentIdentityHolder();
+                cih.ReplaceCurrent(asIdentity);
+                return cih;
+            }
+
+            clock ??= new WallClock();
+            operation ??= UseOperation();
+            
+            operation.Begin();
+
+            var identityHolder = asIdentity == null
+                                     ? CurrentIdentityHolder.CreateSystem()
+                                     : CreateAsIdentity();
+            return new TestDbSession(this, operation, identityHolder, clock);
+        }
     }
 }

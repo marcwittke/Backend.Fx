@@ -1,23 +1,22 @@
-﻿namespace Backend.Fx.Environment.DateAndTime
-{
-    using System;
+﻿using System;
+using Backend.Fx.Logging;
 
+namespace Backend.Fx.Environment.DateAndTime
+{
     /// <summary>
     /// Best practice for web (service) applications: time does not advance during a single request
     /// </summary>
-    public class FrozenClock : Clock
+    public class FrozenClock : IClock
     {
-        public FrozenClock() : this(DateTime.UtcNow)
-        { }
-
-        private FrozenClock(DateTime utcNow)
+        private static readonly ILogger Logger = LogManager.Create<FrozenClock>();
+        
+        // ReSharper disable once UnusedParameter.Local
+        public FrozenClock(IClock clock)
         {
-            OverrideUtcNow(utcNow);
+            UtcNow = DateTime.UtcNow;
+            Logger.Trace($"Freezing clock at {UtcNow}");
         }
 
-        public static IClock WithFrozenUtcNow(DateTime utcNow)
-        {
-            return new FrozenClock(utcNow);
-        }
+        public DateTime UtcNow { get; }
     }
 }

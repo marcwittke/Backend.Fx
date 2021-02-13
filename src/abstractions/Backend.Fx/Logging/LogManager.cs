@@ -1,13 +1,13 @@
-﻿namespace Backend.Fx.Logging
-{
-    using System;
-    using System.Diagnostics;
-    using System.Threading;
+﻿using System;
+using System.Diagnostics;
+using System.Threading;
 
+namespace Backend.Fx.Logging
+{
     [DebuggerStepThrough]
     public abstract class LogManager
     {
-        private static int _activityIndex=1;
+        private static int _activityIndex = 1;
         private static ILoggerFactory _factory = new DebugLoggerFactory();
 
         public static void Initialize(ILoggerFactory theFactory)
@@ -17,18 +17,12 @@
 
         public static ILogger Create<T>()
         {
-            return Create(typeof(T));
+            return _factory.Create<T>();
         }
 
         public static ILogger Create(Type t)
         {
-            string s = t.FullName;
-            var indexOf = s?.IndexOf('[') ?? 0;
-            if (indexOf > 0)
-            {
-                s = s?.Substring(0, indexOf);
-            }
-            return Create(s);
+            return _factory.Create(t);
         }
 
         public static ILogger Create(string s)

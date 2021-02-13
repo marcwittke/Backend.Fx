@@ -1,13 +1,12 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using System.Collections.Generic;
+using Backend.Fx.BuildingBlocks;
+using Backend.Fx.RandomData;
+using JetBrains.Annotations;
 using Xunit;
 
 namespace Backend.Fx.Tests.BuildingBlocks
 {
-    using System;
-    using System.Collections.Generic;
-    using Fx.BuildingBlocks;
-    using RandomData;
-
     public class TheAggregateRoot
     {
         private static int _nextId;
@@ -22,10 +21,9 @@ namespace Backend.Fx.Tests.BuildingBlocks
                 Children.Add(new TestEntity("Child 3", this));
             }
 
-            [UsedImplicitly]
-            public string Name { get; private set; }
+            [UsedImplicitly] public string Name { get; private set; }
 
-            public ISet<TestEntity> Children { get;  } = new HashSet<TestEntity>();
+            public ISet<TestEntity> Children { get; } = new HashSet<TestEntity>();
         }
 
         public class TestEntity : Entity
@@ -36,10 +34,49 @@ namespace Backend.Fx.Tests.BuildingBlocks
                 Parent = parent;
             }
 
-            [UsedImplicitly]
-            public string Name { get; set; }
-            [UsedImplicitly]
-            public TestAggregateRoot Parent { get; set; }
+            [UsedImplicitly] public string Name { get; set; }
+
+            [UsedImplicitly] public TestAggregateRoot Parent { get; set; }
+        }
+
+        [Fact]
+        public void ChangedByPropertyIsChoppedAt100Chars()
+        {
+            DateTime now = DateTime.Now;
+            var sut = new TestAggregateRoot(_nextId++, "gaga");
+            var moreThanHundred = Letters.RandomLowerCase(110);
+            sut.SetModifiedProperties(moreThanHundred, now);
+            Assert.Equal(moreThanHundred.Substring(0, 99) + "…", sut.ChangedBy);
+        }
+
+        [Fact]
+        public void ChangedByPropertyIsStoredCorrectly()
+        {
+            DateTime now = DateTime.Now;
+            var sut = new TestAggregateRoot(_nextId++, "gaga");
+            sut.SetModifiedProperties("me", now);
+            Assert.Equal("me", sut.ChangedBy);
+            Assert.Null(sut.CreatedBy);
+        }
+
+        [Fact]
+        public void ChangedOnPropertyIsStoredCorrectly()
+        {
+            DateTime now = DateTime.Now;
+            var sut = new TestAggregateRoot(_nextId++, "gaga");
+            sut.SetModifiedProperties("me", now);
+            Assert.Equal(now, sut.ChangedOn);
+            Assert.Equal(default, sut.CreatedOn);
+        }
+
+        [Fact]
+        public void CreatedByPropertyIsChoppedAt100Chars()
+        {
+            DateTime now = DateTime.Now;
+            var sut = new TestAggregateRoot(_nextId++, "gaga");
+            var moreThanHundred = Letters.RandomLowerCase(110);
+            sut.SetCreatedProperties(moreThanHundred, now);
+            Assert.Equal(moreThanHundred.Substring(0, 99) + "…", sut.CreatedBy);
         }
 
         [Fact]
@@ -63,59 +100,11 @@ namespace Backend.Fx.Tests.BuildingBlocks
         }
 
         [Fact]
-        public void ChangedByPropertyIsStoredCorrectly()
-        {
-            DateTime now = DateTime.Now;
-            var sut = new TestAggregateRoot(_nextId++, "gaga");
-            sut.SetModifiedProperties("me", now);
-            Assert.Equal("me", sut.ChangedBy);
-            Assert.Null(sut.CreatedBy);
-        }
-
-        [Fact]
-        public void ChangedOnPropertyIsStoredCorrectly()
-        {
-            DateTime now = DateTime.Now;
-            var sut = new TestAggregateRoot(_nextId++, "gaga");
-            sut.SetModifiedProperties("me", now);
-            Assert.Equal(now, sut.ChangedOn);
-            Assert.Equal(default(DateTime), sut.CreatedOn);
-        }
-
-        [Fact]
-        public void CreatedByPropertyIsChoppedAt100Chars()
-        {
-            DateTime now = DateTime.Now;
-            var sut = new TestAggregateRoot(_nextId++, "gaga");
-            var moreThanHundred = Letters.RandomLowerCase(110);
-            sut.SetCreatedProperties(moreThanHundred, now);
-            Assert.Equal(moreThanHundred.Substring(0, 99) + "…", sut.CreatedBy);
-        }
-
-        [Fact]
-        public void ChangedByPropertyIsChoppedAt100Chars()
-        {
-            DateTime now = DateTime.Now;
-            var sut = new TestAggregateRoot(_nextId++, "gaga");
-            var moreThanHundred = Letters.RandomLowerCase(110);
-            sut.SetModifiedProperties(moreThanHundred, now);
-            Assert.Equal(moreThanHundred.Substring(0, 99) + "…", sut.ChangedBy);
-        }
-
-        [Fact]
-        public void ThrowsGivenNullCreatedBy()
+        public void ThrowsGivenEmptyChangedBy()
         {
             var sut = new TestAggregateRoot(_nextId++, "gaga");
             // ReSharper disable once AssignNullToNotNullAttribute
-            Assert.Throws<ArgumentNullException>(() => sut.SetCreatedProperties(null, DateTime.Now));
-        }
-
-        [Fact]
-        public void ThrowsGivenNullChangedBy()
-        {
-            var sut = new TestAggregateRoot(_nextId++, "gaga");
-            // ReSharper disable once AssignNullToNotNullAttribute
-            Assert.Throws<ArgumentNullException>(() => sut.SetModifiedProperties(null, DateTime.Now));
+            Assert.Throws<ArgumentException>(() => sut.SetModifiedProperties("", DateTime.Now));
         }
 
         [Fact]
@@ -127,12 +116,19 @@ namespace Backend.Fx.Tests.BuildingBlocks
         }
 
         [Fact]
-        public void ThrowsGivenEmptyChangedBy()
+        public void ThrowsGivenNullChangedBy()
         {
             var sut = new TestAggregateRoot(_nextId++, "gaga");
             // ReSharper disable once AssignNullToNotNullAttribute
-            Assert.Throws<ArgumentException>(() => sut.SetModifiedProperties("", DateTime.Now));
+            Assert.Throws<ArgumentNullException>(() => sut.SetModifiedProperties(null, DateTime.Now));
         }
 
+        [Fact]
+        public void ThrowsGivenNullCreatedBy()
+        {
+            var sut = new TestAggregateRoot(_nextId++, "gaga");
+            // ReSharper disable once AssignNullToNotNullAttribute
+            Assert.Throws<ArgumentNullException>(() => sut.SetCreatedProperties(null, DateTime.Now));
+        }
     }
 }

@@ -1,11 +1,12 @@
+using System;
+using System.Globalization;
+using JetBrains.Annotations;
+
 namespace Backend.Fx.ConfigurationSettings
 {
-    using System;
-    using System.Globalization;
-    using JetBrains.Annotations;
-
     public interface ISettingSerializer
-    { }
+    {
+    }
 
     public interface ISettingSerializer<T> : ISettingSerializer
     {
@@ -37,7 +38,7 @@ namespace Backend.Fx.ConfigurationSettings
 
         public int? Deserialize(string value)
         {
-            return string.IsNullOrWhiteSpace(value) ? (int?)null : int.Parse(value, CultureInfo.InvariantCulture);
+            return string.IsNullOrWhiteSpace(value) ? (int?) null : int.Parse(value, CultureInfo.InvariantCulture);
         }
     }
 
@@ -51,7 +52,7 @@ namespace Backend.Fx.ConfigurationSettings
 
         public double? Deserialize(string value)
         {
-            return string.IsNullOrWhiteSpace(value) ? (double?)null : double.Parse(value, CultureInfo.InvariantCulture);
+            return string.IsNullOrWhiteSpace(value) ? (double?) null : double.Parse(value, CultureInfo.InvariantCulture);
         }
     }
 
@@ -65,7 +66,7 @@ namespace Backend.Fx.ConfigurationSettings
 
         public bool? Deserialize(string value)
         {
-            return string.IsNullOrWhiteSpace(value) ? (bool?)null : bool.Parse(value);
+            return string.IsNullOrWhiteSpace(value) ? (bool?) null : bool.Parse(value);
         }
     }
 
@@ -79,7 +80,7 @@ namespace Backend.Fx.ConfigurationSettings
 
         public DateTime? Deserialize(string value)
         {
-            return string.IsNullOrWhiteSpace(value) ? (DateTime?)null : DateTime.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+            return string.IsNullOrWhiteSpace(value) ? (DateTime?) null : DateTime.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
         }
     }
 }

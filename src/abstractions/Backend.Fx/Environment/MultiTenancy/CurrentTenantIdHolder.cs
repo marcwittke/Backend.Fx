@@ -1,7 +1,7 @@
-﻿namespace Backend.Fx.Environment.MultiTenancy
-{
-    using Patterns.DependencyInjection;
+﻿using Backend.Fx.Patterns.DependencyInjection;
 
+namespace Backend.Fx.Environment.MultiTenancy
+{
     public class CurrentTenantIdHolder : CurrentTHolder<TenantId>
     {
         public static CurrentTenantIdHolder Create(int tenantId)
@@ -34,7 +34,7 @@
             {
                 return $"TenantId: {instance.Value}";
             }
-            
+
             return "TenantId: null";
         }
     }

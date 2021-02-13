@@ -1,11 +1,10 @@
-﻿using Xunit;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Backend.Fx.Extensions;
+using Xunit;
 
 namespace Backend.Fx.Tests.Extensions
 {
-    using System.Collections.Generic;
-    using System.Linq;
-    using Fx.Extensions;
-
     public class TheEnumerableEx
     {
         private class Item

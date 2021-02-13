@@ -1,7 +1,7 @@
-﻿namespace Backend.Fx.Environment.Authentication
-{
-    using System.Security.Principal;
+﻿using System.Security.Principal;
 
+namespace Backend.Fx.Environment.Authentication
+{
     public class SystemIdentity : IIdentity
     {
         public string Name => "SYSTEM";

@@ -3,15 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Backend.Fx.Environment.DateAndTime;
-using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.Logging;
-using Backend.Fx.Patterns.EventAggregation.Integration;
-using Backend.Fx.Patterns.IdGeneration;
-using Backend.Fx.SimpleInjectorDependencyInjection.Modules;
-using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Bootstrapping;
-using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.Domain;
-using FakeItEasy;
+using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.ASimpleDomain;
 using SimpleInjector;
 using Xunit;
 
@@ -21,35 +13,12 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
     {
         private readonly SimpleInjectorCompositionRoot _sut;
         
-        private class ADomainModule  : DomainModule 
-        {
-            public ADomainModule(params Assembly[] domainAssemblies) : base(domainAssemblies)
-            { }
-
-            protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
-            {
-                base.Register(container, scopedLifestyle);
-                container.Register<IClock, FrozenClock>();
-            }
-        }
-
         public TheSimpleInjectorCompositionRoot()
         {
-
-            var tenantManager = A.Fake<ITenantIdService>();
-            TenantId[] tenantIds = { new TenantId(999) };
-            A.CallTo(() => tenantManager.GetActiveTenantIds()).Returns(tenantIds);
-
-
             _sut = new SimpleInjectorCompositionRoot();
-            var domainAssembly = typeof(AnAggregate).GetTypeInfo().Assembly;
-            _sut.RegisterModules(
-                new InfrastructureModule(new DebugExceptionLogger(), A.Fake<IEventBus>()),
-                new ADomainModule(domainAssembly),
-                new APersistenceModule(domainAssembly));
-            
+            Assembly domainAssembly = typeof(AnAggregate).GetTypeInfo().Assembly;
+            _sut.RegisterModules(new ADomainModule(domainAssembly));
             _sut.Verify();
-
         }
 
         [Fact]
@@ -91,22 +60,22 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         [Fact]
         public void ProvidesScopedInstancesWhenScopeHasBeenStarted()
         {
-            IClock scope1Clock;
-            IClock scope2Clock;
+            ITestDomainService scope1Instance;
+            ITestDomainService scope2Instance;
 
             using (_sut.BeginScope())
             {
-                scope1Clock = _sut.GetInstance<IClock>();
-                Assert.NotNull(scope1Clock);
+                scope1Instance = _sut.GetInstance<ITestDomainService>();
+                Assert.NotNull(scope1Instance);
             }
 
             using (_sut.BeginScope())
             {
-                scope2Clock = _sut.GetInstance<IClock>();
-                Assert.NotNull(scope2Clock);
+                scope2Instance = _sut.GetInstance<ITestDomainService>();
+                Assert.NotNull(scope2Instance);
             }
 
-            Assert.NotEqual(scope1Clock, scope2Clock);
+            Assert.NotEqual(scope1Instance, scope2Instance);
         }
 
         [Fact]
@@ -118,7 +87,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
             object[] singletonInstances = new object[parallelScopeCount];
             Task[] tasks = new Task[parallelScopeCount];
 
-            ManualResetEvent waiter = new ManualResetEvent(false);
+            var waiter = new ManualResetEvent(false);
 
             // resolving a singleton service and a scoped service in a massive parallel scenario
             for (int index = 0; index < parallelScopeCount; index++)
@@ -130,8 +99,8 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
                     waiter.WaitOne();
                     using (_sut.BeginScope())
                     {
-                        scopedInstances[indexClosure] = _sut.GetInstance<IClock>();
-                        singletonInstances[indexClosure] = _sut.GetInstance<IEntityIdGenerator>();
+                        scopedInstances[indexClosure] = _sut.GetInstance<ITestDomainService>();
+                        singletonInstances[indexClosure] = _sut.GetInstance<ISingletonService>();
                     }
                 });
             }
@@ -161,22 +130,22 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         [Fact]
         public void ThrowsWhenScopedInstanceIsRequestedOutsideScope()
         {
-            Assert.Throws<ActivationException>(() => _sut.GetInstance<IClock>());
-            Assert.Throws<ActivationException>(() => _sut.GetInstance(typeof(IClock)));
+            Assert.Throws<ActivationException>(() => _sut.GetInstance<ITestDomainService>());
+            Assert.Throws<ActivationException>(() => _sut.GetInstance(typeof(ITestDomainService)));
             Assert.Null(_sut.GetCurrentScope());
 
             using (_sut.BeginScope())
             {
-                var sutClock = _sut.GetInstance<IClock>();
-                var scopeClock = _sut.GetInstance<IClock>();
-                Assert.NotNull(sutClock);
-                Assert.NotNull(scopeClock);
-                Assert.Equal(sutClock, scopeClock);
+                var sutInstance = _sut.GetInstance<ITestDomainService>();
+                var scopeInstance = _sut.GetInstance<ITestDomainService>();
+                Assert.NotNull(sutInstance);
+                Assert.NotNull(scopeInstance);
+                Assert.Equal(sutInstance, scopeInstance);
             }
 
             Assert.Null(_sut.GetCurrentScope());
-            Assert.Throws<ActivationException>(() => _sut.GetInstance<IClock>());
-            Assert.Throws<ActivationException>(() => _sut.GetInstance(typeof(IClock)));
+            Assert.Throws<ActivationException>(() => _sut.GetInstance<ITestDomainService>());
+            Assert.Throws<ActivationException>(() => _sut.GetInstance(typeof(ITestDomainService)));
         }
 
         [Fact]

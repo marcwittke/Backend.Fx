@@ -1,52 +1,62 @@
+using System;
+using Backend.Fx.Logging;
+using FakeItEasy;
 using Xunit;
 
 namespace Backend.Fx.Tests.Logging
 {
-    using System;
-    using FakeItEasy;
-    using Fx.Logging;
-
     public class TheLogger
     {
-        private readonly ILoggerFactory _loggerFactory;
-        private readonly InvalidOperationException _exception = new InvalidOperationException("whatever");
-
         public TheLogger()
         {
             _loggerFactory = A.Fake<ILoggerFactory>();
-            ILogger logger = A.Fake<ILogger>();
+            var logger = A.Fake<ILogger>();
 
-            A.CallTo(() => _loggerFactory.Create(A<string>.Ignored)).Returns(logger);
+            A.CallTo(() => _loggerFactory.Create<TheLogger>()).Returns(logger);
             A.CallTo(() => logger.DebugDuration(A<string>.Ignored)).ReturnsLazily((string activity) => new DurationLogger(s => logger.Debug(s), activity));
             A.CallTo(() => logger.InfoDuration(A<string>.Ignored)).ReturnsLazily((string activity) => new DurationLogger(s => logger.Info(s), activity));
             A.CallTo(() => logger.TraceDuration(A<string>.Ignored)).ReturnsLazily((string activity) => new DurationLogger(s => logger.Trace(s), activity));
         }
 
-        [Fact]
-        public void CanLogFatal()
-        {
-            string msg = "the log message";
-            var logger = _loggerFactory.Create("aaa");
-            logger.Fatal(msg);
+        private readonly ILoggerFactory _loggerFactory;
+        private readonly InvalidOperationException _exception = new InvalidOperationException("whatever");
 
-            A.CallTo(() => logger.Fatal(A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
+        [Fact]
+        public void CanLogDebug()
+        {
+            var msg = "the log message";
+            ILogger logger = _loggerFactory.Create<TheLogger>();
+            logger.Debug(msg);
+
+            A.CallTo(() => logger.Debug(A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
-        public void CanLogFatalWithException()
+        public void CanLogDebugDuration()
         {
-            string msg = "the log message";
-            var logger = _loggerFactory.Create("aaa");
-            logger.Fatal(_exception, msg);
+            var msg = "the log message";
+            ILogger logger = _loggerFactory.Create<TheLogger>();
+            logger.DebugDuration(msg).Dispose();
 
-            A.CallTo(() => logger.Fatal(A<Exception>.That.Matches(ex => ex == _exception), A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
+            A.CallTo(() => logger.Debug(A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
+            A.CallTo(() => logger.Debug(A<string>.That.Matches(s => s.StartsWith(msg + " - Duration:")))).MustHaveHappenedOnceExactly();
+        }
+
+        [Fact]
+        public void CanLogDebugWithException()
+        {
+            var msg = "the log message";
+            ILogger logger = _loggerFactory.Create<TheLogger>();
+            logger.Debug(_exception, msg);
+
+            A.CallTo(() => logger.Debug(A<Exception>.That.Matches(ex => ex == _exception), A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
         public void CanLogError()
         {
-            string msg = "the log message";
-            var logger = _loggerFactory.Create("aaa");
+            var msg = "the log message";
+            ILogger logger = _loggerFactory.Create<TheLogger>();
             logger.Error(msg);
 
             A.CallTo(() => logger.Error(A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
@@ -55,18 +65,100 @@ namespace Backend.Fx.Tests.Logging
         [Fact]
         public void CanLogErrorWithException()
         {
-            string msg = "the log message";
-            var logger = _loggerFactory.Create("aaa");
+            var msg = "the log message";
+            ILogger logger = _loggerFactory.Create<TheLogger>();
             logger.Error(_exception, msg);
 
             A.CallTo(() => logger.Error(A<Exception>.That.Matches(ex => ex == _exception), A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
+        public void CanLogFatal()
+        {
+            var msg = "the log message";
+            ILogger logger = _loggerFactory.Create<TheLogger>();
+            logger.Fatal(msg);
+
+            A.CallTo(() => logger.Fatal(A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
+        }
+
+        [Fact]
+        public void CanLogFatalWithException()
+        {
+            var msg = "the log message";
+            ILogger logger = _loggerFactory.Create<TheLogger>();
+            logger.Fatal(_exception, msg);
+
+            A.CallTo(() => logger.Fatal(A<Exception>.That.Matches(ex => ex == _exception), A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
+        }
+
+        [Fact]
+        public void CanLogInfo()
+        {
+            var msg = "the log message";
+            ILogger logger = _loggerFactory.Create<TheLogger>();
+            logger.Info(msg);
+
+            A.CallTo(() => logger.Info(A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
+        }
+
+        [Fact]
+        public void CanLogInfoDuration()
+        {
+            var msg = "the log message";
+            ILogger logger = _loggerFactory.Create<TheLogger>();
+            logger.InfoDuration(msg).Dispose();
+
+            A.CallTo(() => logger.Info(A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
+            A.CallTo(() => logger.Info(A<string>.That.Matches(s => s.StartsWith(msg + " - Duration:")))).MustHaveHappenedOnceExactly();
+        }
+
+        [Fact]
+        public void CanLogInfoWithException()
+        {
+            var msg = "the log message";
+            ILogger logger = _loggerFactory.Create<TheLogger>();
+            logger.Info(_exception, msg);
+
+            A.CallTo(() => logger.Info(A<Exception>.That.Matches(ex => ex == _exception), A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
+        }
+
+        [Fact]
+        public void CanLogTrace()
+        {
+            var msg = "the log message";
+            ILogger logger = _loggerFactory.Create<TheLogger>();
+            logger.Trace(msg);
+
+            A.CallTo(() => logger.Trace(A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
+        }
+
+        [Fact]
+        public void CanLogTraceDuration()
+        {
+            var msg = "the log message";
+            ILogger logger = _loggerFactory.Create<TheLogger>();
+            logger.TraceDuration(msg).Dispose();
+
+            A.CallTo(() => logger.Trace(A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
+            A.CallTo(() => logger.Trace(A<string>.That.Matches(s => s.StartsWith(msg + " - Duration:")))).MustHaveHappenedOnceExactly();
+        }
+
+        [Fact]
+        public void CanLogTraceWithException()
+        {
+            var msg = "the log message";
+            ILogger logger = _loggerFactory.Create<TheLogger>();
+            logger.Trace(_exception, msg);
+
+            A.CallTo(() => logger.Trace(A<Exception>.That.Matches(ex => ex == _exception), A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
+        }
+
+        [Fact]
         public void CanLogWarning()
         {
-            string msg = "the log message";
-            var logger = _loggerFactory.Create("aaa");
+            var msg = "the log message";
+            ILogger logger = _loggerFactory.Create<TheLogger>();
             logger.Warn(msg);
 
             A.CallTo(() => logger.Warn(A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
@@ -75,104 +167,11 @@ namespace Backend.Fx.Tests.Logging
         [Fact]
         public void CanLogWarnWithException()
         {
-            string msg = "the log message";
-            var logger = _loggerFactory.Create("aaa");
+            var msg = "the log message";
+            ILogger logger = _loggerFactory.Create<TheLogger>();
             logger.Warn(_exception, msg);
 
             A.CallTo(() => logger.Warn(A<Exception>.That.Matches(ex => ex == _exception), A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
-        }
-
-        [Fact]
-        public void CanLogInfo()
-        {
-            string msg = "the log message";
-            var logger = _loggerFactory.Create("aaa");
-            logger.Info(msg);
-
-            A.CallTo(() => logger.Info(A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
-        }
-
-        [Fact]
-        public void CanLogInfoWithException()
-        {
-            string msg = "the log message";
-            var logger = _loggerFactory.Create("aaa");
-            logger.Info(_exception, msg);
-
-            A.CallTo(() => logger.Info(A<Exception>.That.Matches(ex => ex == _exception), A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
-        }
-
-        [Fact]
-        public void CanLogInfoDuration()
-        {
-            string msg = "the log message";
-            var logger = _loggerFactory.Create("aaa");
-            logger.InfoDuration(msg).Dispose();
-
-            A.CallTo(() => logger.Info(A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
-            A.CallTo(() => logger.Info(A<string>.That.Matches(s => s.StartsWith(msg + " - Duration:")))).MustHaveHappenedOnceExactly();
-        }
-
-        [Fact]
-        public void CanLogDebug()
-        {
-            string msg = "the log message";
-            var logger = _loggerFactory.Create("aaa");
-            logger.Debug(msg);
-
-            A.CallTo(() => logger.Debug(A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
-        }
-
-        [Fact]
-        public void CanLogDebugWithException()
-        {
-            string msg = "the log message";
-            var logger = _loggerFactory.Create("aaa");
-            logger.Debug(_exception, msg);
-
-            A.CallTo(() => logger.Debug(A<Exception>.That.Matches(ex => ex == _exception), A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
-        }
-
-        [Fact]
-        public void CanLogDebugDuration()
-        {
-            string msg = "the log message";
-            var logger = _loggerFactory.Create("aaa");
-            logger.DebugDuration(msg).Dispose();
-
-            A.CallTo(() => logger.Debug(A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
-            A.CallTo(() => logger.Debug(A<string>.That.Matches(s => s.StartsWith(msg+" - Duration:")))).MustHaveHappenedOnceExactly();
-        }
-
-        [Fact]
-        public void CanLogTrace()
-        {
-            string msg = "the log message";
-            var logger = _loggerFactory.Create("aaa");
-            logger.Trace(msg);
-
-            A.CallTo(() => logger.Trace(A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
-        }
-
-        [Fact]
-        public void CanLogTraceWithException()
-        {
-            string msg = "the log message";
-            var logger = _loggerFactory.Create("aaa");
-            logger.Trace(_exception, msg);
-
-            A.CallTo(() => logger.Trace(A<Exception>.That.Matches(ex => ex == _exception), A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
-        }
-
-        [Fact]
-        public void CanLogTraceDuration()
-        {
-            string msg = "the log message";
-            var logger = _loggerFactory.Create("aaa");
-            logger.TraceDuration(msg).Dispose();
-
-            A.CallTo(() => logger.Trace(A<string>.That.Matches(s => s == msg))).MustHaveHappenedOnceExactly();
-            A.CallTo(() => logger.Trace(A<string>.That.Matches(s => s.StartsWith(msg + " - Duration:")))).MustHaveHappenedOnceExactly();
         }
     }
 }

@@ -1,17 +1,17 @@
-﻿namespace Backend.Fx.Patterns.Authorization
-{
-    using System;
-    using System.Linq;
-    using System.Linq.Expressions;
-    using BuildingBlocks;
+﻿using System;
+using System.Linq;
+using System.Linq.Expressions;
+using Backend.Fx.BuildingBlocks;
+using Backend.Fx.Logging;
 
+namespace Backend.Fx.Patterns.Authorization
+{
     public abstract class AggregateAuthorization<TAggregateRoot> : IAggregateAuthorization<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
+        private static readonly ILogger Logger = LogManager.Create<AggregateAuthorization<TAggregateRoot>>();
+        
         /// <inheritdoc />>
-        public virtual Expression<Func<TAggregateRoot, bool>> HasAccessExpression
-        {
-            get { return agg => true; }
-        }
+        public abstract Expression<Func<TAggregateRoot, bool>> HasAccessExpression { get; }
 
         /// <inheritdoc />>
         public virtual IQueryable<TAggregateRoot> Filter(IQueryable<TAggregateRoot> queryable)
@@ -20,10 +20,7 @@
         }
 
         /// <inheritdoc />>
-        public virtual bool CanCreate(TAggregateRoot t)
-        {
-            return true;
-        }
+        public abstract bool CanCreate(TAggregateRoot t);
 
         /// <summary>
         /// Implement a guard that might disallow modifying an existing aggregate.
@@ -32,13 +29,17 @@
         /// </summary>
         public virtual bool CanModify(TAggregateRoot t)
         {
-            return CanCreate(t);
+            var canCreate = CanCreate(t);
+            Logger.Trace($"CanCreate({t.DebuggerDisplay}): {canCreate}");
+            return canCreate;
         }
 
         /// <inheritdoc />>
         public virtual bool CanDelete(TAggregateRoot t)
         {
-            return CanModify(t);
+            var canModify = CanModify(t);
+            Logger.Trace($"CanModify({t.DebuggerDisplay}): {canModify}");
+            return canModify;
         }
     }
 }

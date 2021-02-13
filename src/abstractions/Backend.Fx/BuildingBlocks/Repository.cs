@@ -1,16 +1,16 @@
-﻿namespace Backend.Fx.BuildingBlocks
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Environment.MultiTenancy;
-    using Exceptions;
-    using Extensions;
-    using JetBrains.Annotations;
-    using Logging;
-    using Patterns.Authorization;
-    using Patterns.DependencyInjection;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Exceptions;
+using Backend.Fx.Extensions;
+using Backend.Fx.Logging;
+using Backend.Fx.Patterns.Authorization;
+using Backend.Fx.Patterns.DependencyInjection;
+using JetBrains.Annotations;
 
+namespace Backend.Fx.BuildingBlocks
+{
     public abstract class Repository<TAggregateRoot> : IRepository<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
         private static readonly ILogger Logger = LogManager.Create<Repository<TAggregateRoot>>();
@@ -45,7 +45,7 @@
         public TAggregateRoot Single(int id)
         {
             Logger.Debug($"Getting single {AggregateTypeName}[{id}]");
-            var aggregateRoot = AggregateQueryable.FirstOrDefault(aggr => aggr.Id.Equals(id));
+            TAggregateRoot aggregateRoot = AggregateQueryable.FirstOrDefault(aggr => aggr.Id.Equals(id));
             if (aggregateRoot == null)
             {
                 throw new NotFoundException<TAggregateRoot>(id);

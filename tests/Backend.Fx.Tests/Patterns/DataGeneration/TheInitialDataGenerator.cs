@@ -1,12 +1,10 @@
-﻿using Xunit;
+﻿using Backend.Fx.Patterns.DataGeneration;
+using Xunit;
 
 namespace Backend.Fx.Tests.Patterns.DataGeneration
 {
-    using Fx.Patterns.DataGeneration;
-
     public class ADataGenerator : DataGenerator
     {
-
         public bool ShouldRunOverride { get; set; }
         public int GenerateCoreCalled { get; private set; }
         public int ShouldRunCalled { get; private set; }
