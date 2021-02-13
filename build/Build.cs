@@ -105,7 +105,8 @@ class Build : NukeBuild
 
                                        if (pushToNuget)
                                        {
-                                           s = s.SetApiKey(NugetApiKey);
+                                           s = s.SetSource("https://api.nuget.org/v3/index.json")
+                                                .SetApiKey(NugetApiKey);
                                        }
                                        else
                                        {
