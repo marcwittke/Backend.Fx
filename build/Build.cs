@@ -92,7 +92,7 @@ class Build : NukeBuild
                            .DependsOn(Pack)
                            .Executes(() =>
                            {
-                               bool pushToNuget = GitRepository.Branch == "refs/heads/master";
+                               bool pushToNuget = GitRepository.Branch == "master";
 
                                foreach (var nupkg in ArtifactsDirectory.GlobFiles("*.nupkg"))
                                {
