@@ -25,5 +25,5 @@ jobs:
       - name: nuke build
         run: ./build.sh
         env:
-            MYGET_TOKEN: ${{ secrets.MYGET_TOKEN }}
-            NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+            MYGET_APIKEY: ${{ secrets.MYGET_APIKEY }}
+            NUGET_APIKEY: ${{ secrets.NUGET_APIKEY }}
