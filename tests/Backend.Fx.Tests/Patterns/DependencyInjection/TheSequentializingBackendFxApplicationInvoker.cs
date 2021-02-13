@@ -46,7 +46,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         [Fact]
         public async Task IsReallyNeeded()
         {
-            if (System.Environment.ProcessorCount > 1)
+            if (System.Environment.ProcessorCount > 2)
             {
                 // negative test: without sequentialization all tasks run in parallel
                 var count = 10;
