@@ -32,6 +32,11 @@ namespace Backend.Fx.Environment.MultiTenancy
         public bool IsDemoTenant { get; set; }
 
         public TenantState State { get; set; }
+
+        /// <summary>
+        /// optional: a generic field to store your arbitrary config data 
+        /// </summary>
+        public string Configuration { get; set; }
     }
 
     public enum TenantState
