@@ -16,5 +16,6 @@ namespace Backend.Fx.Environment.MultiTenancy
         public bool IsDemonstrationTenant { get; set; }
         public string Name { get; set; } = "Tenant";
         public string Description { get; set; }
+        public string Configuration { get; set; }
     }
 }

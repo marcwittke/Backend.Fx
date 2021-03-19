@@ -12,36 +12,44 @@ namespace Backend.Fx.Environment.MultiTenancy
     /// </summary>
     public interface ITenantService
     {
+        ITenantIdProvider IdProvider { get; }
+        
         TenantId CreateTenant(TenantCreationParameters param);
         void ActivateTenant(TenantId tenantId);
         void DeactivateTenant(TenantId tenantId);
+        void DeleteTenant(TenantId tenantId);
+        
+        Tenant[] GetActiveTenants();
+        Tenant[] GetActiveDemonstrationTenants();
+        Tenant[] GetActiveProductionTenants();
+    }
+
+    public interface ITenantIdProvider
+    {
         TenantId[] GetActiveTenantIds();
         TenantId[] GetActiveDemonstrationTenantIds();
         TenantId[] GetActiveProductionTenantIds();
     }
 
-    public interface ITenantIdProvider
-    {
-        TenantId[] GetActiveDemonstrationTenantIds();
-        TenantId[] GetActiveProductionTenantIds();
-    }
-
-    public class TenantService : ITenantService, ITenantIdProvider
+    public class TenantService : ITenantService
     {
         private static readonly ILogger Logger = LogManager.Create<TenantService>();
         private readonly IMessageBus _messageBus;
         private readonly ITenantRepository _tenantRepository;
 
+        public ITenantIdProvider IdProvider { get; }
+
         public TenantService(IMessageBus messageBus, ITenantRepository tenantRepository)
         {
             _messageBus = messageBus;
             _tenantRepository = tenantRepository;
+            IdProvider = new TenantServiceTenantIdProvider(this);
         }
 
         public TenantId CreateTenant(TenantCreationParameters param)
         {
             Logger.Info($"Creating tenant: {param.Name}");
-            return CreateTenant(param.Name, param.Description, param.IsDemonstrationTenant);
+            return CreateTenant(param.Name, param.Description, param.IsDemonstrationTenant, param.Configuration);
         }
 
         public void ActivateTenant(TenantId tenantId)
@@ -62,40 +70,43 @@ namespace Backend.Fx.Environment.MultiTenancy
             _messageBus.Publish(new TenantDeactivated(tenant.Id, tenant.Name, tenant.Description, tenant.IsDemoTenant));
         }
 
-        public TenantId[] GetActiveTenantIds()
+        public void DeleteTenant(TenantId tenantId)
+        {
+            Logger.Info($"Deleting tenant: {tenantId}");
+            _tenantRepository.DeleteTenant(tenantId);
+        }
+
+        public Tenant[] GetActiveTenants()
         {
             var activeTenantIds = _tenantRepository
                                   .GetTenants()
                                   .Where(t => t.State == TenantState.Active)
-                                  .Select(t => new TenantId(t.Id))
                                   .ToArray();
             Logger.Trace($"Active TenantIds: {string.Join(",",activeTenantIds.Select(t => t.ToString()))}");
             return activeTenantIds;
         }
 
-        public TenantId[] GetActiveDemonstrationTenantIds()
+        public Tenant[] GetActiveDemonstrationTenants()
         {
             var activeDemonstrationTenantIds = _tenantRepository
                                                .GetTenants()
                                                .Where(t => t.State == TenantState.Active && t.IsDemoTenant)
-                                               .Select(t => new TenantId(t.Id))
                                                .ToArray();
             Logger.Trace($"Active Demonstration TenantIds: {string.Join(",",activeDemonstrationTenantIds.Select(t => t.ToString()))}");
             return activeDemonstrationTenantIds;
         }
 
-        public TenantId[] GetActiveProductionTenantIds()
+        public Tenant[] GetActiveProductionTenants()
         {
             var activeProductionTenantIds = _tenantRepository
                                             .GetTenants()
                                             .Where(t => t.State == TenantState.Active && !t.IsDemoTenant)
-                                            .Select(t => new TenantId(t.Id))
                                             .ToArray();
             Logger.Trace($"Active Production TenantIds: {string.Join(",",activeProductionTenantIds.Select(t => t.ToString()))}");
             return activeProductionTenantIds;
         }
 
-        protected virtual TenantId CreateTenant([NotNull] string name, string description, bool isDemo)
+        protected virtual TenantId CreateTenant([NotNull] string name, string description, bool isDemo, string configuration)
         {
             Logger.Info($"Creating Tenant {name}");
             
@@ -109,11 +120,42 @@ namespace Backend.Fx.Environment.MultiTenancy
                 throw new ArgumentException($"There is already a tenant named {name}");
             }
 
-            var tenant = new Tenant(name, description, isDemo);
+            var tenant = new Tenant(name, description, isDemo) {Configuration = configuration};
             _tenantRepository.SaveTenant(tenant);
             var tenantId = new TenantId(tenant.Id);
             _messageBus.Publish(new TenantActivated(tenant.Id, tenant.Name, tenant.Description, tenant.IsDemoTenant));
             return tenantId;
+        }
+        
+        private class TenantServiceTenantIdProvider : ITenantIdProvider
+        {
+            private readonly ITenantService _tenantService;
+
+            public TenantServiceTenantIdProvider(ITenantService tenantService)
+            {
+                _tenantService = tenantService;
+            }
+
+            public TenantId[] GetActiveDemonstrationTenantIds()
+            {
+                return _tenantService.GetActiveDemonstrationTenants()
+                                       .Select(t => new TenantId(t.Id))
+                                       .ToArray();
+            }
+
+            public TenantId[] GetActiveProductionTenantIds()
+            {
+                return _tenantService.GetActiveProductionTenants()
+                                       .Select(t => new TenantId(t.Id))
+                                       .ToArray();
+            }
+            
+            public TenantId[] GetActiveTenantIds()
+            {
+                return _tenantService.GetActiveTenants()
+                                     .Select(t => new TenantId(t.Id))
+                                     .ToArray();
+            }
         }
     }
 }

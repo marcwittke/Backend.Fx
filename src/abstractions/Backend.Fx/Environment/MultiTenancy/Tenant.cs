@@ -14,12 +14,13 @@ namespace Backend.Fx.Environment.MultiTenancy
         {
         }
 
-        public Tenant([NotNull] string name, string description, bool isDemoTenant)
+        public Tenant([NotNull] string name, string description, bool isDemoTenant, string configuration = null)
         {
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Value cannot be null or whitespace.", nameof(name));
             Name = name;
             Description = description;
             IsDemoTenant = isDemoTenant;
+            Configuration = configuration;
             State = TenantState.Active;
         }
 
