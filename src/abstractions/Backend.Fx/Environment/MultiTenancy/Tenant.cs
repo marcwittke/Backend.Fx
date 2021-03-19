@@ -38,6 +38,11 @@ namespace Backend.Fx.Environment.MultiTenancy
         /// optional: a generic field to store your arbitrary config data 
         /// </summary>
         public string Configuration { get; set; }
+
+        public TenantId GetTenantId()
+        {
+            return new TenantId(Id);
+        }
     }
 
     public enum TenantState
