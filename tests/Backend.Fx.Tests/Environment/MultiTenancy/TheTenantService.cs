@@ -25,17 +25,17 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
         [Fact]
         public void CannotCreateTenantWithoutName()
         {
-            Assert.Throws<ArgumentException>(() => _sut.CreateTenant(new TenantCreationParameters("", "d", true)));
-            Assert.Throws<ArgumentException>(() => _sut.CreateTenant(new TenantCreationParameters(null, "d", true)));
+            Assert.Throws<ArgumentException>(() => _sut.CreateTenant("", "d", true));
+            Assert.Throws<ArgumentException>(() => _sut.CreateTenant(null, "d", true));
         }
 
         [Fact]
         public void CannotCreateTenantWithSameName()
         {
-            _sut.CreateTenant(new TenantCreationParameters("n", "d", true));
-            Assert.Throws<ArgumentException>(() => _sut.CreateTenant(new TenantCreationParameters("n", "d", true)));
-            Assert.Throws<ArgumentException>(() => _sut.CreateTenant(new TenantCreationParameters("n", "d", false)));
-            Assert.Throws<ArgumentException>(() => _sut.CreateTenant(new TenantCreationParameters("N", "d", true)));
+            _sut.CreateTenant("n", "d", true);
+            Assert.Throws<ArgumentException>(() => _sut.CreateTenant("n", "d", true));
+            Assert.Throws<ArgumentException>(() => _sut.CreateTenant("n", "d", false));
+            Assert.Throws<ArgumentException>(() => _sut.CreateTenant("N", "d", true));
         }
 
         [Fact]
@@ -55,9 +55,9 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
             var demoTenantIds = tenants.Where(t => t.IsDemoTenant).Select(t => new TenantId(t.Id)).ToArray();
             var prodTenantIds = tenants.Where(t => !t.IsDemoTenant).Select(t => new TenantId(t.Id)).ToArray();
 
-            Assert.Equal(tenantIds, _sut.GetActiveTenantIds());
-            Assert.Equal(prodTenantIds, _sut.GetActiveProductionTenantIds());
-            Assert.Equal(demoTenantIds, _sut.GetActiveDemonstrationTenantIds());
+            Assert.Equal(tenantIds, _sut.TenantIdProvider.GetActiveTenantIds());
+            Assert.Equal(prodTenantIds, _sut.TenantIdProvider.GetActiveProductionTenantIds());
+            Assert.Equal(demoTenantIds, _sut.TenantIdProvider.GetActiveDemonstrationTenantIds());
         }
 
         [Fact]
@@ -65,8 +65,7 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
         {
             var ev = new ManualResetEvent(false);
             A.CallTo(() => _messageBus.Publish(A<TenantActivated>._)).Invokes(() => ev.Set());
-            Task.Run(() => _sut.CreateTenant(new TenantCreationParameters
-                                                 {Name = "prod", Description = "unit test created", IsDemonstrationTenant = false}));
+            Task.Run(() => _sut.CreateTenant("prod", "unit test created", false));
             Assert.True(ev.WaitOne(Debugger.IsAttached ? int.MaxValue : 10000));
         }
     }

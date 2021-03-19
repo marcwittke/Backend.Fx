@@ -11,15 +11,15 @@ namespace Backend.Fx.Environment.MultiTenancy
     public class SingleTenantApplication : TenantApplication, IBackendFxApplication
     {
         private static readonly ILogger Logger = LogManager.Create<SingleTenantApplication>();
+        private readonly bool _isDemoTenant;
         private readonly ITenantService _tenantService;
         private readonly IBackendFxApplication _application;
-        private readonly TenantCreationParameters _tenantCreationParameters;
-
-        public SingleTenantApplication(TenantCreationParameters tenantCreationParameters, ITenantService tenantService, IBackendFxApplication application) : base(application)
+        
+        public SingleTenantApplication(bool isDemoTenant, ITenantService tenantService, IBackendFxApplication application) : base(application)
         {
+            _isDemoTenant = isDemoTenant;
             _tenantService = tenantService;
             _application = application;
-            _tenantCreationParameters = tenantCreationParameters;
         }
 
         public void Dispose()
@@ -48,9 +48,9 @@ namespace Backend.Fx.Environment.MultiTenancy
 
             await _application.Boot(cancellationToken);
 
-            Logger.Info($"Ensuring existence of single tenant {_tenantCreationParameters.Name}");
-            TenantId = _tenantService.GetActiveTenantIds().SingleOrDefault()
-                       ?? _tenantService.CreateTenant(_tenantCreationParameters);
+            Logger.Info($"Ensuring existence of single tenant");
+            TenantId = _tenantService.GetActiveTenants().SingleOrDefault()?.GetTenantId()
+                       ?? _tenantService.CreateTenant("Single Tenant", "This application runs in single tenant mode", _isDemoTenant);
         }
     }
 }
