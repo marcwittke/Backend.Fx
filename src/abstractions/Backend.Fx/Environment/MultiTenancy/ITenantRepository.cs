@@ -7,5 +7,7 @@
         Tenant[] GetTenants();
 
         Tenant GetTenant(TenantId tenantId);
+
+        void DeleteTenant(TenantId tenantId);
     }
 }
