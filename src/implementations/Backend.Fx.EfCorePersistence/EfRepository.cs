@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security;
 using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Exceptions;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.Authorization;
 using Backend.Fx.Patterns.DependencyInjection;
@@ -76,7 +77,8 @@ namespace Backend.Fx.EfCorePersistence
             if (previousState == EntityState.Unchanged && entry.EntityState == EntityState.Modified && entry.EntityType.ClrType == typeof(TAggregateRoot))
             {
                 var aggregateRoot = (TAggregateRoot) entry.Entity;
-                if (!_aggregateAuthorization.CanModify(aggregateRoot)) throw new SecurityException($"You are not allowed to modify {AggregateTypeName}[{aggregateRoot.Id}]");
+                if (!_aggregateAuthorization.CanModify(aggregateRoot)) throw new ForbiddenException("Unauthorized attempt to modify {AggregateTypeName}[{aggregateRoot.Id}]")
+                    .AddError($"You are not allowed to modify {AggregateTypeName}[{aggregateRoot.Id}]");
             }
         }
 
