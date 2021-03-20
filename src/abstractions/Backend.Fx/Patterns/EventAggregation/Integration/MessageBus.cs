@@ -25,6 +25,11 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
 
         public void ProvideInvoker(IBackendFxApplicationInvoker invoker)
         {
+            if (_invoker != null && !Equals(_invoker, invoker))
+            {
+                throw new InvalidOperationException("This message bus instance has been linked to an application instance invoker before. " +
+                                                    "You cannot share the same message bus instance between multiple applications.");
+            }
             _invoker = invoker;
         }
 

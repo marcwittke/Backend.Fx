@@ -23,8 +23,13 @@ namespace Backend.Fx.Environment.Authentication
 
         public static ICurrentTHolder<IIdentity> CreateSystem()
         {
+            return Create(new SystemIdentity());
+        }
+        
+        public static ICurrentTHolder<IIdentity> Create(IIdentity identity)
+        {
             var currentIdentityHolder = new CurrentIdentityHolder();
-            currentIdentityHolder.ReplaceCurrent(new SystemIdentity());
+            currentIdentityHolder.ReplaceCurrent(identity);
             return currentIdentityHolder;
         }
     }

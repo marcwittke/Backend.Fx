@@ -55,5 +55,8 @@ namespace Backend.Fx.Environment.MultiTenancy
         {
             yield return _id;
         }
+        
+        public static explicit operator int(TenantId tid) => tid.Value;
+        public static explicit operator TenantId(int id) => new TenantId(id);
     }
 }

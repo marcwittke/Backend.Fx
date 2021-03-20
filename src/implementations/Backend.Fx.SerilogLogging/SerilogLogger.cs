@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using Serilog;
+using Serilog.Core;
 using Serilog.Events;
+// ReSharper disable TemplateIsNotCompileTimeConstantProblem
 
 namespace Backend.Fx.SerilogLogging
 {
@@ -23,11 +25,13 @@ namespace Backend.Fx.SerilogLogging
             return exception;
         }
 
+        [MessageTemplateFormatMethod("format")]
         public void Fatal(string format, params object[] args)
         {
             _logger.Fatal(format, args);
         }
 
+        [MessageTemplateFormatMethod("format")]
         public Exception Fatal(Exception exception, string format, params object[] args)
         {
             _logger.Fatal(exception, format, args);
@@ -44,11 +48,13 @@ namespace Backend.Fx.SerilogLogging
             return exception;
         }
 
+        [MessageTemplateFormatMethod("format")]
         public void Error(string format, params object[] args)
         {
             _logger.Error(format, args);
         }
 
+        [MessageTemplateFormatMethod("format")]
         public Exception Error(Exception exception, string format, params object[] args)
         {
             _logger.Error(exception, format, args);
@@ -65,11 +71,13 @@ namespace Backend.Fx.SerilogLogging
             return exception;
         }
 
+        [MessageTemplateFormatMethod("format")]
         public void Warn(string format, params object[] args)
         {
             _logger.Warning(format, args);
         }
 
+        [MessageTemplateFormatMethod("format")]
         public Exception Warn(Exception exception, string format, params object[] args)
         {
             _logger.Warning(exception, format, args);
@@ -96,11 +104,13 @@ namespace Backend.Fx.SerilogLogging
             return new Logging.DurationLogger(s => Info(s), beginMessage, endMessage);
         }
 
+        [MessageTemplateFormatMethod("format")]
         public void Info(string format, params object[] args)
         {
             _logger.Information(format, args);
         }
 
+        [MessageTemplateFormatMethod("format")]
         public Exception Info(Exception exception, string format, params object[] args)
         {
             _logger.Information(exception, format, args);
@@ -132,11 +142,13 @@ namespace Backend.Fx.SerilogLogging
             return new Logging.DurationLogger(s => Debug(s), beginMessage, endMessage);
         }
 
+        [MessageTemplateFormatMethod("format")]
         public void Debug(string format, params object[] args)
         {
             _logger.Debug(format, args);
         }
 
+        [MessageTemplateFormatMethod("format")]
         public Exception Debug(Exception exception, string format, params object[] args)
         {
             _logger.Debug(exception, format, args);
@@ -168,11 +180,13 @@ namespace Backend.Fx.SerilogLogging
             return new Logging.DurationLogger(s => Trace(s), beginMessage, endMessage);
         }
 
+        [MessageTemplateFormatMethod("format")]
         public void Trace(string format, params object[] args)
         {
             if (IsTraceEnabled()) _logger.Verbose(format, args);
         }
 
+        [MessageTemplateFormatMethod("format")]
         public Exception Trace(Exception exception, string format, params object[] args)
         {
             if (IsTraceEnabled()) _logger.Verbose(exception, format, args);

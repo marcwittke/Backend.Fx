@@ -8,7 +8,6 @@ using Backend.Fx.Extensions;
 using Backend.Fx.Logging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Backend.Fx.EfCorePersistence
 {

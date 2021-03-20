@@ -18,6 +18,11 @@ namespace Backend.Fx.InMemoryPersistence
             return _store[tenantId.Value];
         }
 
+        public void DeleteTenant(TenantId tenantId)
+        {
+            _store.Remove(tenantId.Value);
+        }
+
         public void SaveTenant(Tenant tenant)
         {
             if (tenant.Id == 0)
@@ -28,6 +33,7 @@ namespace Backend.Fx.InMemoryPersistence
             else
             {
                 _store[tenant.Id].Description = tenant.Description;
+                _store[tenant.Id].Configuration = tenant.Configuration;
                 _store[tenant.Id].IsDemoTenant = tenant.IsDemoTenant;
                 _store[tenant.Id].Name = tenant.Name;
                 _store[tenant.Id].State = tenant.State;

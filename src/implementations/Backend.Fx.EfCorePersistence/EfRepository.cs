@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Security;
 using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Exceptions;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.Authorization;
 using Backend.Fx.Patterns.DependencyInjection;
@@ -21,6 +21,7 @@ namespace Backend.Fx.EfCorePersistence
         private readonly IAggregateMapping<TAggregateRoot> _aggregateMapping;
         private DbContext _dbContext;
 
+        [SuppressMessage("ReSharper", "EF1001")]
         public EfRepository([CanBeNull] DbContext dbContext, IAggregateMapping<TAggregateRoot> aggregateMapping,
                             ICurrentTHolder<TenantId> currentTenantIdHolder, IAggregateAuthorization<TAggregateRoot> aggregateAuthorization)
             : base(currentTenantIdHolder, aggregateAuthorization)
@@ -34,6 +35,7 @@ namespace Backend.Fx.EfCorePersistence
             localViewListener?.RegisterView(AuthorizeChanges);
         }
 
+        [SuppressMessage("ReSharper", "EF1001")]
         public DbContext DbContext
         {
             get => _dbContext ?? throw new InvalidOperationException(
@@ -76,7 +78,8 @@ namespace Backend.Fx.EfCorePersistence
             if (previousState == EntityState.Unchanged && entry.EntityState == EntityState.Modified && entry.EntityType.ClrType == typeof(TAggregateRoot))
             {
                 var aggregateRoot = (TAggregateRoot) entry.Entity;
-                if (!_aggregateAuthorization.CanModify(aggregateRoot)) throw new SecurityException($"You are not allowed to modify {AggregateTypeName}[{aggregateRoot.Id}]");
+                if (!_aggregateAuthorization.CanModify(aggregateRoot)) throw new ForbiddenException("Unauthorized attempt to modify {AggregateTypeName}[{aggregateRoot.Id}]")
+                    .AddError($"You are not allowed to modify {AggregateTypeName}[{aggregateRoot.Id}]");
             }
         }
 

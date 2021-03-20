@@ -1,5 +1,4 @@
 using System;
-using System.Reflection;
 using System.Security.Principal;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;

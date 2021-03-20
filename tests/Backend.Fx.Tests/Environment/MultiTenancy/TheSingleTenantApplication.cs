@@ -1,5 +1,6 @@
 using System.Threading;
 using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Hacking;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using FakeItEasy;
@@ -11,7 +12,6 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
     {
         private readonly IBackendFxApplication _sut;
         private readonly ITenantService _tenantService = A.Fake<ITenantService>();
-        private readonly TenantCreationParameters _tenantCreationParameters = new TenantCreationParameters("n", "d", false);
         private readonly ICompositionRoot _compositionRoot = A.Fake<ICompositionRoot>();
 
         public TheSingleTenantApplication()
@@ -20,33 +20,32 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
 
             A.CallTo(() => application.CompositionRoot).Returns(_compositionRoot);
 
-            _sut = new SingleTenantApplication(_tenantCreationParameters,
-                                               _tenantService,
-                                               application);
+            _sut = new SingleTenantApplication(false, _tenantService, application);
         }
 
         [Fact]
         public void CreatesTenantOnBootWhenNotExistent()
         {
             _sut.Boot();
-            A.CallTo(() => _tenantService.CreateTenant(A<TenantCreationParameters>.That.IsEqualTo(_tenantCreationParameters))).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _tenantService.CreateTenant(A<string>._, A<string>._, A<bool>._, A<string>._)).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
         public void CreatesNoTenantOnBootWhenExistent()
         {
-            A.CallTo(() => _tenantService.GetActiveTenantIds()).Returns(new[] {new TenantId(1)});
+            var tenant = new Tenant("single tenant", "", false);
+            tenant.SetPrivate(t => t.Id, 1);
+            
+            A.CallTo(() => _tenantService.GetActiveTenants()).Returns(new[] {tenant});
             _sut.Boot();
-            A.CallTo(() => _tenantService.CreateTenant(A<TenantCreationParameters>.That.IsEqualTo(_tenantCreationParameters))).MustNotHaveHappened();
+            A.CallTo(() => _tenantService.CreateTenant(A<string>._, A<string>._, A<bool>._, A<string>._)).MustNotHaveHappened();
         }
 
         [Fact]
         public void DelegatesAllCalls()
         {
             var application = A.Fake<IBackendFxApplication>();
-            var sut = new SingleTenantApplication(_tenantCreationParameters,
-                                                  A.Fake<ITenantService>(),
-                                                  application);
+            var sut = new SingleTenantApplication(false, A.Fake<ITenantService>(), application);
 
             Fake.ClearRecordedCalls(application);
             // ReSharper disable once UnusedVariable

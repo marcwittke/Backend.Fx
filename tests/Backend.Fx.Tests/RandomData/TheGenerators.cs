@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using Backend.Fx.RandomData;
 using Xunit;
