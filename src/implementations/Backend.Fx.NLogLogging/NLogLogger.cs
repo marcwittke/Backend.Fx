@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Globalization;
 using Backend.Fx.Logging;
 using NLog;
+// ReSharper disable TemplateIsNotCompileTimeConstantProblem
 
 namespace Backend.Fx.NLogLogging
 {
@@ -49,11 +50,13 @@ namespace Backend.Fx.NLogLogging
             return exception;
         }
 
+        [MessageTemplateFormatMethod("format")]
         public void Error(string format, params object[] args)
         {
             _nlogLogger.Error(CultureInfo.InvariantCulture, format, args);
         }
 
+        [MessageTemplateFormatMethod("format")]
         public Exception Error(Exception exception, string format, params object[] args)
         {
             _nlogLogger.Error(exception, CultureInfo.InvariantCulture, format, args);
@@ -70,11 +73,13 @@ namespace Backend.Fx.NLogLogging
             return exception;
         }
 
+        [MessageTemplateFormatMethod("format")]
         public void Warn(string format, params object[] args)
         {
             _nlogLogger.Warn(CultureInfo.InvariantCulture, format, args);
         }
 
+        [MessageTemplateFormatMethod("format")]
         public Exception Warn(Exception exception, string format, params object[] args)
         {
             _nlogLogger.Warn(exception, CultureInfo.InvariantCulture, format, args);
@@ -101,11 +106,13 @@ namespace Backend.Fx.NLogLogging
             return new DurationLogger(s => Info(s), beginMessage, endMessage);
         }
 
+        [MessageTemplateFormatMethod("format")]
         public void Info(string format, params object[] args)
         {
             _nlogLogger.Info(CultureInfo.InvariantCulture, format, args);
         }
 
+        [MessageTemplateFormatMethod("format")]
         public Exception Info(Exception exception, string format, params object[] args)
         {
             _nlogLogger.Info(exception, CultureInfo.InvariantCulture, format, args);
@@ -137,11 +144,13 @@ namespace Backend.Fx.NLogLogging
             return new DurationLogger(s => Debug(s), beginMessage, endMessage);
         }
 
+        [MessageTemplateFormatMethod("format")]
         public void Debug(string format, params object[] args)
         {
             _nlogLogger.Debug(CultureInfo.InvariantCulture, format, args);
         }
 
+        [MessageTemplateFormatMethod("format")]
         public Exception Debug(Exception exception, string format, params object[] args)
         {
             _nlogLogger.Debug(exception, CultureInfo.InvariantCulture, format, args);
@@ -173,11 +182,13 @@ namespace Backend.Fx.NLogLogging
             return new DurationLogger(s => Trace(s), beginMessage, endMessage);
         }
 
+        [MessageTemplateFormatMethod("format")]
         public void Trace(string format, params object[] args)
         {
             if (IsTraceEnabled()) _nlogLogger.Trace(CultureInfo.InvariantCulture, format, args);
         }
 
+        [MessageTemplateFormatMethod("format")]
         public Exception Trace(Exception exception, string format, params object[] args)
         {
             if (IsTraceEnabled()) _nlogLogger.Trace(exception, CultureInfo.InvariantCulture, format, args);

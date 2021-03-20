@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -37,7 +36,7 @@ namespace Backend.Fx.Environment.MultiTenancy
 
         public TenantId TenantId { get; private set; }
 
-        public bool WaitForBoot(int timeoutMilliSeconds = Int32.MaxValue, CancellationToken cancellationToken = default)
+        public bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue, CancellationToken cancellationToken = default)
         {
             return _application.WaitForBoot(timeoutMilliSeconds, cancellationToken);
         }

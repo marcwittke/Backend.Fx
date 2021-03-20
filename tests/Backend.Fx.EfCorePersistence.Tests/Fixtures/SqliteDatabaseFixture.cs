@@ -1,5 +1,4 @@
 using System.Data;
-using System.Data.Common;
 using System.IO;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
 using Backend.Fx.Environment.Persistence;

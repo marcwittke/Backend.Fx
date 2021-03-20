@@ -24,6 +24,12 @@ namespace Backend.Fx.AspNetCore
         {
             app.UseMiddleware<TBackendFxMiddleware>();
 
+            // if a SIGINT is received, the application must stop gracefully. To achieve this behavior, the
+            // stopping cancellation token must be passed to all async initialization calls
+            CancellationToken stopping = app.ApplicationServices
+                                            .GetRequiredService<IHostApplicationLifetime>()
+                                            .ApplicationStopping;
+
             // booting the application when web host enters started phase
             app.ApplicationServices
                .GetRequiredService<IHostApplicationLifetime>()
@@ -38,7 +44,7 @@ namespace Backend.Fx.AspNetCore
                        {
                            // normal ASP.Net Core environment does not have a synchronization context, 
                            // no problem with await here, it will be executed on the thread pool
-                           await application.Boot();
+                           await application.Boot(stopping);
                        }
                        else
                        {
@@ -48,7 +54,7 @@ namespace Backend.Fx.AspNetCore
                            // synchronization context, which is already at it's limit running the test thread
                            // so we end up in a deadlock here.
                            // solution is to run the await explicitly on the thread pool by using Task.Run
-                           Task.Run(() => application.Boot()).Wait();
+                           Task.Run(() => application.Boot(stopping)).Wait(stopping);
                        }
 
                        Logger.Info("Application startup finished successfully");
@@ -60,11 +66,9 @@ namespace Backend.Fx.AspNetCore
                    }
                });
 
+            
             // backendFxApplication should be gracefully disposed on shutdown
-            app.ApplicationServices
-               .GetRequiredService<IHostApplicationLifetime>()
-               .ApplicationStopping
-               .Register(app.ApplicationServices.GetService<IBackendFxApplication>().Dispose);
+            stopping.Register(app.ApplicationServices.GetService<IBackendFxApplication>().Dispose);
         }
     }
 }

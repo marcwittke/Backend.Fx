@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Security;
 using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Exceptions;
@@ -22,6 +21,7 @@ namespace Backend.Fx.EfCorePersistence
         private readonly IAggregateMapping<TAggregateRoot> _aggregateMapping;
         private DbContext _dbContext;
 
+        [SuppressMessage("ReSharper", "EF1001")]
         public EfRepository([CanBeNull] DbContext dbContext, IAggregateMapping<TAggregateRoot> aggregateMapping,
                             ICurrentTHolder<TenantId> currentTenantIdHolder, IAggregateAuthorization<TAggregateRoot> aggregateAuthorization)
             : base(currentTenantIdHolder, aggregateAuthorization)
@@ -35,6 +35,7 @@ namespace Backend.Fx.EfCorePersistence
             localViewListener?.RegisterView(AuthorizeChanges);
         }
 
+        [SuppressMessage("ReSharper", "EF1001")]
         public DbContext DbContext
         {
             get => _dbContext ?? throw new InvalidOperationException(
