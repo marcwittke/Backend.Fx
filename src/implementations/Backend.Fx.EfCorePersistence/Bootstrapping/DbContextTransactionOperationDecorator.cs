@@ -20,7 +20,6 @@ namespace Backend.Fx.EfCorePersistence.Bootstrapping
         {
             base.Begin();
             _dbContext.Database.UseTransaction((DbTransaction) CurrentTransaction);
-
         }
     }
 }
