@@ -48,7 +48,6 @@ namespace Backend.Fx.AspNetCore.Tests
                 {
                     AdministratorEmail = "me@example.com",
                     AdministratorPassword = "Pa$$w0rd",
-                    Culture = "fr",
                     Description = LoremIpsumGenerator.Generate(3, 5, true),
                     IsDemo = false,
                     Name = "Hello"

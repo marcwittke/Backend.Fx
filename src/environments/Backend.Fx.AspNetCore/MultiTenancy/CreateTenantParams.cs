@@ -12,9 +12,7 @@ namespace Backend.Fx.AspNetCore.MultiTenancy
         [JsonProperty(PropertyName = "description")]
         public string Description { get; set; }
 
-        [JsonProperty(PropertyName = "culture")]
-        public string Culture { get; set; } = "en-US";
-
+        
         [JsonProperty(PropertyName = "administratorEmail")]
         public string AdministratorEmail { get; set; }
 
