@@ -50,8 +50,7 @@ namespace Backend.Fx.Environment.MultiTenancy
         public TenantId CreateTenant(string name, string description, bool isDemonstrationTenant, string configuration = null)
         {
             Logger.Info($"Creating tenant: {name}");
-            Logger.Info($"Creating Tenant {name}");
-
+            
             if (string.IsNullOrWhiteSpace(name))
             {
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(name));
