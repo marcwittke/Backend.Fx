@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Exceptions;
@@ -52,7 +51,7 @@ namespace Backend.Fx.AspNetCore.MultiTenancy
                             Tenant tenant = await CreateTenant(createTenantParams);
                             Logger.Info($"Created Tenant[{tenant.Id}] ({tenant.Name})");
                             
-                            await context.Response.WriteAsync(JsonConvert.SerializeObject(tenant), Encoding.UTF8);
+                            await context.Response.WriteJsonAsync(tenant);
                         }
                     }
                     catch (Exception ex)
@@ -74,14 +73,14 @@ namespace Backend.Fx.AspNetCore.MultiTenancy
                         Logger.Info($"Getting Tenant[{tenantId}]");
 
                         var tenant = TenantService.GetTenant(new TenantId(tenantId));
-                        await context.Response.WriteAsync(JsonConvert.SerializeObject(tenant), Encoding.UTF8);
+                        await context.Response.WriteJsonAsync(tenant);
                     }
                     else
                     {
                         Logger.Info($"Getting Tenants");
                         
                         var tenants = TenantService.GetTenants();
-                        await context.Response.WriteAsync(JsonConvert.SerializeObject(tenants), Encoding.UTF8);
+                        await context.Response.WriteJsonAsync(tenants);
                     }
 
                     return;
