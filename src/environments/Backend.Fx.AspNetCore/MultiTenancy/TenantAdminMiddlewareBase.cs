@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Exceptions;
 using Backend.Fx.Logging;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
@@ -46,9 +47,11 @@ namespace Backend.Fx.AspNetCore.MultiTenancy
                             string inputStreamContent = await inputStream.ReadToEndAsync();
 
                             var createTenantParams = JsonConvert.DeserializeObject<CreateTenantParams>(inputStreamContent);
-                            if (createTenantParams == null) throw new Exception("Bad Request");
+                            if (createTenantParams == null) throw new ClientException();
 
-                            var tenant = await CreateTenant(createTenantParams);
+                            Tenant tenant = await CreateTenant(createTenantParams);
+                            Logger.Info($"Created Tenant[{tenant.Id}] ({tenant.Name})");
+                            
                             await context.Response.WriteAsync(JsonConvert.SerializeObject(tenant), Encoding.UTF8);
                         }
                     }

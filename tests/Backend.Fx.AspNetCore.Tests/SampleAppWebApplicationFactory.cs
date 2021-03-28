@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Xunit;
 
 namespace Backend.Fx.AspNetCore.Tests
 {
@@ -40,7 +41,8 @@ namespace Backend.Fx.AspNetCore.Tests
             ITenantService tenantService = server.Services.GetRequiredService<SampleApplicationHostedService>().TenantService;
             for (int i = 0; i < 100; i++)
             {
-                tenantService.CreateTenant($"t{i:000}", $"Tenant {i:000}", false);
+                var x = tenantService.CreateTenant($"t{i:000}", $"Tenant {i:000}", false);
+                Assert.True(x.Value > 0);
             }
             
             
