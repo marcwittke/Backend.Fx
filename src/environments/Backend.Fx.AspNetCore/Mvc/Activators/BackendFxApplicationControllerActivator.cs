@@ -18,10 +18,10 @@ namespace Backend.Fx.AspNetCore.Mvc.Activators
         public virtual object Create(ControllerContext c)
         {
             var requestedControllerType = c.ActionDescriptor.ControllerTypeInfo.AsType();
-            c.HttpContext.Items.TryGetValue(HttpContextItemKey.InstanceProvider, out var ip);
-            return ip == null 
-                ? CreateInstanceUsingSystemActivator(requestedControllerType) 
-                : CreateInstanceUsingInstanceProvider(ip, requestedControllerType);
+            
+            return c.HttpContext.TryGetInstanceProvider(out var ip) 
+                ? CreateInstanceUsingInstanceProvider(ip, requestedControllerType)
+                : CreateInstanceUsingSystemActivator(requestedControllerType);
         }
 
         private static object CreateInstanceUsingInstanceProvider(object ip, Type requestedControllerType)

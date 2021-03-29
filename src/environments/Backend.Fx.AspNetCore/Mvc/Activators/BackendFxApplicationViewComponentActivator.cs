@@ -12,10 +12,10 @@ namespace Backend.Fx.AspNetCore.Mvc.Activators
         public object Create(ViewComponentContext context)
         {
             var requestedViewComponentType = context.ViewComponentDescriptor.TypeInfo.AsType();
-            context.ViewContext.HttpContext.Items.TryGetValue(HttpContextItemKey.InstanceProvider, out var ip);
-            return ip == null 
-                ? CreateInstanceUsingSystemActivator(requestedViewComponentType) 
-                : CreateInstanceUsingInstanceProvider(ip, requestedViewComponentType);
+            
+            return context.ViewContext.HttpContext.TryGetInstanceProvider(out var ip) 
+                ? CreateInstanceUsingInstanceProvider(ip, requestedViewComponentType)
+                : CreateInstanceUsingSystemActivator(requestedViewComponentType);
         }
 
         private static object CreateInstanceUsingInstanceProvider(object ip, Type requestedViewComponentType)

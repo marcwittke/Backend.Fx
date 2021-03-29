@@ -16,7 +16,7 @@ namespace Backend.Fx.AspNetCore.MultiTenancy
         
         public async Task Invoke(HttpContext context)
         {
-            context.Items[HttpContextItemKey.TenantId] = FindMatchingTenantId(context);
+            context.SetCurrentTenantId(FindMatchingTenantId(context));
             await _next.Invoke(context);
         }
         

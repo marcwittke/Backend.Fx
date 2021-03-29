@@ -1,7 +1,7 @@
 using System.Security.Principal;
+using Backend.Fx.AspNetCore.MultiTenancy;
 using Backend.Fx.AspNetCore.Mvc;
 using Backend.Fx.AspNetCore.Mvc.Activators;
-using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Patterns.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -25,17 +25,17 @@ namespace Backend.Fx.AspNetCore
             where THostedService : class, IBackendFxApplicationHostedService
         {
             app.UseMiddleware<TTenantMiddleware>();
-            
+
             app.Use(async (context, requestDelegate) =>
             {
                 IBackendFxApplication application = app.ApplicationServices.GetRequiredService<THostedService>().Application;
                 application.WaitForBoot();
 
                 // set the instance provider for the controller activator
-                context.Items[HttpContextItemKey.InstanceProvider] = application.CompositionRoot.InstanceProvider;
+                context.SetCurrentInstanceProvider(application.CompositionRoot.InstanceProvider);
 
-                // the ambient tenant id has been set before by the TenantMiddleware
-                var tenantId = (TenantId) context.Items[HttpContextItemKey.TenantId];
+                // the ambient tenant id has been set before by a TenantMiddleware
+                var tenantId = context.GetTenantId();
 
                 // the invoking identity has been set before by an AuthenticationMiddleware
                 IIdentity actingIdentity = context.User.Identity;

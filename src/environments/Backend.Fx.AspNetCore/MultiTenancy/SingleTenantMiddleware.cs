@@ -15,7 +15,7 @@ namespace Backend.Fx.AspNetCore.MultiTenancy
 
         public virtual async Task Invoke(HttpContext context)
         {
-            context.Items["TenantId"] = new TenantId(1);
+            context.SetCurrentTenantId(new TenantId(1));
             await _next.Invoke(context);
         }
     }
