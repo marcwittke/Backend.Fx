@@ -35,6 +35,9 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             Container.Options.DefaultScopedLifestyle = ScopedLifestyle;
             InfrastructureModule = new SimpleInjectorInfrastructureModule(Container);
             InstanceProvider = new SimpleInjectorInstanceProvider(Container);
+            
+            // SimpleInjector 5 needs this to resolve controllers
+            Container.Options.ResolveUnregisteredConcreteTypes = true;
         }
 
         public Container Container { get; } = new Container();
