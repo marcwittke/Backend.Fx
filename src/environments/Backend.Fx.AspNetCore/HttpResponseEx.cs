@@ -1,4 +1,4 @@
-using System.Net.Mime;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
@@ -6,9 +6,16 @@ namespace Backend.Fx.AspNetCore
 {
     public static class HttpResponseEx
     {
-        public static async Task WriteJsonAsync(this HttpResponse response, object o, string contentType = null)
+        public static async Task WriteJsonAsync(this HttpResponse response, object o, JsonSerializerOptions options = null, string contentType = null)
         {
-            await response.WriteJsonAsync(System.Text.Json.JsonSerializer.Serialize(o), contentType);
+            options ??= new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                AllowTrailingCommas = true,
+                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
+            };
+            
+            await response.WriteJsonAsync(JsonSerializer.Serialize(o, options), contentType);
         }
         
         public static async Task WriteJsonAsync(this HttpResponse response, string json, string contentType = null)
