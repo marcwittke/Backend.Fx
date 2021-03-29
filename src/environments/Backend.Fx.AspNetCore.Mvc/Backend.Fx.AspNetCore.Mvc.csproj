@@ -37,4 +37,8 @@
     <ProjectReference Include="..\Backend.Fx.AspNetCore\Backend.Fx.AspNetCore.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="DependencyInjection" />
+  </ItemGroup>
+
 </Project>

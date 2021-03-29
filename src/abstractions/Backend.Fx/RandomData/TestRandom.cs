@@ -50,6 +50,7 @@ namespace Backend.Fx.RandomData
             return abs + Math.Round(Next(100) / 100m, 2);
         }
 
+        [Obsolete("See Letters.RandomPassword()")]
         public static string NextPassword(int length = 10)
         {
             const string letters = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz";
