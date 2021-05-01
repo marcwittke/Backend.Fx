@@ -83,8 +83,7 @@ namespace Backend.Fx.Environment.Persistence
             
             _operation.Cancel();
 
-            CurrentTransaction.Rollback();
-            CurrentTransaction.Dispose();
+            CurrentTransaction?.Dispose();
             CurrentTransaction = null;
 
             _transactionLifetimeLogger?.Dispose();
