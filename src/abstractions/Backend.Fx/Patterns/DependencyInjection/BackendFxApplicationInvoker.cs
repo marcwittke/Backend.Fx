@@ -56,9 +56,19 @@ namespace Backend.Fx.Patterns.DependencyInjection
                         injectionScope.InstanceProvider.GetInstance<IDomainEventAggregator>().RaiseEvents();
                         operation.Complete();
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        operation.Cancel();
+                        Logger.Debug(ex, "Invocation failed, canceling operation now");
+                        try
+                        {
+                            operation.Cancel();
+                            Logger.Debug(ex, "Operation canceled");
+                        }
+                        catch (Exception exx)
+                        {
+                            Logger.Error(exx, "Canceling operation failed");
+                        }
+
                         throw;
                     }
 
@@ -83,9 +93,19 @@ namespace Backend.Fx.Patterns.DependencyInjection
                         injectionScope.InstanceProvider.GetInstance<IDomainEventAggregator>().RaiseEvents();
                         operation.Complete();
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        operation.Cancel();
+                        Logger.Debug(ex, "Invocation failed, canceling operation now");
+                        try
+                        {
+                            operation.Cancel();
+                            Logger.Debug(ex, "Operation canceled");
+                        }
+                        catch (Exception exx)
+                        {
+                            Logger.Error(exx, "Canceling operation failed");
+                        }
+
                         throw;
                     }
 
