@@ -106,7 +106,14 @@ namespace Backend.Fx.EfCorePersistence
                      .ForAll(entry =>
                      {
                          EntityEntry aggregateRootEntry = FindAggregateRootEntry(DbContext.ChangeTracker, entry);
-                         if (aggregateRootEntry.State == EntityState.Unchanged) aggregateRootEntry.State = EntityState.Modified;
+                         if (aggregateRootEntry == null)
+                         {
+                             throw new InvalidOperationException($"Could not find aggregate root of {entry.Entity.GetType().Name}[{entry.Entity?.Id}]");
+                         }
+                         else if (aggregateRootEntry.State == EntityState.Unchanged)
+                         {
+                             aggregateRootEntry.State = EntityState.Modified;
+                         }
                      });
 
             DbContext.ChangeTracker
