@@ -10,11 +10,13 @@ namespace Backend.Fx.Exceptions
             RetryAfter = retryAfter;
         }
 
+        /// <inheritdoc />
         public TooManyRequestsException(int retryAfter, string message) : base(message)
         {
             RetryAfter = retryAfter;
         }
 
+        /// <inheritdoc />
         public TooManyRequestsException(int retryAfter, string message, Exception innerException) : base(message, innerException)
         {
             RetryAfter = retryAfter;

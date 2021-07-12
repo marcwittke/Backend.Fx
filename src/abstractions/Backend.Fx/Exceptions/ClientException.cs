@@ -12,11 +12,19 @@ namespace Backend.Fx.Exceptions
         {
         }
 
+        /// <param name="message">When using one of the middlewares in Backend.Fx.AspNetCore.ErrorHandling, the message is not sent
+        /// to the client to not provide internal details to an attacker. Write the exception message with a developer in mind, since
+        /// the application log will contain the message. To provide the user with functional feedback to correct their input, use
+        /// the AddError(s) overloads.</param>
         public ClientException(string message)
             : base(message)
         {
         }
 
+        /// <param name="message">When using one of the middlewares in Backend.Fx.AspNetCore.ErrorHandling, the message is not sent
+        /// to the client to not provide internal details to an attacker. Write the exception message with a developer in mind, since
+        /// the application log will contain the message. To provide the user with functional feedback to correct their input, use
+        /// the AddError(s) overloads.</param>
         public ClientException(string message, Exception innerException)
             : base(message, innerException)
         {
@@ -47,6 +55,16 @@ namespace Backend.Fx.Exceptions
 
             return string.Join(System.Environment.NewLine,
                                new[] {message, Errors.ToString(), innerException, StackTrace}.Where(s => s != null));
+        }
+        
+        /// <summary>
+        /// Used to build an <see cref="ClientException"/> with multiple possible error messages. The builder will throw on disposal
+        /// when at least one error was added. Using the AddIf methods is quite comfortable when there are several criteria to be validated
+        /// before executing a business case. 
+        /// </summary>
+        public static IExceptionBuilder UseBuilder()
+        {
+            return new ExceptionBuilder<ClientException>();
         }
     }
 

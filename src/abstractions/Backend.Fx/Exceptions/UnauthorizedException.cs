@@ -9,11 +9,13 @@ namespace Backend.Fx.Exceptions
         {
         }
 
+        /// <inheritdoc />
         public UnauthorizedException(string message)
             : base(message)
         {
         }
 
+        /// <inheritdoc />
         public UnauthorizedException(string message, Exception innerException)
             : base(message, innerException)
         {
