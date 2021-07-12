@@ -9,12 +9,16 @@ using JetBrains.Annotations;
 
 namespace Backend.Fx.Patterns.DataGeneration
 {
+    /// <summary>
+    /// Enriches the <see cref="IBackendFxApplication"/> by calling all data generators for all tenants on application start.
+    /// </summary>
     public class GenerateDataOnBoot : IBackendFxApplication
     {
         private static readonly ILogger Logger = LogManager.Create<GenerateDataOnBoot>();
         private readonly ITenantIdProvider _tenantIdProvider;
         private readonly IBackendFxApplication _application;
         private readonly IModule _dataGenerationModule;
+        private readonly ManualResetEventSlim _dataGenerated = new ManualResetEventSlim(false);
         public IDataGenerationContext DataGenerationContext { get; [UsedImplicitly] private set; }
 
         public GenerateDataOnBoot(ITenantIdProvider tenantIdProvider, IModule dataGenerationModule, IBackendFxApplication application)
@@ -39,18 +43,20 @@ namespace Backend.Fx.Patterns.DataGeneration
 
         public bool WaitForBoot(int timeoutMilliSeconds = Int32.MaxValue, CancellationToken cancellationToken = default)
         {
-            return _application.WaitForBoot(timeoutMilliSeconds, cancellationToken);
+            return _dataGenerated.Wait(timeoutMilliSeconds, cancellationToken);
         }
 
-        public async Task Boot(CancellationToken cancellationToken = default)
+        public async Task BootAsync(CancellationToken cancellationToken = default)
         {
             _application.CompositionRoot.RegisterModules(_dataGenerationModule);
-            await _application.Boot(cancellationToken);
+            await _application.BootAsync(cancellationToken);
             
             SeedDataForAllActiveTenants();
+
+            _dataGenerated.Set();
         }
-        
-        public void SeedDataForAllActiveTenants()
+
+        private void SeedDataForAllActiveTenants()
         {
             using (Logger.InfoDuration("Seeding data"))
             {
