@@ -6,6 +6,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Backend.Fx.AspNetCore.Mvc.Throttling
 {
+    /// <summary>
+    /// returns HTTP 429 "Too many requests" when the attributed action get's called from the same IP address in less than
+    /// the configured interval. Useful to prevent denial of service attacks.
+    /// </summary>
     public class ThrottlingAttribute : ThrottlingBaseAttribute
     {
         public override void OnActionExecuting(ActionExecutingContext actionContext)

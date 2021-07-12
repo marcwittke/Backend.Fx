@@ -16,8 +16,15 @@ namespace Backend.Fx.Patterns.DependencyInjection
         void RegisterModules(params IModule[] modules);
 
         IInjectionScope BeginScope();
+        
+        /// <summary>
+        /// Access to the container's resolution functionality
+        /// </summary>
         IInstanceProvider InstanceProvider { get; }
         
+        /// <summary>
+        /// Access to the container's configuration functionality
+        /// </summary>
         IInfrastructureModule InfrastructureModule { get; }
     }
 }

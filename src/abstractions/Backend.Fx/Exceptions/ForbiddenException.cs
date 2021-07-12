@@ -9,19 +9,16 @@ namespace Backend.Fx.Exceptions
         {
         }
 
+        /// <inheritdoc />
         public ForbiddenException(string message)
             : base(message)
         {
         }
 
+        /// <inheritdoc />
         public ForbiddenException(string message, Exception innerException)
             : base(message, innerException)
         {
-        }
-
-        public static IExceptionBuilder UseBuilder()
-        {
-            return new ExceptionBuilder<ForbiddenException>();
         }
     }
 }

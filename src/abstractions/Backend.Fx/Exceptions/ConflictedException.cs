@@ -9,19 +9,16 @@ namespace Backend.Fx.Exceptions
         {
         }
 
+        /// <inheritdoc />
         public ConflictedException(string message)
             : base(message)
         {
         }
 
+        /// <inheritdoc />
         public ConflictedException(string message, Exception innerException)
             : base(message, innerException)
         {
-        }
-
-        public static IExceptionBuilder UseBuilder()
-        {
-            return new ExceptionBuilder<ConflictedException>();
         }
     }
 }

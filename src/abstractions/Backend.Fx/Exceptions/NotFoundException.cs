@@ -17,11 +17,6 @@
             EntityName = entityName;
             Id = id;
         }
-
-        public static IExceptionBuilder UseBuilder()
-        {
-            return new ExceptionBuilder<NotFoundException>();
-        }
     }
     
     public class NotFoundException<TEntity> : NotFoundException

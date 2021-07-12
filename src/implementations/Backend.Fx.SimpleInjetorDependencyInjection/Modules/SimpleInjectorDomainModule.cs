@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
-using System.Security.Principal;
 using Backend.Fx.BuildingBlocks;
-using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.Authorization;
 using Backend.Fx.Patterns.DataGeneration;
@@ -15,10 +13,14 @@ using SimpleInjector;
 namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
 {
     /// <summary>
-    /// Wires all injected domain services: Current <see cref="IIdentity"/> and current <see cref="TenantId"/> as set while 
-    /// beginning the scope. All <see cref="IDomainService"/>s, <see cref="IApplicationService"/>s, <see cref="IAggregateAuthorization{TAggregateRoot}"/>s 
-    /// the collections of <see cref="IDomainEventHandler{TDomainEvent}"/>s, <see cref="IJob"/>s and <see cref="DataGenerator"/>s 
-    /// found in the given list of domain assemblies.
+    /// Wires all public domain services to be injected as scoped instances provided by the array of domain assemblies:
+    /// - <see cref="IDomainService"/>s
+    /// - <see cref="IApplicationService"/>s
+    /// - <see cref="IAggregateAuthorization{TAggregateRoot}"/>s
+    /// - <see cref="IJob"/>s
+    /// - <see cref="DataGenerator"/>s 
+    /// - the collections of <see cref="IDomainEventHandler{TDomainEvent}"/>s
+    /// - <see cref="IIntegrationMessageHandler{TIntegrationEvent}"/>'s
     /// </summary>
     public class SimpleInjectorDomainModule : SimpleInjectorModule
     {

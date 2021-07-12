@@ -3,6 +3,11 @@ using Backend.Fx.Logging;
 
 namespace Backend.Fx.Patterns.DependencyInjection
 {
+    /// <summary>
+    /// The basic interface of an operation invoked by the <see cref="IBackendFxApplicationInvoker"/> (or its async counterpart).
+    /// Decorate this interface to provide operation specific infrastructure services (like a database connection, a database transaction
+    /// an entry-exit logging etc.)
+    /// </summary>
     public interface IOperation
     {
         void Begin();

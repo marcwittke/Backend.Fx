@@ -5,6 +5,12 @@ namespace Backend.Fx.Environment.Authentication
 {
     public class CurrentIdentityHolder : CurrentTHolder<IIdentity>
     {
+        public CurrentIdentityHolder()
+        { }
+
+        private CurrentIdentityHolder(IIdentity initial) : base(initial)
+        { }
+        
         public override IIdentity ProvideInstance()
         {
             return new AnonymousIdentity();
@@ -28,9 +34,7 @@ namespace Backend.Fx.Environment.Authentication
         
         public static ICurrentTHolder<IIdentity> Create(IIdentity identity)
         {
-            var currentIdentityHolder = new CurrentIdentityHolder();
-            currentIdentityHolder.ReplaceCurrent(identity);
-            return currentIdentityHolder;
+            return new CurrentIdentityHolder(identity);
         }
     }
 }

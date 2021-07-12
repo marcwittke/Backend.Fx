@@ -14,7 +14,7 @@
     <Authors>Marc Wittke</Authors>
     <Company>anic GmbH</Company>
     <Copyright>All rights reserved. Distributed under the terms of the MIT License.</Copyright>
-    <Description>Bootstrapping for Backend.Fx using Simple Injector 4</Description>
+    <Description>Bootstrapping for Backend.Fx using Simple Injector 5</Description>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <PackageLicense>MIT</PackageLicense>
     <PackageProjectUrl>https://github.com/marcwittke/Backend.Fx</PackageProjectUrl>
@@ -24,7 +24,7 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="SimpleInjector" Version="5.3.0" />
+    <PackageReference Include="SimpleInjector" Version="5.1.0" />
 	<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
   

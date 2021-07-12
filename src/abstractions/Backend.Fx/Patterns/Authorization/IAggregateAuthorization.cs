@@ -1,9 +1,14 @@
-﻿namespace Backend.Fx.Patterns.Authorization
-{
-    using System.Linq;
-    using System.Linq.Expressions;
-    using BuildingBlocks;
+﻿using System.Linq;
+using System.Linq.Expressions;
+using Backend.Fx.BuildingBlocks;
 
+namespace Backend.Fx.Patterns.Authorization
+{
+    /// <summary>
+    /// Implements permissions on aggregate level. The respective instance is applied when creating an <see cref="IRepository&lt;T&gt;"/>,
+    /// so that the repository never allows reading or writing of an aggregate without permissions. 
+    /// </summary>
+    /// <typeparam name="TAggregateRoot"></typeparam>
     public interface IAggregateAuthorization<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
         /// <summary>
