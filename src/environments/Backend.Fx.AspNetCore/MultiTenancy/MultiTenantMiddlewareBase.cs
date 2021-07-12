@@ -1,5 +1,4 @@
 using System.Threading.Tasks;
-using Backend.Fx.AspNetCore.Mvc;
 using Backend.Fx.Environment.MultiTenancy;
 using Microsoft.AspNetCore.Http;
 
@@ -19,7 +18,14 @@ namespace Backend.Fx.AspNetCore.MultiTenancy
             context.SetCurrentTenantId(FindMatchingTenantId(context));
             await _next.Invoke(context);
         }
-        
+ 
+        /// <summary>
+        /// Detects the <see cref="TenantId"/> for this request from the current HttpContext. Possible implementations might rely on
+        /// a dedicated header value, the (sub-) domain name, a query string parameter etc. This method is called for each request. If
+        /// the database is required for determination, some kind of caching is advised.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns>The TenantId for this request</returns>
         protected abstract TenantId FindMatchingTenantId(HttpContext context);
     }
 }
