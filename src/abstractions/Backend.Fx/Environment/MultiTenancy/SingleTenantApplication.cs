@@ -13,6 +13,7 @@ namespace Backend.Fx.Environment.MultiTenancy
         private readonly bool _isDemoTenant;
         private readonly ITenantService _tenantService;
         private readonly IBackendFxApplication _application;
+        private readonly ManualResetEventSlim _defaultTenantEnsured = new ManualResetEventSlim(false);
         
         public SingleTenantApplication(bool isDemoTenant, ITenantService tenantService, IBackendFxApplication application) : base(application)
         {
@@ -38,7 +39,7 @@ namespace Backend.Fx.Environment.MultiTenancy
 
         public bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue, CancellationToken cancellationToken = default)
         {
-            return _application.WaitForBoot(timeoutMilliSeconds, cancellationToken);
+            return _defaultTenantEnsured.Wait(timeoutMilliSeconds, cancellationToken);
         }
 
         public async Task Boot(CancellationToken cancellationToken = default)
@@ -50,6 +51,8 @@ namespace Backend.Fx.Environment.MultiTenancy
             Logger.Info($"Ensuring existence of single tenant");
             TenantId = _tenantService.GetActiveTenants().SingleOrDefault()?.GetTenantId()
                        ?? _tenantService.CreateTenant("Single Tenant", "This application runs in single tenant mode", _isDemoTenant);
+
+            _defaultTenantEnsured.Set();
         }
     }
 }
