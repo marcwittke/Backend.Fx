@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Http;
 
 namespace Backend.Fx.AspNetCore.MultiTenancy
 {
+    /// <summary>
+    /// Always assumes TenantId: 1 for all requests.
+    /// </summary>
     public class SingleTenantMiddleware
     {
         private readonly RequestDelegate _next;
