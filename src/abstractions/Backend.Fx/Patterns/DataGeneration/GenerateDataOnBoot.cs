@@ -46,10 +46,10 @@ namespace Backend.Fx.Patterns.DataGeneration
             return _dataGenerated.Wait(timeoutMilliSeconds, cancellationToken);
         }
 
-        public async Task BootAsync(CancellationToken cancellationToken = default)
+        public async Task Boot(CancellationToken cancellationToken = default)
         {
             _application.CompositionRoot.RegisterModules(_dataGenerationModule);
-            await _application.BootAsync(cancellationToken);
+            await _application.Boot(cancellationToken);
             
             SeedDataForAllActiveTenants();
 

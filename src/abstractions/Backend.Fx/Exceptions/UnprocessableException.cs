@@ -26,7 +26,7 @@ namespace Backend.Fx.Exceptions
         /// when at least one error was added. Using the AddIf methods is quite comfortable when there are several criteria to be validated
         /// before executing a business case. 
         /// </summary>
-        public static IExceptionBuilder UseBuilder()
+        public new static IExceptionBuilder UseBuilder()
         {
             return new ExceptionBuilder<UnprocessableException>();
         }
