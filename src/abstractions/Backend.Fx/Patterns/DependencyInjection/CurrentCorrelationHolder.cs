@@ -2,14 +2,6 @@ namespace Backend.Fx.Patterns.DependencyInjection
 {
     public class CurrentCorrelationHolder : CurrentTHolder<Correlation>
     {
-        public CurrentCorrelationHolder()
-        {
-        }
-
-        public CurrentCorrelationHolder(Correlation initial) : base(initial)
-        {
-        }
-
         public override Correlation ProvideInstance()
         {
             return new Correlation();
