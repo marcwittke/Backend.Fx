@@ -20,6 +20,14 @@ namespace Backend.Fx.Patterns.DependencyInjection
         private static readonly ILogger Logger = LogManager.Create<CurrentTHolder<T>>();
         private T _current;
 
+        protected CurrentTHolder()
+        { }
+
+        protected CurrentTHolder(T initial)
+        {
+            _current = initial;
+        }
+        
         public T Current
         {
             get

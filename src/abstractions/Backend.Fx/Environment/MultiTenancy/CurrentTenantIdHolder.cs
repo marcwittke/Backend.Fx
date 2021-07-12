@@ -4,17 +4,21 @@ namespace Backend.Fx.Environment.MultiTenancy
 {
     public class CurrentTenantIdHolder : CurrentTHolder<TenantId>
     {
+        public CurrentTenantIdHolder()
+        { }
+
+        private CurrentTenantIdHolder(TenantId initial) : base(initial)
+        { }
+        
         public static CurrentTenantIdHolder Create(int tenantId)
         {
-            var instance = new CurrentTenantIdHolder();
-            instance.ReplaceCurrent(new TenantId(tenantId));
+            var instance = new CurrentTenantIdHolder((TenantId)tenantId);
             return instance;
         }
 
         public static CurrentTenantIdHolder Create(TenantId tenantId)
         {
-            var instance = new CurrentTenantIdHolder();
-            instance.ReplaceCurrent(tenantId);
+            var instance = new CurrentTenantIdHolder(tenantId);
             return instance;
         }
 
