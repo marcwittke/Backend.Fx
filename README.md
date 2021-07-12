@@ -15,7 +15,7 @@ Backend.Fx.AspNetCore.Mvc | 2.0 | [![NuGet](https://img.shields.io/nuget/v/Backe
 Backend.Fx.NetCore | 1.3 | [![NuGet](https://img.shields.io/nuget/v/Backend.Fx.NetCore.svg)](https://www.nuget.org/packages/Backend.Fx.NetCore)
  
 ## What does "opinionated" mean?
-You get vendor locked to a set of abstractions, like my DDD building blocks and some architecture [patterns](https://github.com/marcwittke/Backend.Fx/tree/master/src/abstractions/Backend.Fx/Patterns) defined as interfaces
+You get vendor locked to a set of abstractions, like my DDD building blocks and some architecture [patterns](https://github.com/marcwittke/Backend.Fx/tree/main/src/abstractions/Backend.Fx/Patterns) defined as interfaces
 
 ## Less opinonated, but already provided as pluggable implementations of patterns
 
