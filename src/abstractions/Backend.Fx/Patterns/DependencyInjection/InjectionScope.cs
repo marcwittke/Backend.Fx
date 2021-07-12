@@ -2,6 +2,10 @@ using System;
 
 namespace Backend.Fx.Patterns.DependencyInjection
 {
+    /// <summary>
+    /// During a scope, services by default are singletons. Scopes may exist in parallel, providing totally separate singleton
+    /// instances for every scope.
+    /// </summary>
     public interface IInjectionScope : IDisposable
     {
         int SequenceNumber { get; }

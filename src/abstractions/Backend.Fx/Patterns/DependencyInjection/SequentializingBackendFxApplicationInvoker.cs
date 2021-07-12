@@ -4,6 +4,9 @@ using Backend.Fx.Environment.MultiTenancy;
 
 namespace Backend.Fx.Patterns.DependencyInjection
 {
+    /// <summary>
+    /// Decorates the <see cref="IBackendFxApplicationInvoker"/> to prevent parallel invocation.
+    /// </summary>
     public class SequentializingBackendFxApplicationInvoker : IBackendFxApplicationInvoker
     {
         private readonly object _syncLock = new object();
