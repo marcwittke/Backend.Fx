@@ -65,7 +65,7 @@ namespace Backend.Fx.AspNetCore.MultiTenancy
                     return;
                 }
 
-                if (context.Request.Method.ToLower() == "get")
+                if (HttpMethods.IsGet(context.Request.Method))
                 {
                     var tenantIdStr = context.Request.Path.Value.Split('/').Last();
                     if (int.TryParse(tenantIdStr, out int tenantId))
