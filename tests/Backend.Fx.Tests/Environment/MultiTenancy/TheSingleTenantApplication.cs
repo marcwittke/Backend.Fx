@@ -69,9 +69,6 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
 
             sut.Dispose();
             A.CallTo(() => application.Dispose()).MustHaveHappenedOnceExactly();
-
-            sut.WaitForBoot();
-            A.CallTo(() => application.WaitForBoot(A<int>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
         }
     }
 }

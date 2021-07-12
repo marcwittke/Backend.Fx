@@ -56,8 +56,6 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
             IMessageBus mb = sut.MessageBus;
             A.CallTo(() => app.MessageBus).MustHaveHappenedOnceExactly();
 
-            var b = sut.WaitForBoot();
-            A.CallTo(() => app.WaitForBoot(A<int>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
             // ReSharper restore UnusedVariable
         }
 
@@ -83,6 +81,8 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
             A.CallTo(() => _dataGenerationContext.SeedDataForTenant(A<TenantId>.That.IsEqualTo(tenantId2), A<bool>.That.IsEqualTo(true))).MustHaveHappenedOnceExactly();
             A.CallTo(() => _dataGenerationContext.SeedDataForTenant(A<TenantId>.That.IsEqualTo(tenantId3), A<bool>.That.IsEqualTo(false))).MustHaveHappenedOnceExactly();
             A.CallTo(() => _dataGenerationContext.SeedDataForTenant(A<TenantId>.That.IsEqualTo(tenantId4), A<bool>.That.IsEqualTo(false))).MustHaveHappenedOnceExactly();
+
+            Assert.True(_sut.WaitForBoot(1000));
         }
     }
 }
