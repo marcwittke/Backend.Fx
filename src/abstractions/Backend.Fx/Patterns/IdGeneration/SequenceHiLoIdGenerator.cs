@@ -1,6 +1,6 @@
 ﻿namespace Backend.Fx.Patterns.IdGeneration
 {
-    public abstract class SequenceHiLoIdGenerator : HiLoIdGenerator, IEntityIdGenerator
+    public abstract class SequenceHiLoIdGenerator : HiLoIdGenerator
     {
         private readonly ISequence _sequence;
 
