@@ -24,7 +24,7 @@ namespace Backend.Fx.AspNetCore
             {
                 try
                 {
-                    await Application.Boot(ct);
+                    await Application.BootAsync(ct);
                 }
                 catch (Exception ex)
                 {

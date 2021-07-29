@@ -62,7 +62,7 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
         [Fact]
         public async Task RegistersDataGenerationModuleOnBoot()
         {
-            await _sut.Boot();
+            await _sut.BootAsync();
             A.CallTo(() => _compositionRoot.RegisterModules(A<IModule[]>.That.Contains(_dataGenerationModule))).MustHaveHappenedOnceExactly();
         }
 
@@ -76,7 +76,7 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
             
             A.CallTo(() => _tenantIdProvider.GetActiveDemonstrationTenantIds()).Returns(new[] {tenantId1, tenantId2});
             A.CallTo(() => _tenantIdProvider.GetActiveProductionTenantIds()).Returns(new[] {tenantId3, tenantId4});
-            await _sut.Boot();
+            await _sut.BootAsync();
             A.CallTo(() => _dataGenerationContext.SeedDataForTenant(A<TenantId>.That.IsEqualTo(tenantId1), A<bool>.That.IsEqualTo(true))).MustHaveHappenedOnceExactly();
             A.CallTo(() => _dataGenerationContext.SeedDataForTenant(A<TenantId>.That.IsEqualTo(tenantId2), A<bool>.That.IsEqualTo(true))).MustHaveHappenedOnceExactly();
             A.CallTo(() => _dataGenerationContext.SeedDataForTenant(A<TenantId>.That.IsEqualTo(tenantId3), A<bool>.That.IsEqualTo(false))).MustHaveHappenedOnceExactly();

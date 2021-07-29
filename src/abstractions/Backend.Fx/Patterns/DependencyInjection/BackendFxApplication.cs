@@ -41,11 +41,14 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// </summary>
         bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue, CancellationToken cancellationToken = default);
 
+        [Obsolete("Use BootAsync()")]
+        Task Boot(CancellationToken cancellationToken = default);
+        
         /// <summary>
-        /// Initializes ans starts the application (async)
+        /// Initializes and starts the application (async)
         /// </summary>
         /// <returns></returns>
-        Task Boot(CancellationToken cancellationToken = default);
+        Task BootAsync(CancellationToken cancellationToken = default);
     }
 
 
@@ -88,7 +91,9 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
         public IMessageBus MessageBus { get; }
 
-        public Task Boot(CancellationToken cancellationToken = default)
+        public Task Boot(CancellationToken cancellationToken = default) => BootAsync(cancellationToken);
+        
+        public Task BootAsync(CancellationToken cancellationToken = default)
         {
             Logger.Info("Booting application");
             CompositionRoot.Verify();

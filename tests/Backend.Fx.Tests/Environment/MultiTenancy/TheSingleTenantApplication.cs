@@ -26,7 +26,7 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
         [Fact]
         public void CreatesTenantOnBootWhenNotExistent()
         {
-            _sut.Boot();
+            _sut.BootAsync();
             A.CallTo(() => _tenantService.CreateTenant(A<string>._, A<string>._, A<bool>._, A<string>._)).MustHaveHappenedOnceExactly();
         }
 
@@ -37,7 +37,7 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
             tenant.SetPrivate(t => t.Id, 1);
             
             A.CallTo(() => _tenantService.GetActiveTenants()).Returns(new[] {tenant});
-            _sut.Boot();
+            _sut.BootAsync();
             A.CallTo(() => _tenantService.CreateTenant(A<string>._, A<string>._, A<bool>._, A<string>._)).MustNotHaveHappened();
         }
 
@@ -64,8 +64,8 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
             IMessageBus mb = sut.MessageBus;
             A.CallTo(() => application.MessageBus).MustHaveHappenedOnceExactly();
 
-            sut.Boot();
-            A.CallTo(() => application.Boot(A<CancellationToken>._)).MustHaveHappenedOnceExactly();
+            sut.BootAsync();
+            A.CallTo(() => application.BootAsync(A<CancellationToken>._)).MustHaveHappenedOnceExactly();
 
             sut.Dispose();
             A.CallTo(() => application.Dispose()).MustHaveHappenedOnceExactly();

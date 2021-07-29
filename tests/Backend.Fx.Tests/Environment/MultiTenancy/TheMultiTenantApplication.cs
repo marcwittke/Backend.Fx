@@ -39,8 +39,8 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
             IMessageBus mb = _sut.MessageBus;
             A.CallTo(() => _application.MessageBus).MustHaveHappenedOnceExactly();
 
-            _sut.Boot();
-            A.CallTo(() => _application.Boot(A<CancellationToken>._)).MustHaveHappenedOnceExactly();
+            _sut.BootAsync();
+            A.CallTo(() => _application.BootAsync(A<CancellationToken>._)).MustHaveHappenedOnceExactly();
 
             _sut.Dispose();
             A.CallTo(() => _application.Dispose()).MustHaveHappenedOnceExactly();

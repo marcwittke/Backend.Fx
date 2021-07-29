@@ -45,7 +45,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             A.CallTo(() => _fakes.CompositionRoot.Verify()).Invokes(() => Thread.Sleep(bootTime));
             var sw = new Stopwatch();
             
-            Task.Factory.StartNew(() => _sut.Boot());
+            Task.Factory.StartNew(() => _sut.BootAsync());
             sw.Start();
             Assert.True(_sut.WaitForBoot());
             Assert.True(sw.ElapsedMilliseconds >= bootTime);
@@ -54,7 +54,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         [Fact]
         public void DisposesCompositionRootOnDispose()
         {
-            _sut.Boot();
+            _sut.BootAsync();
             _sut.Dispose();
             A.CallTo(() => _fakes.CompositionRoot.Dispose()).MustHaveHappenedOnceExactly();
         }
@@ -114,7 +114,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         [Fact]
         public void VerifiesCompositionRootOnBoot()
         {
-            _sut.Boot();
+            _sut.BootAsync();
             A.CallTo(() => _fakes.CompositionRoot.Verify()).MustHaveHappenedOnceExactly();
         }
     }

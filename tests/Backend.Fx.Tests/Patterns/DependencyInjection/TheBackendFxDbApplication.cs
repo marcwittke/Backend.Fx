@@ -26,7 +26,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         {
             A.CallTo(() => _databaseAvailabilityAwaiter.WaitForDatabase(A<CancellationToken>._)).MustNotHaveHappened();
             A.CallTo(() => _databaseBootstrapper.EnsureDatabaseExistence()).MustNotHaveHappened();
-            _sut.Boot();
+            _sut.BootAsync();
             A.CallTo(() => _databaseAvailabilityAwaiter.WaitForDatabase(A<CancellationToken>._)).MustHaveHappenedOnceExactly();
             A.CallTo(() => _databaseBootstrapper.EnsureDatabaseExistence()).MustHaveHappenedOnceExactly();
         }
@@ -62,8 +62,8 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             IMessageBus mb = sut.MessageBus;
             A.CallTo(() => application.MessageBus).MustHaveHappenedOnceExactly();
 
-            sut.Boot();
-            A.CallTo(() => application.Boot(A<CancellationToken>._)).MustHaveHappenedOnceExactly();
+            sut.BootAsync();
+            A.CallTo(() => application.BootAsync(A<CancellationToken>._)).MustHaveHappenedOnceExactly();
 
             sut.Dispose();
             A.CallTo(() => application.Dispose()).MustHaveHappenedOnceExactly();

@@ -45,12 +45,13 @@ namespace Backend.Fx.Environment.Persistence
             return _backendFxApplication.WaitForBoot(timeoutMilliSeconds, cancellationToken);
         }
 
-        public async Task Boot(CancellationToken cancellationToken = default)
+        public Task Boot(CancellationToken cancellationToken = default) => BootAsync(cancellationToken);
+        public async Task BootAsync(CancellationToken cancellationToken = default)
         {
             Logger.Trace("Booting...");
             await _databaseAvailabilityAwaiter.WaitForDatabase(cancellationToken);
             _databaseBootstrapper.EnsureDatabaseExistence();
-            await _backendFxApplication.Boot(cancellationToken);
+            await _backendFxApplication.BootAsync(cancellationToken);
         }
     }
 }

@@ -50,9 +50,10 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp.Runtime
             return _application.WaitForBoot(timeoutMilliSeconds, cancellationToken);
         }
 
-        public Task Boot(CancellationToken cancellationToken = default)
+        public Task Boot(CancellationToken cancellationToken = default) => BootAsync(cancellationToken);
+        public Task BootAsync(CancellationToken cancellationToken = default)
         {
-            return _application.Boot(cancellationToken);
+            return _application.BootAsync(cancellationToken);
         }
     }
 }
