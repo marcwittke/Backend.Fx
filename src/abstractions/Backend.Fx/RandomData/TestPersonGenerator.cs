@@ -15,9 +15,9 @@ namespace Backend.Fx.RandomData
         public int MaximumAgeInDays { get; set; } = 80 * Year;
         public int MinimumAgeInDays { get; set; } = 18 * Year;
 
-        public static TestAddress Generate()
+        public static TestPerson Generate()
         {
-            return new TestAddressGenerator().First();
+            return new TestPersonGenerator().First();
         }
 
         protected override TestPerson Next()
