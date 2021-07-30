@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
 using Backend.Fx.EfCorePersistence.Tests.Fixtures;
@@ -35,14 +36,15 @@ namespace Backend.Fx.EfCorePersistence.Tests
             using (TestDbSession dbSession = _fixture.CreateTestDbSession())
             {
                 var count = dbSession.DbConnection.ExecuteScalar<int>("SELECT Count(*) FROM Bloggers");
-                Assert.Equal(1L, count);
+                Assert.Equal(1, count);
 
                 count = dbSession.DbConnection.ExecuteScalar<int>(
-                    $"SELECT Count(*) FROM Bloggers WHERE FirstName = 'Bratislav' AND LastName = 'Metulsky' AND TenantId = '{_tenantId}'");
-                Assert.Equal(1L, count);
+                    $"SELECT Count(*) FROM Bloggers WHERE Id=345");
+                Assert.Equal(1, count);
             }
         }
-
+        
+       
         [Fact]
         public void CanDelete()
         {
@@ -62,11 +64,12 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (TestDbSession dbSession = _fixture.CreateTestDbSession())
             {
-                var count = dbSession.DbConnection.ExecuteScalar<int>("SELECT Count(*) FROM Bloggers");
-                Assert.Equal(0L, count);
+                var count = dbSession.DbConnection.ExecuteScalar<int>("SELECT Count(*) FROM Bloggers WHERE Id = 555");
+                Assert.Equal(0, count);
             }
         }
-
+        
+       
 
         [Fact]
         public void CanRead()
@@ -77,10 +80,64 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     "INSERT INTO Bloggers (Id, TenantId, CreatedOn, CreatedBy, FirstName, LastName, Bio) " +
                     $"VALUES (444, {_tenantId}, '2012-05-12 23:12:09', 'the test', 'Bratislav', 'Metulsky', 'whatever')");
 
+                {
+                    var repo = new EfRepository<Blogger>(dbSession.DbContext, new BloggerMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blogger>());
+                    
+                    bool any = repo.Any();
+                    Assert.True(any);
+                    
+                    Blogger[] all = repo.GetAll();
+                    Assert.NotEmpty(all);
+                    
+                    Blogger bratislavMetulsky = repo.Single(444);
+                    Assert.Equal(_tenantId, bratislavMetulsky.TenantId);
+                    Assert.Equal("the test", bratislavMetulsky.CreatedBy);
+                    Assert.Equal(new DateTime(2012, 05, 12, 23, 12, 09), bratislavMetulsky.CreatedOn);
+                    Assert.Equal("Bratislav", bratislavMetulsky.FirstName);
+                    Assert.Equal("Metulsky", bratislavMetulsky.LastName);
+                    Assert.Equal("whatever", bratislavMetulsky.Bio);
+                    
+                    bratislavMetulsky = repo.SingleOrDefault(444);
+                    Assert.NotNull(bratislavMetulsky);
+                    Assert.Equal(_tenantId, bratislavMetulsky.TenantId);
+                    Assert.Equal("the test", bratislavMetulsky.CreatedBy);
+                    Assert.Equal(new DateTime(2012, 05, 12, 23, 12, 09), bratislavMetulsky.CreatedOn);
+                    Assert.Equal("Bratislav", bratislavMetulsky.FirstName);
+                    Assert.Equal("Metulsky", bratislavMetulsky.LastName);
+                    Assert.Equal("whatever", bratislavMetulsky.Bio);
+                }
+            }
+        }
+        
+        
+        [Fact]
+        public async Task CanReadAsync()
+        {
+            using (TestDbSession dbSession = _fixture.CreateTestDbSession())
+            {
+                dbSession.DbConnection.ExecuteNonQuery(
+                    "INSERT INTO Bloggers (Id, TenantId, CreatedOn, CreatedBy, FirstName, LastName, Bio) " +
+                    $"VALUES (555, {_tenantId}, '2012-05-12 23:12:09', 'the test', 'Bratislav', 'Metulsky', 'whatever')");
 
                 {
                     var repo = new EfRepository<Blogger>(dbSession.DbContext, new BloggerMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blogger>());
-                    Blogger bratislavMetulsky = repo.Single(444);
+                    
+                    bool any = await repo.AnyAsync();
+                    Assert.True(any);
+                    
+                    Blogger[] all = await repo.GetAllAsync();
+                    Assert.NotEmpty(all);
+                    
+                    Blogger bratislavMetulsky = await repo.SingleAsync(555);
+                    Assert.Equal(_tenantId, bratislavMetulsky.TenantId);
+                    Assert.Equal("the test", bratislavMetulsky.CreatedBy);
+                    Assert.Equal(new DateTime(2012, 05, 12, 23, 12, 09), bratislavMetulsky.CreatedOn);
+                    Assert.Equal("Bratislav", bratislavMetulsky.FirstName);
+                    Assert.Equal("Metulsky", bratislavMetulsky.LastName);
+                    Assert.Equal("whatever", bratislavMetulsky.Bio);
+                    
+                    bratislavMetulsky = await repo.SingleOrDefaultAsync(555);
+                    Assert.NotNull(bratislavMetulsky);
                     Assert.Equal(_tenantId, bratislavMetulsky.TenantId);
                     Assert.Equal("the test", bratislavMetulsky.CreatedBy);
                     Assert.Equal(new DateTime(2012, 05, 12, 23, 12, 09), bratislavMetulsky.CreatedOn);
@@ -115,7 +172,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
             {
                 var count = dbSession.DbConnection.ExecuteScalar<int>(
                     $"SELECT Count(*) FROM Bloggers WHERE FirstName = 'Johnny' AND LastName = 'Flash' AND TenantId = '{_tenantId}'");
-                Assert.Equal(1L, count);
+                Assert.Equal(1, count);
             }
 
             using (TestDbSession dbSession = _fixture.CreateTestDbSession())

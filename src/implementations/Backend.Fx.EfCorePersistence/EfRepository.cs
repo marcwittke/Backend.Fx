@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Exceptions;
@@ -14,7 +17,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Backend.Fx.EfCorePersistence
 {
-    public class EfRepository<TAggregateRoot> : Repository<TAggregateRoot> where TAggregateRoot : AggregateRoot
+    public class EfRepository<TAggregateRoot> : Repository<TAggregateRoot>, IAsyncRepository<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
         private static readonly ILogger Logger = LogManager.Create<EfRepository<TAggregateRoot>>();
         private readonly IAggregateAuthorization<TAggregateRoot> _aggregateAuthorization;
@@ -48,6 +51,42 @@ namespace Backend.Fx.EfCorePersistence
                 var localViewListener = _dbContext?.GetService<ILocalViewListener>();
                 localViewListener?.RegisterView(AuthorizeChanges);
             }
+        }
+        
+        public async Task<TAggregateRoot> SingleAsync(int id, CancellationToken cancellationToken = default)
+        {
+            return await AggregateQueryable.SingleAsync(agg => agg.Id == id, cancellationToken);
+        }
+
+        public async Task<TAggregateRoot> SingleOrDefaultAsync(int id, CancellationToken cancellationToken = default)
+        {
+            return await AggregateQueryable.SingleOrDefaultAsync(agg => agg.Id == id, cancellationToken);
+        }
+
+        public async Task<TAggregateRoot[]> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            return await AggregateQueryable.ToArrayAsync(cancellationToken);
+        }
+
+        public async Task<bool> AnyAsync(CancellationToken cancellationToken = default)
+        {
+            return await AggregateQueryable.AnyAsync(cancellationToken);
+        }
+
+        public async Task<TAggregateRoot[]> ResolveAsync(IEnumerable<int> ids, CancellationToken cancellationToken = default)
+        {
+            if (ids == null)
+            {
+                return new TAggregateRoot[0];
+            }
+
+            int[] idsToResolve = ids as int[] ?? ids.ToArray();
+            TAggregateRoot[] resolved = await AggregateQueryable.Where(agg => idsToResolve.Contains(agg.Id)).ToArrayAsync(cancellationToken);
+            if (resolved.Length != idsToResolve.Length)
+            {
+                throw new ArgumentException($"The following {AggregateTypeName} ids could not be resolved: {string.Join(", ", idsToResolve.Except(resolved.Select(agg => agg.Id)))}");
+            }
+            return resolved;
         }
 
         protected override IQueryable<TAggregateRoot> RawAggregateQueryable
