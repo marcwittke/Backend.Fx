@@ -1,4 +1,3 @@
-using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Hacking;
@@ -14,30 +13,26 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
     {
         public TheGenerateDataOnBootDecorator()
         {
-            _compositionRoot = A.Fake<ICompositionRoot>();
-            _dataGenerationModule = A.Fake<IModule>();
+            var compositionRoot = A.Fake<ICompositionRoot>();
             _dataGenerationContext = A.Fake<IDataGenerationContext>();
             _tenantIdProvider = A.Fake<ITenantIdProvider>();
             
             var backendFxApplication = A.Fake<IBackendFxApplication>();
-            A.CallTo(() => backendFxApplication.CompositionRoot).Returns(_compositionRoot);
-            _sut = new GenerateDataOnBoot(_tenantIdProvider,
-                                          _dataGenerationModule, backendFxApplication);
+            A.CallTo(() => backendFxApplication.CompositionRoot).Returns(compositionRoot);
+            _sut = new GenerateDataOnBoot(_tenantIdProvider, backendFxApplication);
 
             _sut.SetPrivate(f => f.DataGenerationContext, _dataGenerationContext);
         }
 
         private readonly GenerateDataOnBoot _sut;
-        private readonly IModule _dataGenerationModule;
         private readonly IDataGenerationContext _dataGenerationContext;
-        private readonly ICompositionRoot _compositionRoot;
         private readonly ITenantIdProvider _tenantIdProvider;
 
         [Fact]
         public void DelegatesAllOtherCalls()
         {
             var app = A.Fake<IBackendFxApplication>();
-            IBackendFxApplication sut = new GenerateDataOnBoot(A.Fake<ITenantIdProvider>(), A.Fake<IModule>(), app);
+            IBackendFxApplication sut = new GenerateDataOnBoot(A.Fake<ITenantIdProvider>(), app);
 
 
             // ReSharper disable UnusedVariable
@@ -57,13 +52,6 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
             A.CallTo(() => app.MessageBus).MustHaveHappenedOnceExactly();
 
             // ReSharper restore UnusedVariable
-        }
-
-        [Fact]
-        public async Task RegistersDataGenerationModuleOnBoot()
-        {
-            await _sut.BootAsync();
-            A.CallTo(() => _compositionRoot.RegisterModules(A<IModule[]>.That.Contains(_dataGenerationModule))).MustHaveHappenedOnceExactly();
         }
 
         [Fact]

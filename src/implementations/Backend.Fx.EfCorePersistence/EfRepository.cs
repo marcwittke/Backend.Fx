@@ -10,7 +10,6 @@ using Backend.Fx.Exceptions;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.Authorization;
 using Backend.Fx.Patterns.DependencyInjection;
-using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -22,37 +21,23 @@ namespace Backend.Fx.EfCorePersistence
         private static readonly ILogger Logger = LogManager.Create<EfRepository<TAggregateRoot>>();
         private readonly IAggregateAuthorization<TAggregateRoot> _aggregateAuthorization;
         private readonly IAggregateMapping<TAggregateRoot> _aggregateMapping;
-        private DbContext _dbContext;
 
         [SuppressMessage("ReSharper", "EF1001")]
-        public EfRepository([CanBeNull] DbContext dbContext, IAggregateMapping<TAggregateRoot> aggregateMapping,
+        public EfRepository([JetBrains.Annotations.NotNull] DbContext dbContext, IAggregateMapping<TAggregateRoot> aggregateMapping,
                             ICurrentTHolder<TenantId> currentTenantIdHolder, IAggregateAuthorization<TAggregateRoot> aggregateAuthorization)
             : base(currentTenantIdHolder, aggregateAuthorization)
         {
-            _dbContext = dbContext;
+            DbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             _aggregateMapping = aggregateMapping;
             _aggregateAuthorization = aggregateAuthorization;
 
             // somewhat a hack: using the internal EF Core services against advice
-            var localViewListener = dbContext?.GetService<ILocalViewListener>();
+            var localViewListener = dbContext.GetService<ILocalViewListener>();
             localViewListener?.RegisterView(AuthorizeChanges);
         }
 
-        [SuppressMessage("ReSharper", "EF1001")]
-        public DbContext DbContext
-        {
-            get => _dbContext ?? throw new InvalidOperationException(
-                       "This EfRepository does not have a DbContext yet. You might either make sure a proper DbContext gets injected or the DbContext is initialized later using a derived class")
-            ;
-            protected set
-            {
-                if (_dbContext != null) throw new InvalidOperationException("This EfRepository has already a DbContext assigned. It is not allowed to change it later.");
-                _dbContext = value;
-                var localViewListener = _dbContext?.GetService<ILocalViewListener>();
-                localViewListener?.RegisterView(AuthorizeChanges);
-            }
-        }
-        
+        public DbContext DbContext { get; }
+
         public async Task<TAggregateRoot> SingleAsync(int id, CancellationToken cancellationToken = default)
         {
             return await AggregateQueryable.SingleAsync(agg => agg.Id == id, cancellationToken);

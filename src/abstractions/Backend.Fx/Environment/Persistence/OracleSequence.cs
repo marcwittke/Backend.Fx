@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Data;
-using Backend.Fx.EfCorePersistence.Bootstrapping;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.IdGeneration;
 
-namespace Backend.Fx.EfCorePersistence.Oracle
+namespace Backend.Fx.Environment.Persistence
 {
     public abstract class OracleSequence : ISequence
     {

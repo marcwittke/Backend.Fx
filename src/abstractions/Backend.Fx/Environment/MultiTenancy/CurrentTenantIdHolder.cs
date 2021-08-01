@@ -1,8 +1,9 @@
-﻿using Backend.Fx.Patterns.DependencyInjection;
+﻿using Backend.Fx.BuildingBlocks;
+using Backend.Fx.Patterns.DependencyInjection;
 
 namespace Backend.Fx.Environment.MultiTenancy
 {
-    public class CurrentTenantIdHolder : CurrentTHolder<TenantId>
+    public class CurrentTenantIdHolder : CurrentTHolder<TenantId>, IApplicationService
     {
         public CurrentTenantIdHolder()
         { }

@@ -17,15 +17,13 @@ namespace Backend.Fx.Patterns.DataGeneration
         private static readonly ILogger Logger = LogManager.Create<GenerateDataOnBoot>();
         private readonly ITenantIdProvider _tenantIdProvider;
         private readonly IBackendFxApplication _application;
-        private readonly IModule _dataGenerationModule;
         private readonly ManualResetEventSlim _dataGenerated = new ManualResetEventSlim(false);
         public IDataGenerationContext DataGenerationContext { get; [UsedImplicitly] private set; }
 
-        public GenerateDataOnBoot(ITenantIdProvider tenantIdProvider, IModule dataGenerationModule, IBackendFxApplication application)
+        public GenerateDataOnBoot(ITenantIdProvider tenantIdProvider, IBackendFxApplication application)
         {
             _tenantIdProvider = tenantIdProvider;
             _application = application;
-            _dataGenerationModule = dataGenerationModule;
             DataGenerationContext = new DataGenerationContext(_application.CompositionRoot,
                                                               _application.Invoker);
         }
@@ -46,10 +44,8 @@ namespace Backend.Fx.Patterns.DataGeneration
             return _dataGenerated.Wait(timeoutMilliSeconds, cancellationToken);
         }
 
-        public Task Boot(CancellationToken cancellationToken = default) => BootAsync(cancellationToken);
         public async Task BootAsync(CancellationToken cancellationToken = default)
         {
-            _application.CompositionRoot.RegisterModules(_dataGenerationModule);
             await _application.BootAsync(cancellationToken);
             
             SeedDataForAllActiveTenants();

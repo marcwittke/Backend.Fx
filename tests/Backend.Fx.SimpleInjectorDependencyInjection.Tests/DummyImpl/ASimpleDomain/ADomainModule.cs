@@ -6,8 +6,8 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.ASimpleDo
 {
     public class ADomainModule : SimpleInjectorDomainModule
     {
-        public ADomainModule(params Assembly[] domainAssemblies)
-            : base(domainAssemblies)
+        public ADomainModule(params Assembly[] assemblies)
+            : base(assemblies)
         {
         }
 

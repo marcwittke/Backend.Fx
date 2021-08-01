@@ -1,6 +1,6 @@
-﻿using System.Data;
+using System.Data;
 
-namespace Backend.Fx.EfCorePersistence.Bootstrapping
+namespace Backend.Fx.Environment.Persistence
 {
     public interface IDbConnectionFactory
     {

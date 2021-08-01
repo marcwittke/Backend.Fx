@@ -24,7 +24,6 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             A.CallTo(() => InjectionScope.InstanceProvider).Returns(InstanceProvider);
 
             A.CallTo(() => CompositionRoot.BeginScope()).Returns(InjectionScope);
-            A.CallTo(() => CompositionRoot.InfrastructureModule).Returns(InfrastructureModule);
 
             A.CallTo(() => Invoker.Invoke(A<Action<IInstanceProvider>>._, A<IIdentity>._, A<TenantId>._, A<Guid?>._))
              .Invokes((Action<IInstanceProvider> a, IIdentity i, TenantId t, Guid? g) => a.Invoke(InstanceProvider));
@@ -39,7 +38,6 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         public IExceptionLogger ExceptionLogger { get; } = A.Fake<IExceptionLogger>();
         public IInstanceProvider InstanceProvider { get; } = A.Fake<IInstanceProvider>();
         public IMessageBus MessageBus { get; } = A.Fake<IMessageBus>();
-        public IInfrastructureModule InfrastructureModule { get; } = A.Fake<IInfrastructureModule>();
         public IBackendFxApplicationInvoker Invoker { get; } = A.Fake<IBackendFxApplicationInvoker>();
     }
 }

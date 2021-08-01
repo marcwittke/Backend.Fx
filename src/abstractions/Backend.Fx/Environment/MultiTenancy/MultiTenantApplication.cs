@@ -33,7 +33,6 @@ namespace Backend.Fx.Environment.MultiTenancy
             return _application.WaitForBoot(timeoutMilliSeconds, cancellationToken);
         }
 
-        public Task Boot(CancellationToken cancellationToken = default) => BootAsync(cancellationToken);
         public async Task BootAsync(CancellationToken cancellationToken = default)
         {
             EnableDataGenerationForNewTenants();

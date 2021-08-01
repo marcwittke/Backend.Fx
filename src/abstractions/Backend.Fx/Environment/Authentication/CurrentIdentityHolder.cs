@@ -1,9 +1,10 @@
 ﻿using System.Security.Principal;
+using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Patterns.DependencyInjection;
 
 namespace Backend.Fx.Environment.Authentication
 {
-    public class CurrentIdentityHolder : CurrentTHolder<IIdentity>
+    public class CurrentIdentityHolder : CurrentTHolder<IIdentity>, IApplicationService
     {
         public CurrentIdentityHolder()
         { }
