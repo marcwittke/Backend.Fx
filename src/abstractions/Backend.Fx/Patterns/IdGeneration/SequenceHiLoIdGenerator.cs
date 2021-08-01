@@ -1,10 +1,10 @@
 ﻿namespace Backend.Fx.Patterns.IdGeneration
 {
-    public abstract class SequenceHiLoIdGenerator : HiLoIdGenerator
+    public class SequenceHiLoIdGenerator : HiLoIdGenerator
     {
         private readonly ISequence _sequence;
 
-        protected SequenceHiLoIdGenerator(ISequence sequence)
+        public SequenceHiLoIdGenerator(ISequence sequence)
         {
             _sequence = sequence;
         }

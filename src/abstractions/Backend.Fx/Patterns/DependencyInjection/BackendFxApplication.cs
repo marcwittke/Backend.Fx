@@ -41,9 +41,6 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// </summary>
         bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue, CancellationToken cancellationToken = default);
 
-        [Obsolete("Use BootAsync()")]
-        Task Boot(CancellationToken cancellationToken = default);
-        
         /// <summary>
         /// Initializes and starts the application (async)
         /// </summary>
@@ -73,14 +70,6 @@ namespace Backend.Fx.Patterns.DependencyInjection
                                           new WaitForBootInvoker(this, 
                                                                  new ExceptionLoggingAndHandlingInvoker(exceptionLogger, Invoker))));
             CompositionRoot = compositionRoot;
-            CompositionRoot.InfrastructureModule.RegisterScoped<IClock, WallClock>();
-            CompositionRoot.InfrastructureModule.RegisterScoped<ICurrentTHolder<Correlation>, CurrentCorrelationHolder>();
-            CompositionRoot.InfrastructureModule.RegisterScoped<ICurrentTHolder<IIdentity>, CurrentIdentityHolder>();
-            CompositionRoot.InfrastructureModule.RegisterScoped<ICurrentTHolder<TenantId>, CurrentTenantIdHolder>();
-            CompositionRoot.InfrastructureModule.RegisterScoped<IOperation, Operation>();
-            CompositionRoot.InfrastructureModule.RegisterScoped<IDomainEventAggregator>(() => new DomainEventAggregator(compositionRoot));
-            CompositionRoot.InfrastructureModule.RegisterScoped<IMessageBusScope>(
-                () => new MessageBusScope(MessageBus, compositionRoot.InstanceProvider.GetInstance<ICurrentTHolder<Correlation>>()));
         }
 
         public IBackendFxApplicationAsyncInvoker AsyncInvoker { get; }
@@ -91,8 +80,6 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
         public IMessageBus MessageBus { get; }
 
-        public Task Boot(CancellationToken cancellationToken = default) => BootAsync(cancellationToken);
-        
         public Task BootAsync(CancellationToken cancellationToken = default)
         {
             Logger.Info("Booting application");

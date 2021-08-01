@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Logging;
 
 namespace Backend.Fx.Patterns.EventAggregation.Domain

@@ -10,8 +10,6 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
     public class TheMultiTenantApplication
     {
         private readonly IBackendFxApplication _sut;
-        private readonly IModule _multiTenancyModule = A.Fake<IModule>();
-        private readonly ITenantService _tenantService = A.Fake<ITenantService>();
         private readonly IBackendFxApplication _application = A.Fake<IBackendFxApplication>();
 
         public TheMultiTenantApplication()

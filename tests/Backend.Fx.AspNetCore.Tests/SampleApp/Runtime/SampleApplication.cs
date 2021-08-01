@@ -7,7 +7,6 @@ using Backend.Fx.Patterns.DataGeneration;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using Backend.Fx.SimpleInjectorDependencyInjection;
-using Backend.Fx.SimpleInjectorDependencyInjection.Modules;
 
 namespace Backend.Fx.AspNetCore.Tests.SampleApp.Runtime
 {
@@ -25,8 +24,7 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp.Runtime
                 exceptionLogger);
             _application = new MultiTenantApplication(_application);
             _application = new GenerateDataOnBoot(
-                tenantIdProvider,
-                new SimpleInjectorDataGenerationModule(domainAssembly), 
+                tenantIdProvider, 
                 _application);
             _application.CompositionRoot.RegisterModules(
                 new SimpleInjectorDomainModule(domainAssembly));
@@ -50,7 +48,6 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp.Runtime
             return _application.WaitForBoot(timeoutMilliSeconds, cancellationToken);
         }
 
-        public Task Boot(CancellationToken cancellationToken = default) => BootAsync(cancellationToken);
         public Task BootAsync(CancellationToken cancellationToken = default)
         {
             return _application.BootAsync(cancellationToken);

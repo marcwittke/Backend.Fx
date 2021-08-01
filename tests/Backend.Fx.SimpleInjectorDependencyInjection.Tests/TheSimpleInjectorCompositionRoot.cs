@@ -17,7 +17,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         {
             _sut = new SimpleInjectorCompositionRoot();
             Assembly domainAssembly = typeof(AnAggregate).GetTypeInfo().Assembly;
-            _sut.RegisterModules(new ADomainModule(domainAssembly));
             _sut.Verify();
         }
 

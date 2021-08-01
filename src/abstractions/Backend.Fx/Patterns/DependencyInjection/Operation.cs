@@ -1,4 +1,5 @@
 using System;
+using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Logging;
 
 namespace Backend.Fx.Patterns.DependencyInjection
@@ -17,7 +18,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
         void Cancel();
     }
 
-    public class Operation : IOperation
+    public class Operation : IOperation, IApplicationService
     {
         private static readonly ILogger Logger = LogManager.Create<Operation>();
         private static int _index;

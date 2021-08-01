@@ -45,7 +45,6 @@ namespace Backend.Fx.Environment.Persistence
             return _backendFxApplication.WaitForBoot(timeoutMilliSeconds, cancellationToken);
         }
 
-        public Task Boot(CancellationToken cancellationToken = default) => BootAsync(cancellationToken);
         public async Task BootAsync(CancellationToken cancellationToken = default)
         {
             Logger.Trace("Booting...");
