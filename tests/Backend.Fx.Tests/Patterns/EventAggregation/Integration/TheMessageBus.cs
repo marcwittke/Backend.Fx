@@ -17,6 +17,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         public TheInMemoryMessageBus()
         {
             Sut.ProvideInvoker(FakeApplication.Invoker);
+            Sut.Connect();
         }
         
         [Fact]
