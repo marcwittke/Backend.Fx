@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Backend.Fx.BuildingBlocks;
+using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.Authorization;
 using Backend.Fx.Patterns.DataGeneration;
@@ -73,8 +74,10 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             }
             
             // integration event message bus scope
-            Container.Register<IMessageBusScope>(() =>
-                new MessageBusScope(_messageBus, Container.GetInstance<ICurrentTHolder<Correlation>>()));
+            Container.Register<IMessageBusScope>(() => new MessageBusScope(
+                _messageBus,
+                Container.GetInstance<ICurrentTHolder<Correlation>>(),
+                Container.GetInstance<ICurrentTHolder<TenantId>>()));
             
             // integration message handlers
             foreach (Type integrationMessageHandlerType in Container.GetTypesToRegister(typeof(IIntegrationMessageHandler<>), _assemblies))
