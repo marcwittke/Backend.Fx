@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Security.Principal;
@@ -105,7 +106,7 @@ namespace Backend.Fx.EfCorePersistence
                      .ToArray()
                      .ForAll(entry =>
                      {
-                         EntityEntry aggregateRootEntry = FindAggregateRootEntry(DbContext.ChangeTracker, entry);
+                         EntityEntry aggregateRootEntry = GetAggregateRootEntry(DbContext.ChangeTracker, entry);
                          if (aggregateRootEntry.State == EntityState.Unchanged) aggregateRootEntry.State = EntityState.Modified;
                      });
 
@@ -141,14 +142,16 @@ namespace Backend.Fx.EfCorePersistence
                      });
             if (count > 0) Logger.Debug($"Tracked {count} entities as created/changed on {utcNow:u} by {userId}");
         }
-
+        
         /// <summary>
         ///     This method finds the EntityEntry&lt;AggregateRoot&gt; of an EntityEntry&lt;Entity&gt;
         ///     assuming it has been loaded and is being tracked by the change tracker.
         /// </summary>
-        private static EntityEntry FindAggregateRootEntry(ChangeTracker changeTracker, EntityEntry entry)
+        [return: NotNull]
+        private static EntityEntry GetAggregateRootEntry(ChangeTracker changeTracker, EntityEntry entry)
         {
-            Logger.Debug($"Searching aggregate root of {entry.Entity.GetType().Name}[{(entry.Entity as Identified)?.Id}]");
+            var entityIdentifier = $"{entry.Entity.GetType().Name}[{(entry.Entity as Identified)?.Id}]";
+            Logger.Debug($"Searching aggregate root of {entityIdentifier}");
             foreach (NavigationEntry navigation in entry.Navigations)
             {
                 TypeInfo navTargetTypeInfo = navigation.Metadata.TargetEntityType.ClrType.GetTypeInfo();
@@ -181,10 +184,10 @@ namespace Backend.Fx.EfCorePersistence
 
                 // recurse in case of "Entity -> Entity -> AggregateRoot"
                 Logger.Debug("Recursing...");
-                return FindAggregateRootEntry(changeTracker, navigationTargetEntry);
+                return GetAggregateRootEntry(changeTracker, navigationTargetEntry);
             }
 
-            return null;
+            throw new InvalidOperationException($"Could not find aggregate root of {entityIdentifier}");
         }
     }
 }
