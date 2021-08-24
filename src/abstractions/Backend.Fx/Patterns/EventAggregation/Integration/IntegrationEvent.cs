@@ -1,4 +1,6 @@
 ﻿using System;
+using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Patterns.DependencyInjection;
 
 namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
@@ -6,8 +8,8 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
     {
         Guid Id { get; }
         DateTime CreationDate { get; }
-        int TenantId { get; }
-        Guid CorrelationId { get; }
+        int TenantId { get; set; }
+        Guid CorrelationId { get; set; }
     }
 
     /// <summary>
@@ -19,16 +21,13 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
         public Guid Id { get; } = Guid.NewGuid();
 
         public DateTime CreationDate { get; } = DateTime.UtcNow;
+        public int TenantId { get; set; }
+        public Guid CorrelationId { get; set; }
 
-        public int TenantId { get; }
-
-        public Guid CorrelationId { get; private set; }
-
-        internal void SetCorrelationId(Guid correlationId)
-        {
-            CorrelationId = correlationId;
-        }
-
+        protected IntegrationEvent()
+        { }
+        
+        [Obsolete("TenantId is injected automatically when publishing the event")]
         protected IntegrationEvent(int tenantId)
         {
             TenantId = tenantId;
