@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
 using Backend.Fx.EfCorePersistence.Tests.Fixtures;
-using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Extensions;
 using Dapper;
 using Xunit;
