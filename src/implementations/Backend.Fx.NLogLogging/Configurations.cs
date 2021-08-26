@@ -13,7 +13,7 @@ namespace Backend.Fx.NLogLogging
     {
         private static readonly object SyncLock = new object();
 
-        public static void ForTests(string appRootNamespace, string logfilename = "tests.xlog")
+        public static void ForTests(string appRootNamespace, string logfilename = "tests.log")
         {
             lock (SyncLock)
             {
@@ -34,7 +34,7 @@ namespace Backend.Fx.NLogLogging
                 {
                     DeleteOldFileOnStartup = false,
                     FileName = @"${basedir}/" + logfilename,
-                    Layout = new Log4JXmlEventLayout(),
+                    Layout = @"${level:uppercase=true:padding=5} ${mdc:item=Activity} ${time} ${logger} ${message} ${exception}",
                     MaxArchiveFiles = 1,
                     ArchiveAboveSize = 10 * 1024 * 1024
                 };

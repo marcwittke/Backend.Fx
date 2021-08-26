@@ -6,6 +6,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.ASimpleDo
     {
         public void Handle(ADomainEvent domainEvent)
         {
+            domainEvent.HandledBy.Add(GetType());
         }
     }
 }

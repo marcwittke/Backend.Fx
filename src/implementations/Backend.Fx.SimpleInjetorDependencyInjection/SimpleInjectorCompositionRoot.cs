@@ -3,8 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Security.Principal;
 using System.Threading;
 using Backend.Fx.BuildingBlocks;
+using Backend.Fx.Environment.Authentication;
+using Backend.Fx.Environment.DateAndTime;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.Authorization;
@@ -35,22 +38,32 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
         /// This constructor creates a composition root that prefers scoped lifestyle
         /// </summary>
         public SimpleInjectorCompositionRoot(IMessageBus messageBus, params Assembly[] assemblies)
-            : this(new ScopedLifestyleBehavior(), new AsyncScopedLifestyle())
-        {
-            _messageBus = messageBus;
-            _assemblies = assemblies;
-            _assembliesForLogging = string.Join(",", assemblies.Select(ass => ass.GetName().Name));
-        }
+            : this(messageBus, assemblies, new ScopedLifestyleBehavior(), new AsyncScopedLifestyle())
+        { }
 
-        public SimpleInjectorCompositionRoot(ILifestyleSelectionBehavior lifestyleBehavior, ScopedLifestyle scopedLifestyle)
+        private SimpleInjectorCompositionRoot(IMessageBus messageBus, Assembly[] assemblies, ILifestyleSelectionBehavior lifestyleBehavior, ScopedLifestyle scopedLifestyle)
         {
             Logger.Info("Initializing SimpleInjector");
+            
+            _messageBus = messageBus;
+            _assemblies = assemblies ?? Array.Empty<Assembly>();
+            _assembliesForLogging = string.Join(",", _assemblies.Select(ass => ass.GetName().Name));
+            
             Container.Options.LifestyleSelectionBehavior = lifestyleBehavior;
             Container.Options.DefaultScopedLifestyle = scopedLifestyle;
             InstanceProvider = new SimpleInjectorInstanceProvider(Container);
             
             // SimpleInjector 5 needs this to resolve controllers
             Container.Options.ResolveUnregisteredConcreteTypes = true;
+
+            // the basic types that are open for decorators
+            Container.Register<IClock, WallClock>();
+            Container.Register<IOperation, Operation>();
+            
+            // holder types that provide access to cross cutting, scope-local state
+            Container.Register<ICurrentTHolder<TenantId>, CurrentTenantIdHolder>();
+            Container.Register<ICurrentTHolder<IIdentity>, CurrentIdentityHolder>();
+            Container.Register<ICurrentTHolder<Correlation>, CurrentCorrelationHolder>();
             
             RegisterDomainAndApplicationServices(Container);
 

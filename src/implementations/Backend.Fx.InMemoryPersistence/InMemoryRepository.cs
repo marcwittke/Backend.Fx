@@ -10,13 +10,13 @@ namespace Backend.Fx.InMemoryPersistence
 {
     public class InMemoryRepository<T> : Repository<T> where T : AggregateRoot
     {
-        public InMemoryRepository(IInMemoryStore<T> store, ICurrentTHolder<TenantId> currentTenantIdHolder, IAggregateAuthorization<T> aggregateAuthorization)
+        public InMemoryRepository(InMemoryStore<T> store, ICurrentTHolder<TenantId> currentTenantIdHolder, IAggregateAuthorization<T> aggregateAuthorization)
             : base(currentTenantIdHolder, aggregateAuthorization)
         {
             Store = store;
         }
 
-        public virtual IInMemoryStore<T> Store { get; }
+        public virtual InMemoryStore<T> Store { get; }
 
         protected override IQueryable<T> RawAggregateQueryable => Store.Values.AsQueryable();
 

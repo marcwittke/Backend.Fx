@@ -4,7 +4,7 @@ using Backend.Fx.Patterns.DependencyInjection;
 
 namespace Backend.Fx.Environment.Authentication
 {
-    public class CurrentIdentityHolder : CurrentTHolder<IIdentity>, IApplicationService
+    public class CurrentIdentityHolder : CurrentTHolder<IIdentity>
     {
         public CurrentIdentityHolder()
         { }

@@ -11,7 +11,7 @@ namespace Backend.Fx.InMemoryPersistence
     {
         private readonly IQueryable<TAggregateRoot> _queryableImplementation;
 
-        public InMemoryQueryable(IInMemoryStore<TAggregateRoot> store)
+        public InMemoryQueryable(InMemoryStore<TAggregateRoot> store)
         {
             _queryableImplementation = store.Values.AsQueryable();
         }

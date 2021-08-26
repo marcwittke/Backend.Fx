@@ -30,5 +30,10 @@ namespace Backend.Fx.Environment.DateAndTime
             _overriddenUtcNow = _overriddenUtcNow.Value.Add(timespan);
             return _overriddenUtcNow.Value;
         }
+
+        public void ResetToOriginalTime()
+        {
+            _overriddenUtcNow = null;
+        }
     }
 }

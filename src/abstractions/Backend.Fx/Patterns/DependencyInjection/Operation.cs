@@ -18,7 +18,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
         void Cancel();
     }
 
-    public class Operation : IOperation, IApplicationService
+    public class Operation : IOperation
     {
         private static readonly ILogger Logger = LogManager.Create<Operation>();
         private static int _index;

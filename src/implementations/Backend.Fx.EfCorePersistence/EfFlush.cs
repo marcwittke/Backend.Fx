@@ -27,7 +27,7 @@ namespace Backend.Fx.EfCorePersistence
         {
             DbContext = dbContext;
             Logger.Info("Disabling auto detect changes on this DbContext. Changes will be detected explicitly when flushing.");
-            DbContext.DisableChangeTracking();
+            // DbContext.DisableChangeTracking();
             IdentityHolder = identityHolder;
             Clock = clock;
         }
