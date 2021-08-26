@@ -11,7 +11,7 @@ namespace Backend.Fx.Tests.Patterns.MultiTenancy
     {
         private readonly ITenantService _sut;
         private readonly InMemoryTenantRepository _tenantRepository = new InMemoryTenantRepository();
-        private readonly  IMessageBus _messageBus = A.Fake<IMessageBus>();
+        private readonly IMessageBus _messageBus = A.Fake<IMessageBus>();
         
         public TheTenantService()
         {
@@ -48,7 +48,7 @@ namespace Backend.Fx.Tests.Patterns.MultiTenancy
             Assert.Contains(tenants, t => t.Name == "t3");
             
             tenants = _sut.GetActiveDemonstrationTenants();
-            Assert.Equal(1, tenants.Length);
+            Assert.Single(tenants);
             Assert.Contains(tenants, t => t.Name == "t4");
         }
         
@@ -71,11 +71,11 @@ namespace Backend.Fx.Tests.Patterns.MultiTenancy
             Fake.ClearRecordedCalls(_messageBus);
             
             _sut.DeactivateTenant(tenantId);
-            A.CallTo(() => _messageBus.Publish(A<TenantDeactivated>.That.Matches(ev => ev.TenantId == tenantId.Value))).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _messageBus.Publish(A<TenantDeactivated>._)).MustHaveHappenedOnceExactly();
             Assert.Equal(TenantState.Inactive, _tenantRepository.GetTenant(tenantId).State);
             
             _sut.ActivateTenant(tenantId);
-            A.CallTo(() => _messageBus.Publish(A<TenantActivated>.That.Matches(ev => ev.TenantId == tenantId.Value))).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _messageBus.Publish(A<TenantActivated>._)).MustHaveHappenedOnceExactly();
             Assert.Equal(TenantState.Active, _tenantRepository.GetTenant(tenantId).State);
         }
 

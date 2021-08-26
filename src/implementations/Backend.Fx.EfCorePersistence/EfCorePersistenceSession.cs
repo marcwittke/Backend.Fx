@@ -16,14 +16,24 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Backend.Fx.EfCorePersistence
 {
-    public class EfFlush : ICanFlush
+    public class EfCorePersistenceSession : IPersistenceSession
     {
-        private static readonly ILogger Logger = LogManager.Create<EfFlush>();
+        private static readonly ILogger Logger = LogManager.Create<EfCorePersistenceSession>();
+        private bool _isReadonly;
         public DbContext DbContext { get; }
+    
         public ICurrentTHolder<IIdentity> IdentityHolder { get; }
         public IClock Clock { get; }
+        
+        public void MakeReadonly()
+        {
+            Logger.Debug("Making this DbContext readonly. Changes won't be detected when flushing.");
+            DbContext.ChangeTracker.AutoDetectChangesEnabled = false;
+            DbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+            _isReadonly = true;
+        }
 
-        public EfFlush(DbContext dbContext, ICurrentTHolder<IIdentity> identityHolder, IClock clock)
+        public EfCorePersistenceSession(DbContext dbContext, ICurrentTHolder<IIdentity> identityHolder, IClock clock)
         {
             DbContext = dbContext;
             Logger.Debug("Disabling auto detect changes on this DbContext. Changes will be detected explicitly when flushing.");
@@ -34,6 +44,12 @@ namespace Backend.Fx.EfCorePersistence
 
         public void Flush()
         {
+            if (_isReadonly)
+            {
+                Logger.Info("skipping flush because this instance was marked as readonly");
+                return;
+            }
+            
             DetectChanges();
             UpdateTrackingProperties();
             DbContext.TraceChangeTrackerState();

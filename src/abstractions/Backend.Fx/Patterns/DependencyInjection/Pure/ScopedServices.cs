@@ -21,7 +21,7 @@ namespace Backend.Fx.Patterns.DependencyInjection.Pure
     /// It is very useful in testing scenarios.</remarks>
     public interface IScopedServices : IDisposable
     {
-        ICanFlush CanFlush { get; }
+        IPersistenceSession PersistenceSession { get; }
         AdjustableClock Clock { get; }
         IDomainEventAggregator EventAggregator { get; }
         IMessageBusScope MessageBusScope { get; }
@@ -34,7 +34,7 @@ namespace Backend.Fx.Patterns.DependencyInjection.Pure
     public abstract class ScopedServices : IScopedServices
     {
         private readonly Assembly[] _domainAssemblies;
-        private readonly Lazy<ICanFlush> _canFlush;
+        private readonly Lazy<IPersistenceSession> _persistenceSession;
         private bool _doAutoFlush = true;
 
         protected ScopedServices(
@@ -48,10 +48,12 @@ namespace Backend.Fx.Patterns.DependencyInjection.Pure
             TenantIdHolder = CurrentTenantIdHolder.Create(tenantId);
             IdentityHolder = CurrentIdentityHolder.Create(identity);
             CorrelationHolder = new CurrentCorrelationHolder();
-            _canFlush = new Lazy<ICanFlush>(CreateCanFlush);
+            _persistenceSession = new Lazy<IPersistenceSession>(() => CreatePersistenceSession());
         }
 
-        public ICanFlush CanFlush => _canFlush.Value;
+        public ICanFlush CanFlush => _persistenceSession.Value;
+        
+        public IPersistenceSession PersistenceSession => _persistenceSession.Value;
 
         public ICurrentTHolder<TenantId> TenantIdHolder { get; }
 
@@ -96,7 +98,7 @@ namespace Backend.Fx.Patterns.DependencyInjection.Pure
 
         public void Flush()
         {
-            CanFlush.Flush();
+            PersistenceSession.Flush();
         }
 
         public void Complete()
@@ -150,9 +152,9 @@ namespace Backend.Fx.Patterns.DependencyInjection.Pure
                     continue;
                 }
 
-                constructorParameterTypes[i] = ProvideInstance(constructorParameterTypes[i].ParameterType);
+                constructorParameters[i] = ProvideInstance(constructorParameterTypes[i].ParameterType);
 
-                if (constructorParameterTypes[i] == null)
+                if (constructorParameters[i] == null)
                 {
                     throw new InvalidOperationException($"No implementation for {constructorParameterTypes[i].ParameterType.Name} provided");
                 }
@@ -170,6 +172,6 @@ namespace Backend.Fx.Patterns.DependencyInjection.Pure
         {
         }
 
-        protected abstract ICanFlush CreateCanFlush();
+        protected abstract IPersistenceSession CreatePersistenceSession();
     }
 }

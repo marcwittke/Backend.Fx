@@ -61,14 +61,14 @@ namespace Backend.Fx.Patterns.DataGeneration
                 foreach (TenantId prodTenantId in prodTenantIds)
                 {
                     DataGenerationContext.SeedDataForTenant(prodTenantId, false);
-                    _application.MessageBus.Publish(new DataGenerated(prodTenantId.Value));
+                    _application.MessageBus.Publish(new DataGenerated());
                 }
 
                 var demoTenantIds = _tenantIdProvider.GetActiveDemonstrationTenantIds();
                 foreach (TenantId demoTenantId in demoTenantIds)
                 {
                     DataGenerationContext.SeedDataForTenant(demoTenantId, true);
-                    _application.MessageBus.Publish(new DataGenerated(demoTenantId.Value));
+                    _application.MessageBus.Publish(new DataGenerated());
                 }
             }
         }

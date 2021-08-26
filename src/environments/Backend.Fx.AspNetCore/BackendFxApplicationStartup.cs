@@ -5,6 +5,7 @@ using Backend.Fx.AspNetCore.Mvc.Activators;
 using Backend.Fx.Patterns.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Mvc.ViewComponents;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -17,8 +18,8 @@ namespace Backend.Fx.AspNetCore
         {
             services.AddSingleton<THostedService>();
             services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<THostedService>());
-            services.AddSingleton(provider => provider.GetRequiredService<THostedService>().Application);
             services.AddSingleton<IControllerActivator, BackendFxApplicationControllerActivator>();
+            services.AddSingleton<IViewComponentActivator, BackendFxApplicationViewComponentActivator>();
         }
 
         public static void UseBackendFxApplication<THostedService, TTenantMiddleware>(this IApplicationBuilder app)
@@ -28,19 +29,23 @@ namespace Backend.Fx.AspNetCore
 
             app.Use(async (context, requestDelegate) =>
             {
-                IBackendFxApplication application = app.ApplicationServices.GetRequiredService<THostedService>().Application;
-                application.WaitForBoot();
-
-                // set the instance provider for the controller activator
-                context.SetCurrentInstanceProvider(application.CompositionRoot.InstanceProvider);
-
                 // the ambient tenant id has been set before by a TenantMiddleware
                 var tenantId = context.GetTenantId();
 
                 // the invoking identity has been set before by an AuthenticationMiddleware
                 IIdentity actingIdentity = context.User.Identity;
+                
+                IBackendFxApplication application = app.ApplicationServices.GetRequiredService<THostedService>().Application;
+                application.WaitForBoot();
 
-                await application.AsyncInvoker.InvokeAsync(_ => requestDelegate.Invoke(), actingIdentity, tenantId);
+                await application.AsyncInvoker.InvokeAsync(ip =>
+                {
+                    // set the instance provider for activators being called inside the requestDelegate (everything related to MVC
+                    // for example, like ControllerActivator and ViewComponentActivator etc.)
+                    context.SetCurrentInstanceProvider(ip);
+
+                    return requestDelegate.Invoke();
+                }, actingIdentity, tenantId);
             });
         }
     }

@@ -64,7 +64,7 @@ namespace Backend.Fx.Environment.MultiTenancy
             var tenant = new Tenant(name, description, isDemonstrationTenant) {Configuration = configuration};
             _tenantRepository.SaveTenant(tenant);
             var tenantId = new TenantId(tenant.Id);
-            _messageBus.Publish(new TenantActivated(tenant.Id, tenant.Name, tenant.Description, tenant.IsDemoTenant));
+            _messageBus.Publish(new TenantActivated(tenant.Name, tenant.Description, tenant.IsDemoTenant));
             return tenantId;
         }
 
@@ -74,7 +74,7 @@ namespace Backend.Fx.Environment.MultiTenancy
             Tenant tenant = _tenantRepository.GetTenant(tenantId);
             tenant.State = TenantState.Active;
             _tenantRepository.SaveTenant(tenant);
-            _messageBus.Publish(new TenantActivated(tenant.Id, tenant.Name, tenant.Description, tenant.IsDemoTenant));
+            _messageBus.Publish(new TenantActivated(tenant.Name, tenant.Description, tenant.IsDemoTenant));
         }
 
         public void DeactivateTenant(TenantId tenantId)
@@ -83,7 +83,7 @@ namespace Backend.Fx.Environment.MultiTenancy
             Tenant tenant = _tenantRepository.GetTenant(tenantId);
             tenant.State = TenantState.Inactive;
             _tenantRepository.SaveTenant(tenant);
-            _messageBus.Publish(new TenantDeactivated(tenant.Id, tenant.Name, tenant.Description, tenant.IsDemoTenant));
+            _messageBus.Publish(new TenantDeactivated(tenant.Name, tenant.Description, tenant.IsDemoTenant));
         }
 
         public void DeleteTenant(TenantId tenantId)

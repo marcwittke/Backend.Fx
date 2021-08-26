@@ -21,7 +21,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         [Fact]
         public void MaintainsCorrelationIdOnPublish()
         {
-            var testIntegrationEvent = new Domain.TestIntegrationEvent(44, 1111);
+            var testIntegrationEvent = new Domain.TestIntegrationEvent(44);
             _sut.Publish(testIntegrationEvent);
             Assert.Equal(_currentCorrelationHolder.Current.Id, testIntegrationEvent.CorrelationId);
         }
@@ -29,7 +29,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         [Fact]
         public void DoesNotPublishOnBusWhenPublishing()
         {
-            var testIntegrationEvent = new Domain.TestIntegrationEvent(44, 1111);
+            var testIntegrationEvent = new Domain.TestIntegrationEvent(44);
             _sut.Publish(testIntegrationEvent);
             A.CallTo(()=>_messageBus.Publish(A<IIntegrationEvent>._)).MustNotHaveHappened();
         }
@@ -37,10 +37,10 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         [Fact]
         public void PublishesAllEventsOnRaise()
         {
-            var ev1 = new Domain.TestIntegrationEvent(44, 1111);
-            var ev2 = new Domain.TestIntegrationEvent(45, 1111);
-            var ev3 = new Domain.TestIntegrationEvent(46, 1111);
-            var ev4 = new Domain.TestIntegrationEvent(47, 1111);
+            var ev1 = new Domain.TestIntegrationEvent(44);
+            var ev2 = new Domain.TestIntegrationEvent(45);
+            var ev3 = new Domain.TestIntegrationEvent(46);
+            var ev4 = new Domain.TestIntegrationEvent(47);
             _sut.Publish(ev1);
             _sut.Publish(ev2);
             _sut.Publish(ev3);

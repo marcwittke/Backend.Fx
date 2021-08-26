@@ -75,12 +75,12 @@ namespace Backend.Fx.RabbitMq.Tests
 
         public class TestIntegrationEvent : IntegrationEvent
         {
-            public TestIntegrationEvent(int sequencenumber) : base(999)
+            public TestIntegrationEvent(int sequenceNumber)
             {
-                Sequencenumber = sequencenumber;
+                SequenceNumber = sequenceNumber;
             }
 
-            public int Sequencenumber { get; }
+            public int SequenceNumber { get; }
         }
     }
 }
