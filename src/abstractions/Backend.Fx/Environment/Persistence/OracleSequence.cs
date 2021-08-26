@@ -17,7 +17,7 @@ namespace Backend.Fx.Environment.Persistence
 
         protected abstract string SequenceName { get; }
         protected abstract string SchemaName { get; }
-
+        protected virtual int StartValue => 1;
         private string SchemaPrefix
         {
             get
@@ -51,7 +51,7 @@ namespace Backend.Fx.Environment.Persistence
                     Logger.Info($"Sequence {SchemaPrefix}{SequenceName} does not exist yet and will be created now");
                     using (IDbCommand cmd = dbConnection.CreateCommand())
                     {
-                        cmd.CommandText = $"CREATE SEQUENCE {SchemaPrefix}{SequenceName} START WITH 1 INCREMENT BY {Increment}";
+                        cmd.CommandText = $"CREATE SEQUENCE {SchemaPrefix}{SequenceName} START WITH {StartValue} INCREMENT BY {Increment}";
                         cmd.ExecuteNonQuery();
                         Logger.Info($"Sequence {SchemaPrefix}{SequenceName} created");
                     }
