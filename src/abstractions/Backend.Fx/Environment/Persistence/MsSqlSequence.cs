@@ -18,6 +18,8 @@ namespace Backend.Fx.Environment.Persistence
         protected abstract string SequenceName { get; }
         protected virtual string SchemaName { get; } = "dbo";
 
+        protected virtual int StartValue => 1;
+
         public void EnsureSequence()
         {
             Logger.Info($"Ensuring existence of mssql sequence {SchemaName}.{SequenceName}");
@@ -40,7 +42,7 @@ namespace Backend.Fx.Environment.Persistence
                     Logger.Info($"Sequence {SchemaName}.{SequenceName} does not exist yet and will be created now");
                     using (IDbCommand cmd = dbConnection.CreateCommand())
                     {
-                        cmd.CommandText = $"CREATE SEQUENCE [{SchemaName}].[{SequenceName}] START WITH 1 INCREMENT BY {Increment}";
+                        cmd.CommandText = $"CREATE SEQUENCE [{SchemaName}].[{SequenceName}] START WITH {StartValue} INCREMENT BY {Increment}";
                         cmd.ExecuteNonQuery();
                         Logger.Info($"Sequence {SchemaName}.{SequenceName} created");
                     }
