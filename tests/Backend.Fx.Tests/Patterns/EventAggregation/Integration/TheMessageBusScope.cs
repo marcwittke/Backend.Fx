@@ -1,3 +1,4 @@
+using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using FakeItEasy;
@@ -9,11 +10,12 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
     {
         private readonly IMessageBus _messageBus = A.Fake<IMessageBus>();
         private readonly ICurrentTHolder<Correlation> _currentCorrelationHolder = new CurrentCorrelationHolder();
+        private readonly ICurrentTHolder<TenantId> _currentTenantIdHolder = CurrentTenantIdHolder.Create(1);
         private readonly IMessageBusScope _sut;
 
         public TheMessageBusScope()
         {
-            _sut = new MessageBusScope(_messageBus, _currentCorrelationHolder);
+            _sut = new MessageBusScope(_messageBus, _currentCorrelationHolder, _currentTenantIdHolder);
         }
 
         [Fact]

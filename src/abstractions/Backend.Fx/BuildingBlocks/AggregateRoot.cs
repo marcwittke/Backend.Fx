@@ -1,8 +1,8 @@
 ﻿namespace Backend.Fx.BuildingBlocks
 {
     /// <summary>
-    /// A collection of objects that are bound together by a root entity
-    /// See https://en.wikipedia.org/wiki/Domain-driven_design#Building_blocks
+    ///     A collection of objects that are bound together by a root entity
+    ///     See https://en.wikipedia.org/wiki/Domain-driven_design#Building_blocks
     /// </summary>
     public abstract class AggregateRoot : Entity
     {

@@ -3,7 +3,7 @@ using Backend.Fx.Patterns.DependencyInjection;
 
 namespace Backend.Fx.Environment.MultiTenancy
 {
-    public class CurrentTenantIdHolder : CurrentTHolder<TenantId>, IApplicationService
+    public class CurrentTenantIdHolder : CurrentTHolder<TenantId>
     {
         public CurrentTenantIdHolder()
         { }

@@ -6,35 +6,34 @@ using Xunit;
 
 namespace Backend.Fx.EfCorePersistence.Tests
 {
-    public class TheDbContext
+    public class TheDbContext : IClassFixture<PersistenceFixture>
     {
-        public TheDbContext()
-        {
-            _fixture = new SqliteDatabaseFixture();
-            _fixture.CreateDatabase();
-        }
-
-        private readonly DatabaseFixture _fixture;
+        private readonly PersistenceFixture _fixture;
         private static int _nextTenantId = 2675;
         private readonly int _tenantId = _nextTenantId++;
 
-        [Fact]
-        public void CanClearAndReplaceDependentEntites()
+        public TheDbContext(PersistenceFixture fixture)
         {
-            using (TestDbSession dbSession = _fixture.CreateTestDbSession())
+            _fixture = fixture;
+        }
+
+        [Fact]
+        public void CanClearAndReplaceDependentEntities()
+        {
+            using (var scope = _fixture.BeginScope())
             {
-                var blog = new Blog(1, "original blog") {TenantId = _tenantId};
+                var blog = new Blog(1, "original blog") { TenantId = _tenantId };
                 blog.Posts.Add(new Post(1, blog, "new name 1"));
                 blog.Posts.Add(new Post(2, blog, "new name 2"));
                 blog.Posts.Add(new Post(3, blog, "new name 3"));
                 blog.Posts.Add(new Post(4, blog, "new name 4"));
                 blog.Posts.Add(new Post(5, blog, "new name 5"));
-                dbSession.DbContext.Add(blog);
+                scope.DbContext.Add(blog);
             }
 
-            using (TestDbSession dbSession = _fixture.CreateTestDbSession())
+            using (var scope = _fixture.BeginScope())
             {
-                Blog blog = dbSession.DbContext.Blogs.Include(b => b.Posts).Single(b => b.Id == 1);
+                Blog blog = scope.DbContext.Blogs.Include(b => b.Posts).Single(b => b.Id == 1);
                 blog.Posts.Clear();
                 blog.Posts.Add(new Post(6, blog, "new name 6"));
                 blog.Posts.Add(new Post(7, blog, "new name 7"));
@@ -43,9 +42,9 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 blog.Posts.Add(new Post(10, blog, "new name 10"));
             }
 
-            using (TestDbSession dbSession = _fixture.CreateTestDbSession())
+            using (var scope = _fixture.BeginScope())
             {
-                Blog blog = dbSession.DbContext.Blogs.Include(b => b.Posts).Single(b => b.Id == 1);
+                Blog blog = scope.DbContext.Blogs.Include(b => b.Posts).Single(b => b.Id == 1);
 
                 Assert.Equal(5, blog.Posts.Count);
 

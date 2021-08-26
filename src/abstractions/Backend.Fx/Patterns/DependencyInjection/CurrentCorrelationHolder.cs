@@ -1,8 +1,6 @@
-using Backend.Fx.BuildingBlocks;
-
 namespace Backend.Fx.Patterns.DependencyInjection
 {
-    public class CurrentCorrelationHolder : CurrentTHolder<Correlation>, IApplicationService
+    public class CurrentCorrelationHolder : CurrentTHolder<Correlation>
     {
         public override Correlation ProvideInstance()
         {

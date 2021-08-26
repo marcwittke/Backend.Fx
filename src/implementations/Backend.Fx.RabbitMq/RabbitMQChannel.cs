@@ -107,7 +107,7 @@ namespace Backend.Fx.RabbitMq
                                     retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
                                     (ex, time) => { Logger.Warn(ex); }
                       )
-                      .Execute(() => { _connection = _connectionFactory.CreateConnection(); });
+                     .Execute(() => { _connection = _connectionFactory.CreateConnection(); });
 
                 if (_connection?.IsOpen == true)
                 {
@@ -210,7 +210,7 @@ namespace Backend.Fx.RabbitMq
                   .WaitAndRetry(_retryCount,
                                 retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
                                 (ex, time) => { Logger.Warn(ex.ToString()); })
-                  .Execute(action);
+                 .Execute(action);
         }
     }
 }

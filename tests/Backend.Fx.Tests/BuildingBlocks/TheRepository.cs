@@ -11,6 +11,8 @@ namespace Backend.Fx.Tests.BuildingBlocks
 {
     public class TheRepository
     {
+        private readonly InMemoryStores _stores = new InMemoryStores();
+        
         [Fact]
         public void AcceptsNullArrayToResolve()
         {

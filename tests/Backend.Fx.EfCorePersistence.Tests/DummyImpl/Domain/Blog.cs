@@ -19,7 +19,7 @@ namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain
 
         public string Name { get; private set; }
 
-        public ISet<Post> Posts { get; } = new HashSet<Post>();
+        public ISet<Post> Posts { get; private set; } = new HashSet<Post>();
 
         public Post AddPost(IEntityIdGenerator idGenerator, string name, bool isPublic = false)
         {

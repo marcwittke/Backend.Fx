@@ -1,9 +1,11 @@
 using System;
-using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Backend.Fx.Patterns.EventAggregation.Domain;
+using Backend.Fx.Patterns.EventAggregation.Integration;
 using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.ASimpleDomain;
+using FakeItEasy;
 using SimpleInjector;
 using Xunit;
 
@@ -15,8 +17,9 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         
         public TheSimpleInjectorCompositionRoot()
         {
-            _sut = new SimpleInjectorCompositionRoot();
             Assembly domainAssembly = typeof(AnAggregate).GetTypeInfo().Assembly;
+            _sut = new SimpleInjectorCompositionRoot(A.Fake<IMessageBus>(), domainAssembly);
+            _sut.Container.RegisterPackages(new [] {domainAssembly});
             _sut.Verify();
         }
 
@@ -131,8 +134,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         {
             Assert.Throws<ActivationException>(() => _sut.GetInstance<ITestDomainService>());
             Assert.Throws<ActivationException>(() => _sut.GetInstance(typeof(ITestDomainService)));
-            Assert.Null(_sut.GetCurrentScope());
-
+            
             using (_sut.BeginScope())
             {
                 var sutInstance = _sut.GetInstance<ITestDomainService>();
@@ -142,7 +144,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
                 Assert.Equal(sutInstance, scopeInstance);
             }
 
-            Assert.Null(_sut.GetCurrentScope());
             Assert.Throws<ActivationException>(() => _sut.GetInstance<ITestDomainService>());
             Assert.Throws<ActivationException>(() => _sut.GetInstance(typeof(ITestDomainService)));
         }
@@ -150,15 +151,18 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         [Fact]
         public void CanProvideEventHandlers()
         {
+            var aDomainEvent = new ADomainEvent();
+            
             using (_sut.BeginScope())
             {
-                var handlers = _sut.GetAllEventHandlers<ADomainEvent>().ToArray();
-                
-                // these three handlers should have been auto registered during boot by scanning the assembly
-                Assert.True(handlers.OfType<ADomainEventHandler1>().Any());
-                Assert.True(handlers.OfType<ADomainEventHandler2>().Any());
-                Assert.True(handlers.OfType<ADomainEventHandler3>().Any());
+                var domainEventAggregator = _sut.GetInstance<IDomainEventAggregator>();
+                domainEventAggregator.PublishDomainEvent(aDomainEvent);
+                domainEventAggregator.RaiseEvents();
             }
+            
+            Assert.True(aDomainEvent.HandledBy.Contains(typeof(ADomainEventHandler1)));
+            Assert.True(aDomainEvent.HandledBy.Contains(typeof(ADomainEventHandler2)));
+            Assert.True(aDomainEvent.HandledBy.Contains(typeof(ADomainEventHandler3)));
         }
         
         public void Dispose()
