@@ -56,7 +56,7 @@ namespace Backend.Fx.EfCorePersistence
             Type efRepositoryType = typeof(EfRepository<>).MakeGenericType(aggregateRootType);
             return Activator.CreateInstance(
                 efRepositoryType,
-                ((EfFlush)CanFlush).DbContext,
+                ((EfCorePersistenceSession)CanFlush).DbContext,
                 GetAggregateMapping(aggregateRootType),
                 TenantIdHolder,
                 aggregateAuthorization);

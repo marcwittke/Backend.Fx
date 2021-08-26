@@ -21,9 +21,9 @@ namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
         
         public override IMessageBusScope MessageBusScope { get; } = A.Fake<IMessageBusScope>();
         
-        protected override ICanFlush CreateCanFlush()
+        protected override IPersistenceSession CreatePersistenceSession()
         {
-            return new EfFlush(DbContext, IdentityHolder, Clock);
+            return new EfCorePersistenceSession(DbContext, IdentityHolder, Clock);
         }
     }
 }

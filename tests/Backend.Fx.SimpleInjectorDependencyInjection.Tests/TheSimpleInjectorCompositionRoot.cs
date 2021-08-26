@@ -160,9 +160,9 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
                 domainEventAggregator.RaiseEvents();
             }
             
-            Assert.True(aDomainEvent.HandledBy.Contains(typeof(ADomainEventHandler1)));
-            Assert.True(aDomainEvent.HandledBy.Contains(typeof(ADomainEventHandler2)));
-            Assert.True(aDomainEvent.HandledBy.Contains(typeof(ADomainEventHandler3)));
+            Assert.Contains(typeof(ADomainEventHandler1), aDomainEvent.HandledBy);
+            Assert.Contains(typeof(ADomainEventHandler2), aDomainEvent.HandledBy);
+            Assert.Contains(typeof(ADomainEventHandler3), aDomainEvent.HandledBy);
         }
         
         public void Dispose()

@@ -2,8 +2,8 @@
 {
     public class TenantDeactivated : TenantStatusChanged
     {
-        public TenantDeactivated(int tenantId, string name, string description, bool isDemoTenant)
-            : base(tenantId, name, description, isDemoTenant)
+        public TenantDeactivated(string name, string description, bool isDemoTenant)
+            : base(name, description, isDemoTenant)
         {
         }
     }

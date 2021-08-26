@@ -19,9 +19,9 @@ namespace Backend.Fx.InMemoryPersistence
             _inMemoryStores = inMemoryStores;
         }
 
-        protected override ICanFlush CreateCanFlush()
+        protected override IPersistenceSession CreatePersistenceSession()
         {
-            return new InMemoryFlush();
+            return new InMemoryPersistenceSession(IdentityHolder, Clock);
         }
 
         public override IRepository<TAggregateRoot> GetRepository<TAggregateRoot>()
