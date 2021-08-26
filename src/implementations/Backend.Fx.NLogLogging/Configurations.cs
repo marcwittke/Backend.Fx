@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using NLog;
 using NLog.Config;
-using NLog.Layouts;
 using NLog.Targets;
 
 namespace Backend.Fx.NLogLogging

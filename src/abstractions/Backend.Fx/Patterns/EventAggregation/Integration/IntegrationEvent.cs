@@ -1,6 +1,4 @@
 ﻿using System;
-using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.Patterns.DependencyInjection;
 
 namespace Backend.Fx.Patterns.EventAggregation.Integration
 {

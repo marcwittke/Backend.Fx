@@ -1,5 +1,4 @@
 ﻿using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.Hacking;
 using Backend.Fx.Patterns.DependencyInjection;
 
 namespace Backend.Fx.Patterns.EventAggregation.Integration

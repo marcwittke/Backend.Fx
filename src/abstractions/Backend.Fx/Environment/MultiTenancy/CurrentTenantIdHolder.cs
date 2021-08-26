@@ -1,5 +1,4 @@
-﻿using Backend.Fx.BuildingBlocks;
-using Backend.Fx.Patterns.DependencyInjection;
+﻿using Backend.Fx.Patterns.DependencyInjection;
 
 namespace Backend.Fx.Environment.MultiTenancy
 {
