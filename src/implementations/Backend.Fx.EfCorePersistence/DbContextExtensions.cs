@@ -15,13 +15,6 @@ namespace Backend.Fx.EfCorePersistence
     {
         private static readonly ILogger Logger = LogManager.Create(typeof(DbContextExtensions));
 
-        public static void DisableChangeTracking(this DbContext dbContext)
-        {
-            Logger.Debug($"Disabling change tracking on {dbContext.GetType().Name} instance");
-            dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
-            //dbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
-        }
-
         public static void RegisterRowVersionProperty(this ModelBuilder modelBuilder)
         {
             modelBuilder.Model
