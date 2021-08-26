@@ -53,9 +53,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             Container.Options.DefaultScopedLifestyle = scopedLifestyle;
             InstanceProvider = new SimpleInjectorInstanceProvider(Container);
             
-            // SimpleInjector 5 needs this to resolve controllers
-            Container.Options.ResolveUnregisteredConcreteTypes = true;
-
             // the basic types that are open for decorators
             Container.Register<IClock, WallClock>();
             Container.Register<IOperation, Operation>();
