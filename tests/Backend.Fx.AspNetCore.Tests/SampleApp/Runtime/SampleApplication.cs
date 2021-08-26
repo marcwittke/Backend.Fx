@@ -1,11 +1,13 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Extensions;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DataGeneration;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using Backend.Fx.SimpleInjectorDependencyInjection;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Fx.AspNetCore.Tests.SampleApp.Runtime
 {
@@ -20,6 +22,8 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp.Runtime
             _application = new BackendFxApplication(compositionRoot, messageBus, exceptionLogger);
             _application = new MultiTenantApplication(_application);
             _application = new GenerateDataOnBoot(tenantIdProvider, _application);
+            
+            compositionRoot.Container.GetTypesToRegister<ControllerBase>(GetType().Assembly).ForAll(t => compositionRoot.Container.Register(t));
         }
 
         public void Dispose()
