@@ -1,10 +1,7 @@
 using System;
 using System.Diagnostics;
-using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
-using Backend.Fx.Environment.Authentication;
-using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Domain;

@@ -1,7 +1,6 @@
 using System.Security.Principal;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
 using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.Patterns.DependencyInjection.Pure;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Fx.EfCorePersistence.Tests.Fixtures

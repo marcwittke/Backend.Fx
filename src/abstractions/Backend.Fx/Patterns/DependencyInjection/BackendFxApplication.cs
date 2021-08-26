@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
-using Backend.Fx.Environment.Authentication;
-using Backend.Fx.Environment.DateAndTime;
-using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.EventAggregation.Domain;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 
 namespace Backend.Fx.Patterns.DependencyInjection

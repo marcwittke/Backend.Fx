@@ -1,5 +1,4 @@
 using System;
-using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Logging;
 
 namespace Backend.Fx.Patterns.DependencyInjection

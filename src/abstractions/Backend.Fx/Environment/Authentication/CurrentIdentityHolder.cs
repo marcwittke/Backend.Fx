@@ -1,5 +1,4 @@
 ﻿using System.Security.Principal;
-using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Patterns.DependencyInjection;
 
 namespace Backend.Fx.Environment.Authentication
