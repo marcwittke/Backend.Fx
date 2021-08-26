@@ -160,7 +160,7 @@ namespace Backend.Fx.EfCorePersistence
         }
         
         /// <summary>
-        ///     This method finds the EntityEntry&lt;AggregateRoot&gt; of an EntityEntry&lt;Entity&gt;
+        ///     This method gets the EntityEntry&lt;AggregateRoot&gt; of an EntityEntry&lt;Entity&gt;
         ///     assuming it has been loaded and is being tracked by the change tracker.
         /// </summary>
         [return: NotNull]
