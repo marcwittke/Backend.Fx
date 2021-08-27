@@ -31,3 +31,5 @@ _ReSharper*/
 # JetBrains Rider
 .idea/
 *.sln.iml
+
+.tmp
