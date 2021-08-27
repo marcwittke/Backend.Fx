@@ -17,8 +17,8 @@ class Build : NukeBuild
 {
     public static int Main() => Execute<Build>(x => x.Publish);
 
-    [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
-    readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
+    [Parameter("Configuration to build - Default is 'Release'")]
+    readonly Configuration Configuration = Configuration.Release;
     
     readonly string MygetApiKey = Environment.GetEnvironmentVariable("MYGET_APIKEY");
     readonly string MygetFeedUrl = Environment.GetEnvironmentVariable("MYGET_FEED_URL") ?? "https://www.myget.org/F/marcwittke/api/v3/index.json";
@@ -26,10 +26,9 @@ class Build : NukeBuild
 
     [Solution] readonly Solution Solution;
     [GitRepository] readonly GitRepository GitRepository;
-    [GitVersion(Framework = "netcoreapp3.1")] readonly GitVersion GitVersion;
+    [GitVersion(Framework = "net5.0", NoFetch = true)] readonly GitVersion GitVersion;
 
     AbsolutePath SourceDirectory => RootDirectory / "src";
-    AbsolutePath TestsDirectory => RootDirectory / "tests";
     AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
 
     Target Clean => _ => _
@@ -37,7 +36,6 @@ class Build : NukeBuild
                          .Executes(() =>
                          {
                              SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
-                             TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
                              EnsureCleanDirectory(ArtifactsDirectory);
                          });
 
