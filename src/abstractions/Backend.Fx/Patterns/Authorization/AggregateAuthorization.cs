@@ -16,7 +16,7 @@ namespace Backend.Fx.Patterns.Authorization
         /// <inheritdoc />>
         public virtual IQueryable<TAggregateRoot> Filter(IQueryable<TAggregateRoot> queryable)
         {
-            return queryable.Where(HasAccessExpression);
+            return queryable;
         }
 
         /// <inheritdoc />>

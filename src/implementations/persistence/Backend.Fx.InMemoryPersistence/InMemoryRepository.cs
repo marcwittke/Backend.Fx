@@ -8,7 +8,7 @@ using Backend.Fx.RandomData;
 
 namespace Backend.Fx.InMemoryPersistence
 {
-    public class InMemoryRepository<T> : Repository<T> where T : AggregateRoot
+    public class InMemoryRepository<T> : QueryableRepository<T> where T : AggregateRoot
     {
         public InMemoryRepository(InMemoryStore<T> store, ICurrentTHolder<TenantId> currentTenantIdHolder, IAggregateAuthorization<T> aggregateAuthorization)
             : base(currentTenantIdHolder, aggregateAuthorization)
@@ -29,6 +29,7 @@ namespace Backend.Fx.InMemoryPersistence
         {
             return Store.Values.Random();
         }
+        
 
         protected override void AddPersistent(T aggregateRoot)
         {

@@ -19,50 +19,24 @@ namespace Backend.Fx.BuildingBlocks
 
         protected Repository(ICurrentTHolder<TenantId> tenantIdHolder, IAggregateAuthorization<TAggregateRoot> aggregateAuthorization)
         {
-            Logger.Trace($"Instantiating a new Repository<{AggregateTypeName}> for tenant [{(tenantIdHolder.Current.HasValue ? tenantIdHolder.Current.Value.ToString() : "null")}]");
+            Logger.Trace(
+                $"Instantiating a new Repository<{AggregateTypeName}> for tenant [{(tenantIdHolder.Current.HasValue ? tenantIdHolder.Current.Value.ToString() : "null")}]");
             _tenantIdHolder = tenantIdHolder;
             _aggregateAuthorization = aggregateAuthorization;
         }
 
         protected static string AggregateTypeName => typeof(TAggregateRoot).Name;
 
-        protected abstract IQueryable<TAggregateRoot> RawAggregateQueryable { get; }
-
-        public IQueryable<TAggregateRoot> AggregateQueryable
-        {
-            get
-            {
-                if (_tenantIdHolder.Current.HasValue)
-                {
-                    return _aggregateAuthorization.Filter(RawAggregateQueryable
-                            .Where(agg => agg.TenantId == _tenantIdHolder.Current.Value));
-                }
-
-                return RawAggregateQueryable.Where(agg => false);
-            }
-        }
-
         public TAggregateRoot Single(int id)
         {
             Logger.Debug($"Getting single {AggregateTypeName}[{id}]");
-            TAggregateRoot aggregateRoot = AggregateQueryable.FirstOrDefault(aggr => aggr.Id.Equals(id));
-            if (aggregateRoot == null)
-            {
-                throw new NotFoundException<TAggregateRoot>(id);
-            }
-
-            return aggregateRoot;
+            return Find(id) ?? throw new NotFoundException<TAggregateRoot>(id);
         }
 
         public TAggregateRoot SingleOrDefault(int id)
         {
             Logger.Debug($"Getting single or default {AggregateTypeName}[{id}]");
-            return AggregateQueryable.FirstOrDefault(aggr => aggr.Id.Equals(id));
-        }
-
-        public TAggregateRoot[] GetAll()
-        {
-            return AggregateQueryable.ToArray();
+            return Find(id);
         }
 
         public void Delete([NotNull] TAggregateRoot aggregateRoot)
@@ -114,7 +88,7 @@ namespace Backend.Fx.BuildingBlocks
                     throw new ForbiddenException($"You are not allowed to create records of type {typeof(TAggregateRoot).Name}");
                 }
             });
-            
+
             Logger.Debug($"Adding {aggregateRoots.Length} items of type {AggregateTypeName}");
 
             aggregateRoots.ForAll(agg => agg.TenantId = _tenantIdHolder.Current.Value);
@@ -124,24 +98,43 @@ namespace Backend.Fx.BuildingBlocks
 
         public bool Any()
         {
-            return AggregateQueryable.Any();
+            return AnyPersistent(_tenantIdHolder.Current, _aggregateAuthorization);
         }
 
         public TAggregateRoot[] Resolve(IEnumerable<int> ids)
         {
             if (ids == null)
             {
-                return new TAggregateRoot[0];
+                return Array.Empty<TAggregateRoot>();
             }
 
             int[] idsToResolve = ids as int[] ?? ids.ToArray();
-            TAggregateRoot[] resolved = AggregateQueryable.Where(agg => idsToResolve.Contains(agg.Id)).ToArray();
+
+            if (idsToResolve.Length == 0)
+            {
+                return Array.Empty<TAggregateRoot>();
+            }
+
+            IQueryable<TAggregateRoot> queryable = FindManyPersistent(idsToResolve, _tenantIdHolder.Current, _aggregateAuthorization).AsQueryable();
+            
+            TAggregateRoot[] resolved = queryable.ToArray();
             if (resolved.Length != idsToResolve.Length)
             {
-                throw new ArgumentException($"The following {AggregateTypeName} ids could not be resolved: {string.Join(", ", idsToResolve.Except(resolved.Select(agg => agg.Id)))}");
+                throw new ArgumentException($"The following {AggregateTypeName} ids could not be resolved: " +
+                                            $"{string.Join(", ", idsToResolve.Except(resolved.Select(agg => agg.Id)))}");
             }
+
             return resolved;
         }
+
+        private TAggregateRoot Find(int id)
+        {
+            return FindPersistent(id, _tenantIdHolder.Current, _aggregateAuthorization);
+        }
+        
+        protected abstract TAggregateRoot FindPersistent(int id, TenantId tenantId, IAggregateAuthorization<TAggregateRoot> authorization);
+        protected abstract TAggregateRoot[] FindManyPersistent(int[] ids, TenantId tenantId, IAggregateAuthorization<TAggregateRoot> authorization);
+        protected abstract bool AnyPersistent(TenantId tenantId, IAggregateAuthorization<TAggregateRoot> authorization);
 
         protected abstract void AddPersistent(TAggregateRoot aggregateRoot);
 

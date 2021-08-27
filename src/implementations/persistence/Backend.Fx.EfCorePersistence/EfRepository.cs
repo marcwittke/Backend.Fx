@@ -16,7 +16,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Backend.Fx.EfCorePersistence
 {
-    public class EfRepository<TAggregateRoot> : Repository<TAggregateRoot>, IAsyncRepository<TAggregateRoot> where TAggregateRoot : AggregateRoot
+    public class EfRepository<TAggregateRoot> : QueryableRepository<TAggregateRoot>, IAsyncRepository<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
         private static readonly ILogger Logger = LogManager.Create<EfRepository<TAggregateRoot>>();
         private readonly IAggregateAuthorization<TAggregateRoot> _aggregateAuthorization;
@@ -40,7 +40,7 @@ namespace Backend.Fx.EfCorePersistence
 
         public async Task<TAggregateRoot> SingleAsync(int id, CancellationToken cancellationToken = default)
         {
-            return await AggregateQueryable.SingleAsync(agg => agg.Id == id, cancellationToken);
+            return await GetAggregateQueryable().SingleAsync(agg => agg.Id == id, cancellationToken);
         }
 
         public async Task<TAggregateRoot> SingleOrDefaultAsync(int id, CancellationToken cancellationToken = default)

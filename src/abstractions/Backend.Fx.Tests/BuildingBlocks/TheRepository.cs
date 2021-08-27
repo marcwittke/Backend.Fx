@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Backend.Fx.Tests.BuildingBlocks
 {
-    public class TheRepository
+    public class TheQueryableRepository
     {
         private readonly InMemoryStores _stores = new InMemoryStores();
         

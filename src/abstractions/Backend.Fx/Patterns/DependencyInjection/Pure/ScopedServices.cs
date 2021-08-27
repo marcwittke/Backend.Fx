@@ -91,11 +91,7 @@ namespace Backend.Fx.Patterns.DependencyInjection.Pure
 
         public abstract IAsyncRepository<TAggregateRoot> GetAsyncRepository<TAggregateRoot>() where TAggregateRoot : AggregateRoot;
 
-        public T GetRandom<T>() where T : AggregateRoot
-        {
-            return GetRepository<T>().AggregateQueryable.Random();
-        }
-
+        
         public void Flush()
         {
             PersistenceSession.Flush();
