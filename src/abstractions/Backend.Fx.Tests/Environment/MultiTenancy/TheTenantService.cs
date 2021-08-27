@@ -4,13 +4,47 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.InMemoryPersistence;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using FakeItEasy;
 using Xunit;
 
 namespace Backend.Fx.Tests.Environment.MultiTenancy
 {
+    public class TheTenantIdProvider
+    {
+        private readonly InMemoryTenantRepository _tenantRepository = new ();
+        private readonly IMessageBus _messageBus = A.Fake<IMessageBus>();
+        private readonly ITenantIdProvider _sut;
+
+        public TheTenantIdProvider()
+        {
+            var tenantService = new TenantService(_messageBus, _tenantRepository);
+            _sut = new TenantServiceTenantIdProvider(tenantService);
+        }
+        
+        [Fact]
+        public void GetsProductiveTenantIds()
+        {
+            var tenants = Enumerable.Range(1, 7)
+                                    .Select(i => new Tenant("n" + i, "d" + i, i % 2 == 0))
+                                    .ToArray();
+
+            foreach (Tenant tenant in tenants)
+            {
+                tenant.State = TenantState.Active;
+                _tenantRepository.SaveTenant(tenant);
+            }
+
+            var tenantIds = tenants.Select(t => new TenantId(t.Id)).ToArray();
+            var demoTenantIds = tenants.Where(t => t.IsDemoTenant).Select(t => new TenantId(t.Id)).ToArray();
+            var prodTenantIds = tenants.Where(t => !t.IsDemoTenant).Select(t => new TenantId(t.Id)).ToArray();
+
+            Assert.Equal(tenantIds, _sut.GetActiveTenantIds());
+            Assert.Equal(prodTenantIds, _sut.GetActiveProductionTenantIds());
+            Assert.Equal(demoTenantIds, _sut.GetActiveDemonstrationTenantIds());
+        }
+    }
+    
     public class TheTenantService
     {
         public TheTenantService()
@@ -36,28 +70,6 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
             Assert.Throws<ArgumentException>(() => _sut.CreateTenant("n", "d", true));
             Assert.Throws<ArgumentException>(() => _sut.CreateTenant("n", "d", false));
             Assert.Throws<ArgumentException>(() => _sut.CreateTenant("N", "d", true));
-        }
-
-        [Fact]
-        public void GetsProductiveTenantIds()
-        {
-            var tenants = Enumerable.Range(1, 7)
-                                    .Select(i => new Tenant("n" + i, "d" + i, i % 2 == 0))
-                                    .ToArray();
-
-            foreach (Tenant tenant in tenants)
-            {
-                tenant.State = TenantState.Active;
-                _tenantRepository.SaveTenant(tenant);
-            }
-
-            var tenantIds = tenants.Select(t => new TenantId(t.Id)).ToArray();
-            var demoTenantIds = tenants.Where(t => t.IsDemoTenant).Select(t => new TenantId(t.Id)).ToArray();
-            var prodTenantIds = tenants.Where(t => !t.IsDemoTenant).Select(t => new TenantId(t.Id)).ToArray();
-
-            Assert.Equal(tenantIds, _sut.TenantIdProvider.GetActiveTenantIds());
-            Assert.Equal(prodTenantIds, _sut.TenantIdProvider.GetActiveProductionTenantIds());
-            Assert.Equal(demoTenantIds, _sut.TenantIdProvider.GetActiveDemonstrationTenantIds());
         }
 
         [Fact]

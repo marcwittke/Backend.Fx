@@ -1,6 +1,5 @@
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Exceptions;
-using Backend.Fx.InMemoryPersistence;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using FakeItEasy;
 using Xunit;

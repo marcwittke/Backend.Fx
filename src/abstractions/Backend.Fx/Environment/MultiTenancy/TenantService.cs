@@ -7,19 +7,11 @@ using Backend.Fx.Patterns.EventAggregation.Integration;
 namespace Backend.Fx.Environment.MultiTenancy
 {
     /// <summary>
-    /// Encapsulates the management of tenants
-    /// Note that this should not use repositories and other building blocks, but access the persistence layer directly
+    /// Encapsulates the management of tenants. Note that the implementation must not rely on services provided by the application or
+    /// domain layer, but resembles a separate application with exclusive persistence layer.
     /// </summary>
     public interface ITenantService
     {
-        /// <summary>
-        /// The tenant service can also provide an <see cref="ITenantIdProvider"/>. Keep in mind that this instance uses a direct
-        /// database connection. When multiple microservices do not share the same database, this instance cannot be used, but must
-        /// be implemented by a client to the master tenant service, probably using a remoting technology like RESTful Service, HTTP,
-        /// gRPC or SOAP web service 
-        /// </summary>
-        ITenantIdProvider TenantIdProvider { get; }
-
         TenantId CreateTenant(string name, string description, bool isDemonstrationTenant, string configuration = null);
         void ActivateTenant(TenantId tenantId);
         void DeactivateTenant(TenantId tenantId);
@@ -38,13 +30,10 @@ namespace Backend.Fx.Environment.MultiTenancy
         private readonly IMessageBus _messageBus;
         private readonly ITenantRepository _tenantRepository;
 
-        public ITenantIdProvider TenantIdProvider { get; }
-
         public TenantService(IMessageBus messageBus, ITenantRepository tenantRepository)
         {
             _messageBus = messageBus;
             _tenantRepository = tenantRepository;
-            TenantIdProvider = new TenantServiceTenantIdProvider(this);
         }
 
         public TenantId CreateTenant(string name, string description, bool isDemonstrationTenant, string configuration = null)
@@ -139,37 +128,6 @@ namespace Backend.Fx.Environment.MultiTenancy
                                             .ToArray();
             Logger.Trace($"Active Production TenantIds: {string.Join(",", activeProductionTenants.Select(t => t.ToString()))}");
             return activeProductionTenants;
-        }
-
-        private class TenantServiceTenantIdProvider : ITenantIdProvider
-        {
-            private readonly ITenantService _tenantService;
-
-            public TenantServiceTenantIdProvider(ITenantService tenantService)
-            {
-                _tenantService = tenantService;
-            }
-
-            public TenantId[] GetActiveDemonstrationTenantIds()
-            {
-                return _tenantService.GetActiveDemonstrationTenants()
-                                     .Select(t => new TenantId(t.Id))
-                                     .ToArray();
-            }
-
-            public TenantId[] GetActiveProductionTenantIds()
-            {
-                return _tenantService.GetActiveProductionTenants()
-                                     .Select(t => new TenantId(t.Id))
-                                     .ToArray();
-            }
-
-            public TenantId[] GetActiveTenantIds()
-            {
-                return _tenantService.GetActiveTenants()
-                                     .Select(t => new TenantId(t.Id))
-                                     .ToArray();
-            }
         }
     }
 }
