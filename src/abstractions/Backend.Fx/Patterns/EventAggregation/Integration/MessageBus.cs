@@ -63,7 +63,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
             string eventName = MessageNameProvider.GetMessageName<TEvent>();
             Logger.Info($"Subscribing to {eventName}");
             EnsureInvoker();
-            var subscription = new TypedSubscription(typeof(THandler));
+            var subscription = new TypedSubscription(typeof(THandler), typeof(TEvent));
             _subscriptions.AddOrUpdate(eventName,
                                        s => new List<ISubscription> {subscription},
                                        (s, list) =>
