@@ -59,5 +59,39 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             Assert.True(eventHandled);
             Assert.True(anotherEventHandled);
         }
+        
+        [Fact]
+        public async Task DoesAwaitAllPendingMessages()
+        {
+            var channel = new InMemoryMessageBusChannel();
+            var messageBus = new InMemoryMessageBus(channel);
+            messageBus.Connect();
+            messageBus.ProvideInvoker(new TheMessageBus.TestInvoker());
+
+            var allMessagesAreHandled = false;
+            
+            messageBus.Subscribe(new DelegateIntegrationMessageHandler<TestIntegrationEvent>(x =>
+            {
+                if (x.StringParam == "first message")
+                {
+                    messageBus.Publish(new TestIntegrationEvent(0, "second message"));
+                }
+                else if (x.StringParam == "second message")
+                {
+                    messageBus.Publish(new TestIntegrationEvent(0, "third message"));
+                }
+                else if (x.StringParam == "third message")
+                {
+                    allMessagesAreHandled = true;
+                }
+            }));
+
+            // Publish the first message and await the result.
+            // This should block until all three messages are processed not only the first one was.
+            await messageBus.Publish(new TestIntegrationEvent(0, "first message"));
+            await channel.FinishHandlingAllMessagesAsync();
+            
+            Assert.True(allMessagesAreHandled);
+        }
     }
 }
