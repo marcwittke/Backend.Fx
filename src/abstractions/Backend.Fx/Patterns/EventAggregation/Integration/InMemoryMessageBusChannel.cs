@@ -1,12 +1,13 @@
-﻿namespace Backend.Fx.Patterns.EventAggregation.Integration
+﻿using System.Collections.Concurrent;
+
+namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     
     public class InMemoryMessageBusChannel
     {
-        private readonly List<Task> _messageHandlingTasks = new List<Task>();
+        private readonly ConcurrentBag<Task> _messageHandlingTasks = new ConcurrentBag<Task>();
         
         internal event EventHandler<MessageReceivedEventArgs> MessageReceived;
 
@@ -18,8 +19,10 @@
 
         public async Task FinishHandlingAllMessagesAsync()
         {
-            await Task.WhenAll(_messageHandlingTasks);
-            _messageHandlingTasks.Clear();
+            while (_messageHandlingTasks.TryTake(out var messageHandlingTask))
+            {
+                await messageHandlingTask;
+            }
         }
         
         internal class MessageReceivedEventArgs
