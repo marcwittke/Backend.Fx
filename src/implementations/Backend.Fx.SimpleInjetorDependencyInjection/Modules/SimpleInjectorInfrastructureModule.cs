@@ -8,7 +8,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
     public class SimpleInjectorInfrastructureModule : IInfrastructureModule
     {
         private readonly Container _container;
-        
+
         public SimpleInjectorInfrastructureModule(Container container)
         {
             _container = container;

@@ -16,6 +16,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         public string StringParam { get; }
 
         public ManualResetEventSlim TypedProcessed { get; } = new ManualResetEventSlim(false);
+
         public ManualResetEventSlim DynamicProcessed { get; } = new ManualResetEventSlim(false);
     }
 }

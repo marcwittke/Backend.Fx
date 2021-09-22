@@ -9,12 +9,13 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.ASimpleDo
         public static string Name = "Productive record";
 
         private readonly IRepository<AnAggregate> _repository;
-        public override int Priority => 1;
 
         public AProdAggregateGenerator(IRepository<AnAggregate> repository)
         {
             _repository = repository;
         }
+
+        public override int Priority => 1;
 
         protected override void GenerateCore()
         {

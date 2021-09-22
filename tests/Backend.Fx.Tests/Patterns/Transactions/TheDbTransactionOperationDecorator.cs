@@ -9,16 +9,16 @@ namespace Backend.Fx.Tests.Patterns.Transactions
 {
     public class TheDbTransactionOperationDecorator
     {
+        private readonly IDbConnection _dbConnection = A.Fake<IDbConnection>();
+        private readonly IDbTransaction _dbTransaction = A.Fake<IDbTransaction>();
+        private readonly IOperation _operation = new Operation();
+        private readonly DbTransactionOperationDecorator _sut;
+
         public TheDbTransactionOperationDecorator()
         {
             _sut = new DbTransactionOperationDecorator(_dbConnection, _operation);
             A.CallTo(() => _dbConnection.BeginTransaction(A<IsolationLevel>._)).Returns(_dbTransaction);
         }
-
-        private readonly IDbConnection _dbConnection = A.Fake<IDbConnection>();
-        private readonly IDbTransaction _dbTransaction = A.Fake<IDbTransaction>();
-        private readonly IOperation _operation = new Operation();
-        private readonly DbTransactionOperationDecorator _sut;
 
         [Theory]
         [InlineData(IsolationLevel.ReadCommitted)]
@@ -29,7 +29,8 @@ namespace Backend.Fx.Tests.Patterns.Transactions
             _sut.SetIsolationLevel(isolationLevel);
             A.CallTo(() => _dbConnection.State).Returns(ConnectionState.Open);
             _sut.Begin();
-            A.CallTo(() => _dbConnection.BeginTransaction(A<IsolationLevel>.That.IsEqualTo(isolationLevel))).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _dbConnection.BeginTransaction(A<IsolationLevel>.That.IsEqualTo(isolationLevel)))
+                .MustHaveHappenedOnceExactly();
             Assert.Equal(_sut.CurrentTransaction, _dbTransaction);
         }
 
@@ -38,7 +39,8 @@ namespace Backend.Fx.Tests.Patterns.Transactions
         {
             A.CallTo(() => _dbConnection.State).Returns(ConnectionState.Open);
             _sut.Begin();
-            A.CallTo(() => _dbConnection.BeginTransaction(A<IsolationLevel>.That.IsEqualTo(IsolationLevel.Unspecified))).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _dbConnection.BeginTransaction(A<IsolationLevel>.That.IsEqualTo(IsolationLevel.Unspecified)))
+                .MustHaveHappenedOnceExactly();
             Assert.Equal(_sut.CurrentTransaction, _dbTransaction);
         }
 
@@ -111,7 +113,7 @@ namespace Backend.Fx.Tests.Patterns.Transactions
         public void DoesNotMaintainConnectionStateOnCancelWhenProvidingOpenConnection()
         {
             A.CallTo(() => _dbConnection.State).Returns(ConnectionState.Open);
-            
+
             _sut.Begin();
             A.CallTo(() => _dbConnection.Open()).MustNotHaveHappened();
             _sut.Cancel();
@@ -143,7 +145,6 @@ namespace Backend.Fx.Tests.Patterns.Transactions
             A.CallTo(() => _dbConnection.Open()).MustHaveHappenedOnceExactly();
             _sut.Complete();
             A.CallTo(() => _dbConnection.Close()).MustHaveHappenedOnceExactly();
-
         }
 
         [Fact]

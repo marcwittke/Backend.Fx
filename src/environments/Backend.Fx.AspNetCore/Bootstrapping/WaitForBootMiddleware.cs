@@ -12,8 +12,8 @@ namespace Backend.Fx.AspNetCore.Bootstrapping
     public class WaitForBootMiddleware
     {
         private static readonly ILogger Logger = LogManager.Create<WaitForBootMiddleware>();
-        private readonly RequestDelegate _next;
         private readonly IBackendFxApplication _application;
+        private readonly RequestDelegate _next;
 
         [UsedImplicitly]
         public WaitForBootMiddleware(RequestDelegate next, IBackendFxApplication application)

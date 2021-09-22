@@ -1,22 +1,23 @@
 ﻿using System;
 using System.Diagnostics;
-using Serilog;
+using Backend.Fx.Logging;
 using Serilog.Core;
 using Serilog.Events;
+
 // ReSharper disable TemplateIsNotCompileTimeConstantProblem
 
 namespace Backend.Fx.SerilogLogging
 {
     [DebuggerStepThrough]
-    public class SerilogLogger : Logging.ILogger
+    public class SerilogLogger : ILogger
     {
-        private readonly ILogger _logger;
+        private readonly Serilog.ILogger _logger;
 
-        internal SerilogLogger(ILogger logger)
+        internal SerilogLogger(Serilog.ILogger logger)
         {
             _logger = logger;
         }
-        
+
         #region fatal
 
         public Exception Fatal(Exception exception)
@@ -96,12 +97,12 @@ namespace Backend.Fx.SerilogLogging
 
         public IDisposable InfoDuration(string activity)
         {
-            return new Logging.DurationLogger(s => Info(s), activity);
+            return new DurationLogger(s => Info(s), activity);
         }
 
         public IDisposable InfoDuration(string beginMessage, string endMessage)
         {
-            return new Logging.DurationLogger(s => Info(s), beginMessage, endMessage);
+            return new DurationLogger(s => Info(s), beginMessage, endMessage);
         }
 
         [MessageTemplateFormatMethod("format")]
@@ -134,12 +135,12 @@ namespace Backend.Fx.SerilogLogging
 
         public IDisposable DebugDuration(string activity)
         {
-            return new Logging.DurationLogger(s => Debug(s), activity);
+            return new DurationLogger(s => Debug(s), activity);
         }
 
         public IDisposable DebugDuration(string beginMessage, string endMessage)
         {
-            return new Logging.DurationLogger(s => Debug(s), beginMessage, endMessage);
+            return new DurationLogger(s => Debug(s), beginMessage, endMessage);
         }
 
         [MessageTemplateFormatMethod("format")]
@@ -172,24 +173,30 @@ namespace Backend.Fx.SerilogLogging
 
         public IDisposable TraceDuration(string activity)
         {
-            return new Logging.DurationLogger(s => Trace(s), activity);
+            return new DurationLogger(s => Trace(s), activity);
         }
 
         public IDisposable TraceDuration(string beginMessage, string endMessage)
         {
-            return new Logging.DurationLogger(s => Trace(s), beginMessage, endMessage);
+            return new DurationLogger(s => Trace(s), beginMessage, endMessage);
         }
 
         [MessageTemplateFormatMethod("format")]
         public void Trace(string format, params object[] args)
         {
-            if (IsTraceEnabled()) _logger.Verbose(format, args);
+            if (IsTraceEnabled())
+            {
+                _logger.Verbose(format, args);
+            }
         }
 
         [MessageTemplateFormatMethod("format")]
         public Exception Trace(Exception exception, string format, params object[] args)
         {
-            if (IsTraceEnabled()) _logger.Verbose(exception, format, args);
+            if (IsTraceEnabled())
+            {
+                _logger.Verbose(exception, format, args);
+            }
 
             return exception;
         }

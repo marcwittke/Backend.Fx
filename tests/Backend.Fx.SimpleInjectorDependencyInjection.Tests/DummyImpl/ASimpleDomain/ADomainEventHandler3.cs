@@ -5,7 +5,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.ASimpleDo
     public class ADomainEventHandler3 : IDomainEventHandler<ADomainEvent>
     {
         public void Handle(ADomainEvent domainEvent)
-        {
-        }
+        { }
     }
 }

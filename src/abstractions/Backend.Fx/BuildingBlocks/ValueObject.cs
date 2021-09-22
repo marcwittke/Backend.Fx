@@ -18,10 +18,22 @@ namespace Backend.Fx.BuildingBlocks
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(this, obj)) return true;
-            if (ReferenceEquals(null, obj)) return false;
-            if (GetType() != obj.GetType()) return false;
-            return GetEqualityComponents().SequenceEqual(((ValueObject) obj).GetEqualityComponents());
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (GetType() != obj.GetType())
+            {
+                return false;
+            }
+
+            return GetEqualityComponents().SequenceEqual(((ValueObject)obj).GetEqualityComponents());
         }
 
         public override int GetHashCode()
@@ -38,6 +50,7 @@ namespace Backend.Fx.BuildingBlocks
             }
         }
     }
+
 
     public abstract class ComparableValueObject : ValueObject, IComparable
     {
@@ -74,37 +87,40 @@ namespace Backend.Fx.BuildingBlocks
             {
                 return 1;
             }
-            
-            using (var thisComponents = GetComparableComponents().GetEnumerator())
-            using (var otherComponents = other.GetComparableComponents().GetEnumerator())
-            {
-                while (true)
-                {
-                    var x = thisComponents.MoveNext();
-                    var y = otherComponents.MoveNext();
-                    if (x != y)
-                    {
-                        throw new InvalidOperationException();
-                    }
 
-                    if (x)
+            using (IEnumerator<IComparable> thisComponents = GetComparableComponents().GetEnumerator())
+            {
+                using (IEnumerator<IComparable> otherComponents = other.GetComparableComponents().GetEnumerator())
+                {
+                    while (true)
                     {
-                        var c = thisComponents.Current?.CompareTo(otherComponents.Current) ?? 0;
-                        if (c != 0)
+                        bool x = thisComponents.MoveNext();
+                        bool y = otherComponents.MoveNext();
+                        if (x != y)
                         {
-                            return c;
+                            throw new InvalidOperationException();
+                        }
+
+                        if (x)
+                        {
+                            int c = thisComponents.Current?.CompareTo(otherComponents.Current) ?? 0;
+                            if (c != 0)
+                            {
+                                return c;
+                            }
+                        }
+                        else
+                        {
+                            break;
                         }
                     }
-                    else
-                    {
-                        break;
-                    }
-                }
 
-                return 0;
+                    return 0;
+                }
             }
         }
     }
+
 
     public abstract class ComparableValueObject<T> : ComparableValueObject, IComparable<T>
         where T : ComparableValueObject<T>

@@ -6,8 +6,11 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
     public class ADataGenerator : DataGenerator
     {
         public bool ShouldRunOverride { get; set; }
+
         public int GenerateCoreCalled { get; private set; }
+
         public int ShouldRunCalled { get; private set; }
+
         public int InitializeCalled { get; private set; }
 
         public override int Priority => 12;
@@ -28,6 +31,7 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
             return ShouldRunOverride;
         }
     }
+
 
     public class TheInitialDataGenerator
     {

@@ -22,7 +22,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
 
         public IEnumerable GetInstances(Type serviceType)
         {
-            return (IEnumerable) _container.GetInstance(typeof(IEnumerable<>).MakeGenericType(serviceType));
+            return (IEnumerable)_container.GetInstance(typeof(IEnumerable<>).MakeGenericType(serviceType));
         }
 
         public T GetInstance<T>() where T : class

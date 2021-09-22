@@ -17,7 +17,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
         {
             using (Logger.InfoDuration($"Invoking subscribed handler {_handler.GetType().Name}"))
             {
-                _handler.Handle((TEvent) context.GetTypedEvent(typeof(TEvent)));
+                _handler.Handle((TEvent)context.GetTypedEvent(typeof(TEvent)));
             }
         }
 

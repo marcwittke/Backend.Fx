@@ -16,13 +16,16 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
             Assert.Throws<InvalidOperationException>(() => sut.Verify());
         }
 
+
         public class UnresolvableService
         {
             public UnresolvableService(Entity e)
             {
-                throw new Exception($"This constructor should never be called, since the Entity {e?.GetType().Name} cannot be resolved by the container");
+                throw new Exception(
+                    $"This constructor should never be called, since the Entity {e?.GetType().Name} cannot be resolved by the container");
             }
         }
+
 
         public class BadModule : SimpleInjectorModule
         {

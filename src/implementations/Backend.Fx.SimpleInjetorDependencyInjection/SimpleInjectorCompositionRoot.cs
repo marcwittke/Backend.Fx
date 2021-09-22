@@ -20,14 +20,17 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
         private static readonly ILogger Logger = LogManager.Create<SimpleInjectorCompositionRoot>();
 
         private int _scopeSequenceNumber = 1;
+
         /// <summary>
         /// This constructor creates a composition root that prefers scoped lifestyle
         /// </summary>
-        public SimpleInjectorCompositionRoot() 
+        public SimpleInjectorCompositionRoot()
             : this(new ScopedLifestyleBehavior(), new AsyncScopedLifestyle())
-        {}
+        { }
 
-        public SimpleInjectorCompositionRoot(ILifestyleSelectionBehavior lifestyleBehavior, ScopedLifestyle scopedLifestyle)
+        public SimpleInjectorCompositionRoot(
+            ILifestyleSelectionBehavior lifestyleBehavior,
+            ScopedLifestyle scopedLifestyle)
         {
             Logger.Info("Initializing SimpleInjector");
             ScopedLifestyle = scopedLifestyle;
@@ -35,7 +38,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             Container.Options.DefaultScopedLifestyle = ScopedLifestyle;
             InfrastructureModule = new SimpleInjectorInfrastructureModule(Container);
             InstanceProvider = new SimpleInjectorInstanceProvider(Container);
-            
+
             // SimpleInjector 5 needs this to resolve controllers
             Container.Options.ResolveUnregisteredConcreteTypes = true;
         }
@@ -53,6 +56,39 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             }
         }
 
+        #region IEventHandlerProvider implementation
+
+        /// <inheritdoc />
+        public IEnumerable<IDomainEventHandler<TDomainEvent>> GetAllEventHandlers<TDomainEvent>()
+            where TDomainEvent : IDomainEvent
+        {
+            return Container.GetAllInstances<IDomainEventHandler<TDomainEvent>>();
+        }
+
+        #endregion
+
+        #region IDisposable implementation
+
+        public void Dispose()
+        {
+            Container?.Dispose();
+        }
+
+        #endregion
+
+
+        /// <summary>
+        ///     A behavior that defaults to scoped life style for injected instances
+        /// </summary>
+        private class ScopedLifestyleBehavior : ILifestyleSelectionBehavior
+        {
+            public Lifestyle SelectLifestyle(Type implementationType)
+            {
+                return Lifestyle.Scoped;
+            }
+        }
+
+
         #region ICompositionRoot implementation
 
         public void Verify()
@@ -68,7 +104,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
                 throw;
             }
         }
-
 
         public object GetInstance(Type serviceType)
         {
@@ -89,11 +124,13 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
         {
             return Container.GetAllInstances<T>();
         }
-        
+
         /// <inheritdoc />
         public IInjectionScope BeginScope()
         {
-            return new SimpleInjectorInjectionScope(Interlocked.Increment(ref _scopeSequenceNumber), AsyncScopedLifestyle.BeginScope(Container));
+            return new SimpleInjectorInjectionScope(
+                Interlocked.Increment(ref _scopeSequenceNumber),
+                AsyncScopedLifestyle.BeginScope(Container));
         }
 
         public IInstanceProvider InstanceProvider { get; }
@@ -104,33 +141,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
         {
             return ScopedLifestyle.GetCurrentScope(Container);
         }
+
         #endregion
-
-        #region IEventHandlerProvider implementation
-
-        /// <inheritdoc />
-        public IEnumerable<IDomainEventHandler<TDomainEvent>> GetAllEventHandlers<TDomainEvent>() where TDomainEvent : IDomainEvent
-        {
-            return Container.GetAllInstances<IDomainEventHandler<TDomainEvent>>();
-        }
-        #endregion
-
-        #region IDisposable implementation
-        public void Dispose()
-        {
-            Container?.Dispose();
-        }
-        #endregion
-
-        /// <summary>
-        ///     A behavior that defaults to scoped life style for injected instances
-        /// </summary>
-        private class ScopedLifestyleBehavior : ILifestyleSelectionBehavior
-        {
-            public Lifestyle SelectLifestyle(Type implementationType)
-            {
-                return Lifestyle.Scoped;
-            }
-        }
     }
 }

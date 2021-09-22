@@ -3,12 +3,11 @@ using Microsoft.AspNetCore.Http;
 
 namespace Backend.Fx.AspNetCore.Tests.SampleApp
 {
-    public class TenantAdminMiddleware : TenantAdminMiddlewareBase 
+    public class TenantAdminMiddleware : TenantAdminMiddlewareBase
     {
-        public TenantAdminMiddleware(RequestDelegate next, SampleApplicationHostedService hostedService) 
+        public TenantAdminMiddleware(RequestDelegate next, SampleApplicationHostedService hostedService)
             : base(next, hostedService.TenantService)
-        {
-        }
+        { }
 
         protected override string GetTenantConfiguration(CreateTenantParams createTenantParams)
         {

@@ -15,14 +15,18 @@ namespace Backend.Fx.EfCorePersistence.Bootstrapping
     public class EfCorePersistenceModule<TDbContext> : IModule
         where TDbContext : DbContext
     {
-        private readonly ILoggerFactory _loggerFactory;
+        private readonly Assembly[] _assemblies;
         private readonly Action<DbContextOptionsBuilder<TDbContext>, IDbConnection> _configure;
         private readonly IDbConnectionFactory _dbConnectionFactory;
         private readonly IEntityIdGenerator _entityIdGenerator;
-        private readonly Assembly[] _assemblies;
+        private readonly ILoggerFactory _loggerFactory;
 
-        public EfCorePersistenceModule(IDbConnectionFactory dbConnectionFactory, IEntityIdGenerator entityIdGenerator, 
-                                       ILoggerFactory loggerFactory, Action<DbContextOptionsBuilder<TDbContext>, IDbConnection> configure, params Assembly[] assemblies)
+        public EfCorePersistenceModule(
+            IDbConnectionFactory dbConnectionFactory,
+            IEntityIdGenerator entityIdGenerator,
+            ILoggerFactory loggerFactory,
+            Action<DbContextOptionsBuilder<TDbContext>, IDbConnection> configure,
+            params Assembly[] assemblies)
         {
             _dbConnectionFactory = dbConnectionFactory;
             _entityIdGenerator = entityIdGenerator;
@@ -49,16 +53,19 @@ namespace Backend.Fx.EfCorePersistence.Bootstrapping
             compositionRoot.InfrastructureModule.RegisterScoped(typeof(IQueryable<>), typeof(EntityQueryable<>));
 
             // DbContext is injected into repositories
-            compositionRoot.InfrastructureModule.RegisterScoped(() => CreateDbContextOptions(compositionRoot.InstanceProvider.GetInstance<IDbConnection>()));
+            compositionRoot.InfrastructureModule.RegisterScoped(
+                () => CreateDbContextOptions(compositionRoot.InstanceProvider.GetInstance<IDbConnection>()));
             compositionRoot.InfrastructureModule.RegisterScoped<DbContext, TDbContext>();
 
             // wrapping the operation: connection.open - transaction.begin - operation - (flush) - transaction.commit - connection.close
             compositionRoot.InfrastructureModule.RegisterDecorator<IOperation, FlushOperationDecorator>();
-            compositionRoot.InfrastructureModule.RegisterDecorator<IOperation, DbContextTransactionOperationDecorator>();
+            compositionRoot.InfrastructureModule
+                .RegisterDecorator<IOperation, DbContextTransactionOperationDecorator>();
             compositionRoot.InfrastructureModule.RegisterDecorator<IOperation, DbConnectionOperationDecorator>();
-            
+
             // ensure everything dirty is flushed to the db before handling domain events  
-            compositionRoot.InfrastructureModule.RegisterDecorator<IDomainEventAggregator, FlushDomainEventAggregatorDecorator>();
+            compositionRoot.InfrastructureModule
+                .RegisterDecorator<IDomainEventAggregator, FlushDomainEventAggregatorDecorator>();
 
             compositionRoot.InfrastructureModule.RegisterScoped(typeof(IAggregateMapping<>), _assemblies);
         }

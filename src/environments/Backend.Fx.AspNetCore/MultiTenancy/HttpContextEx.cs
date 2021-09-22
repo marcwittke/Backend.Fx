@@ -12,17 +12,18 @@ namespace Backend.Fx.AspNetCore.MultiTenancy
         {
             if (httpContext.Items.TryGetValue(TenantId, out object untyped))
             {
-                throw new InvalidOperationException($"TenantId has been set already in this HttpContext. Value: {(untyped ?? "null")}");
+                throw new InvalidOperationException(
+                    $"TenantId has been set already in this HttpContext. Value: {untyped ?? "null"}");
             }
 
             httpContext.Items[TenantId] = tenantId;
         }
-        
+
         public static TenantId GetTenantId(this HttpContext httpContext)
         {
             if (httpContext.Items.TryGetValue(TenantId, out object untyped))
             {
-                return (TenantId) untyped;
+                return (TenantId)untyped;
             }
 
             throw new InvalidOperationException("No TenantId present in this HttpContext");

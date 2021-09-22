@@ -10,7 +10,10 @@ namespace Backend.Fx.InMemoryPersistence
 {
     public class InMemoryRepository<T> : Repository<T> where T : AggregateRoot
     {
-        public InMemoryRepository(IInMemoryStore<T> store, ICurrentTHolder<TenantId> currentTenantIdHolder, IAggregateAuthorization<T> aggregateAuthorization)
+        public InMemoryRepository(
+            IInMemoryStore<T> store,
+            ICurrentTHolder<TenantId> currentTenantIdHolder,
+            IAggregateAuthorization<T> aggregateAuthorization)
             : base(currentTenantIdHolder, aggregateAuthorization)
         {
             Store = store;

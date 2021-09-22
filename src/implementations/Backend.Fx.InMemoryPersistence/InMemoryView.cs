@@ -23,11 +23,13 @@ namespace Backend.Fx.InMemoryPersistence
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable) _list).GetEnumerator();
+            return ((IEnumerable)_list).GetEnumerator();
         }
 
         public Type ElementType => typeof(T);
+
         public Expression Expression => _list.AsQueryable().Expression;
+
         public IQueryProvider Provider => _list.AsQueryable().Provider;
     }
 }

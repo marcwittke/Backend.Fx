@@ -19,7 +19,7 @@ namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
 
         public override DbContextOptionsBuilder<TestDbContext> GetDbContextOptionsBuilder(IDbConnection connection)
         {
-            return new DbContextOptionsBuilder<TestDbContext>().UseSqlite((SqliteConnection) connection);
+            return new DbContextOptionsBuilder<TestDbContext>().UseSqlite((SqliteConnection)connection);
         }
 
         public override DbConnectionOperationDecorator UseOperation()

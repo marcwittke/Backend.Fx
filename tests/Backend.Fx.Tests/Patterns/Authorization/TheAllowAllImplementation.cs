@@ -7,14 +7,17 @@ namespace Backend.Fx.Tests.Patterns.Authorization
 {
     public class TheAllowAllImplementation
     {
-        private readonly IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot> _sut = new AllowAll<TheAggregateRoot.TestAggregateRoot>();
-        private readonly TheAggregateRoot.TestAggregateRoot _testAggregateRoot = new TheAggregateRoot.TestAggregateRoot(1,"e");
+        private readonly IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot> _sut
+            = new AllowAll<TheAggregateRoot.TestAggregateRoot>();
+
+        private readonly TheAggregateRoot.TestAggregateRoot _testAggregateRoot
+            = new TheAggregateRoot.TestAggregateRoot(1, "e");
 
         [Fact]
         public void AllowsAccess()
         {
             Assert.True(_sut.HasAccessExpression.Compile().Invoke(_testAggregateRoot));
-            Assert.Contains(_testAggregateRoot, _sut.Filter(new[] {_testAggregateRoot}.AsQueryable()));
+            Assert.Contains(_testAggregateRoot, _sut.Filter(new[] { _testAggregateRoot }.AsQueryable()));
         }
 
         [Fact]
@@ -22,13 +25,13 @@ namespace Backend.Fx.Tests.Patterns.Authorization
         {
             Assert.True(_sut.CanCreate(_testAggregateRoot));
         }
-        
+
         [Fact]
         public void AllowsModification()
         {
             Assert.True(_sut.CanModify(_testAggregateRoot));
         }
-        
+
         [Fact]
         public void AllowsDeletion()
         {

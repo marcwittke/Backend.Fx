@@ -11,7 +11,8 @@ namespace Backend.Fx.EfCorePersistence
 {
     public class EntityQueryable<TEntity> : IQueryable<TEntity> where TEntity : Entity
     {
-        [CanBeNull] private DbContext _dbContext;
+        [CanBeNull]
+        private DbContext _dbContext;
 
         public EntityQueryable(DbContext dbContext)
         {
@@ -21,11 +22,16 @@ namespace Backend.Fx.EfCorePersistence
         public DbContext DbContext
         {
             get => _dbContext ?? throw new InvalidOperationException(
-                       "This EntityQueryable does not have a DbContext yet. You might either make sure a proper DbContext gets injected or the DbContext is initialized later using a derived class")
+                "This EntityQueryable does not have a DbContext yet. You might either make sure a proper DbContext gets injected or the DbContext is initialized later using a derived class")
             ;
             protected set
             {
-                if (_dbContext != null) throw new InvalidOperationException("This EntityQueryable has already a DbContext assigned. It is not allowed to change it later.");
+                if (_dbContext != null)
+                {
+                    throw new InvalidOperationException(
+                        "This EntityQueryable has already a DbContext assigned. It is not allowed to change it later.");
+                }
+
                 _dbContext = value;
             }
         }
@@ -39,7 +45,7 @@ namespace Backend.Fx.EfCorePersistence
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable) InnerQueryable).GetEnumerator();
+            return ((IEnumerable)InnerQueryable).GetEnumerator();
         }
 
         public Type ElementType => InnerQueryable.ElementType;

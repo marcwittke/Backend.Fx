@@ -10,10 +10,14 @@ namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
 {
     public class TestDbSession : ICanFlush, IDisposable
     {
-        private readonly DbConnectionOperationDecorator _operation;
         private readonly EfFlush _efFlush;
+        private readonly DbConnectionOperationDecorator _operation;
 
-        public TestDbSession(DatabaseFixture fixture, DbConnectionOperationDecorator operation, ICurrentTHolder<IIdentity> identityHolder, IClock clock)
+        public TestDbSession(
+            DatabaseFixture fixture,
+            DbConnectionOperationDecorator operation,
+            ICurrentTHolder<IIdentity> identityHolder,
+            IClock clock)
         {
             _operation = operation;
             DbContext = new TestDbContext(fixture.GetDbContextOptionsBuilder(operation.DbConnection).Options);
@@ -21,8 +25,8 @@ namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
             DbConnection = operation.DbConnection;
         }
 
-
         public TestDbContext DbContext { get; }
+
         public IDbConnection DbConnection { get; }
 
         public void Flush()

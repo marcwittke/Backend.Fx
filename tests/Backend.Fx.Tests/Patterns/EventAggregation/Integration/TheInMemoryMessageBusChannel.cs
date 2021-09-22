@@ -21,28 +21,30 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             await messageBus.Publish(new TestIntegrationEvent(0, string.Empty));
 
             var finishHandleTask = channel.FinishHandlingAllMessagesAsync();
-            Assert.Contains(finishHandleTask.Status, new[] {TaskStatus.WaitingForActivation, TaskStatus.Running});
+            Assert.Contains(finishHandleTask.Status, new[] { TaskStatus.WaitingForActivation, TaskStatus.Running });
             handled.Set();
 
             await finishHandleTask;
         }
-        
+
         [Fact]
         public async Task InvokesAllApplicationHandlers()
         {
             var channel = new InMemoryMessageBusChannel();
-            
+
             var messageBus = new InMemoryMessageBus(channel);
             var eventHandled = false;
             messageBus.Connect();
             messageBus.ProvideInvoker(new TheMessageBus.TestInvoker());
-            messageBus.Subscribe(new DelegateIntegrationMessageHandler<TestIntegrationEvent>(ev => eventHandled = true));
-            
+            messageBus.Subscribe(
+                new DelegateIntegrationMessageHandler<TestIntegrationEvent>(ev => eventHandled = true));
+
             var anotherMessageBus = new InMemoryMessageBus(channel);
             var anotherEventHandled = false;
             anotherMessageBus.Connect();
             anotherMessageBus.ProvideInvoker(new TheMessageBus.TestInvoker());
-            messageBus.Subscribe(new DelegateIntegrationMessageHandler<TestIntegrationEvent>(ev => anotherEventHandled = true));
+            messageBus.Subscribe(
+                new DelegateIntegrationMessageHandler<TestIntegrationEvent>(ev => anotherEventHandled = true));
 
             await messageBus.Publish(new TestIntegrationEvent(0, string.Empty));
             await channel.FinishHandlingAllMessagesAsync();
@@ -52,14 +54,14 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
 
             eventHandled = false;
             anotherEventHandled = false;
-            
+
             await anotherMessageBus.Publish(new TestIntegrationEvent(0, string.Empty));
             await channel.FinishHandlingAllMessagesAsync();
-            
+
             Assert.True(eventHandled);
             Assert.True(anotherEventHandled);
         }
-        
+
         [Fact]
         public async Task DoesAwaitAllPendingMessages()
         {
@@ -69,28 +71,30 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             messageBus.ProvideInvoker(new TheMessageBus.TestInvoker());
 
             var allMessagesAreHandled = false;
-            
-            messageBus.Subscribe(new DelegateIntegrationMessageHandler<TestIntegrationEvent>(x =>
-            {
-                if (x.StringParam == "first message")
-                {
-                    messageBus.Publish(new TestIntegrationEvent(0, "second message"));
-                }
-                else if (x.StringParam == "second message")
-                {
-                    messageBus.Publish(new TestIntegrationEvent(0, "third message"));
-                }
-                else if (x.StringParam == "third message")
-                {
-                    allMessagesAreHandled = true;
-                }
-            }));
+
+            messageBus.Subscribe(
+                new DelegateIntegrationMessageHandler<TestIntegrationEvent>(
+                    x =>
+                    {
+                        if (x.StringParam == "first message")
+                        {
+                            messageBus.Publish(new TestIntegrationEvent(0, "second message"));
+                        }
+                        else if (x.StringParam == "second message")
+                        {
+                            messageBus.Publish(new TestIntegrationEvent(0, "third message"));
+                        }
+                        else if (x.StringParam == "third message")
+                        {
+                            allMessagesAreHandled = true;
+                        }
+                    }));
 
             // Publish the first message and await the result.
             // This should block until all three messages are processed not only the first one was.
             await messageBus.Publish(new TestIntegrationEvent(0, "first message"));
             await channel.FinishHandlingAllMessagesAsync();
-            
+
             Assert.True(allMessagesAreHandled);
         }
     }

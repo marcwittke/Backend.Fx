@@ -5,8 +5,8 @@ using Backend.Fx.BuildingBlocks;
 namespace Backend.Fx.InMemoryPersistence
 {
     public interface IInMemoryStore<T> : IDictionary<int, T> where T : AggregateRoot
-    {
-    }
+    { }
+
 
     public class InMemoryStore<T> : IInMemoryStore<T> where T : AggregateRoot
     {
@@ -19,7 +19,7 @@ namespace Backend.Fx.InMemoryPersistence
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable) _dictionaryImplementation).GetEnumerator();
+            return ((IEnumerable)_dictionaryImplementation).GetEnumerator();
         }
 
         public void Add(KeyValuePair<int, T> item)

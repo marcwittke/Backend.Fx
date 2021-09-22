@@ -2,10 +2,12 @@
 using Backend.Fx.Logging;
 using log4net;
 using log4net.Core;
+using log4net.Repository.Hierarchy;
+using ILogger = Backend.Fx.Logging.ILogger;
 
 namespace Backend.Fx.Log4NetLogging
 {
-    public class Log4NetLogger : Logging.ILogger
+    public class Log4NetLogger : ILogger
     {
         private readonly ILog _log4NetLogger;
 
@@ -13,6 +15,8 @@ namespace Backend.Fx.Log4NetLogging
         {
             _log4NetLogger = log4NetLogger;
         }
+
+        private Level Level => ((Logger)_log4NetLogger.Logger).EffectiveLevel;
 
         public Exception Fatal(Exception exception)
         {
@@ -71,11 +75,6 @@ namespace Backend.Fx.Log4NetLogging
             return exception;
         }
 
-        public void Info(string message)
-        {
-            _log4NetLogger.Info(message);
-        }
-
         public IDisposable InfoDuration(string activity)
         {
             return new DurationLogger(Info, activity);
@@ -99,19 +98,15 @@ namespace Backend.Fx.Log4NetLogging
 
         public bool IsDebugEnabled()
         {
-            Level myLevel = Level;
-            return myLevel == Level.Debug || myLevel == Level.Fine || myLevel == Level.Trace || myLevel == Level.Finer || myLevel == Level.Verbose || myLevel == Level.Finest;
+            var myLevel = Level;
+            return myLevel == Level.Debug || myLevel == Level.Fine || myLevel == Level.Trace ||
+                myLevel == Level.Finer || myLevel == Level.Verbose || myLevel == Level.Finest;
         }
 
         public Exception Debug(Exception exception)
         {
             _log4NetLogger.Debug(exception);
             return exception;
-        }
-
-        public void Debug(string message)
-        {
-            _log4NetLogger.Debug(message);
         }
 
         public IDisposable DebugDuration(string activity)
@@ -137,19 +132,15 @@ namespace Backend.Fx.Log4NetLogging
 
         public bool IsTraceEnabled()
         {
-            Level myLevel = Level;
-            return myLevel == Level.Trace || myLevel == Level.Finer || myLevel == Level.Verbose || myLevel == Level.Finest;
+            var myLevel = Level;
+            return myLevel == Level.Trace || myLevel == Level.Finer || myLevel == Level.Verbose ||
+                myLevel == Level.Finest;
         }
 
         public Exception Trace(Exception exception)
         {
             _log4NetLogger.Logger.Log(null, Level.Trace, null, exception);
             return exception;
-        }
-
-        public void Trace(string message)
-        {
-            _log4NetLogger.Logger.Log(null, Level.Trace, message, null);
         }
 
         public IDisposable TraceDuration(string activity)
@@ -173,6 +164,19 @@ namespace Backend.Fx.Log4NetLogging
             return exception;
         }
 
-        private Level Level => ((log4net.Repository.Hierarchy.Logger)_log4NetLogger.Logger).EffectiveLevel;
+        public void Info(string message)
+        {
+            _log4NetLogger.Info(message);
+        }
+
+        public void Debug(string message)
+        {
+            _log4NetLogger.Debug(message);
+        }
+
+        public void Trace(string message)
+        {
+            _log4NetLogger.Logger.Log(null, Level.Trace, message, null);
+        }
     }
 }

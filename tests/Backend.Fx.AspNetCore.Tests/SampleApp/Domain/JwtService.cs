@@ -15,12 +15,12 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp.Domain
         public static string IssueJwt(string identityName)
         {
             var jwt = new JwtSecurityToken(
-                issuer: "SampleApp",
-                audience: "SampleApp",
-                claims: new[] {new Claim(ClaimTypes.Name, identityName)},
-                notBefore: DateTime.UtcNow,
-                expires: DateTime.UtcNow.AddMinutes(5),
-                signingCredentials: SigningCredentials);
+                "SampleApp",
+                "SampleApp",
+                new[] { new Claim(ClaimTypes.Name, identityName) },
+                DateTime.UtcNow,
+                DateTime.UtcNow.AddMinutes(5),
+                SigningCredentials);
 
             string jwtString = JwtSecurityTokenHandler.WriteToken(jwt);
             return jwtString;
@@ -38,7 +38,7 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp.Domain
                 ValidateAudience = true,
                 ValidAudience = "SampleApp",
                 ValidateLifetime = true,
-                ClockSkew = TimeSpan.FromMinutes(2),
+                ClockSkew = TimeSpan.FromMinutes(2)
             };
         }
     }

@@ -10,17 +10,22 @@ namespace Backend.Fx.Environment.MultiTenancy
     public class SingleTenantApplication : TenantApplication, IBackendFxApplication
     {
         private static readonly ILogger Logger = LogManager.Create<SingleTenantApplication>();
-        private readonly bool _isDemoTenant;
-        private readonly ITenantService _tenantService;
         private readonly IBackendFxApplication _application;
         private readonly ManualResetEventSlim _defaultTenantEnsured = new ManualResetEventSlim(false);
-        
-        public SingleTenantApplication(bool isDemoTenant, ITenantService tenantService, IBackendFxApplication application) : base(application)
+        private readonly bool _isDemoTenant;
+        private readonly ITenantService _tenantService;
+
+        public SingleTenantApplication(
+            bool isDemoTenant,
+            ITenantService tenantService,
+            IBackendFxApplication application) : base(application)
         {
             _isDemoTenant = isDemoTenant;
             _tenantService = tenantService;
             _application = application;
         }
+
+        public TenantId TenantId { get; private set; }
 
         public void Dispose()
         {
@@ -35,14 +40,16 @@ namespace Backend.Fx.Environment.MultiTenancy
 
         public IMessageBus MessageBus => _application.MessageBus;
 
-        public TenantId TenantId { get; private set; }
-
         public bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue, CancellationToken cancellationToken = default)
         {
             return _defaultTenantEnsured.Wait(timeoutMilliSeconds, cancellationToken);
         }
 
-        public Task Boot(CancellationToken cancellationToken = default) => BootAsync(cancellationToken);
+        public Task Boot(CancellationToken cancellationToken = default)
+        {
+            return BootAsync(cancellationToken);
+        }
+
         public async Task BootAsync(CancellationToken cancellationToken = default)
         {
             EnableDataGenerationForNewTenants();
@@ -51,7 +58,10 @@ namespace Backend.Fx.Environment.MultiTenancy
 
             Logger.Info("Ensuring existence of single tenant");
             TenantId = _tenantService.GetActiveTenants().SingleOrDefault()?.GetTenantId()
-                       ?? _tenantService.CreateTenant("Single Tenant", "This application runs in single tenant mode", _isDemoTenant);
+                ?? _tenantService.CreateTenant(
+                    "Single Tenant",
+                    "This application runs in single tenant mode",
+                    _isDemoTenant);
 
             _defaultTenantEnsured.Set();
         }

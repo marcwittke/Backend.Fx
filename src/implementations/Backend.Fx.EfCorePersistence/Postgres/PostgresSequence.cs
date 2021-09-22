@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 using Backend.Fx.EfCorePersistence.Bootstrapping;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.IdGeneration;
@@ -17,20 +16,22 @@ namespace Backend.Fx.EfCorePersistence.Postgres
         }
 
         protected abstract string SequenceName { get; }
+
         protected abstract string SchemaName { get; }
 
         public void EnsureSequence()
         {
             Logger.Info($"Ensuring existence of postgres sequence {SchemaName}.{SequenceName}");
 
-            using (IDbConnection dbConnection = _dbConnectionFactory.Create())
+            using (var dbConnection = _dbConnectionFactory.Create())
             {
                 dbConnection.Open();
                 bool sequenceExists;
-                using (IDbCommand command = dbConnection.CreateCommand())
+                using (var command = dbConnection.CreateCommand())
                 {
-                    command.CommandText = $"SELECT count(*) FROM information_schema.sequences WHERE sequence_name = '{SequenceName}' AND sequence_schema = '{SchemaName}'";
-                    sequenceExists = (long) command.ExecuteScalar() == 1L;
+                    command.CommandText
+                        = $"SELECT count(*) FROM information_schema.sequences WHERE sequence_name = '{SequenceName}' AND sequence_schema = '{SchemaName}'";
+                    sequenceExists = (long)command.ExecuteScalar() == 1L;
                 }
 
                 if (sequenceExists)
@@ -40,9 +41,10 @@ namespace Backend.Fx.EfCorePersistence.Postgres
                 else
                 {
                     Logger.Info($"Sequence {SchemaName}.{SequenceName} does not exist yet and will be created now");
-                    using (IDbCommand cmd = dbConnection.CreateCommand())
+                    using (var cmd = dbConnection.CreateCommand())
                     {
-                        cmd.CommandText = $"CREATE SEQUENCE {SchemaName}.{SequenceName} START WITH 1 INCREMENT BY {Increment}";
+                        cmd.CommandText
+                            = $"CREATE SEQUENCE {SchemaName}.{SequenceName} START WITH 1 INCREMENT BY {Increment}";
                         cmd.ExecuteNonQuery();
                         Logger.Info($"Sequence {SchemaName}.{SequenceName} created");
                     }
@@ -52,12 +54,12 @@ namespace Backend.Fx.EfCorePersistence.Postgres
 
         public int GetNextValue()
         {
-            using (IDbConnection dbConnection = _dbConnectionFactory.Create())
+            using (var dbConnection = _dbConnectionFactory.Create())
             {
                 dbConnection.Open();
 
                 int nextValue;
-                using (IDbCommand command = dbConnection.CreateCommand())
+                using (var command = dbConnection.CreateCommand())
                 {
                     command.CommandText = $"SELECT nextval('{SchemaName}.{SequenceName}');";
                     nextValue = Convert.ToInt32(command.ExecuteScalar());

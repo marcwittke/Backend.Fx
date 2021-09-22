@@ -6,8 +6,8 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
 {
     public class TheCurrentTHolder
     {
-        private readonly ICurrentTHolder<TenantId> _sut = new CurrentTenantIdHolder();
         private readonly TenantId _instance2 = new TenantId(2);
+        private readonly ICurrentTHolder<TenantId> _sut = new CurrentTenantIdHolder();
 
         [Fact]
         public void CanReplaceCurrent()
@@ -19,7 +19,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         [Fact]
         public void HoldsCurrent()
         {
-            TenantId current = _sut.Current;
+            var current = _sut.Current;
             Assert.False(current.HasValue);
         }
     }

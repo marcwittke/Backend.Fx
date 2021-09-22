@@ -1,4 +1,3 @@
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.MultiTenancy;
@@ -17,8 +16,8 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp.Runtime
 
         public SampleApplication(ITenantIdProvider tenantIdProvider, IExceptionLogger exceptionLogger)
         {
-            Assembly domainAssembly = GetType().Assembly;
-            
+            var domainAssembly = GetType().Assembly;
+
             _application = new BackendFxApplication(
                 new SimpleInjectorCompositionRoot(),
                 new InMemoryMessageBus(),
@@ -26,10 +25,9 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp.Runtime
             _application = new MultiTenantApplication(_application);
             _application = new GenerateDataOnBoot(
                 tenantIdProvider,
-                new SimpleInjectorDataGenerationModule(domainAssembly), 
+                new SimpleInjectorDataGenerationModule(domainAssembly),
                 _application);
-            _application.CompositionRoot.RegisterModules(
-                new SimpleInjectorDomainModule(domainAssembly));
+            _application.CompositionRoot.RegisterModules(new SimpleInjectorDomainModule(domainAssembly));
         }
 
         public void Dispose()
@@ -50,7 +48,11 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp.Runtime
             return _application.WaitForBoot(timeoutMilliSeconds, cancellationToken);
         }
 
-        public Task Boot(CancellationToken cancellationToken = default) => BootAsync(cancellationToken);
+        public Task Boot(CancellationToken cancellationToken = default)
+        {
+            return BootAsync(cancellationToken);
+        }
+
         public Task BootAsync(CancellationToken cancellationToken = default)
         {
             return _application.BootAsync(cancellationToken);

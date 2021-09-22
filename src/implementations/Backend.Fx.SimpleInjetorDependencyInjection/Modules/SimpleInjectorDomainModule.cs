@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Backend.Fx.BuildingBlocks;
@@ -14,13 +15,13 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
 {
     /// <summary>
     /// Wires all public domain services to be injected as scoped instances provided by the array of domain assemblies:
-    /// - <see cref="IDomainService"/>s
-    /// - <see cref="IApplicationService"/>s
-    /// - <see cref="IAggregateAuthorization{TAggregateRoot}"/>s
-    /// - <see cref="IJob"/>s
-    /// - <see cref="DataGenerator"/>s 
-    /// - the collections of <see cref="IDomainEventHandler{TDomainEvent}"/>s
-    /// - <see cref="IIntegrationMessageHandler{TIntegrationEvent}"/>'s
+    /// - <see cref="IDomainService" />s
+    /// - <see cref="IApplicationService" />s
+    /// - <see cref="IAggregateAuthorization{TAggregateRoot}" />s
+    /// - <see cref="IJob" />s
+    /// - <see cref="DataGenerator" />s
+    /// - the collections of <see cref="IDomainEventHandler{TDomainEvent}" />s
+    /// - <see cref="IIntegrationMessageHandler{TEvent}" />'s
     /// </summary>
     public class SimpleInjectorDomainModule : SimpleInjectorModule
     {
@@ -41,21 +42,25 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
             RegisterAuthorization(container);
 
             // all jobs are dynamically registered
-            foreach (Type jobType in container.GetTypesToRegister(typeof(IJob), _domainAssemblies))
+            foreach (var jobType in container.GetTypesToRegister(typeof(IJob), _domainAssemblies))
             {
                 Logger.Debug($"Registering {jobType.Name}");
                 container.Register(jobType);
             }
 
             // domain event handlers
-            foreach (Type domainEventHandlerType in container.GetTypesToRegister(typeof(IDomainEventHandler<>), _domainAssemblies))
+            foreach (var domainEventHandlerType in container.GetTypesToRegister(
+                typeof(IDomainEventHandler<>),
+                _domainAssemblies))
             {
                 Logger.Debug($"Appending {domainEventHandlerType.Name} to list of IDomainEventHandler");
                 container.Collection.Append(typeof(IDomainEventHandler<>), domainEventHandlerType);
             }
-            
+
             // integration message handlers
-            foreach (Type integrationMessageHandlerType in container.GetTypesToRegister(typeof(IIntegrationMessageHandler<>), _domainAssemblies))
+            foreach (var integrationMessageHandlerType in container.GetTypesToRegister(
+                typeof(IIntegrationMessageHandler<>),
+                _domainAssemblies))
             {
                 Logger.Debug($"Registering {integrationMessageHandlerType.Name}");
                 container.Register(integrationMessageHandlerType);
@@ -64,26 +69,30 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
 
         private void RegisterDomainAndApplicationServices(Container container)
         {
-            Logger.Debug($"Registering domain and application services from {string.Join(",", _domainAssemblies.Select(ass => ass.GetName().Name))}");
+            Logger.Debug(
+                $"Registering domain and application services from {string.Join(",", _domainAssemblies.Select(ass => ass.GetName().Name))}");
             var serviceRegistrations = container
-                                       .GetTypesToRegister(typeof(IDomainService), _domainAssemblies)
-                                       .Concat(container.GetTypesToRegister(typeof(IApplicationService), _domainAssemblies))
-                                       .SelectMany(type =>
-                                                       type.GetTypeInfo()
-                                                           .ImplementedInterfaces
-                                                           .Where(i => typeof(IDomainService) != i
-                                                                       && typeof(IApplicationService) != i
-                                                                       && (i.Namespace != null && i.Namespace.StartsWith("Backend")
-                                                                           || _domainAssemblies.Contains(i.GetTypeInfo().Assembly)))
-                                                           .Select(service => new
-                                                                              {
-                                                                                  Service = service,
-                                                                                  Implementation = type
-                                                                              })
-                                       );
+                .GetTypesToRegister(typeof(IDomainService), _domainAssemblies)
+                .Concat(container.GetTypesToRegister(typeof(IApplicationService), _domainAssemblies))
+                .SelectMany(
+                    type =>
+                        type.GetTypeInfo()
+                            .ImplementedInterfaces
+                            .Where(
+                                i => typeof(IDomainService) != i
+                                    && typeof(IApplicationService) != i
+                                    && (i.Namespace != null && i.Namespace.StartsWith("Backend")
+                                        || _domainAssemblies.Contains(i.GetTypeInfo().Assembly)))
+                            .Select(
+                                service => new
+                                {
+                                    Service = service,
+                                    Implementation = type
+                                }));
             foreach (var reg in serviceRegistrations)
             {
-                Logger.Debug($"Registering scoped service {reg.Service.Name} with implementation {reg.Implementation.Name}");
+                Logger.Debug(
+                    $"Registering scoped service {reg.Service.Name} with implementation {reg.Implementation.Name}");
                 container.Register(reg.Service, reg.Implementation);
             }
         }
@@ -94,19 +103,23 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
         private void RegisterAuthorization(Container container)
         {
             Logger.Debug($"Registering authorization services from {_domainAssembliesForLogging}");
-            var aggregateRootAuthorizationTypes = container.GetTypesToRegister(typeof(IAggregateAuthorization<>), _domainAssemblies).ToArray();
-            foreach (Type aggregateAuthorizationType in aggregateRootAuthorizationTypes)
+            Type[] aggregateRootAuthorizationTypes
+                = container.GetTypesToRegister(typeof(IAggregateAuthorization<>), _domainAssemblies).ToArray();
+            foreach (var aggregateAuthorizationType in aggregateRootAuthorizationTypes)
             {
-                var serviceTypes = aggregateAuthorizationType
-                        .GetTypeInfo()
-                        .ImplementedInterfaces
-                        .Where(impif => impif.GetTypeInfo().IsGenericType
-                                        && impif.GenericTypeArguments.Length == 1
-                                        && typeof(AggregateRoot).GetTypeInfo().IsAssignableFrom(impif.GenericTypeArguments[0].GetTypeInfo()));
+                IEnumerable<Type> serviceTypes = aggregateAuthorizationType
+                    .GetTypeInfo()
+                    .ImplementedInterfaces
+                    .Where(
+                        impif => impif.GetTypeInfo().IsGenericType
+                            && impif.GenericTypeArguments.Length == 1
+                            && typeof(AggregateRoot).GetTypeInfo()
+                                .IsAssignableFrom(impif.GenericTypeArguments[0].GetTypeInfo()));
 
-                foreach (Type serviceType in serviceTypes)
+                foreach (var serviceType in serviceTypes)
                 {
-                    Logger.Debug($"Registering scoped authorization service {serviceType.Name} with implementation {aggregateAuthorizationType.Name}");
+                    Logger.Debug(
+                        $"Registering scoped authorization service {serviceType.Name} with implementation {aggregateAuthorizationType.Name}");
                     container.Register(serviceType, aggregateAuthorizationType);
                 }
             }

@@ -5,6 +5,17 @@ namespace Backend.Fx.Extensions
 {
     public static class ReaderWriterLockSlimExtensions
     {
+        public static IDisposable Read(this ReaderWriterLockSlim obj)
+        {
+            return new ReadLockToken(obj);
+        }
+
+        public static IDisposable Write(this ReaderWriterLockSlim obj)
+        {
+            return new WriteLockToken(obj);
+        }
+
+
         private sealed class ReadLockToken : IDisposable
         {
             private ReaderWriterLockSlim _sync;
@@ -25,6 +36,7 @@ namespace Backend.Fx.Extensions
             }
         }
 
+
         private sealed class WriteLockToken : IDisposable
         {
             private ReaderWriterLockSlim _sync;
@@ -43,16 +55,6 @@ namespace Backend.Fx.Extensions
                     _sync = null;
                 }
             }
-        }
-
-        public static IDisposable Read(this ReaderWriterLockSlim obj)
-        {
-            return new ReadLockToken(obj);
-        }
-
-        public static IDisposable Write(this ReaderWriterLockSlim obj)
-        {
-            return new WriteLockToken(obj);
         }
     }
 }

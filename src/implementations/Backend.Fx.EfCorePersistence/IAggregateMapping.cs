@@ -11,6 +11,7 @@ namespace Backend.Fx.EfCorePersistence
         void ApplyEfMapping(ModelBuilder modelBuilder);
     }
 
+
     public interface IAggregateMapping<T> : IAggregateMapping where T : AggregateRoot
     {
         IEnumerable<Expression<Func<T, object>>> IncludeDefinitions { get; }

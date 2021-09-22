@@ -17,24 +17,27 @@ namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
         public SqlServerDatabaseFixture()
         {
             var dbName = $"TestFixture_{_testindex++:000}";
-            var sqlConnectionStringBuilder = new SqlConnectionStringBuilder("Server=.\\SQLExpress;Trusted_Connection=True;");
+            var sqlConnectionStringBuilder
+                = new SqlConnectionStringBuilder("Server=.\\SQLExpress;Trusted_Connection=True;");
             using (IDbConnection connection = new SqlConnection(sqlConnectionStringBuilder.ConnectionString))
             {
                 connection.Open();
 
-                using (IDbCommand dropCommand = connection.CreateCommand())
+                using (var dropCommand = connection.CreateCommand())
                 {
-                    dropCommand.CommandText = $"IF EXISTS(SELECT * FROM sys.Databases WHERE Name='{dbName}') ALTER DATABASE [{dbName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE";
+                    dropCommand.CommandText
+                        = $"IF EXISTS(SELECT * FROM sys.Databases WHERE Name='{dbName}') ALTER DATABASE [{dbName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE";
                     dropCommand.ExecuteNonQuery();
                 }
 
-                using (IDbCommand dropCommand = connection.CreateCommand())
+                using (var dropCommand = connection.CreateCommand())
                 {
-                    dropCommand.CommandText = $"IF EXISTS(SELECT * FROM sys.Databases WHERE Name='{dbName}') DROP DATABASE [{dbName}]";
+                    dropCommand.CommandText
+                        = $"IF EXISTS(SELECT * FROM sys.Databases WHERE Name='{dbName}') DROP DATABASE [{dbName}]";
                     dropCommand.ExecuteNonQuery();
                 }
 
-                using (IDbCommand createCommand = connection.CreateCommand())
+                using (var createCommand = connection.CreateCommand())
                 {
                     createCommand.CommandText = $"CREATE DATABASE [{dbName}]";
                     createCommand.ExecuteNonQuery();
@@ -52,10 +55,9 @@ namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
             return new DbContextOptionsBuilder<TestDbContext>().UseSqlServer(_connectionString).Options;
         }
 
-
         public override DbContextOptionsBuilder<TestDbContext> GetDbContextOptionsBuilder(IDbConnection connection)
         {
-            return new DbContextOptionsBuilder<TestDbContext>().UseSqlServer((SqlConnection) connection);
+            return new DbContextOptionsBuilder<TestDbContext>().UseSqlServer((SqlConnection)connection);
         }
 
         public override DbConnectionOperationDecorator UseOperation()

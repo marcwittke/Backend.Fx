@@ -17,9 +17,12 @@ namespace Backend.Fx.BuildingBlocks
         private readonly IAggregateAuthorization<TAggregateRoot> _aggregateAuthorization;
         private readonly ICurrentTHolder<TenantId> _tenantIdHolder;
 
-        protected Repository(ICurrentTHolder<TenantId> tenantIdHolder, IAggregateAuthorization<TAggregateRoot> aggregateAuthorization)
+        protected Repository(
+            ICurrentTHolder<TenantId> tenantIdHolder,
+            IAggregateAuthorization<TAggregateRoot> aggregateAuthorization)
         {
-            Logger.Trace($"Instantiating a new Repository<{AggregateTypeName}> for tenant [{(tenantIdHolder.Current.HasValue ? tenantIdHolder.Current.Value.ToString() : "null")}]");
+            Logger.Trace(
+                $"Instantiating a new Repository<{AggregateTypeName}> for tenant [{(tenantIdHolder.Current.HasValue ? tenantIdHolder.Current.Value.ToString() : "null")}]");
             _tenantIdHolder = tenantIdHolder;
             _aggregateAuthorization = aggregateAuthorization;
         }
@@ -34,7 +37,8 @@ namespace Backend.Fx.BuildingBlocks
             {
                 if (_tenantIdHolder.Current.HasValue)
                 {
-                    return _aggregateAuthorization.Filter(RawAggregateQueryable
+                    return _aggregateAuthorization.Filter(
+                        RawAggregateQueryable
                             .Where(agg => agg.TenantId == _tenantIdHolder.Current.Value));
                 }
 
@@ -45,7 +49,7 @@ namespace Backend.Fx.BuildingBlocks
         public TAggregateRoot Single(int id)
         {
             Logger.Debug($"Getting single {AggregateTypeName}[{id}]");
-            TAggregateRoot aggregateRoot = AggregateQueryable.FirstOrDefault(aggr => aggr.Id.Equals(id));
+            var aggregateRoot = AggregateQueryable.FirstOrDefault(aggr => aggr.Id.Equals(id));
             if (aggregateRoot == null)
             {
                 throw new NotFoundException<TAggregateRoot>(id);
@@ -73,9 +77,11 @@ namespace Backend.Fx.BuildingBlocks
             }
 
             Logger.Debug($"Deleting {AggregateTypeName}[{aggregateRoot.Id}]");
-            if (aggregateRoot.TenantId != _tenantIdHolder.Current.Value || !_aggregateAuthorization.CanDelete(aggregateRoot))
+            if (aggregateRoot.TenantId != _tenantIdHolder.Current.Value ||
+                !_aggregateAuthorization.CanDelete(aggregateRoot))
             {
-                throw new ForbiddenException($"You are not allowed to delete {typeof(TAggregateRoot).Name}[{aggregateRoot.Id}]");
+                throw new ForbiddenException(
+                    $"You are not allowed to delete {typeof(TAggregateRoot).Name}[{aggregateRoot.Id}]");
             }
 
             DeletePersistent(aggregateRoot);
@@ -96,7 +102,8 @@ namespace Backend.Fx.BuildingBlocks
             }
             else
             {
-                throw new ForbiddenException($"You are not allowed to create records of type {typeof(TAggregateRoot).Name}");
+                throw new ForbiddenException(
+                    $"You are not allowed to create records of type {typeof(TAggregateRoot).Name}");
             }
         }
 
@@ -107,14 +114,16 @@ namespace Backend.Fx.BuildingBlocks
                 throw new ArgumentNullException(nameof(aggregateRoots));
             }
 
-            aggregateRoots.ForAll(agg =>
-            {
-                if (!_aggregateAuthorization.CanCreate(agg))
+            aggregateRoots.ForAll(
+                agg =>
                 {
-                    throw new ForbiddenException($"You are not allowed to create records of type {typeof(TAggregateRoot).Name}");
-                }
-            });
-            
+                    if (!_aggregateAuthorization.CanCreate(agg))
+                    {
+                        throw new ForbiddenException(
+                            $"You are not allowed to create records of type {typeof(TAggregateRoot).Name}");
+                    }
+                });
+
             Logger.Debug($"Adding {aggregateRoots.Length} items of type {AggregateTypeName}");
 
             aggregateRoots.ForAll(agg => agg.TenantId = _tenantIdHolder.Current.Value);
@@ -138,8 +147,10 @@ namespace Backend.Fx.BuildingBlocks
             TAggregateRoot[] resolved = AggregateQueryable.Where(agg => idsToResolve.Contains(agg.Id)).ToArray();
             if (resolved.Length != idsToResolve.Length)
             {
-                throw new ArgumentException($"The following {AggregateTypeName} ids could not be resolved: {string.Join(", ", idsToResolve.Except(resolved.Select(agg => agg.Id)))}");
+                throw new ArgumentException(
+                    $"The following {AggregateTypeName} ids could not be resolved: {string.Join(", ", idsToResolve.Except(resolved.Select(agg => agg.Id)))}");
             }
+
             return resolved;
         }
 

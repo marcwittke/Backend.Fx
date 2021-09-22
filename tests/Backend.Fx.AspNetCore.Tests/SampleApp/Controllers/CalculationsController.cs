@@ -18,21 +18,19 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp.Controllers
         {
             return Ok(_calculationService.Add(arg1, arg2));
         }
-        
+
         [HttpPost("subtraction/{arg1}/{arg2}")]
         public IActionResult Subtraction(double arg1, double arg2)
         {
             return Ok(_calculationService.Subtract(arg1, arg2));
         }
-        
-        
+
         [HttpPost("multiplication/{arg1}/{arg2}")]
         public IActionResult Multiplication(double arg1, double arg2)
         {
             return Ok(_calculationService.Multiply(arg1, arg2));
         }
-        
-        
+
         [HttpPost("division/{arg1}/{arg2}")]
         public IActionResult Division(double arg1, double arg2)
         {

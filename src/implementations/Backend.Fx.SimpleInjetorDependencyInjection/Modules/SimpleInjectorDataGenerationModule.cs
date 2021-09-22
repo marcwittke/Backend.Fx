@@ -1,7 +1,6 @@
 using System.Reflection;
 using Backend.Fx.Patterns.DataGeneration;
 using Backend.Fx.Patterns.DependencyInjection;
-using SimpleInjector;
 
 namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
 {
@@ -13,11 +12,12 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
         {
             _domainAssemblies = domainAssemblies;
         }
- 
+
         public void Register(ICompositionRoot compositionRoot)
         {
-            Container container = ((SimpleInjectorCompositionRoot) compositionRoot).Container;
-            container.Collection.Register<IDataGenerator>(container.GetTypesToRegister(typeof(IDataGenerator), _domainAssemblies));
+            var container = ((SimpleInjectorCompositionRoot)compositionRoot).Container;
+            container.Collection.Register<IDataGenerator>(
+                container.GetTypesToRegister(typeof(IDataGenerator), _domainAssemblies));
         }
     }
 }

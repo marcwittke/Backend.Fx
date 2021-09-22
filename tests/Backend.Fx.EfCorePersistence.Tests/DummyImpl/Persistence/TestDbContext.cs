@@ -15,7 +15,9 @@ namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence
         public DbSet<Blogger> Bloggers { get; [UsedImplicitly] set; }
 
         public DbSet<Blog> Blogs { get; [UsedImplicitly] set; }
+
         public DbSet<Post> Posts { get; [UsedImplicitly] set; }
+
         public DbSet<Tenant> Tenants { get; [UsedImplicitly] set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

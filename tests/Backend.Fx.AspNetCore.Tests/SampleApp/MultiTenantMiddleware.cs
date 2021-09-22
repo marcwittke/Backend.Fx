@@ -1,7 +1,6 @@
 using Backend.Fx.AspNetCore.MultiTenancy;
 using Backend.Fx.Environment.MultiTenancy;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Primitives;
 
 namespace Backend.Fx.AspNetCore.Tests.SampleApp
 {
@@ -12,7 +11,7 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp
 
         protected override TenantId FindMatchingTenantId(HttpContext context)
         {
-            if (context.Request.Query.TryGetValue("tenantId", out StringValues tenantIdStr)
+            if (context.Request.Query.TryGetValue("tenantId", out var tenantIdStr)
                 && int.TryParse(tenantIdStr[0], out int tenantId))
             {
                 return new TenantId(tenantId);

@@ -5,14 +5,15 @@ using JetBrains.Annotations;
 namespace Backend.Fx.ConfigurationSettings
 {
     public interface ISettingSerializer
-    {
-    }
+    { }
+
 
     public interface ISettingSerializer<T> : ISettingSerializer
     {
         string Serialize(T setting);
         T Deserialize(string value);
     }
+
 
     [UsedImplicitly]
     public class StringSerializer : ISettingSerializer<string>
@@ -28,6 +29,7 @@ namespace Backend.Fx.ConfigurationSettings
         }
     }
 
+
     [UsedImplicitly]
     public class IntegerSerializer : ISettingSerializer<int?>
     {
@@ -38,9 +40,10 @@ namespace Backend.Fx.ConfigurationSettings
 
         public int? Deserialize(string value)
         {
-            return string.IsNullOrWhiteSpace(value) ? (int?) null : int.Parse(value, CultureInfo.InvariantCulture);
+            return string.IsNullOrWhiteSpace(value) ? (int?)null : int.Parse(value, CultureInfo.InvariantCulture);
         }
     }
+
 
     [UsedImplicitly]
     public class DoubleSerializer : ISettingSerializer<double?>
@@ -52,9 +55,10 @@ namespace Backend.Fx.ConfigurationSettings
 
         public double? Deserialize(string value)
         {
-            return string.IsNullOrWhiteSpace(value) ? (double?) null : double.Parse(value, CultureInfo.InvariantCulture);
+            return string.IsNullOrWhiteSpace(value) ? (double?)null : double.Parse(value, CultureInfo.InvariantCulture);
         }
     }
+
 
     [UsedImplicitly]
     public class BooleanSerializer : ISettingSerializer<bool?>
@@ -66,9 +70,10 @@ namespace Backend.Fx.ConfigurationSettings
 
         public bool? Deserialize(string value)
         {
-            return string.IsNullOrWhiteSpace(value) ? (bool?) null : bool.Parse(value);
+            return string.IsNullOrWhiteSpace(value) ? (bool?)null : bool.Parse(value);
         }
     }
+
 
     [UsedImplicitly]
     public class DateTimeSerializer : ISettingSerializer<DateTime?>
@@ -80,7 +85,9 @@ namespace Backend.Fx.ConfigurationSettings
 
         public DateTime? Deserialize(string value)
         {
-            return string.IsNullOrWhiteSpace(value) ? (DateTime?) null : DateTime.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+            return string.IsNullOrWhiteSpace(value)
+                ? (DateTime?)null
+                : DateTime.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
         }
     }
 }

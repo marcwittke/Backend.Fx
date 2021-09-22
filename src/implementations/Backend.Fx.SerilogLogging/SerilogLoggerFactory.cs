@@ -20,7 +20,7 @@ namespace Backend.Fx.SerilogLogging
 
         public ILogger Create(string s)
         {
-            return TryGetContextTypeFromString(s, out Type t)
+            return TryGetContextTypeFromString(s, out var t)
                 ? new SerilogLogger(_rootLogger.ForContext(t))
                 : new SerilogLogger(_rootLogger);
         }
@@ -44,7 +44,7 @@ namespace Backend.Fx.SerilogLogging
         {
             Log.CloseAndFlush();
         }
-        
+
         private static bool TryGetContextTypeFromString(string s, out Type type)
         {
             try
@@ -55,7 +55,7 @@ namespace Backend.Fx.SerilogLogging
             {
                 type = null;
             }
-            
+
             return type != null;
         }
     }

@@ -11,35 +11,35 @@ namespace Backend.Fx.Tests.ConfigurationSettings
         [Fact]
         public void ProvidesBooleanSerializerForNullableBool()
         {
-            var serializer = _sut.GetSerializer<bool?>();
+            ISettingSerializer<bool?> serializer = _sut.GetSerializer<bool?>();
             Assert.IsType<BooleanSerializer>(serializer);
         }
 
         [Fact]
         public void ProvidesBooleanSerializerForNullableDateTime()
         {
-            var serializer = _sut.GetSerializer<DateTime?>();
+            ISettingSerializer<DateTime?> serializer = _sut.GetSerializer<DateTime?>();
             Assert.IsType<DateTimeSerializer>(serializer);
         }
 
         [Fact]
         public void ProvidesBooleanSerializerForNullableDouble()
         {
-            var serializer = _sut.GetSerializer<double?>();
+            ISettingSerializer<double?> serializer = _sut.GetSerializer<double?>();
             Assert.IsType<DoubleSerializer>(serializer);
         }
 
         [Fact]
         public void ProvidesBooleanSerializerForNullableInt()
         {
-            var serializer = _sut.GetSerializer<int?>();
+            ISettingSerializer<int?> serializer = _sut.GetSerializer<int?>();
             Assert.IsType<IntegerSerializer>(serializer);
         }
 
         [Fact]
         public void ProvidesBooleanSerializerForString()
         {
-            var serializer = _sut.GetSerializer<string>();
+            ISettingSerializer<string> serializer = _sut.GetSerializer<string>();
             Assert.IsType<StringSerializer>(serializer);
         }
 

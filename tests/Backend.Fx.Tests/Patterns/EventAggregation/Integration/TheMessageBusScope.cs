@@ -7,8 +7,8 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
 {
     public class TheMessageBusScope
     {
-        private readonly IMessageBus _messageBus = A.Fake<IMessageBus>();
         private readonly ICurrentTHolder<Correlation> _currentCorrelationHolder = new CurrentCorrelationHolder();
+        private readonly IMessageBus _messageBus = A.Fake<IMessageBus>();
         private readonly IMessageBusScope _sut;
 
         public TheMessageBusScope()
@@ -29,9 +29,9 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         {
             var testIntegrationEvent = new Domain.TestIntegrationEvent(44, 1111);
             _sut.Publish(testIntegrationEvent);
-            A.CallTo(()=>_messageBus.Publish(A<IIntegrationEvent>._)).MustNotHaveHappened();
+            A.CallTo(() => _messageBus.Publish(A<IIntegrationEvent>._)).MustNotHaveHappened();
         }
-        
+
         [Fact]
         public void PublishesAllEventsOnRaise()
         {
@@ -44,10 +44,10 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             _sut.Publish(ev3);
             _sut.Publish(ev4);
             _sut.RaiseEvents();
-            A.CallTo(()=>_messageBus.Publish(A<IIntegrationEvent>.That.IsEqualTo(ev1))).MustHaveHappenedOnceExactly();
-            A.CallTo(()=>_messageBus.Publish(A<IIntegrationEvent>.That.IsEqualTo(ev2))).MustHaveHappenedOnceExactly();
-            A.CallTo(()=>_messageBus.Publish(A<IIntegrationEvent>.That.IsEqualTo(ev3))).MustHaveHappenedOnceExactly();
-            A.CallTo(()=>_messageBus.Publish(A<IIntegrationEvent>.That.IsEqualTo(ev4))).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _messageBus.Publish(A<IIntegrationEvent>.That.IsEqualTo(ev1))).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _messageBus.Publish(A<IIntegrationEvent>.That.IsEqualTo(ev2))).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _messageBus.Publish(A<IIntegrationEvent>.That.IsEqualTo(ev3))).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _messageBus.Publish(A<IIntegrationEvent>.That.IsEqualTo(ev4))).MustHaveHappenedOnceExactly();
         }
     }
 }

@@ -19,7 +19,9 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             Sut.ProvideInvoker(FakeApplication.Invoker);
             Sut.Connect();
         }
-        
+
+        protected override IMessageBus Sut { get; } = new InMemoryMessageBus();
+
         [Fact]
         public async Task HandlesEventsAsynchronously()
         {
@@ -31,9 +33,8 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             Assert.True(Invoker.IntegrationEvent.TypedProcessed.Wait(Debugger.IsAttached ? int.MaxValue : 10000));
             Assert.True(sw.ElapsedMilliseconds > 1000);
         }
-
-        protected override IMessageBus Sut { get; } = new InMemoryMessageBus();
     }
+
 
     [UsedImplicitly]
     public sealed class TheSerializingMessageBus : TheMessageBus
@@ -46,54 +47,20 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         protected override IMessageBus Sut { get; } = new SerializingMessageBus();
     }
 
+
     public abstract class TheMessageBus
     {
-        protected IBackendFxApplication FakeApplication { get; } = A.Fake<IBackendFxApplication>();
-
         protected TheMessageBus()
         {
             A.CallTo(() => FakeApplication.Invoker).Returns(Invoker);
             A.CallTo(() => FakeApplication.WaitForBoot(A<int>._, A<CancellationToken>._)).Returns(true);
         }
 
+        protected IBackendFxApplication FakeApplication { get; } = A.Fake<IBackendFxApplication>();
+
         protected TestInvoker Invoker { get; } = new TestInvoker();
+
         protected abstract IMessageBus Sut { get; }
-
-
-        public class TestInvoker : IBackendFxApplicationInvoker
-        {
-            public TestIntegrationEvent IntegrationEvent = new TestIntegrationEvent(34, "gaga");
-
-            public TestInvoker()
-            {
-                A.CallTo(() => TypedHandler.Handle(A<TestIntegrationEvent>._)).Invokes((TestIntegrationEvent e) => IntegrationEvent.TypedProcessed.Set());
-                A.CallTo(() => DynamicHandler.Handle(new object())).WithAnyArguments().Invokes((object e) => IntegrationEvent.DynamicProcessed.Set());
-
-                A.CallTo(() => FakeInstanceProvider.GetInstance(A<Type>.That.IsEqualTo(typeof(TypedMessageHandler))))
-                 .Returns(new TypedMessageHandler(TypedHandler));
-
-                A.CallTo(() => FakeInstanceProvider.GetInstance(A<Type>.That.IsEqualTo(typeof(LongRunningMessageHandler))))
-                 .Returns(new LongRunningMessageHandler(TypedHandler));
-
-                A.CallTo(() => FakeInstanceProvider.GetInstance(A<Type>.That.IsEqualTo(typeof(ThrowingTypedMessageHandler))))
-                 .Returns(new ThrowingTypedMessageHandler(TypedHandler));
-
-                A.CallTo(() => FakeInstanceProvider.GetInstance(A<Type>.That.IsEqualTo(typeof(DynamicMessageHandler))))
-                 .Returns(new DynamicMessageHandler(DynamicHandler));
-
-                A.CallTo(() => FakeInstanceProvider.GetInstance(A<Type>.That.IsEqualTo(typeof(ThrowingDynamicMessageHandler))))
-                 .Returns(new ThrowingDynamicMessageHandler(DynamicHandler));
-            }
-
-            public IIntegrationMessageHandler<TestIntegrationEvent> TypedHandler { get; } = A.Fake<IIntegrationMessageHandler<TestIntegrationEvent>>();
-            public IIntegrationMessageHandler DynamicHandler { get; } = A.Fake<IIntegrationMessageHandler>();
-            public IInstanceProvider FakeInstanceProvider { get; } = A.Fake<IInstanceProvider>();
-
-            public void Invoke(Action<IInstanceProvider> action, IIdentity identity, TenantId tenantId, Guid? correlationId = null)
-            {
-                action(FakeInstanceProvider);
-            }
-        }
 
         [Fact]
         public async void CallsDynamicEventHandler()
@@ -116,10 +83,12 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             Assert.True(Invoker.IntegrationEvent.TypedProcessed.Wait(Debugger.IsAttached ? int.MaxValue : 10000));
             Assert.True(Invoker.IntegrationEvent.DynamicProcessed.Wait(Debugger.IsAttached ? int.MaxValue : 10000));
 
-            A.CallTo(() => Invoker.TypedHandler.Handle(A<TestIntegrationEvent>
-                                                       .That
-                                                       .Matches(evt => evt.IntParam == 34 && evt.StringParam == "gaga")))
-             .MustHaveHappenedOnceExactly();
+            A.CallTo(
+                    () => Invoker.TypedHandler.Handle(
+                        A<TestIntegrationEvent>
+                            .That
+                            .Matches(evt => evt.IntParam == 34 && evt.StringParam == "gaga")))
+                .MustHaveHappenedOnceExactly();
 
             A.CallTo(() => Invoker.DynamicHandler.Handle(A<object>._)).MustHaveHappenedOnceExactly();
         }
@@ -130,26 +99,30 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             Sut.Subscribe<TypedMessageHandler, TestIntegrationEvent>();
             await Sut.Publish(Invoker.IntegrationEvent);
             Assert.True(Invoker.IntegrationEvent.TypedProcessed.Wait(Debugger.IsAttached ? int.MaxValue : 10000));
-            A.CallTo(() => Invoker.TypedHandler.Handle(A<TestIntegrationEvent>
-                                                       .That
-                                                       .Matches(evt => evt.IntParam == 34 && evt.StringParam == "gaga")))
-             .MustHaveHappenedOnceExactly();
+            A.CallTo(
+                    () => Invoker.TypedHandler.Handle(
+                        A<TestIntegrationEvent>
+                            .That
+                            .Matches(evt => evt.IntParam == 34 && evt.StringParam == "gaga")))
+                .MustHaveHappenedOnceExactly();
 
             A.CallTo(() => Invoker.DynamicHandler.Handle(A<object>._)).MustNotHaveHappened();
         }
-        
+
         [Fact]
         public async Task DoesNotCallUnsubscribedTypedEventHandler()
         {
             Sut.Subscribe<TypedMessageHandler, TestIntegrationEvent>();
             Sut.Unsubscribe<TypedMessageHandler, TestIntegrationEvent>();
             await Sut.Publish(Invoker.IntegrationEvent);
-            A.CallTo(() => Invoker.TypedHandler.Handle(A<TestIntegrationEvent>
-                                                       .That
-                                                       .Matches(evt => evt.IntParam == 34 && evt.StringParam == "gaga")))
-             .MustNotHaveHappened();
+            A.CallTo(
+                    () => Invoker.TypedHandler.Handle(
+                        A<TestIntegrationEvent>
+                            .That
+                            .Matches(evt => evt.IntParam == 34 && evt.StringParam == "gaga")))
+                .MustNotHaveHappened();
         }
-        
+
         [Fact]
         public async void DoesNotCallUnsubscribedDynamicEventHandler()
         {
@@ -158,7 +131,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             await Sut.Publish(Invoker.IntegrationEvent);
             A.CallTo(() => Invoker.DynamicHandler.Handle(A<object>._)).MustNotHaveHappened();
         }
-        
+
         [Fact]
         public async void DoesNotCallUnsubscribedDelegateEventHandler()
         {
@@ -175,7 +148,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         {
             Sut.Connect();
         }
-        
+
         [Fact]
         public async void DelegateIntegrationMessageHandler()
         {
@@ -184,6 +157,58 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             Sut.Subscribe(handler);
             await Sut.Publish(Invoker.IntegrationEvent);
             Assert.True(handled.WaitOne(Debugger.IsAttached ? int.MaxValue : 10000));
+        }
+
+
+        public class TestInvoker : IBackendFxApplicationInvoker
+        {
+            public TestIntegrationEvent IntegrationEvent = new TestIntegrationEvent(34, "gaga");
+
+            public TestInvoker()
+            {
+                A.CallTo(() => TypedHandler.Handle(A<TestIntegrationEvent>._))
+                    .Invokes((TestIntegrationEvent e) => IntegrationEvent.TypedProcessed.Set());
+                A.CallTo(() => DynamicHandler.Handle(new object()))
+                    .WithAnyArguments()
+                    .Invokes((object e) => IntegrationEvent.DynamicProcessed.Set());
+
+                A.CallTo(() => FakeInstanceProvider.GetInstance(A<Type>.That.IsEqualTo(typeof(TypedMessageHandler))))
+                    .Returns(new TypedMessageHandler(TypedHandler));
+
+                A.CallTo(
+                        () => FakeInstanceProvider.GetInstance(
+                            A<Type>.That.IsEqualTo(typeof(LongRunningMessageHandler))))
+                    .Returns(new LongRunningMessageHandler(TypedHandler));
+
+                A.CallTo(
+                        () => FakeInstanceProvider.GetInstance(
+                            A<Type>.That.IsEqualTo(typeof(ThrowingTypedMessageHandler))))
+                    .Returns(new ThrowingTypedMessageHandler(TypedHandler));
+
+                A.CallTo(() => FakeInstanceProvider.GetInstance(A<Type>.That.IsEqualTo(typeof(DynamicMessageHandler))))
+                    .Returns(new DynamicMessageHandler(DynamicHandler));
+
+                A.CallTo(
+                        () => FakeInstanceProvider.GetInstance(
+                            A<Type>.That.IsEqualTo(typeof(ThrowingDynamicMessageHandler))))
+                    .Returns(new ThrowingDynamicMessageHandler(DynamicHandler));
+            }
+
+            public IIntegrationMessageHandler<TestIntegrationEvent> TypedHandler { get; }
+                = A.Fake<IIntegrationMessageHandler<TestIntegrationEvent>>();
+
+            public IIntegrationMessageHandler DynamicHandler { get; } = A.Fake<IIntegrationMessageHandler>();
+
+            public IInstanceProvider FakeInstanceProvider { get; } = A.Fake<IInstanceProvider>();
+
+            public void Invoke(
+                Action<IInstanceProvider> action,
+                IIdentity identity,
+                TenantId tenantId,
+                Guid? correlationId = null)
+            {
+                action(FakeInstanceProvider);
+            }
         }
     }
 }

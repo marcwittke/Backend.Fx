@@ -16,8 +16,8 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
 
         /// <summary>
         /// Directly publishes an event on the message bus without delay.
-        /// In most cases you want to publish an event when the cause is considered as safely done, e.g. when the 
-        /// wrapping transaction is committed. Use <see cref="IMessageBusScope"/> to let the framework raise all events
+        /// In most cases you want to publish an event when the cause is considered as safely done, e.g. when the
+        /// wrapping transaction is committed. Use <see cref="IMessageBusScope" /> to let the framework raise all events
         /// after completing the operation.
         /// </summary>
         /// <param name="integrationEvent"></param>

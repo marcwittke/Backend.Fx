@@ -9,25 +9,28 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp
 {
     public class Startup
     {
-        private readonly ExceptionLoggers _exceptionLoggers = new ();
+        private readonly ExceptionLoggers _exceptionLoggers = new();
 
         public void ConfigureServices(IServiceCollection services)
         {
             // diagnostics services
             services.AddSingleton<IExceptionLogger>(_exceptionLoggers);
-            
-            // decode jwt 
-            services.AddAuthentication(authOpt =>
-            {
-                authOpt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                authOpt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                authOpt.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(bearerOpt => bearerOpt.TokenValidationParameters = JwtService.TokenValidationParameters());
 
-            
+            // decode jwt 
+            services.AddAuthentication(
+                    authOpt =>
+                    {
+                        authOpt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                        authOpt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                        authOpt.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                    })
+                .AddJwtBearer(
+                    bearerOpt => bearerOpt.TokenValidationParameters = JwtService.TokenValidationParameters());
+
+
             // enabling MVC
             services.AddMvc();
-            
+
             // integrate backend fx application as hosted service
             services.AddBackendFxApplication<SampleApplicationHostedService>();
         }
@@ -36,24 +39,21 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp
         {
             // log exceptions to file
             _exceptionLoggers.Add(new ExceptionLogger(LogManager.Create("Mep.WebHost")));
-            
+
             // use the ASP.Net Core routing middleware that decides the endpoint to be hit later
             app.UseRouting();
-            
+
             // error handling: return rich JSON errors,
             app.UseMiddleware<SampleJsonErrorHandlingMiddleware>();
-            
+
             // decode JWT Bearer from Authorization header
             app.UseAuthentication();
 
             app.UseMiddleware<TenantAdminMiddleware>();
-            
+
             app.UseBackendFxApplication<SampleApplicationHostedService, MultiTenantMiddleware>();
-            
-            app.UseEndpoints(endpointRouteBuilder =>
-            {
-                endpointRouteBuilder.MapControllers();
-            });
+
+            app.UseEndpoints(endpointRouteBuilder => { endpointRouteBuilder.MapControllers(); });
         }
     }
 }

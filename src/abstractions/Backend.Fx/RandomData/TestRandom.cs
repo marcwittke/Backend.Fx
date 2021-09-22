@@ -9,7 +9,10 @@ namespace Backend.Fx.RandomData
 
         public static IEnumerable<int> Next(int amount, Func<int> generate)
         {
-            for (var i = 0; i < amount; i++) yield return generate();
+            for (var i = 0; i < amount; i++)
+            {
+                yield return generate();
+            }
         }
 
         public static int Next()
@@ -40,13 +43,13 @@ namespace Backend.Fx.RandomData
         public static DateTime RandomDateTime(int rangeDays)
         {
             return rangeDays < 0
-                       ? DateTime.Now.AddDays(-Next(-rangeDays)).AddSeconds(-Next(100000))
-                       : DateTime.Now.AddDays(Next(rangeDays)).AddSeconds(-Next(100000));
+                ? DateTime.Now.AddDays(-Next(-rangeDays)).AddSeconds(-Next(100000))
+                : DateTime.Now.AddDays(Next(rangeDays)).AddSeconds(-Next(100000));
         }
 
         public static decimal RandomDecimal(int min = 0, int max = 999999)
         {
-            var abs = Next(min, max);
+            int abs = Next(min, max);
             return abs + Math.Round(Next(100) / 100m, 2);
         }
 
@@ -60,12 +63,12 @@ namespace Backend.Fx.RandomData
 
             for (var i = 0; i < password.Length; i++)
             {
-                var rnd = Next(100);
+                int rnd = Next(100);
                 password[i] = rnd < 60
-                                  ? letters.Random()
-                                  : rnd < 90
-                                      ? numbers.Random()
-                                      : specials.Random();
+                    ? letters.Random()
+                    : rnd < 90
+                        ? numbers.Random()
+                        : specials.Random();
             }
 
             return new string(password);
@@ -73,7 +76,7 @@ namespace Backend.Fx.RandomData
 
         public static decimal NextDecimal(decimal minimum, decimal maximum)
         {
-            return (decimal) Instance.NextDouble() * (maximum - minimum) + minimum;
+            return (decimal)Instance.NextDouble() * (maximum - minimum) + minimum;
         }
 
         public static bool NextProbability(int p)

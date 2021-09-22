@@ -8,13 +8,13 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
     {
         private static readonly ILogger Logger = LogManager.Create<SimpleInjectorModule>();
 
-        protected abstract void Register(Container container, ScopedLifestyle scopedLifestyle);
-
         public virtual void Register(ICompositionRoot compositionRoot)
         {
             Logger.Debug($"Registering {GetType().Name}");
-            var simpleInjectorCompositionRoot = (SimpleInjectorCompositionRoot) compositionRoot;
+            var simpleInjectorCompositionRoot = (SimpleInjectorCompositionRoot)compositionRoot;
             Register(simpleInjectorCompositionRoot.Container, simpleInjectorCompositionRoot.ScopedLifestyle);
         }
+
+        protected abstract void Register(Container container, ScopedLifestyle scopedLifestyle);
     }
 }

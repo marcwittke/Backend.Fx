@@ -5,8 +5,9 @@ using Microsoft.AspNetCore.Mvc.Filters;
 namespace Backend.Fx.AspNetCore.Mvc.Validation
 {
     /// <summary>
-    /// Returns HTTP 400 "Bad Request" when model validation failed. In addition, the bad model state is converted into an instance of
-    /// <see cref="Errors"/> gets serialized to the body as JSON.
+    /// Returns HTTP 400 "Bad Request" when model validation failed. In addition, the bad model state is converted into an
+    /// instance of
+    /// <see cref="Errors" /> gets serialized to the body as JSON.
     /// </summary>
     public class ReturnModelStateAsJsonModelValidationFilter : ModelValidationFilter
     {
@@ -14,7 +15,7 @@ namespace Backend.Fx.AspNetCore.Mvc.Validation
         {
             if (!context.ModelState.IsValid && AcceptsJson(context))
             {
-                Errors errors = context.ModelState.ToErrorsDictionary();
+                var errors = context.ModelState.ToErrorsDictionary();
                 LogErrors(context, context.Controller.ToString(), errors);
                 context.Result = CreateResult(errors);
             }
@@ -26,7 +27,6 @@ namespace Backend.Fx.AspNetCore.Mvc.Validation
         }
 
         public override void OnActionExecuted(ActionExecutedContext context)
-        {
-        }
+        { }
     }
 }

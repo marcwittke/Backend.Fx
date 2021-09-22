@@ -1,8 +1,6 @@
-using System.Security.Principal;
 using Backend.Fx.AspNetCore.MultiTenancy;
 using Backend.Fx.AspNetCore.Mvc;
 using Backend.Fx.AspNetCore.Mvc.Activators;
-using Backend.Fx.Patterns.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,22 +24,23 @@ namespace Backend.Fx.AspNetCore
         {
             app.UseMiddleware<TTenantMiddleware>();
 
-            app.Use(async (context, requestDelegate) =>
-            {
-                IBackendFxApplication application = app.ApplicationServices.GetRequiredService<THostedService>().Application;
-                application.WaitForBoot();
+            app.Use(
+                async (context, requestDelegate) =>
+                {
+                    var application = app.ApplicationServices.GetRequiredService<THostedService>().Application;
+                    application.WaitForBoot();
 
-                // set the instance provider for the controller activator
-                context.SetCurrentInstanceProvider(application.CompositionRoot.InstanceProvider);
+                    // set the instance provider for the controller activator
+                    context.SetCurrentInstanceProvider(application.CompositionRoot.InstanceProvider);
 
-                // the ambient tenant id has been set before by a TenantMiddleware
-                var tenantId = context.GetTenantId();
+                    // the ambient tenant id has been set before by a TenantMiddleware
+                    var tenantId = context.GetTenantId();
 
-                // the invoking identity has been set before by an AuthenticationMiddleware
-                IIdentity actingIdentity = context.User.Identity;
+                    // the invoking identity has been set before by an AuthenticationMiddleware
+                    var actingIdentity = context.User.Identity;
 
-                await application.AsyncInvoker.InvokeAsync(_ => requestDelegate.Invoke(), actingIdentity, tenantId);
-            });
+                    await application.AsyncInvoker.InvokeAsync(_ => requestDelegate.Invoke(), actingIdentity, tenantId);
+                });
         }
     }
 }

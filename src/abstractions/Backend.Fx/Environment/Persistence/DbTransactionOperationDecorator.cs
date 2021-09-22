@@ -6,7 +6,8 @@ using Backend.Fx.Patterns.DependencyInjection;
 namespace Backend.Fx.Environment.Persistence
 {
     /// <summary>
-    /// Enriches the operation to use a database transaction during lifetime. The transaction gets started, before IOperation.Begin()
+    /// Enriches the operation to use a database transaction during lifetime. The transaction gets started, before
+    /// IOperation.Begin()
     /// is being called and gets committed after IOperation.Complete() is being called.
     /// </summary>
     public class DbTransactionOperationDecorator : IOperation
@@ -14,17 +15,18 @@ namespace Backend.Fx.Environment.Persistence
         private static readonly ILogger Logger = LogManager.Create<DbTransactionOperationDecorator>();
         private readonly IDbConnection _dbConnection;
         private readonly IOperation _operation;
-        private bool _shouldHandleConnectionState;
         private IsolationLevel _isolationLevel = IsolationLevel.Unspecified;
-        private IDisposable _transactionLifetimeLogger;
+        private bool _shouldHandleConnectionState;
         private TxState _state = TxState.NotStarted;
-        
+        private IDisposable _transactionLifetimeLogger;
+
         public DbTransactionOperationDecorator(IDbConnection dbConnection, IOperation operation)
         {
             _dbConnection = dbConnection;
             _operation = operation;
         }
 
+        public IDbTransaction CurrentTransaction { get; private set; }
 
         public virtual void Begin()
         {
@@ -46,8 +48,6 @@ namespace Backend.Fx.Environment.Persistence
             _state = TxState.Active;
             _operation.Begin();
         }
-
-        public IDbTransaction CurrentTransaction { get; private set; }
 
         public void Complete()
         {
@@ -80,7 +80,7 @@ namespace Backend.Fx.Environment.Persistence
             {
                 throw new InvalidOperationException($"Cannot roll back a transaction that is {_state}");
             }
-            
+
             _operation.Cancel();
 
             CurrentTransaction.Rollback();
@@ -96,17 +96,18 @@ namespace Backend.Fx.Environment.Persistence
 
             _state = TxState.RolledBack;
         }
-        
+
         public void SetIsolationLevel(IsolationLevel isolationLevel)
         {
             if (_state != TxState.NotStarted)
             {
-                throw new InvalidOperationException("Isolation level cannot be changed after the transaction has been started");
+                throw new InvalidOperationException(
+                    "Isolation level cannot be changed after the transaction has been started");
             }
 
             _isolationLevel = isolationLevel;
         }
-        
+
         private bool ShouldHandleConnectionState()
         {
             switch (_dbConnection.State)
@@ -116,10 +117,12 @@ namespace Backend.Fx.Environment.Persistence
                 case ConnectionState.Open:
                     return false;
                 default:
-                    throw new InvalidOperationException($"A connection provided to the operation must either be closed or open, but must not be {_dbConnection.State}");
+                    throw new InvalidOperationException(
+                        $"A connection provided to the operation must either be closed or open, but must not be {_dbConnection.State}");
             }
         }
-        
+
+
         private enum TxState
         {
             NotStarted,

@@ -14,24 +14,9 @@ namespace Backend.Fx.Logging
 
         public ExceptionLoggers(params IExceptionLogger[] exceptionLoggers)
         {
-            foreach (IExceptionLogger exceptionLogger in exceptionLoggers)
+            foreach (var exceptionLogger in exceptionLoggers)
             {
-                _collectionImplementation.Add(exceptionLogger);    
-            }
-        }
-        
-        public void LogException(Exception ex)
-        {
-            foreach (IExceptionLogger exceptionLogger in _collectionImplementation)
-            {
-                try
-                {
-                    exceptionLogger.LogException(ex);
-                }
-                catch (Exception ex2)
-                {
-                    Logger.Error(ex, $"{exceptionLogger.GetType().Name} failed to log the {ex2.GetType()} with message {ex.Message}");
-                }
+                _collectionImplementation.Add(exceptionLogger);
             }
         }
 
@@ -42,7 +27,7 @@ namespace Backend.Fx.Logging
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable) _collectionImplementation).GetEnumerator();
+            return ((IEnumerable)_collectionImplementation).GetEnumerator();
         }
 
         public void Add(IExceptionLogger item)
@@ -73,5 +58,22 @@ namespace Backend.Fx.Logging
         public int Count => _collectionImplementation.Count;
 
         public bool IsReadOnly => _collectionImplementation.IsReadOnly;
+
+        public void LogException(Exception ex)
+        {
+            foreach (var exceptionLogger in _collectionImplementation)
+            {
+                try
+                {
+                    exceptionLogger.LogException(ex);
+                }
+                catch (Exception ex2)
+                {
+                    Logger.Error(
+                        ex,
+                        $"{exceptionLogger.GetType().Name} failed to log the {ex2.GetType()} with message {ex.Message}");
+                }
+            }
+        }
     }
 }

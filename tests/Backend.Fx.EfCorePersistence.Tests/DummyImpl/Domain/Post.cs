@@ -8,30 +8,34 @@ namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain
     {
         [UsedImplicitly]
         private Post()
-        {
-        }
+        { }
 
         public Post(int id, Blog blog, string name, bool isPublic = false) : base(id)
         {
             Blog = blog;
             BlogId = blog.Id;
             Name = name;
-            TargetAudience = new TargetAudience {IsPublic = isPublic, Culture = "fr-FR"};
+            TargetAudience = new TargetAudience { IsPublic = isPublic, Culture = "fr-FR" };
         }
 
-        [UsedImplicitly] public int BlogId { get; private set; }
+        [UsedImplicitly]
+        public int BlogId { get; private set; }
 
-        [UsedImplicitly] public Blog Blog { get; private set; }
+        [UsedImplicitly]
+        public Blog Blog { get; private set; }
 
-        [UsedImplicitly] public string Name { get; private set; }
+        [UsedImplicitly]
+        public string Name { get; private set; }
 
-        [UsedImplicitly] public TargetAudience TargetAudience { get; set; }
+        [UsedImplicitly]
+        public TargetAudience TargetAudience { get; set; }
 
         public void SetName(string name)
         {
             Name = name;
         }
     }
+
 
     public class TargetAudience : ValueObject
     {

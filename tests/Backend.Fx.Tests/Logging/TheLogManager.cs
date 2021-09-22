@@ -21,7 +21,7 @@ namespace Backend.Fx.Tests.Logging
         {
             Exception ex = new SecurityException("very bad");
             var msg = "the log message";
-            ILogger logger = LogManager.Create<TheLogManager>();
+            var logger = LogManager.Create<TheLogManager>();
 
             logger.Fatal(ex);
             logger.Fatal(ex, msg);

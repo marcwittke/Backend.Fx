@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Backend.Fx.Environment.Authentication;
@@ -13,6 +14,7 @@ namespace Backend.Fx.Patterns.DataGeneration
         void SeedDataForTenant(TenantId tenantId, bool isDemoTenant);
     }
 
+
     public class DataGenerationContext : IDataGenerationContext
     {
         private static readonly ILogger Logger = LogManager.Create<DataGenerationContext>();
@@ -25,34 +27,37 @@ namespace Backend.Fx.Patterns.DataGeneration
             _compositionRoot = compositionRoot;
             _invoker = invoker;
         }
-       
+
         public void SeedDataForTenant(TenantId tenantId, bool isDemoTenant)
         {
             using (Logger.InfoDuration($"Seeding data for tenant {tenantId.Value}"))
             {
                 Type[] dataGeneratorTypesToRun = GetDataGeneratorTypes(_compositionRoot, isDemoTenant);
-                foreach (Type dataGeneratorTypeToRun in dataGeneratorTypesToRun)
+                foreach (var dataGeneratorTypeToRun in dataGeneratorTypesToRun)
                 {
-                    _invoker.Invoke(instanceProvider =>
-                    {
-                        IDataGenerator dataGenerator = instanceProvider
-                                                       .GetInstances<IDataGenerator>()
-                                                       .Single(dg => dg.GetType() == dataGeneratorTypeToRun);
-                        dataGenerator.Generate();
-                    }, new SystemIdentity(), tenantId);
+                    _invoker.Invoke(
+                        instanceProvider =>
+                        {
+                            var dataGenerator = instanceProvider
+                                .GetInstances<IDataGenerator>()
+                                .Single(dg => dg.GetType() == dataGeneratorTypeToRun);
+                            dataGenerator.Generate();
+                        },
+                        new SystemIdentity(),
+                        tenantId);
                 }
             }
         }
 
         private static Type[] GetDataGeneratorTypes(ICompositionRoot compositionRoot, bool includeDemoDataGenerators)
         {
-            using (IInjectionScope scope = compositionRoot.BeginScope())
+            using (var scope = compositionRoot.BeginScope())
             {
-                var dataGenerators = scope
-                                     .InstanceProvider
-                                     .GetInstances<IDataGenerator>()
-                                     .OrderBy(dg => dg.Priority)
-                                     .Select(dg => dg.GetType());
+                IEnumerable<Type> dataGenerators = scope
+                    .InstanceProvider
+                    .GetInstances<IDataGenerator>()
+                    .OrderBy(dg => dg.Priority)
+                    .Select(dg => dg.GetType());
 
                 if (!includeDemoDataGenerators)
                 {

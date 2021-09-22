@@ -19,7 +19,7 @@ namespace Backend.Fx.AspNetCore.Mvc.Validation
         {
             if (!context.ModelState.IsValid && AcceptsHtml(context))
             {
-                Errors errors = context.ModelState.ToErrorsDictionary();
+                var errors = context.ModelState.ToErrorsDictionary();
                 LogErrors(context, context.Controller.ToString(), errors);
 
                 // return the same view, using the posted model again
@@ -28,7 +28,7 @@ namespace Backend.Fx.AspNetCore.Mvc.Validation
                 context.Result = new ViewResult
                 {
                     ViewName = context.RouteData.Values["action"].ToString(),
-                    ViewData = viewData,
+                    ViewData = viewData
                 };
             }
         }
@@ -46,14 +46,13 @@ namespace Backend.Fx.AspNetCore.Mvc.Validation
                 context.Result = new ViewResult
                 {
                     ViewName = context.RouteData.Values["action"].ToString(),
-                    ViewData = viewData,
+                    ViewData = viewData
                 };
                 context.ExceptionHandled = true;
             }
         }
 
         protected virtual void BeforeRedirect(ViewDataDictionary viewData)
-        {
-        }
+        { }
     }
 }

@@ -11,14 +11,15 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
 {
     public class TheBackendFxApplicationAsyncInvoker
     {
+        private readonly DiTestFakes _fakes;
+
+        private readonly IBackendFxApplicationAsyncInvoker _sut;
+
         public TheBackendFxApplicationAsyncInvoker()
         {
             _fakes = new DiTestFakes();
             _sut = new BackendFxApplicationInvoker(_fakes.CompositionRoot);
         }
-
-        private readonly IBackendFxApplicationAsyncInvoker _sut;
-        private readonly DiTestFakes _fakes;
 
         [Fact]
         public async Task BeginsNewScopeForEveryInvocation()
@@ -48,7 +49,11 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         public async Task DoesNotCatchFrameworkExceptions()
         {
             A.CallTo(() => _fakes.CompositionRoot.BeginScope()).Throws<SimulatedException>();
-            await Assert.ThrowsAsync<SimulatedException>(async () => await _sut.InvokeAsync(ip => Task.CompletedTask, new AnonymousIdentity(), new TenantId(111)));
+            await Assert.ThrowsAsync<SimulatedException>(
+                async () => await _sut.InvokeAsync(
+                    ip => Task.CompletedTask,
+                    new AnonymousIdentity(),
+                    new TenantId(111)));
             A.CallTo(() => _fakes.Operation.Begin()).MustNotHaveHappened();
             A.CallTo(() => _fakes.Operation.Complete()).MustNotHaveHappened();
         }
@@ -56,7 +61,11 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         [Fact]
         public async Task DoesNotCatchOperationExceptions()
         {
-            await Assert.ThrowsAsync<SimulatedException>(async () => await _sut.InvokeAsync(ip => throw new SimulatedException(), new AnonymousIdentity(), new TenantId(111)));
+            await Assert.ThrowsAsync<SimulatedException>(
+                async () => await _sut.InvokeAsync(
+                    ip => throw new SimulatedException(),
+                    new AnonymousIdentity(),
+                    new TenantId(111)));
             A.CallTo(() => _fakes.Operation.Begin()).MustHaveHappenedOnceExactly();
             A.CallTo(() => _fakes.Operation.Complete()).MustNotHaveHappened();
         }
@@ -74,7 +83,8 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         {
             var identity = new GenericIdentity("me");
             await _sut.InvokeAsync(ip => Task.CompletedTask, identity, new TenantId(123));
-            A.CallTo(() => _fakes.IdentityHolder.ReplaceCurrent(A<IIdentity>.That.IsEqualTo(identity))).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakes.IdentityHolder.ReplaceCurrent(A<IIdentity>.That.IsEqualTo(identity)))
+                .MustHaveHappenedOnceExactly();
         }
 
         [Fact]
@@ -82,18 +92,22 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         {
             var tenantId = new TenantId(123);
             await _sut.InvokeAsync(ip => Task.CompletedTask, new AnonymousIdentity(), tenantId);
-            A.CallTo(() => _fakes.TenantIdHolder.ReplaceCurrent(A<TenantId>.That.IsEqualTo(tenantId))).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakes.TenantIdHolder.ReplaceCurrent(A<TenantId>.That.IsEqualTo(tenantId)))
+                .MustHaveHappenedOnceExactly();
         }
 
         [Fact]
         public async Task ProvidesInstanceProviderForInvocation()
         {
             IInstanceProvider provided = null;
-            await _sut.InvokeAsync(ip =>
-            {
-                provided = ip;
-                return Task.CompletedTask;
-            }, new AnonymousIdentity(), new TenantId(111));
+            await _sut.InvokeAsync(
+                ip =>
+                {
+                    provided = ip;
+                    return Task.CompletedTask;
+                },
+                new AnonymousIdentity(),
+                new TenantId(111));
             Assert.StrictEqual(_fakes.InstanceProvider, provided);
         }
     }

@@ -7,11 +7,6 @@ namespace Backend.Fx.Tests.Extensions
 {
     public class TheEnumerableEx
     {
-        private class Item
-        {
-            public bool Touched { get; set; }
-        }
-
         [Fact]
         public void ExecutesActionForAll()
         {
@@ -19,6 +14,12 @@ namespace Backend.Fx.Tests.Extensions
             enumerable.ForAll(itm => itm.Touched = true);
 
             Assert.All(enumerable, itm => Assert.True(itm.Touched));
+        }
+
+
+        private class Item
+        {
+            public bool Touched { get; set; }
         }
     }
 }

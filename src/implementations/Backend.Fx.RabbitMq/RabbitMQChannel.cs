@@ -15,20 +15,25 @@ namespace Backend.Fx.RabbitMq
     public class RabbitMqChannel : IDisposable
     {
         private static readonly ILogger Logger = LogManager.Create<RabbitMqChannel>();
+        private readonly IConnectionFactory _connectionFactory;
         private readonly string _exchangeName;
         private readonly IMessageNameProvider _messageNameProvider;
-        private readonly IConnectionFactory _connectionFactory;
         private readonly string _queueName;
         private readonly int _retryCount;
         private readonly HashSet<string> _subscribedEventNames = new HashSet<string>();
         private readonly object _syncRoot = new object();
+        private IModel _channel;
 
         private IConnection _connection;
         private EventingBasicConsumer _consumer;
         private bool _isDisposed;
-        private IModel _channel;
 
-        public RabbitMqChannel(IMessageNameProvider messageNameProvider, IConnectionFactory connectionFactory, string exchangeName, string queueName, int retryCount)
+        public RabbitMqChannel(
+            IMessageNameProvider messageNameProvider,
+            IConnectionFactory connectionFactory,
+            string exchangeName,
+            string queueName,
+            int retryCount)
         {
             _messageNameProvider = messageNameProvider;
             _connectionFactory = connectionFactory;
@@ -39,7 +44,10 @@ namespace Backend.Fx.RabbitMq
 
         public void Dispose()
         {
-            if (_isDisposed) return;
+            if (_isDisposed)
+            {
+                return;
+            }
 
             _isDisposed = true;
 
@@ -64,7 +72,10 @@ namespace Backend.Fx.RabbitMq
             if (_channel != null)
             {
                 _channel.CallbackException -= OnCallbackException;
-                if (_channel.IsOpen) _channel.Close();
+                if (_channel.IsOpen)
+                {
+                    _channel.Close();
+                }
 
                 _channel.Dispose();
                 _channel = null;
@@ -75,7 +86,10 @@ namespace Backend.Fx.RabbitMq
                 _connection.ConnectionShutdown -= OnConnectionShutdown;
                 _connection.CallbackException -= OnCallbackException;
                 _connection.ConnectionBlocked -= OnConnectionBlocked;
-                if (_connection.IsOpen) _connection.Close();
+                if (_connection.IsOpen)
+                {
+                    _connection.Close();
+                }
 
                 _connection.Dispose();
                 _connection = null;
@@ -102,12 +116,12 @@ namespace Backend.Fx.RabbitMq
 
                 Logger.Info("RabbitMQ Client is trying to connect");
                 Policy.Handle<SocketException>()
-                      .Or<BrokerUnreachableException>()
-                      .WaitAndRetry(_retryCount,
-                                    retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
-                                    (ex, time) => { Logger.Warn(ex); }
-                      )
-                      .Execute(() => { _connection = _connectionFactory.CreateConnection(); });
+                    .Or<BrokerUnreachableException>()
+                    .WaitAndRetry(
+                        _retryCount,
+                        retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                        (ex, time) => { Logger.Warn(ex); })
+                    .Execute(() => { _connection = _connectionFactory.CreateConnection(); });
 
                 if (_connection?.IsOpen == true)
                 {
@@ -115,7 +129,8 @@ namespace Backend.Fx.RabbitMq
                     _connection.CallbackException += OnCallbackException;
                     _connection.ConnectionBlocked += OnConnectionBlocked;
 
-                    Logger.Info($"Acquired a connection to RabbitMQ host {_connection.Endpoint.HostName} and is subscribed to failure events");
+                    Logger.Info(
+                        $"Acquired a connection to RabbitMQ host {_connection.Endpoint.HostName} and is subscribed to failure events");
 
                     _channel = _connection.CreateModel();
                     _channel.ExchangeDeclare(_exchangeName, "direct");
@@ -125,9 +140,10 @@ namespace Backend.Fx.RabbitMq
                     _channel.BasicConsume(_queueName, false, _consumer);
                     _channel.CallbackException += OnCallbackException;
 
-                    foreach (var subscribedEventName in _subscribedEventNames)
+                    foreach (string subscribedEventName in _subscribedEventNames)
                     {
-                        Logger.Info($"Binding messages on exchange {_exchangeName} with routing key {subscribedEventName} to queue {_queueName}");
+                        Logger.Info(
+                            $"Binding messages on exchange {_exchangeName} with routing key {subscribedEventName} to queue {_queueName}");
                         _channel.QueueBind(_queueName, _exchangeName, subscribedEventName);
                     }
 
@@ -141,9 +157,9 @@ namespace Backend.Fx.RabbitMq
 
         public void PublishEvent(IIntegrationEvent integrationEvent)
         {
-            var messageName = _messageNameProvider.GetMessageName(integrationEvent);
-            var message = JsonConvert.SerializeObject(integrationEvent);
-            var body = Encoding.UTF8.GetBytes(message);
+            string messageName = _messageNameProvider.GetMessageName(integrationEvent);
+            string message = JsonConvert.SerializeObject(integrationEvent);
+            byte[] body = Encoding.UTF8.GetBytes(message);
 
             DoResilent(() => _channel.BasicPublish(_exchangeName, messageName, null, body));
         }
@@ -176,7 +192,10 @@ namespace Backend.Fx.RabbitMq
 
         private void OnCallbackException(object sender, CallbackExceptionEventArgs e)
         {
-            if (_isDisposed) return;
+            if (_isDisposed)
+            {
+                return;
+            }
 
             Logger.Warn(e.Exception, "A RabbitMQ connection threw an exception.");
             Open();
@@ -184,7 +203,10 @@ namespace Backend.Fx.RabbitMq
 
         private void OnConnectionBlocked(object sender, ConnectionBlockedEventArgs e)
         {
-            if (_isDisposed) return;
+            if (_isDisposed)
+            {
+                return;
+            }
 
             Logger.Warn($"A RabbitMQ connection is blocked with reason {e.Reason}");
             Open();
@@ -192,7 +214,10 @@ namespace Backend.Fx.RabbitMq
 
         private void OnConnectionShutdown(object sender, ShutdownEventArgs reason)
         {
-            if (_isDisposed) return;
+            if (_isDisposed)
+            {
+                return;
+            }
 
             Logger.Warn($"A RabbitMQ connection is shut down with reason {reason}.");
             Open();
@@ -206,11 +231,12 @@ namespace Backend.Fx.RabbitMq
         private void DoResilent(Action action)
         {
             Policy.Handle<BrokerUnreachableException>()
-                  .Or<SocketException>()
-                  .WaitAndRetry(_retryCount,
-                                retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
-                                (ex, time) => { Logger.Warn(ex.ToString()); })
-                  .Execute(action);
+                .Or<SocketException>()
+                .WaitAndRetry(
+                    _retryCount,
+                    retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                    (ex, time) => { Logger.Warn(ex.ToString()); })
+                .Execute(action);
         }
     }
 }

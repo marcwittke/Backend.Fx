@@ -10,16 +10,15 @@ namespace Backend.Fx.RabbitMq.Tests
 {
     public class TheRabbitMqChannel
     {
-        private readonly ITestOutputHelper _testOutputHelper;
-        
-        private readonly AutoResetEvent _shutdown = new AutoResetEvent(false);
-
         private readonly ConnectionFactory _factory = new ConnectionFactory
         {
             HostName = "localhost",
             UserName = "anicors",
             Password = "R4bb!tMQ"
         };
+
+        private readonly AutoResetEvent _shutdown = new AutoResetEvent(false);
+        private readonly ITestOutputHelper _testOutputHelper;
 
         public TheRabbitMqChannel(ITestOutputHelper testOutputHelper)
         {
@@ -34,79 +33,81 @@ namespace Backend.Fx.RabbitMq.Tests
 
             var sendingChannel = new SendingChannel(_testOutputHelper, _factory);
             sendingChannel.Connect();
-            
+
             sendingChannel.Send("gnarf", "whatever");
             Assert.False(receivingChannel.Received.WaitOne(1000));
-            
+
             sendingChannel.Send("info", "whatever");
             Assert.True(receivingChannel.Received.WaitOne(1000));
-            
+
             _shutdown.Set();
         }
 
+
         private class SendingChannel
         {
-            private readonly ITestOutputHelper _testOutputHelper;
             private readonly ConnectionFactory _connectionFactory;
-            private IConnection _connection;
+            private readonly ITestOutputHelper _testOutputHelper;
             private IModel _channel;
+            private IConnection _connection;
 
             public SendingChannel(ITestOutputHelper testOutputHelper, ConnectionFactory connectionFactory)
             {
                 _testOutputHelper = testOutputHelper;
                 _connectionFactory = connectionFactory;
             }
-            
+
             public void Connect()
             {
                 _connection = _connectionFactory.CreateConnection();
                 _channel = _connection.CreateModel();
-                _channel.ExchangeDeclare(exchange: "direct_logs", type: "direct");
+                _channel.ExchangeDeclare("direct_logs", "direct");
             }
 
             public void Send(string severity, string message)
             {
-                var body = Encoding.UTF8.GetBytes(message);
-                _channel.BasicPublish(exchange: "direct_logs", routingKey: severity, basicProperties: null, body: body);
+                byte[] body = Encoding.UTF8.GetBytes(message);
+                _channel.BasicPublish("direct_logs", severity, null, body);
             }
         }
-        
+
+
         private class ReceivingChannel
         {
-            private readonly ITestOutputHelper _testOutputHelper;
             private readonly ConnectionFactory _connectionFactory;
-            private IConnection _connection;
+            private readonly ITestOutputHelper _testOutputHelper;
             private IModel _channel;
-            public AutoResetEvent Received { get; } = new AutoResetEvent(false);
-            
+            private IConnection _connection;
+
             public ReceivingChannel(ITestOutputHelper testOutputHelper, ConnectionFactory connectionFactory)
             {
                 _testOutputHelper = testOutputHelper;
                 _connectionFactory = connectionFactory;
             }
 
+            public AutoResetEvent Received { get; } = new AutoResetEvent(false);
+
             public void Connect()
             {
                 _connection = _connectionFactory.CreateConnection();
                 _channel = _connection.CreateModel();
-                _channel.ExchangeDeclare(exchange: "direct_logs", type: "direct");
+                _channel.ExchangeDeclare("direct_logs", "direct");
                 _channel.QueueDeclare("myqueue", true, false, false, null);
-                _channel.QueueBind(queue: "myqueue", exchange: "direct_logs", routingKey: "info");
+                _channel.QueueBind("myqueue", "direct_logs", "info");
                 _testOutputHelper.WriteLine(" [*] Waiting for messages.");
 
                 var consumer = new EventingBasicConsumer(_channel);
                 consumer.Received += (model, ea) =>
-                {
-                    var body = ea.Body.ToArray();
-                    var message = Encoding.UTF8.GetString(body);
-                    var routingKey = ea.RoutingKey;
-                    _testOutputHelper.WriteLine($" [x] Received '{routingKey}':'{message}'");
-                    Received.Set();
-                    _channel.BasicAck(ea.DeliveryTag, false);
-                };
-                _channel.BasicConsume(queue: "myqueue", autoAck: false, consumer: consumer);
+                                     {
+                                         byte[] body = ea.Body.ToArray();
+                                         string message = Encoding.UTF8.GetString(body);
+                                         string routingKey = ea.RoutingKey;
+                                         _testOutputHelper.WriteLine($" [x] Received '{routingKey}':'{message}'");
+                                         Received.Set();
+                                         _channel.BasicAck(ea.DeliveryTag, false);
+                                     };
+                _channel.BasicConsume("myqueue", false, consumer);
             }
         }
-        
     }
 }

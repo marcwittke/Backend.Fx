@@ -22,7 +22,7 @@ namespace Backend.Fx.AspNetCore.Mvc
         {
             if (httpContext.Items.TryGetValue(InstanceProvider, out object untyped))
             {
-                return (IInstanceProvider) untyped;
+                return (IInstanceProvider)untyped;
             }
 
             throw new InvalidOperationException("No IInstanceProvider present in this HttpContext");
@@ -32,7 +32,7 @@ namespace Backend.Fx.AspNetCore.Mvc
         {
             if (httpContext.Items.TryGetValue(InstanceProvider, out object untyped))
             {
-                instanceProvider = (IInstanceProvider) untyped;
+                instanceProvider = (IInstanceProvider)untyped;
                 return true;
             }
 

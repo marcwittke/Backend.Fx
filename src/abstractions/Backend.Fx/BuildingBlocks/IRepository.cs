@@ -4,12 +4,14 @@ using System.Linq;
 namespace Backend.Fx.BuildingBlocks
 {
     /// <summary>
-    /// Encapsulates methods for retrieving domain objects 
+    /// Encapsulates methods for retrieving domain objects
     /// See https://en.wikipedia.org/wiki/Domain-driven_design#Building_blocks
     /// </summary>
     /// <typeparam name="TAggregateRoot"></typeparam>
     public interface IRepository<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
+        IQueryable<TAggregateRoot> AggregateQueryable { get; }
+
         TAggregateRoot Single(int id);
         TAggregateRoot SingleOrDefault(int id);
         TAggregateRoot[] GetAll();
@@ -18,6 +20,5 @@ namespace Backend.Fx.BuildingBlocks
         void AddRange(TAggregateRoot[] aggregateRoots);
         bool Any();
         TAggregateRoot[] Resolve(IEnumerable<int> ids);
-        IQueryable<TAggregateRoot> AggregateQueryable { get; }
     }
 }

@@ -8,7 +8,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
         void RegisterScoped<TService, TImpl>()
             where TImpl : class, TService
             where TService : class;
-        
+
         void RegisterScoped<TService>(Func<TService> factory)
             where TService : class;
 

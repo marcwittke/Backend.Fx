@@ -7,16 +7,22 @@ namespace Backend.Fx.Hacking
 {
     public static class PrivateSetterCaller
     {
-        public static void SetPrivate<T, TValue>(this T instance, Expression<Func<T, TValue>> propertyExpression, TValue value)
+        public static void SetPrivate<T, TValue>(
+            this T instance,
+            Expression<Func<T, TValue>> propertyExpression,
+            TValue value)
         {
-            instance.GetType().GetTypeInfo().GetDeclaredProperty(GetName(propertyExpression)).SetValue(instance, value, null);
+            instance.GetType()
+                .GetTypeInfo()
+                .GetDeclaredProperty(GetName(propertyExpression))
+                .SetValue(instance, value, null);
         }
 
         private static string GetName<T, TValue>(Expression<Func<T, TValue>> exp)
         {
             if (!(exp.Body is MemberExpression body))
             {
-                var ubody = (UnaryExpression) exp.Body;
+                var ubody = (UnaryExpression)exp.Body;
                 body = ubody.Operand as MemberExpression;
             }
 

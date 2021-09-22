@@ -8,8 +8,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.ASimpleDo
     {
         public ADomainModule(params Assembly[] domainAssemblies)
             : base(domainAssemblies)
-        {
-        }
+        { }
 
         protected override void Register(Container container, ScopedLifestyle scopedLifestyle)
         {

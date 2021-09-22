@@ -8,24 +8,36 @@
         public static string RandomUpperCase(int length)
         {
             var random = string.Empty;
-            for (var i = 0; i < length; i++) random += UpperCase.Random();
+            for (var i = 0; i < length; i++)
+            {
+                random += UpperCase.Random();
+            }
+
             return random;
         }
 
         public static string RandomLowerCase(int length)
         {
             var random = string.Empty;
-            for (var i = 0; i < length; i++) random += LowerCase.Random();
+            for (var i = 0; i < length; i++)
+            {
+                random += LowerCase.Random();
+            }
+
             return random;
         }
 
         public static string RandomNormalCase(int length)
         {
             var random = string.Empty;
-            for (var i = 0; i < length; i++) random += i == 0 ? UpperCase.Random() : LowerCase.Random();
+            for (var i = 0; i < length; i++)
+            {
+                random += i == 0 ? UpperCase.Random() : LowerCase.Random();
+            }
+
             return random;
         }
-        
+
         public static string RandomPassword(int length = 10, int numberCount = 2, int specialCharCount = 2)
         {
             const string letters = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz";
@@ -38,12 +50,12 @@
                 password[i] = letters.Random();
             }
 
-            for (int i = 0; i < numberCount; i++)
+            for (var i = 0; i < numberCount; i++)
             {
                 password[TestRandom.Next(length)] = numbers.Random();
             }
-            
-            for (int i = 0; i < specialCharCount; i++)
+
+            for (var i = 0; i < specialCharCount; i++)
             {
                 password[TestRandom.Next(length)] = specials.Random();
             }

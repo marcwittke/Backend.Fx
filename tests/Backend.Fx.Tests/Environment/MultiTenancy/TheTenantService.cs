@@ -13,14 +13,15 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
 {
     public class TheTenantService
     {
+        private readonly IMessageBus _messageBus = A.Fake<IMessageBus>();
+
+        private readonly ITenantService _sut;
+        private readonly InMemoryTenantRepository _tenantRepository = new InMemoryTenantRepository();
+
         public TheTenantService()
         {
             _sut = new TenantService(_messageBus, _tenantRepository);
         }
-
-        private readonly ITenantService _sut;
-        private readonly IMessageBus _messageBus = A.Fake<IMessageBus>();
-        private readonly InMemoryTenantRepository _tenantRepository = new InMemoryTenantRepository();
 
         [Fact]
         public void CannotCreateTenantWithoutName()
@@ -41,19 +42,19 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
         [Fact]
         public void GetsProductiveTenantIds()
         {
-            var tenants = Enumerable.Range(1, 7)
-                                    .Select(i => new Tenant("n" + i, "d" + i, i % 2 == 0))
-                                    .ToArray();
+            Tenant[] tenants = Enumerable.Range(1, 7)
+                .Select(i => new Tenant("n" + i, "d" + i, i % 2 == 0))
+                .ToArray();
 
-            foreach (Tenant tenant in tenants)
+            foreach (var tenant in tenants)
             {
                 tenant.State = TenantState.Active;
                 _tenantRepository.SaveTenant(tenant);
             }
 
-            var tenantIds = tenants.Select(t => new TenantId(t.Id)).ToArray();
-            var demoTenantIds = tenants.Where(t => t.IsDemoTenant).Select(t => new TenantId(t.Id)).ToArray();
-            var prodTenantIds = tenants.Where(t => !t.IsDemoTenant).Select(t => new TenantId(t.Id)).ToArray();
+            TenantId[] tenantIds = tenants.Select(t => new TenantId(t.Id)).ToArray();
+            TenantId[] demoTenantIds = tenants.Where(t => t.IsDemoTenant).Select(t => new TenantId(t.Id)).ToArray();
+            TenantId[] prodTenantIds = tenants.Where(t => !t.IsDemoTenant).Select(t => new TenantId(t.Id)).ToArray();
 
             Assert.Equal(tenantIds, _sut.TenantIdProvider.GetActiveTenantIds());
             Assert.Equal(prodTenantIds, _sut.TenantIdProvider.GetActiveProductionTenantIds());

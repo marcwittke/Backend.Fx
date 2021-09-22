@@ -8,17 +8,6 @@ namespace Backend.Fx.Tests.Patterns.IdGeneration
     {
         private readonly HiLoIdGenerator _sut = new InMemoryHiLoIdGenerator(1, 100);
 
-        private class IdConsument
-        {
-            public int[] Ids { get; private set; }
-
-            public void GetIds(int count, IIdGenerator idGenerator)
-            {
-                Ids = new int[count];
-                for (var i = 0; i < count; i++) Ids[i] = idGenerator.NextId();
-            }
-        }
-
         [Fact]
         public void AllowsMultipleThreadsToGetIds()
         {
@@ -26,11 +15,14 @@ namespace Backend.Fx.Tests.Patterns.IdGeneration
             const int idCountPerConsument = 1000;
             var idConsuments = new IdConsument[consumentCount];
 
-            for (var i = 0; i < consumentCount; i++) idConsuments[i] = new IdConsument();
+            for (var i = 0; i < consumentCount; i++)
+            {
+                idConsuments[i] = new IdConsument();
+            }
 
             idConsuments.AsParallel().ForAll(idConsument => { idConsument.GetIds(idCountPerConsument, _sut); });
 
-            var allIds = idConsuments.SelectMany(idConsument => idConsument.Ids).ToArray();
+            int[] allIds = idConsuments.SelectMany(idConsument => idConsument.Ids).ToArray();
             Assert.Equal(consumentCount * idCountPerConsument, allIds.Length);
             Assert.Equal(consumentCount * idCountPerConsument, allIds.Distinct().Count());
             Assert.Equal(consumentCount * idCountPerConsument + 1, _sut.NextId());
@@ -39,9 +31,28 @@ namespace Backend.Fx.Tests.Patterns.IdGeneration
         [Fact]
         public void StartsWithInitialValueAndCountsUp()
         {
-            for (var i = 1; i < 1000; i++) Assert.Equal(i, _sut.NextId());
+            for (var i = 1; i < 1000; i++)
+            {
+                Assert.Equal(i, _sut.NextId());
+            }
+        }
+
+
+        private class IdConsument
+        {
+            public int[] Ids { get; private set; }
+
+            public void GetIds(int count, IIdGenerator idGenerator)
+            {
+                Ids = new int[count];
+                for (var i = 0; i < count; i++)
+                {
+                    Ids[i] = idGenerator.NextId();
+                }
+            }
         }
     }
+
 
     public class InMemoryHiLoIdGenerator : HiLoIdGenerator
     {
@@ -61,7 +72,7 @@ namespace Backend.Fx.Tests.Patterns.IdGeneration
             lock (_synclock)
             {
                 // this simulates the behavior of a SQL sequence for example
-                var result = _nextBlockStart;
+                int result = _nextBlockStart;
                 _nextBlockStart += BlockSize;
                 return result;
             }

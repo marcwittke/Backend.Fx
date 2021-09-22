@@ -15,6 +15,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
         T ProvideInstance();
     }
 
+
     public abstract class CurrentTHolder<T> : ICurrentTHolder<T> where T : class
     {
         private static readonly ILogger Logger = LogManager.Create<CurrentTHolder<T>>();
@@ -27,7 +28,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
         {
             _current = initial;
         }
-        
+
         public T Current
         {
             get
@@ -45,9 +46,13 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
         public void ReplaceCurrent(T newCurrentInstance)
         {
-            if (Equals(_current, newCurrentInstance)) return;
+            if (Equals(_current, newCurrentInstance))
+            {
+                return;
+            }
 
-            Logger.Debug($"Replacing current instance of {typeof(T).Name} ({Describe(Current)}) with another instance ({Describe(newCurrentInstance)})");
+            Logger.Debug(
+                $"Replacing current instance of {typeof(T).Name} ({Describe(Current)}) with another instance ({Describe(newCurrentInstance)})");
             _current = newCurrentInstance;
         }
 

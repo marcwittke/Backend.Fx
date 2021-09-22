@@ -9,8 +9,7 @@ namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain
     {
         [UsedImplicitly]
         private Blog()
-        {
-        }
+        { }
 
         public Blog(int id, string name) : base(id)
         {
@@ -31,7 +30,10 @@ namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain
         public void Modify(string modified)
         {
             Name = modified;
-            foreach (Post post in Posts) post.SetName(modified);
+            foreach (var post in Posts)
+            {
+                post.SetName(modified);
+            }
         }
     }
 }

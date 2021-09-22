@@ -10,14 +10,15 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
 {
     public class TheBackendFxApplicationInvoker
     {
+        private readonly DiTestFakes _fakes;
+
+        private readonly IBackendFxApplicationInvoker _sut;
+
         public TheBackendFxApplicationInvoker()
         {
             _fakes = new DiTestFakes();
             _sut = new BackendFxApplicationInvoker(_fakes.CompositionRoot);
         }
-
-        private readonly IBackendFxApplicationInvoker _sut;
-        private readonly DiTestFakes _fakes;
 
         [Fact]
         public void BeginsNewScopeForEveryInvocation()
@@ -55,7 +56,8 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         [Fact]
         public void DoesNotCatchOperationExceptions()
         {
-            Assert.Throws<SimulatedException>(() => _sut.Invoke(ip => throw new SimulatedException(), new AnonymousIdentity(), new TenantId(111)));
+            Assert.Throws<SimulatedException>(
+                () => _sut.Invoke(ip => throw new SimulatedException(), new AnonymousIdentity(), new TenantId(111)));
             A.CallTo(() => _fakes.Operation.Begin()).MustHaveHappenedOnceExactly();
             A.CallTo(() => _fakes.Operation.Complete()).MustNotHaveHappened();
         }
@@ -73,7 +75,8 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         {
             var identity = new GenericIdentity("me");
             _sut.Invoke(ip => { }, identity, new TenantId(123));
-            A.CallTo(() => _fakes.IdentityHolder.ReplaceCurrent(A<IIdentity>.That.IsEqualTo(identity))).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakes.IdentityHolder.ReplaceCurrent(A<IIdentity>.That.IsEqualTo(identity)))
+                .MustHaveHappenedOnceExactly();
         }
 
         [Fact]
@@ -81,9 +84,9 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         {
             var tenantId = new TenantId(123);
             _sut.Invoke(ip => { }, new AnonymousIdentity(), tenantId);
-            A.CallTo(() => _fakes.TenantIdHolder.ReplaceCurrent(A<TenantId>.That.IsEqualTo(tenantId))).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakes.TenantIdHolder.ReplaceCurrent(A<TenantId>.That.IsEqualTo(tenantId)))
+                .MustHaveHappenedOnceExactly();
         }
-
 
         [Fact]
         public void ProvidesInstanceProviderForInvocation()

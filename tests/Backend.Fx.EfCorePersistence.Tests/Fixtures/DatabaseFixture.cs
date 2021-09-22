@@ -4,6 +4,7 @@ using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.DateAndTime;
 using Backend.Fx.Environment.Persistence;
+using Backend.Fx.Patterns.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
@@ -24,7 +25,10 @@ namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
 
         public abstract DbConnectionOperationDecorator UseOperation();
 
-        public TestDbSession CreateTestDbSession(DbConnectionOperationDecorator operation = null, IIdentity asIdentity = null, IClock clock = null)
+        public TestDbSession CreateTestDbSession(
+            DbConnectionOperationDecorator operation = null,
+            IIdentity asIdentity = null,
+            IClock clock = null)
         {
             CurrentIdentityHolder CreateAsIdentity()
             {
@@ -35,12 +39,12 @@ namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
 
             clock ??= new WallClock();
             operation ??= UseOperation();
-            
+
             operation.Begin();
 
-            var identityHolder = asIdentity == null
-                                     ? CurrentIdentityHolder.CreateSystem()
-                                     : CreateAsIdentity();
+            ICurrentTHolder<IIdentity> identityHolder = asIdentity == null
+                ? CurrentIdentityHolder.CreateSystem()
+                : CreateAsIdentity();
             return new TestDbSession(this, operation, identityHolder, clock);
         }
     }

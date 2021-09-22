@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Backend.Fx.Patterns.EventAggregation.Domain;
 using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.ASimpleDomain;
 using SimpleInjector;
 using Xunit;
@@ -12,13 +13,18 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
     public class TheSimpleInjectorCompositionRoot : IDisposable
     {
         private readonly SimpleInjectorCompositionRoot _sut;
-        
+
         public TheSimpleInjectorCompositionRoot()
         {
             _sut = new SimpleInjectorCompositionRoot();
-            Assembly domainAssembly = typeof(AnAggregate).GetTypeInfo().Assembly;
+            var domainAssembly = typeof(AnAggregate).GetTypeInfo().Assembly;
             _sut.RegisterModules(new ADomainModule(domainAssembly));
             _sut.Verify();
+        }
+
+        public void Dispose()
+        {
+            _sut.Dispose();
         }
 
         [Fact]
@@ -55,8 +61,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
             }
         }
 
-        
-
         [Fact]
         public void ProvidesScopedInstancesWhenScopeHasBeenStarted()
         {
@@ -81,28 +85,28 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         [Fact]
         public void ProvidesSingletonAndScopedInstancesAccordingly()
         {
-            
             const int parallelScopeCount = 1000;
-            object[] scopedInstances = new object[parallelScopeCount];
-            object[] singletonInstances = new object[parallelScopeCount];
-            Task[] tasks = new Task[parallelScopeCount];
+            var scopedInstances = new object[parallelScopeCount];
+            var singletonInstances = new object[parallelScopeCount];
+            var tasks = new Task[parallelScopeCount];
 
             var waiter = new ManualResetEvent(false);
 
             // resolving a singleton service and a scoped service in a massive parallel scenario
-            for (int index = 0; index < parallelScopeCount; index++)
+            for (var index = 0; index < parallelScopeCount; index++)
             {
-                var indexClosure = index;
-                tasks[index] = Task.Factory.StartNew(() =>
-                {
-                    // using the reset event to enforce a maximum grade of parallelism
-                    waiter.WaitOne();
-                    using (_sut.BeginScope())
+                int indexClosure = index;
+                tasks[index] = Task.Factory.StartNew(
+                    () =>
                     {
-                        scopedInstances[indexClosure] = _sut.GetInstance<ITestDomainService>();
-                        singletonInstances[indexClosure] = _sut.GetInstance<ISingletonService>();
-                    }
-                });
+                        // using the reset event to enforce a maximum grade of parallelism
+                        waiter.WaitOne();
+                        using (_sut.BeginScope())
+                        {
+                            scopedInstances[indexClosure] = _sut.GetInstance<ITestDomainService>();
+                            singletonInstances[indexClosure] = _sut.GetInstance<ISingletonService>();
+                        }
+                    });
             }
 
             // let the show begin...
@@ -110,12 +114,12 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
             Task.WaitAll(tasks);
 
             // asserting for equality: singleton instances must be equal, scoped instances must be unique
-            for (int index = 0; index < parallelScopeCount; index++)
+            for (var index = 0; index < parallelScopeCount; index++)
             {
                 Assert.NotNull(scopedInstances[index]);
                 Assert.NotNull(singletonInstances[index]);
 
-                for (int indexComp = 0; indexComp < parallelScopeCount; indexComp++)
+                for (var indexComp = 0; indexComp < parallelScopeCount; indexComp++)
                 {
                     if (index != indexComp)
                     {
@@ -153,18 +157,13 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         {
             using (_sut.BeginScope())
             {
-                var handlers = _sut.GetAllEventHandlers<ADomainEvent>().ToArray();
-                
+                IDomainEventHandler<ADomainEvent>[] handlers = _sut.GetAllEventHandlers<ADomainEvent>().ToArray();
+
                 // these three handlers should have been auto registered during boot by scanning the assembly
                 Assert.True(handlers.OfType<ADomainEventHandler1>().Any());
                 Assert.True(handlers.OfType<ADomainEventHandler2>().Any());
                 Assert.True(handlers.OfType<ADomainEventHandler3>().Any());
             }
-        }
-        
-        public void Dispose()
-        {
-            _sut.Dispose();
         }
     }
 }
