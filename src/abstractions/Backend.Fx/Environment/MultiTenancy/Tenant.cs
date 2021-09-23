@@ -11,12 +11,15 @@ namespace Backend.Fx.Environment.MultiTenancy
     {
         [UsedImplicitly]
         private Tenant()
-        {
-        }
+        { }
 
         public Tenant([NotNull] string name, string description, bool isDemoTenant, string configuration = null)
         {
-            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Value cannot be null or whitespace.", nameof(name));
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(name));
+            }
+
             Name = name;
             Description = description;
             IsDemoTenant = isDemoTenant;
@@ -24,9 +27,11 @@ namespace Backend.Fx.Environment.MultiTenancy
             State = TenantState.Active;
         }
 
-        [Key] public int Id { get; set; }
+        [Key]
+        public int Id { get; set; }
 
-        [Required] public string Name { get; set; }
+        [Required]
+        public string Name { get; set; }
 
         public string Description { get; set; }
 
@@ -35,7 +40,7 @@ namespace Backend.Fx.Environment.MultiTenancy
         public TenantState State { get; set; }
 
         /// <summary>
-        /// optional: a generic field to store your arbitrary config data 
+        /// optional: a generic field to store your arbitrary config data
         /// </summary>
         public string Configuration { get; set; }
 
@@ -44,6 +49,7 @@ namespace Backend.Fx.Environment.MultiTenancy
             return new TenantId(Id);
         }
     }
+
 
     public enum TenantState
     {

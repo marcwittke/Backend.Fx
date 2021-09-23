@@ -7,8 +7,8 @@ using System.Linq.Expressions;
 namespace Backend.Fx.BuildingBlocks
 {
     public interface IView<out T> : IQueryable<T>
-    {
-    }
+    { }
+
 
     public abstract class View<T> : IView<T>
     {
@@ -26,7 +26,7 @@ namespace Backend.Fx.BuildingBlocks
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable) _viewImplementation).GetEnumerator();
+            return ((IEnumerable)_viewImplementation).GetEnumerator();
         }
 
         public Type ElementType => _viewImplementation.ElementType;

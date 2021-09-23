@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Backend.Fx.Extensions
@@ -12,9 +13,10 @@ namespace Backend.Fx.Extensions
                 return enumValue;
             }
 
-            var validValues = Enum.GetValues(typeof(TEnum)).Cast<TEnum>();
+            IEnumerable<TEnum> validValues = Enum.GetValues(typeof(TEnum)).Cast<TEnum>();
             string validValuesString = string.Join("], [", validValues.Select(en => en.ToString()));
-            throw new ArgumentException($"The string [{value}] is not a valid value for the enum type {typeof(TEnum).Name}. Valid string values are: [{validValuesString}]");
+            throw new ArgumentException(
+                $"The string [{value}] is not a valid value for the enum type {typeof(TEnum).Name}. Valid string values are: [{validValuesString}]");
         }
     }
 }

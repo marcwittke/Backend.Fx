@@ -17,28 +17,31 @@ namespace Backend.Fx.Extensions
         /// </remarks>
         public static void RunSync(Func<Task> task)
         {
-            SynchronizationContext oldContext = SynchronizationContext.Current;
+            var oldContext = SynchronizationContext.Current;
             try
             {
-                var synch = new ExclusiveSynchronizationContext();
-                SynchronizationContext.SetSynchronizationContext(synch);
-                synch.Post(async _ =>
-                {
-                    try
+                var syncContext = new ExclusiveSynchronizationContext();
+                SynchronizationContext.SetSynchronizationContext(syncContext);
+                syncContext.Post(
+                    // ReSharper disable once AsyncVoidLambda
+                    async _ =>
                     {
-                        await task();
-                    }
-                    catch (Exception e)
-                    {
-                        synch.InnerException = e;
-                        throw;
-                    }
-                    finally
-                    {
-                        synch.EndMessageLoop();
-                    }
-                }, null);
-                synch.BeginMessageLoop();
+                        try
+                        {
+                            await task();
+                        }
+                        catch (Exception e)
+                        {
+                            syncContext.InnerException = e;
+                            throw;
+                        }
+                        finally
+                        {
+                            syncContext.EndMessageLoop();
+                        }
+                    },
+                    null);
+                syncContext.BeginMessageLoop();
             }
             finally
             {
@@ -55,27 +58,30 @@ namespace Backend.Fx.Extensions
         public static T RunSync<T>(Func<Task<T>> task)
         {
             var ret = default(T);
-            SynchronizationContext oldContext = SynchronizationContext.Current;
+            var oldContext = SynchronizationContext.Current;
             try
             {
                 var exclusiveSynchronizationContext = new ExclusiveSynchronizationContext();
                 SynchronizationContext.SetSynchronizationContext(exclusiveSynchronizationContext);
-                exclusiveSynchronizationContext.Post(async _ =>
-                {
-                    try
+                exclusiveSynchronizationContext.Post(
+                    // ReSharper disable once AsyncVoidLambda
+                    async _ =>
                     {
-                        ret = await task();
-                    }
-                    catch (Exception e)
-                    {
-                        exclusiveSynchronizationContext.InnerException = e;
-                        throw;
-                    }
-                    finally
-                    {
-                        exclusiveSynchronizationContext.EndMessageLoop();
-                    }
-                }, null);
+                        try
+                        {
+                            ret = await task();
+                        }
+                        catch (Exception e)
+                        {
+                            exclusiveSynchronizationContext.InnerException = e;
+                            throw;
+                        }
+                        finally
+                        {
+                            exclusiveSynchronizationContext.EndMessageLoop();
+                        }
+                    },
+                    null);
                 exclusiveSynchronizationContext.BeginMessageLoop();
             }
             finally
@@ -86,12 +92,16 @@ namespace Backend.Fx.Extensions
             return ret;
         }
 
+
         private class ExclusiveSynchronizationContext : SynchronizationContext
         {
-            private bool _done;
-            public Exception InnerException { private get; set; }
+            private readonly Queue<Tuple<SendOrPostCallback, object>> _items
+                = new Queue<Tuple<SendOrPostCallback, object>>();
+
             private readonly AutoResetEvent _workItemsWaiting = new AutoResetEvent(false);
-            private readonly Queue<Tuple<SendOrPostCallback, object>> _items = new Queue<Tuple<SendOrPostCallback, object>>();
+            private bool _done;
+
+            public Exception InnerException { private get; set; }
 
             public override void Send(SendOrPostCallback d, object state)
             {

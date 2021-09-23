@@ -10,13 +10,19 @@ namespace Backend.Fx.Patterns.DependencyInjection
         private readonly IExceptionLogger _exceptionLogger;
         private readonly IBackendFxApplicationInvoker _invoker;
 
-        public ExceptionLoggingAndHandlingInvoker(IExceptionLogger exceptionLogger, IBackendFxApplicationInvoker invoker)
+        public ExceptionLoggingAndHandlingInvoker(
+            IExceptionLogger exceptionLogger,
+            IBackendFxApplicationInvoker invoker)
         {
             _exceptionLogger = exceptionLogger;
             _invoker = invoker;
         }
 
-        public void Invoke(Action<IInstanceProvider> action, IIdentity identity, TenantId tenantId, Guid? correlationId = null)
+        public void Invoke(
+            Action<IInstanceProvider> action,
+            IIdentity identity,
+            TenantId tenantId,
+            Guid? correlationId = null)
         {
             try
             {

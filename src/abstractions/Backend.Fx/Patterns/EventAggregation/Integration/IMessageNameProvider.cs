@@ -7,8 +7,10 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
     {
         [NotNull]
         string GetMessageName<T>();
+
         [NotNull]
         string GetMessageName(Type t);
+
         [NotNull]
         string GetMessageName(IIntegrationEvent integrationEvent);
     }

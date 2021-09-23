@@ -17,7 +17,9 @@ namespace Backend.Fx.Exceptions
         }
 
         /// <inheritdoc />
-        public TooManyRequestsException(int retryAfter, string message, Exception innerException) : base(message, innerException)
+        public TooManyRequestsException(int retryAfter, string message, Exception innerException) : base(
+            message,
+            innerException)
         {
             RetryAfter = retryAfter;
         }

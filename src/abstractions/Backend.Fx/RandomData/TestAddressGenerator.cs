@@ -9,7 +9,6 @@ namespace Backend.Fx.RandomData
             return new TestAddressGenerator().First();
         }
 
-
         protected override TestAddress Next()
         {
             return new TestAddress(

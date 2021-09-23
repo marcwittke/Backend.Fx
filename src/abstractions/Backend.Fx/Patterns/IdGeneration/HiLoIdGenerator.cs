@@ -6,24 +6,30 @@ namespace Backend.Fx.Patterns.IdGeneration
     public abstract class HiLoIdGenerator : IIdGenerator
     {
         private static readonly ILogger Logger = LogManager.Create<HiLoIdGenerator>();
-        private int _highId = -1;
-        private int _lowId = -1;
         private static readonly object Mutex = new object();
         private readonly bool _isTraceEnabled;
+        private int _highId = -1;
+        private int _lowId = -1;
 
         protected HiLoIdGenerator()
         {
             _isTraceEnabled = Logger.IsTraceEnabled();
         }
 
+        protected abstract int BlockSize { get; }
+
         public int NextId()
         {
             lock (Mutex)
             {
                 EnsureValidLowAndHiId();
-                var nextId = _lowId;
+                int nextId = _lowId;
                 Interlocked.Increment(ref _lowId);
-                if (_isTraceEnabled) Logger.Trace("Providing id {0}", nextId);
+                if (_isTraceEnabled)
+                {
+                    Logger.Trace("Providing id {0}", nextId);
+                }
+
                 return nextId;
             }
         }
@@ -34,12 +40,10 @@ namespace Backend.Fx.Patterns.IdGeneration
             {
                 // first fetch from sequence in life time
                 _lowId = GetNextBlockStart();
-                _highId = _lowId + BlockSize- 1;
+                _highId = _lowId + BlockSize - 1;
             }
         }
 
         protected abstract int GetNextBlockStart();
-
-        protected abstract int BlockSize { get; }
     }
 }

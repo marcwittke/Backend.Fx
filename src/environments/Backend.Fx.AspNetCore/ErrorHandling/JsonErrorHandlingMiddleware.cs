@@ -14,22 +14,22 @@ namespace Backend.Fx.AspNetCore.ErrorHandling
 {
     public class JsonErrorHandlingMiddleware : ErrorHandlingMiddleware
     {
-        private readonly bool _showInternalServerErrorDetails;
         private static readonly ILogger Logger = LogManager.Create<JsonErrorHandlingMiddleware>();
+        private readonly bool _showInternalServerErrorDetails;
 
-        protected JsonSerializerSettings JsonSerializerSettings { get; } = new JsonSerializerSettings
-        {
-            ContractResolver = new DefaultContractResolver
-            {
-                NamingStrategy = new CamelCaseNamingStrategy {ProcessDictionaryKeys = true}
-            },
-        };
-
-        public JsonErrorHandlingMiddleware(RequestDelegate next, bool showInternalServerErrorDetails)
+        protected JsonErrorHandlingMiddleware(RequestDelegate next, bool showInternalServerErrorDetails)
             : base(next)
         {
             _showInternalServerErrorDetails = showInternalServerErrorDetails;
         }
+
+        protected JsonSerializerSettings JsonSerializerSettings { get; } = new()
+        {
+            ContractResolver = new DefaultContractResolver
+            {
+                NamingStrategy = new CamelCaseNamingStrategy { ProcessDictionaryKeys = true }
+            }
+        };
 
         protected override Task<bool> ShouldHandle(HttpContext context)
         {
@@ -38,7 +38,11 @@ namespace Backend.Fx.AspNetCore.ErrorHandling
             return Task.FromResult(accept?.Any(mth => mth.Type == "application" && mth.SubType == "json") == true);
         }
 
-        protected override async Task HandleClientError(HttpContext context, int httpStatusCode, string message, ClientException exception)
+        protected override async Task HandleClientError(
+            HttpContext context,
+            int httpStatusCode,
+            string message,
+            ClientException exception)
         {
             if (context.Response.HasStarted)
             {
@@ -48,9 +52,9 @@ namespace Backend.Fx.AspNetCore.ErrorHandling
 
             // convention: only the errors array will be transmitted to the client, allowing technical (possibly
             // revealing) information in the exception message.
-            Errors errors = exception.HasErrors()
-                                ? exception.Errors
-                                : new Errors().Add($"HTTP{httpStatusCode}: {message}");
+            var errors = exception.HasErrors()
+                ? exception.Errors
+                : new Errors().Add($"HTTP{httpStatusCode}: {message}");
 
             context.Response.StatusCode = httpStatusCode;
             string serializedErrors = SerializeErrors(errors);
@@ -66,30 +70,35 @@ namespace Backend.Fx.AspNetCore.ErrorHandling
                 return;
             }
 
-            context.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
-            var responseContent = _showInternalServerErrorDetails
-                                      ? JsonConvert.SerializeObject(new {message = exception.Message, stackTrace = exception.StackTrace}, JsonSerializerSettings)
-                                      : JsonConvert.SerializeObject(new {message = "An internal error occured"}, JsonSerializerSettings);
+            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            string responseContent = _showInternalServerErrorDetails
+                ? JsonConvert.SerializeObject(
+                    new { message = exception.Message, stackTrace = exception.StackTrace },
+                    JsonSerializerSettings)
+                : JsonConvert.SerializeObject(new { message = "An internal error occured" }, JsonSerializerSettings);
             context.Response.ContentType = "application/json; charset=utf-8";
             await context.Response.WriteAsync(responseContent);
         }
 
         protected virtual string SerializeErrors(Errors errors)
         {
-            var errorsDictionaryForJson = errors.ToDictionary(kvp => kvp.Key == "" ? "_error" : kvp.Key, kvp => kvp.Value);
+            Dictionary<string, string[]> errorsDictionaryForJson = errors.ToDictionary(
+                kvp => kvp.Key == "" ? "_error" : kvp.Key,
+                kvp => kvp.Value);
             return JsonConvert.SerializeObject(errorsDictionaryForJson, JsonSerializerSettings);
         }
     }
-    
+
+
     public class ErrorShape
     {
-        public Dictionary<string,string[]> Errors { get; set; }
+        public Dictionary<string, string[]> Errors { get; set; }
 
         public string[] GenericError
         {
             get
             {
-                Errors.TryGetValue("_error", out var genericError);
+                Errors.TryGetValue("_error", out string[] genericError);
                 return genericError;
             }
         }

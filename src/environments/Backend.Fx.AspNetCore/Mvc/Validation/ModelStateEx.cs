@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Backend.Fx.Exceptions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
@@ -8,9 +9,9 @@ namespace Backend.Fx.AspNetCore.Mvc.Validation
     {
         public static string ToDebugString(this ModelStateDictionary modelState)
         {
-            var modelErrorMessages = modelState
-                                     .Where(kvp => kvp.Value.ValidationState == ModelValidationState.Invalid)
-                                     .Select(kvp => $"{kvp.Key}: {string.Join(", ", kvp.Value.Errors.Select(err => err.ErrorMessage))}");
+            IEnumerable<string> modelErrorMessages = modelState
+                .Where(kvp => kvp.Value.ValidationState == ModelValidationState.Invalid)
+                .Select(kvp => $"{kvp.Key}: {string.Join(", ", kvp.Value.Errors.Select(err => err.ErrorMessage))}");
 
             return string.Join(System.Environment.NewLine, modelErrorMessages);
         }
@@ -18,7 +19,7 @@ namespace Backend.Fx.AspNetCore.Mvc.Validation
         public static Errors ToErrorsDictionary(this ModelStateDictionary modelState)
         {
             var errors = new Errors();
-            foreach (var keyValuePair in modelState)
+            foreach (KeyValuePair<string, ModelStateEntry> keyValuePair in modelState)
             {
                 errors.Add(keyValuePair.Key, keyValuePair.Value.Errors.Select(err => err.ErrorMessage));
             }
@@ -26,12 +27,11 @@ namespace Backend.Fx.AspNetCore.Mvc.Validation
             return errors;
         }
 
-
         public static void Add(this ModelStateDictionary modelState, Errors errors)
         {
-            foreach (var keyValuePair in errors)
+            foreach (KeyValuePair<string, string[]> keyValuePair in errors)
             {
-                foreach (var errorMessage in keyValuePair.Value)
+                foreach (string errorMessage in keyValuePair.Value)
                 {
                     modelState.AddModelError(keyValuePair.Key, errorMessage);
                 }

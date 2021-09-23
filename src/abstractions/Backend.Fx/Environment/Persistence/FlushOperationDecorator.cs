@@ -6,8 +6,8 @@ namespace Backend.Fx.Environment.Persistence
     public class FlushOperationDecorator : IOperation
     {
         private static readonly ILogger Logger = LogManager.Create<FlushOperationDecorator>();
-        private readonly IOperation _operationImplementation;
         private readonly ICanFlush _canFlush;
+        private readonly IOperation _operationImplementation;
 
         public FlushOperationDecorator(ICanFlush canFlush, IOperation operationImplementation)
         {

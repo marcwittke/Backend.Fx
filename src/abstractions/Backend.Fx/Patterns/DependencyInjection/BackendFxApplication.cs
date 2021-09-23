@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
-using Backend.Fx.Environment.Authentication;
-using Backend.Fx.Environment.DateAndTime;
-using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.EventAggregation.Domain;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 
 namespace Backend.Fx.Patterns.DependencyInjection
@@ -17,7 +12,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
     public interface IBackendFxApplication : IDisposable
     {
         /// <summary>
-        /// The async invoker runs a given action asynchronously in an application scope with injection facilities 
+        /// The async invoker runs a given action asynchronously in an application scope with injection facilities
         /// </summary>
         IBackendFxApplicationAsyncInvoker AsyncInvoker { get; }
 
@@ -27,7 +22,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
         ICompositionRoot CompositionRoot { get; }
 
         /// <summary>
-        /// The invoker runs a given action in an application scope with injection facilities 
+        /// The invoker runs a given action in an application scope with injection facilities
         /// </summary>
         IBackendFxApplicationInvoker Invoker { get; }
 
@@ -36,14 +31,6 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// </summary>
         IMessageBus MessageBus { get; }
 
-        /// <summary>
-        /// allows synchronously awaiting application startup
-        /// </summary>
-        bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue, CancellationToken cancellationToken = default);
-
-        [Obsolete("Use BootAsync()")]
-        Task Boot(CancellationToken cancellationToken = default);
-        
         /// <summary>
         /// Initializes and starts the application (async)
         /// </summary>
@@ -55,32 +42,28 @@ namespace Backend.Fx.Patterns.DependencyInjection
     public class BackendFxApplication : IBackendFxApplication
     {
         private static readonly ILogger Logger = LogManager.Create<BackendFxApplication>();
-        private readonly ManualResetEventSlim _isBooted = new ManualResetEventSlim(false);
-
+        
         /// <summary>
         /// Initializes the application's runtime instance
         /// </summary>
         /// <param name="compositionRoot">The composition root of the dependency injection framework</param>
         /// <param name="messageBus">The message bus implementation used by this application instance</param>
         /// <param name="exceptionLogger"></param>
-        public BackendFxApplication(ICompositionRoot compositionRoot, IMessageBus messageBus, IExceptionLogger exceptionLogger)
+        public BackendFxApplication(
+            ICompositionRoot compositionRoot,
+            IMessageBus messageBus,
+            IExceptionLogger exceptionLogger)
         {
             var invoker = new BackendFxApplicationInvoker(compositionRoot);
             AsyncInvoker = new ExceptionLoggingAsyncInvoker(exceptionLogger, invoker);
             Invoker = new ExceptionLoggingInvoker(exceptionLogger, invoker);
             MessageBus = messageBus;
-            MessageBus.ProvideInvoker(new SequentializingBackendFxApplicationInvoker(
-                                          new WaitForBootInvoker(this, 
-                                                                 new ExceptionLoggingAndHandlingInvoker(exceptionLogger, Invoker))));
+            MessageBus.ProvideInvoker(
+                new SequentializingBackendFxApplicationInvoker(
+                    new WaitForBootInvoker(
+                        this,
+                        new ExceptionLoggingAndHandlingInvoker(exceptionLogger, Invoker))));
             CompositionRoot = compositionRoot;
-            CompositionRoot.InfrastructureModule.RegisterScoped<IClock, WallClock>();
-            CompositionRoot.InfrastructureModule.RegisterScoped<ICurrentTHolder<Correlation>, CurrentCorrelationHolder>();
-            CompositionRoot.InfrastructureModule.RegisterScoped<ICurrentTHolder<IIdentity>, CurrentIdentityHolder>();
-            CompositionRoot.InfrastructureModule.RegisterScoped<ICurrentTHolder<TenantId>, CurrentTenantIdHolder>();
-            CompositionRoot.InfrastructureModule.RegisterScoped<IOperation, Operation>();
-            CompositionRoot.InfrastructureModule.RegisterScoped<IDomainEventAggregator>(() => new DomainEventAggregator(compositionRoot));
-            CompositionRoot.InfrastructureModule.RegisterScoped<IMessageBusScope>(
-                () => new MessageBusScope(MessageBus, compositionRoot.InstanceProvider.GetInstance<ICurrentTHolder<Correlation>>()));
         }
 
         public IBackendFxApplicationAsyncInvoker AsyncInvoker { get; }
@@ -91,20 +74,18 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
         public IMessageBus MessageBus { get; }
 
-        public Task Boot(CancellationToken cancellationToken = default) => BootAsync(cancellationToken);
-        
         public Task BootAsync(CancellationToken cancellationToken = default)
         {
             Logger.Info("Booting application");
             CompositionRoot.Verify();
             MessageBus.Connect();
-            _isBooted.Set();
             return Task.CompletedTask;
         }
 
-        public bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue, CancellationToken cancellationToken = default)
+        public void Dispose()
         {
-            return _isBooted.Wait(timeoutMilliSeconds, cancellationToken);
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         protected void Dispose(bool disposing)
@@ -114,12 +95,6 @@ namespace Backend.Fx.Patterns.DependencyInjection
                 Logger.Info("Application shut down initialized");
                 CompositionRoot?.Dispose();
             }
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
     }
 }

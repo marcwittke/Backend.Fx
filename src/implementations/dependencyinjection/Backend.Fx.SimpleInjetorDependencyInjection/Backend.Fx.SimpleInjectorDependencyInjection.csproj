@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.3</TargetFramework>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>  
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <Authors>Marc Wittke</Authors>
+    <Company>anic GmbH</Company>
+    <Copyright>All rights reserved. Distributed under the terms of the MIT License.</Copyright>
+    <Description>Bootstrapping for Backend.Fx using Simple Injector 5</Description>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+    <PackageLicense>MIT</PackageLicense>
+    <PackageProjectUrl>https://github.com/marcwittke/Backend.Fx</PackageProjectUrl>
+    <Product>Backend.Fx</Product>
+    <RepositoryType>Git</RepositoryType>
+    <RepositoryUrl>https://github.com/marcwittke/Backend.Fx.git</RepositoryUrl>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="SimpleInjector" Version="5.1.0" />
+	<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\abstractions\Backend.Fx\Backend.Fx.csproj" />
+  </ItemGroup>
+
+</Project>

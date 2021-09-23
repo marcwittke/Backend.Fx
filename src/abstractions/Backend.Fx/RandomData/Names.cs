@@ -1,4 +1,6 @@
-﻿namespace Backend.Fx.RandomData
+﻿// ReSharper disable StringLiteralTypo
+
+namespace Backend.Fx.RandomData
 {
     public static class Names
     {

@@ -11,7 +11,7 @@ namespace Backend.Fx.RandomData
         public IEnumerator<T> GetEnumerator()
         {
             const int maxRetries = 1000;
-            int retries = 0;
+            var retries = 0;
             while (true)
             {
                 T next;
@@ -23,7 +23,8 @@ namespace Backend.Fx.RandomData
 
                     if (retries++ > maxRetries)
                     {
-                        throw new Exception($"Tried {maxRetries} times to generate a unique {typeof(T).Name} but did not succeed, aborting now.");
+                        throw new Exception(
+                            $"Tried {maxRetries} times to generate a unique {typeof(T).Name} but did not succeed, aborting now.");
                     }
                 } while (_identicalPreventionMemory.Contains(hashCode));
 

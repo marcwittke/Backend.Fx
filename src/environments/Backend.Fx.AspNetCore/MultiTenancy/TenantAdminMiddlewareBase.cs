@@ -15,15 +15,17 @@ namespace Backend.Fx.AspNetCore.MultiTenancy
     {
         private static readonly ILogger Logger = LogManager.Create<TenantAdminMiddlewareBase>();
         private readonly RequestDelegate _next;
-        protected virtual string TenantsApiBaseUrl { get; } = "/api/tenants";
-        protected ITenantService TenantService { get; }
 
         protected TenantAdminMiddlewareBase(RequestDelegate next, ITenantService tenantService)
         {
             _next = next;
             TenantService = tenantService;
         }
-        
+
+        protected virtual string TenantsApiBaseUrl { get; } = "/api/tenants";
+
+        protected ITenantService TenantService { get; }
+
         public async Task Invoke(HttpContext context)
         {
             if (context.Request.Path.StartsWithSegments(TenantsApiBaseUrl))
@@ -31,33 +33,37 @@ namespace Backend.Fx.AspNetCore.MultiTenancy
                 if (!IsTenantsAdmin(context))
                 {
                     Logger.Warn("Unauthorized attempt to access tenant endpoints");
-                    context.Response.StatusCode = (int) HttpStatusCode.Forbidden;
+                    context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                     return;
                 }
 
                 if (context.Request.Method.ToLower() == "post")
                 {
                     Logger.Info("Creating Tenant");
-                    
+
                     try
                     {
                         using (var inputStream = new StreamReader(context.Request.Body))
                         {
                             string inputStreamContent = await inputStream.ReadToEndAsync();
 
-                            var createTenantParams = JsonConvert.DeserializeObject<CreateTenantParams>(inputStreamContent);
-                            if (createTenantParams == null) throw new ClientException();
+                            var createTenantParams
+                                = JsonConvert.DeserializeObject<CreateTenantParams>(inputStreamContent);
+                            if (createTenantParams == null)
+                            {
+                                throw new ClientException();
+                            }
 
-                            Tenant tenant = await CreateTenant(createTenantParams);
+                            var tenant = await CreateTenant(createTenantParams);
                             Logger.Info($"Created Tenant[{tenant.Id}] ({tenant.Name})");
-                            
+
                             await context.Response.WriteJsonAsync(tenant);
                         }
                     }
                     catch (Exception ex)
                     {
                         Logger.Error(ex, "Tenant Creation failed");
-                        context.Response.StatusCode = (int) HttpStatusCode.BadRequest;
+                        context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                         await context.Response.WriteAsync(ex.Message);
                         return;
                     }
@@ -67,7 +73,7 @@ namespace Backend.Fx.AspNetCore.MultiTenancy
 
                 if (HttpMethods.IsGet(context.Request.Method))
                 {
-                    var tenantIdStr = context.Request.Path.Value.Split('/').Last();
+                    string tenantIdStr = context.Request.Path.Value.Split('/').Last();
                     if (int.TryParse(tenantIdStr, out int tenantId))
                     {
                         Logger.Info($"Getting Tenant[{tenantId}]");
@@ -77,9 +83,9 @@ namespace Backend.Fx.AspNetCore.MultiTenancy
                     }
                     else
                     {
-                        Logger.Info($"Getting Tenants");
-                        
-                        var tenants = TenantService.GetTenants();
+                        Logger.Info("Getting Tenants");
+
+                        Tenant[] tenants = TenantService.GetTenants();
                         await context.Response.WriteJsonAsync(tenants);
                     }
 
@@ -95,13 +101,13 @@ namespace Backend.Fx.AspNetCore.MultiTenancy
             var tenantId = TenantService.CreateTenant(
                 createTenantParams.Name,
                 createTenantParams.Description,
-                createTenantParams.IsDemo, 
+                createTenantParams.IsDemo,
                 GetTenantConfiguration(createTenantParams));
             await AfterTenantCreation(createTenantParams, tenantId);
             var tenant = TenantService.GetTenant(tenantId);
             return tenant;
         }
-        
+
         protected abstract string GetTenantConfiguration(CreateTenantParams createTenantParams);
 
         protected virtual Task AfterTenantCreation(CreateTenantParams createTenantParams, TenantId tenantId)

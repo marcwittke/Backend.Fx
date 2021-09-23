@@ -16,7 +16,11 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// <param name="identity">The acting identity</param>
         /// <param name="tenantId">The targeted tenant id</param>
         /// <param name="correlationId">The correlation id, when it was continued</param>
-        Task InvokeAsync(Func<IInstanceProvider, Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId, Guid? correlationId = null);
+        Task InvokeAsync(
+            Func<IInstanceProvider, Task> awaitableAsyncAction,
+            IIdentity identity,
+            TenantId tenantId,
+            Guid? correlationId = null);
     }
 
 
@@ -26,25 +30,62 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// <param name="identity">The acting identity</param>
         /// <param name="tenantId">The targeted tenant id</param>
         /// <param name="correlationId">The correlation id, when it was continued</param>
-        void Invoke(Action<IInstanceProvider> action, IIdentity identity, TenantId tenantId, Guid? correlationId = null);
+        void Invoke(
+            Action<IInstanceProvider> action,
+            IIdentity identity,
+            TenantId tenantId,
+            Guid? correlationId = null);
     }
 
 
     public class BackendFxApplicationInvoker : IBackendFxApplicationInvoker, IBackendFxApplicationAsyncInvoker
     {
-        private readonly ICompositionRoot _compositionRoot;
         private static readonly ILogger Logger = LogManager.Create<BackendFxApplicationInvoker>();
+        private readonly ICompositionRoot _compositionRoot;
 
         public BackendFxApplicationInvoker(ICompositionRoot compositionRoot)
         {
             _compositionRoot = compositionRoot;
         }
 
+        public async Task InvokeAsync(
+            Func<IInstanceProvider, Task> awaitableAsyncAction,
+            IIdentity identity,
+            TenantId tenantId,
+            Guid? correlationId = null)
+        {
+            Logger.Info($"Invoking asynchronous action as {identity.Name} in {tenantId}");
+            using (var injectionScope = BeginScope(identity, tenantId, correlationId))
+            {
+                using (UseDurationLogger(injectionScope))
+                {
+                    var operation = injectionScope.InstanceProvider.GetInstance<IOperation>();
+                    try
+                    {
+                        operation.Begin();
+                        await awaitableAsyncAction.Invoke(injectionScope.InstanceProvider);
+                        injectionScope.InstanceProvider.GetInstance<IDomainEventAggregator>().RaiseEvents();
+                        operation.Complete();
+                    }
+                    catch
+                    {
+                        operation.Cancel();
+                        throw;
+                    }
 
-        public void Invoke(Action<IInstanceProvider> action, IIdentity identity, TenantId tenantId, Guid? correlationId = null)
+                    await injectionScope.InstanceProvider.GetInstance<IMessageBusScope>().RaiseEvents();
+                }
+            }
+        }
+
+        public void Invoke(
+            Action<IInstanceProvider> action,
+            IIdentity identity,
+            TenantId tenantId,
+            Guid? correlationId = null)
         {
             Logger.Info($"Invoking synchronous action as {identity.Name} in {tenantId}");
-            using (IInjectionScope injectionScope = BeginScope(identity, tenantId, correlationId))
+            using (var injectionScope = BeginScope(identity, tenantId, correlationId))
             {
                 using (UseDurationLogger(injectionScope))
                 {
@@ -68,36 +109,9 @@ namespace Backend.Fx.Patterns.DependencyInjection
             }
         }
 
-        public async Task InvokeAsync(Func<IInstanceProvider, Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId, Guid? correlationId = null)
-        {
-            Logger.Info($"Invoking asynchronous action as {identity.Name} in {tenantId}");
-            using (IInjectionScope injectionScope = BeginScope(identity, tenantId, correlationId))
-            {
-                using (UseDurationLogger(injectionScope))
-                {
-                    var operation = injectionScope.InstanceProvider.GetInstance<IOperation>();
-                    try
-                    {
-                        operation.Begin();
-                        await awaitableAsyncAction.Invoke(injectionScope.InstanceProvider);
-                        injectionScope.InstanceProvider.GetInstance<IDomainEventAggregator>().RaiseEvents();
-                        operation.Complete();
-                    }
-                    catch
-                    {
-                        operation.Cancel();
-                        throw;
-                    }
-
-                    await injectionScope.InstanceProvider.GetInstance<IMessageBusScope>().RaiseEvents();
-                }
-            }
-        }
-
-
         private IInjectionScope BeginScope(IIdentity identity, TenantId tenantId, Guid? correlationId)
         {
-            IInjectionScope injectionScope = _compositionRoot.BeginScope();
+            var injectionScope = _compositionRoot.BeginScope();
             tenantId = tenantId ?? new TenantId(null);
             injectionScope.InstanceProvider.GetInstance<ICurrentTHolder<TenantId>>().ReplaceCurrent(tenantId);
 
@@ -106,18 +120,18 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
             if (correlationId.HasValue)
             {
-                injectionScope.InstanceProvider.GetInstance<ICurrentTHolder<Correlation>>().Current.Resume(correlationId.Value);
+                injectionScope.InstanceProvider.GetInstance<ICurrentTHolder<Correlation>>()
+                    .Current.Resume(correlationId.Value);
             }
 
             return injectionScope;
         }
 
-
         private static IDisposable UseDurationLogger(IInjectionScope injectionScope)
         {
-            IIdentity identity = injectionScope.InstanceProvider.GetInstance<ICurrentTHolder<IIdentity>>().Current;
-            TenantId tenantId = injectionScope.InstanceProvider.GetInstance<ICurrentTHolder<TenantId>>().Current;
-            Correlation correlation = injectionScope.InstanceProvider.GetInstance<ICurrentTHolder<Correlation>>().Current;
+            var identity = injectionScope.InstanceProvider.GetInstance<ICurrentTHolder<IIdentity>>().Current;
+            var tenantId = injectionScope.InstanceProvider.GetInstance<ICurrentTHolder<TenantId>>().Current;
+            var correlation = injectionScope.InstanceProvider.GetInstance<ICurrentTHolder<Correlation>>().Current;
             return Logger.InfoDuration(
                 $"Starting scope {injectionScope.SequenceNumber} (correlation [{correlation.Id}]) for {identity.Name} in tenant {(tenantId.HasValue ? tenantId.Value.ToString() : "null")}",
                 $"Ended scope {injectionScope.SequenceNumber} (correlation [{correlation.Id}]) for {identity.Name} in tenant {(tenantId.HasValue ? tenantId.Value.ToString() : "null")}");

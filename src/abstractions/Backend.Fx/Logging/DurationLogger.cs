@@ -13,8 +13,7 @@ namespace Backend.Fx.Logging
 
         public DurationLogger(Action<string> logAction, string activity)
             : this(logAction, activity, activity)
-        {
-        }
+        { }
 
         public DurationLogger(Action<string> logAction, string beginMessage, string endMessage)
         {

@@ -11,8 +11,11 @@ namespace Backend.Fx.RandomData
         private readonly HashSet<string> _uniqueNames = new HashSet<string>();
 
         public bool EnforceUniqueNames { get; set; } = false;
+
         public int FemalePercentage { get; set; } = 55;
+
         public int MaximumAgeInDays { get; set; } = 80 * Year;
+
         public int MinimumAgeInDays { get; set; } = 18 * Year;
 
         public static TestPerson Generate()
@@ -22,7 +25,7 @@ namespace Backend.Fx.RandomData
 
         protected override TestPerson Next()
         {
-            var isFemale = _random.Next(1, 100) < FemalePercentage;
+            bool isFemale = _random.Next(1, 100) < FemalePercentage;
             TestPerson generated;
             do
             {

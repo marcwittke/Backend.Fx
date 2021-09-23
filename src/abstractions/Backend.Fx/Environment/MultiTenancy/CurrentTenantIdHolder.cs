@@ -9,7 +9,7 @@ namespace Backend.Fx.Environment.MultiTenancy
 
         private CurrentTenantIdHolder(TenantId initial) : base(initial)
         { }
-        
+
         public static CurrentTenantIdHolder Create(int tenantId)
         {
             var instance = new CurrentTenantIdHolder((TenantId)tenantId);

@@ -6,7 +6,7 @@ namespace Backend.Fx.Environment.DateAndTime
     public class AdjustableClock : IClock
     {
         private static readonly ILogger Logger = LogManager.Create<AdjustableClock>();
-        
+
         private readonly IClock _clockImplementation;
         private DateTime? _overriddenUtcNow;
 
@@ -29,6 +29,11 @@ namespace Backend.Fx.Environment.DateAndTime
             Logger.Trace($"Advancing clock by {timespan}");
             _overriddenUtcNow = _overriddenUtcNow.Value.Add(timespan);
             return _overriddenUtcNow.Value;
+        }
+
+        public void ResetToOriginalTime()
+        {
+            _overriddenUtcNow = null;
         }
     }
 }

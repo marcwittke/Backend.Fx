@@ -8,9 +8,11 @@ namespace Backend.Fx.BuildingBlocks
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
     public abstract class Identified : IEquatable<Identified>
     {
-        [Key] public int Id { get; set; }
+        [Key]
+        public int Id { get; set; }
 
-        [UsedImplicitly] public string DebuggerDisplay => $"{GetType().Name}[{Id}]";
+        [UsedImplicitly]
+        public string DebuggerDisplay => $"{GetType().Name}[{Id}]";
 
         public bool Equals(Identified other)
         {

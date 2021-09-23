@@ -1,43 +1,44 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard1.3</TargetFramework>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
-    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>  
-  </PropertyGroup>
-  
-  <PropertyGroup>
-    <Authors>Marc Wittke</Authors>
-    <Company>anic GmbH</Company>
-    <Copyright>All rights reserved. Distributed under the terms of the MIT License.</Copyright>
-    <Description>Abstractions of Backend.Fx and generic base implementations.</Description>
-    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
-    <PackageLicense>MIT</PackageLicense>
-    <PackageProjectUrl>https://github.com/marcwittke/Backend.Fx</PackageProjectUrl>
-    <Product>Backend.Fx</Product>
-    <RepositoryType>Git</RepositoryType>
-    <RepositoryUrl>https://github.com/marcwittke/Backend.Fx.git</RepositoryUrl>
-  </PropertyGroup>
-  
-  <ItemGroup>
-    <Compile Remove="Environment\Bootstrapping\**" />
-    <EmbeddedResource Remove="Environment\Bootstrapping\**" />
-    <None Remove="Environment\Bootstrapping\**" />
-  </ItemGroup>
+    <PropertyGroup>
+        <TargetFramework>netstandard1.3</TargetFramework>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+        <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+        <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+        <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="JetBrains.Annotations" Version="2020.3.0" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.6.0" />
-    <PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
-    <PackageReference Include="System.Data.Common" Version="4.1.0" />
-    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.8.16" />
-    <PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
-    <PackageReference Include="System.Security.Principal" Version="4.3.0" />
-	<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-  </ItemGroup>
+    <PropertyGroup>
+        <Authors>Marc Wittke</Authors>
+        <Company>anic GmbH</Company>
+        <Copyright>All rights reserved. Distributed under the terms of the MIT License.</Copyright>
+        <Description>Abstractions of Backend.Fx and generic base implementations.</Description>
+        <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+        <PackageLicense>MIT</PackageLicense>
+        <PackageProjectUrl>https://github.com/marcwittke/Backend.Fx</PackageProjectUrl>
+        <Product>Backend.Fx</Product>
+        <RepositoryType>Git</RepositoryType>
+        <RepositoryUrl>https://github.com/marcwittke/Backend.Fx.git</RepositoryUrl>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Remove="Environment\Bootstrapping\**" />
+        <EmbeddedResource Remove="Environment\Bootstrapping\**" />
+        <None Remove="Environment\Bootstrapping\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="JetBrains.Annotations" Version="2020.3.0" />
+        <PackageReference Include="Microsoft.CSharp" Version="4.6.0" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="1.1.2" />
+        <PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
+        <PackageReference Include="System.Data.Common" Version="4.1.0" />
+        <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.8.16" />
+        <PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
+        <PackageReference Include="System.Security.Principal" Version="4.3.0" />
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+    </ItemGroup>
 
 </Project>

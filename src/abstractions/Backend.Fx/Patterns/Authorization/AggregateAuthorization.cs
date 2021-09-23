@@ -6,40 +6,46 @@ using Backend.Fx.Logging;
 
 namespace Backend.Fx.Patterns.Authorization
 {
-    public abstract class AggregateAuthorization<TAggregateRoot> : IAggregateAuthorization<TAggregateRoot> where TAggregateRoot : AggregateRoot
+    public abstract class AggregateAuthorization<TAggregateRoot> : IAggregateAuthorization<TAggregateRoot>
+        where TAggregateRoot : AggregateRoot
     {
         private static readonly ILogger Logger = LogManager.Create<AggregateAuthorization<TAggregateRoot>>();
-        
-        /// <inheritdoc />>
+
+        /// <inheritdoc />
+        /// >
         public abstract Expression<Func<TAggregateRoot, bool>> HasAccessExpression { get; }
 
-        /// <inheritdoc />>
+        /// <inheritdoc />
+        /// >
         public virtual IQueryable<TAggregateRoot> Filter(IQueryable<TAggregateRoot> queryable)
         {
             return queryable.Where(HasAccessExpression);
         }
 
-        /// <inheritdoc />>
+        /// <inheritdoc />
+        /// >
         public abstract bool CanCreate(TAggregateRoot t);
 
         /// <summary>
         /// Implement a guard that might disallow modifying an existing aggregate.
-        /// This overload is called directly before saving modification of an instance, so that you can use the instance's state for deciding.
-        /// This default implementation forwards to <see cref="AggregateAuthorization{TAggregateRoot}.CanCreate"/>
+        /// This overload is called directly before saving modification of an instance, so that you can use the instance's state
+        /// for deciding.
+        /// This default implementation forwards to <see cref="AggregateAuthorization{TAggregateRoot}.CanCreate" />
         /// </summary>
         public virtual bool CanModify(TAggregateRoot t)
         {
-            var canCreate = CanCreate(t);
-            Logger.Trace($"CanCreate({t.DebuggerDisplay}): {canCreate}");
-            return canCreate;
-        }
-
-        /// <inheritdoc />>
-        public virtual bool CanDelete(TAggregateRoot t)
-        {
-            var canModify = CanModify(t);
+            bool canModify = CanCreate(t);
             Logger.Trace($"CanModify({t.DebuggerDisplay}): {canModify}");
             return canModify;
+        }
+
+        /// <inheritdoc />
+        /// >
+        public virtual bool CanDelete(TAggregateRoot t)
+        {
+            bool canDelete = CanModify(t);
+            Logger.Trace($"CanDelete({t.DebuggerDisplay}): {canDelete}");
+            return canDelete;
         }
     }
 }

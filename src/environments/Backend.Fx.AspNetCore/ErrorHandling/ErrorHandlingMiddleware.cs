@@ -33,42 +33,64 @@ namespace Backend.Fx.AspNetCore.ErrorHandling
                 {
                     await _next.Invoke(context);
                 }
-                catch (TooManyRequestsException tmrex)
+                catch (TooManyRequestsException tooManyRequestsException)
                 {
-                    if (tmrex.RetryAfter > 0)
+                    if (tooManyRequestsException.RetryAfter > 0)
                     {
-                        context.Response.Headers.Add("Retry-After", tmrex.RetryAfter.ToString(CultureInfo.InvariantCulture));
+                        context.Response.Headers.Add(
+                            "Retry-After",
+                            tooManyRequestsException.RetryAfter.ToString(CultureInfo.InvariantCulture));
                     }
 
-                    await HandleClientError(context, 429, "TooManyRequests", tmrex);
+                    await HandleClientError(context, 429, "TooManyRequests", tooManyRequestsException);
                 }
-                catch (UnprocessableException uex)
+                catch (UnprocessableException unprocessableException)
                 {
-                    await HandleClientError(context, 422, "Unprocessable", uex);
+                    await HandleClientError(context, 422, "Unprocessable", unprocessableException);
                 }
-                catch (NotFoundException nfex)
+                catch (NotFoundException notFoundException)
                 {
-                    await HandleClientError(context, (int) HttpStatusCode.NotFound, HttpStatusCode.NotFound.ToString(), nfex);
+                    await HandleClientError(
+                        context,
+                        (int)HttpStatusCode.NotFound,
+                        HttpStatusCode.NotFound.ToString(),
+                        notFoundException);
                 }
-                catch (ConflictedException confex)
+                catch (ConflictedException conflictedException)
                 {
-                    await HandleClientError(context, (int) HttpStatusCode.Conflict, HttpStatusCode.Conflict.ToString(), confex);
+                    await HandleClientError(
+                        context,
+                        (int)HttpStatusCode.Conflict,
+                        HttpStatusCode.Conflict.ToString(),
+                        conflictedException);
                 }
-                catch (ForbiddenException uex)
+                catch (ForbiddenException forbiddenException)
                 {
-                    await HandleClientError(context, (int) HttpStatusCode.Forbidden, HttpStatusCode.Forbidden.ToString(), uex);
+                    await HandleClientError(
+                        context,
+                        (int)HttpStatusCode.Forbidden,
+                        HttpStatusCode.Forbidden.ToString(),
+                        forbiddenException);
                 }
-                catch (UnauthorizedException uex)
+                catch (UnauthorizedException unauthorizedException)
                 {
-                    await HandleClientError(context, (int) HttpStatusCode.Unauthorized, HttpStatusCode.Unauthorized.ToString(), uex);
+                    await HandleClientError(
+                        context,
+                        (int)HttpStatusCode.Unauthorized,
+                        HttpStatusCode.Unauthorized.ToString(),
+                        unauthorizedException);
                 }
-                catch (ClientException cex)
+                catch (ClientException clientException)
                 {
-                    await HandleClientError(context, (int) HttpStatusCode.BadRequest, HttpStatusCode.BadRequest.ToString(), cex);
+                    await HandleClientError(
+                        context,
+                        (int)HttpStatusCode.BadRequest,
+                        HttpStatusCode.BadRequest.ToString(),
+                        clientException);
                 }
-                catch (Exception ex)
+                catch (Exception exception)
                 {
-                    await HandleServerError(context, ex);
+                    await HandleServerError(context, exception);
                 }
             }
             else
@@ -79,7 +101,11 @@ namespace Backend.Fx.AspNetCore.ErrorHandling
 
         protected abstract Task<bool> ShouldHandle(HttpContext context);
 
-        protected abstract Task HandleClientError(HttpContext context, int httpStatusCode, string message, ClientException exception);
+        protected abstract Task HandleClientError(
+            HttpContext context,
+            int httpStatusCode,
+            string message,
+            ClientException exception);
 
         protected abstract Task HandleServerError(HttpContext context, Exception exception);
     }

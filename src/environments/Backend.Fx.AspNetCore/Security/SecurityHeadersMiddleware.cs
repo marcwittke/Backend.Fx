@@ -12,7 +12,6 @@ namespace Backend.Fx.AspNetCore.Security
         private readonly RequestDelegate _next;
         private readonly IOptions<SecurityHeadersOptions> _securityOptionsAccessor;
 
-
         [UsedImplicitly]
         public SecurityHeadersMiddleware(RequestDelegate next, IOptions<SecurityHeadersOptions> securityOptionsAccessor)
         {
@@ -23,10 +22,11 @@ namespace Backend.Fx.AspNetCore.Security
         [UsedImplicitly]
         public async Task Invoke(HttpContext context)
         {
-            ContentSecurityPolicyOptions csp = _securityOptionsAccessor.Value.ContentSecurityPolicy;
+            var csp = _securityOptionsAccessor.Value.ContentSecurityPolicy;
             if (csp?.ContentSecurityPolicy != null && csp.ContentSecurityPolicy.Length > 0)
             {
-                string cspHeaderKey = csp.ReportOnly ? "Content-Security-Policy-Report-Only" : "Content-Security-Policy";
+                string cspHeaderKey
+                    = csp.ReportOnly ? "Content-Security-Policy-Report-Only" : "Content-Security-Policy";
 
                 string completeCsp = csp.ContentSecurityPolicy;
 
@@ -40,7 +40,9 @@ namespace Backend.Fx.AspNetCore.Security
 
             if (_securityOptionsAccessor.Value.HstsExpiration > 0)
             {
-                context.Response.Headers.Add("Strict-Transport-Security", new StringValues($"max-age={_securityOptionsAccessor.Value.HstsExpiration}"));
+                context.Response.Headers.Add(
+                    "Strict-Transport-Security",
+                    new StringValues($"max-age={_securityOptionsAccessor.Value.HstsExpiration}"));
             }
 
             await _next.Invoke(context);

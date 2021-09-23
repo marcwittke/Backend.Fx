@@ -1,0 +1,74 @@
+﻿using System;
+using Backend.Fx.Logging;
+using Backend.Fx.Patterns.IdGeneration;
+
+namespace Backend.Fx.Environment.Persistence
+{
+    public abstract class MsSqlSequence : ISequence
+    {
+        private static readonly ILogger Logger = LogManager.Create<MsSqlSequence>();
+        private readonly IDbConnectionFactory _dbConnectionFactory;
+
+        protected MsSqlSequence(IDbConnectionFactory dbConnectionFactory)
+        {
+            _dbConnectionFactory = dbConnectionFactory;
+        }
+
+        protected abstract string SequenceName { get; }
+
+        protected virtual string SchemaName { get; } = "dbo";
+
+        protected virtual int StartValue => 1;
+
+        public void EnsureSequence()
+        {
+            Logger.Info($"Ensuring existence of mssql sequence {SchemaName}.{SequenceName}");
+            using (var dbConnection = _dbConnectionFactory.Create())
+            {
+                dbConnection.Open();
+                bool sequenceExists;
+                using (var cmd = dbConnection.CreateCommand())
+                {
+                    cmd.CommandText
+                        = $"SELECT count(*) FROM sys.sequences seq join sys.schemas s on s.schema_id  = seq.schema_id WHERE seq.name = '{SequenceName}' and s.name = '{SchemaName}'";
+                    sequenceExists = (int)cmd.ExecuteScalar() == 1;
+                }
+
+                if (sequenceExists)
+                {
+                    Logger.Info($"Sequence {SchemaName}.{SequenceName} exists");
+                }
+                else
+                {
+                    Logger.Info($"Sequence {SchemaName}.{SequenceName} does not exist yet and will be created now");
+                    using (var cmd = dbConnection.CreateCommand())
+                    {
+                        cmd.CommandText
+                            = $"CREATE SEQUENCE [{SchemaName}].[{SequenceName}] START WITH {StartValue} INCREMENT BY {Increment}";
+                        cmd.ExecuteNonQuery();
+                        Logger.Info($"Sequence {SchemaName}.{SequenceName} created");
+                    }
+                }
+            }
+        }
+
+        public int GetNextValue()
+        {
+            using (var dbConnection = _dbConnectionFactory.Create())
+            {
+                dbConnection.Open();
+                int nextValue;
+                using (var selectNextValCommand = dbConnection.CreateCommand())
+                {
+                    selectNextValCommand.CommandText = $"SELECT next value FOR {SchemaName}.{SequenceName}";
+                    nextValue = Convert.ToInt32(selectNextValCommand.ExecuteScalar());
+                    Logger.Debug($"{SchemaName}.{SequenceName} served {nextValue} as next value");
+                }
+
+                return nextValue;
+            }
+        }
+
+        public abstract int Increment { get; }
+    }
+}

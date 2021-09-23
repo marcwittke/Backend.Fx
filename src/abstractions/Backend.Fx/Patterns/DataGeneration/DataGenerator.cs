@@ -1,7 +1,7 @@
-﻿namespace Backend.Fx.Patterns.DataGeneration
-{
-    using Logging;
+﻿using Backend.Fx.Logging;
 
+namespace Backend.Fx.Patterns.DataGeneration
+{
     public interface IDataGenerator
     {
         /// <summary>
@@ -12,9 +12,10 @@
         void Generate();
     }
 
+
     /// <summary>
-    /// Implement this abstract class and mark it either with the <see cref="IDemoDataGenerator"/> 
-    /// or <see cref="IProductiveDataGenerator"/> depending whether you want it to run in all environments
+    /// Implement this abstract class and mark it either with the <see cref="IDemoDataGenerator" />
+    /// or <see cref="IProductiveDataGenerator" /> depending whether you want it to run in all environments
     /// or only on development environments.
     /// Any implementation is automatically picked up by the injection container, so no extra plumbing is required.
     /// You can require any application or domain service including repositories via constructor parameter.
@@ -53,7 +54,7 @@
         protected abstract void Initialize();
 
         /// <summary>
-        /// return true, if the generator should be executed. Generators must be implemented idempotent, 
+        /// return true, if the generator should be executed. Generators must be implemented idempotent,
         /// since they're all executed on application start
         /// </summary>
         /// <returns></returns>

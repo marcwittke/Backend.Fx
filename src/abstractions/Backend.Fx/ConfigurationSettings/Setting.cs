@@ -7,8 +7,7 @@ namespace Backend.Fx.ConfigurationSettings
     {
         [UsedImplicitly]
         private Setting()
-        {
-        }
+        { }
 
         public Setting(int id, string key) : base(id)
         {
@@ -16,6 +15,7 @@ namespace Backend.Fx.ConfigurationSettings
         }
 
         public string Key { get; [UsedImplicitly] private set; }
+
         public string SerializedValue { get; private set; }
 
         public T GetValue<T>(ISettingSerializer<T> serializer)

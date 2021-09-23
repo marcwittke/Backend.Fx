@@ -1,4 +1,3 @@
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Patterns.DependencyInjection;
@@ -28,16 +27,10 @@ namespace Backend.Fx.Environment.MultiTenancy
 
         public IMessageBus MessageBus => _application.MessageBus;
 
-        public bool WaitForBoot(int timeoutMilliSeconds = Int32.MaxValue, CancellationToken cancellationToken = default)
-        {
-            return _application.WaitForBoot(timeoutMilliSeconds, cancellationToken);
-        }
-
-        public Task Boot(CancellationToken cancellationToken = default) => BootAsync(cancellationToken);
         public async Task BootAsync(CancellationToken cancellationToken = default)
         {
             EnableDataGenerationForNewTenants();
-            
+
             await _application.BootAsync(cancellationToken);
         }
     }
