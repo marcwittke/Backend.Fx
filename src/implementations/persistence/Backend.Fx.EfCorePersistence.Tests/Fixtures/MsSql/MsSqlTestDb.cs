@@ -1,23 +1,23 @@
 using Microsoft.Data.SqlClient;
 
-namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
+namespace Backend.Fx.EfCorePersistence.Tests.Fixtures.MsSql
 {
     public class MsSqlTestDb
     {
-        public string ConnectionString { get; set; }
-
         public MsSqlTestDb(string testDbName)
         {
             var sqlUtil = MsSqlServerUtil.DetectSqlServer("BACKENDFXTESTDB");
             sqlUtil.EnsureDroppedDatabase(testDbName);
             sqlUtil.CreateDatabase(testDbName);
 
-            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(sqlUtil.ConnectionString)
+            var builder = new SqlConnectionStringBuilder(sqlUtil.ConnectionString)
             {
                 InitialCatalog = testDbName,
-                MultipleActiveResultSets = true,
+                MultipleActiveResultSets = true
             };
             ConnectionString = builder.ConnectionString;
         }
+
+        public string ConnectionString { get; }
     }
 }

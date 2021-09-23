@@ -10,7 +10,7 @@ namespace Backend.Fx.Environment.Authentication
 
         private CurrentIdentityHolder(IIdentity initial) : base(initial)
         { }
-        
+
         public override IIdentity ProvideInstance()
         {
             return new AnonymousIdentity();
@@ -23,7 +23,9 @@ namespace Backend.Fx.Environment.Authentication
                 return "<NULL>";
             }
 
-            string auth = instance.IsAuthenticated ? $"authenticated via {instance.AuthenticationType}" : "not authenticated";
+            string auth = instance.IsAuthenticated
+                ? $"authenticated via {instance.AuthenticationType}"
+                : "not authenticated";
             return $"Identity: {instance.Name}, {auth}";
         }
 
@@ -31,7 +33,7 @@ namespace Backend.Fx.Environment.Authentication
         {
             return Create(new SystemIdentity());
         }
-        
+
         public static ICurrentTHolder<IIdentity> Create(IIdentity identity)
         {
             return new CurrentIdentityHolder(identity);

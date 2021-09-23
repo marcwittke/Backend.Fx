@@ -12,8 +12,7 @@ namespace Backend.Fx.BuildingBlocks
     public abstract class Entity : Identified
     {
         protected Entity()
-        {
-        }
+        { }
 
         protected Entity(int id)
         {
@@ -22,11 +21,13 @@ namespace Backend.Fx.BuildingBlocks
 
         public DateTime CreatedOn { get; protected set; }
 
-        [StringLength(100)] public string CreatedBy { get; protected set; }
+        [StringLength(100)]
+        public string CreatedBy { get; protected set; }
 
         public DateTime? ChangedOn { get; protected set; }
 
-        [StringLength(100)] public string ChangedBy { get; protected set; }
+        [StringLength(100)]
+        public string ChangedBy { get; protected set; }
 
         public void SetCreatedProperties([NotNull] string createdBy, DateTime createdOn)
         {

@@ -10,7 +10,8 @@ namespace Backend.Fx.Tests.BuildingBlocks
             Id = id;
         }
     }
-    
+
+
     public class TheIdentified
     {
         [Fact]
@@ -20,7 +21,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
             var identified1Clone = new TestIdentified(1);
             var identified2 = new TestIdentified(2);
             Identified stillNull = null;
-            
+
             Assert.True(identified1.Equals(identified1));
             Assert.True(identified1.Equals(identified1Clone));
             Assert.False(identified1.Equals(identified2));

@@ -1,8 +1,6 @@
-using System.Security.Principal;
 using Backend.Fx.AspNetCore.MultiTenancy;
 using Backend.Fx.AspNetCore.Mvc;
 using Backend.Fx.AspNetCore.Mvc.Activators;
-using Backend.Fx.Patterns.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.ViewComponents;
@@ -27,26 +25,29 @@ namespace Backend.Fx.AspNetCore
         {
             app.UseMiddleware<TTenantMiddleware>();
 
-            app.Use(async (context, requestDelegate) =>
-            {
-                // the ambient tenant id has been set before by a TenantMiddleware
-                var tenantId = context.GetTenantId();
-
-                // the invoking identity has been set before by an AuthenticationMiddleware
-                IIdentity actingIdentity = context.User.Identity;
-                
-                IBackendFxApplication application = app.ApplicationServices.GetRequiredService<THostedService>().Application;
-                application.WaitForBoot();
-
-                await application.AsyncInvoker.InvokeAsync(ip =>
+            app.Use(
+                async (context, requestDelegate) =>
                 {
-                    // set the instance provider for activators being called inside the requestDelegate (everything related to MVC
-                    // for example, like ControllerActivator and ViewComponentActivator etc.)
-                    context.SetCurrentInstanceProvider(ip);
+                    // the ambient tenant id has been set before by a TenantMiddleware
+                    var tenantId = context.GetTenantId();
 
-                    return requestDelegate.Invoke();
-                }, actingIdentity, tenantId);
-            });
+                    // the invoking identity has been set before by an AuthenticationMiddleware
+                    var actingIdentity = context.User.Identity;
+
+                    var application = app.ApplicationServices.GetRequiredService<THostedService>().Application;
+
+                    await application.AsyncInvoker.InvokeAsync(
+                        ip =>
+                        {
+                            // set the instance provider for activators being called inside the requestDelegate (everything related to MVC
+                            // for example, like ControllerActivator and ViewComponentActivator etc.)
+                            context.SetCurrentInstanceProvider(ip);
+
+                            return requestDelegate.Invoke();
+                        },
+                        actingIdentity,
+                        tenantId);
+                });
         }
     }
 }

@@ -5,7 +5,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Domain
 {
     public class TestDomainEventHandler : IDomainEventHandler<TestDomainEvent>
     {
-        public List<TestDomainEvent> Events { get; } = new List<TestDomainEvent>();
+        public List<TestDomainEvent> Events { get; } = new();
 
         public void Handle(TestDomainEvent testDomainEvent)
         {

@@ -13,7 +13,11 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
     public class TheSequentializingBackendFxApplicationInvoker
     {
         private static readonly ILogger Logger = LogManager.Create<TheSequentializingBackendFxApplicationInvoker>();
-        
+
+        private readonly int _actionDuration = 100;
+        private readonly IBackendFxApplicationInvoker _decoratedInvoker;
+        private readonly IBackendFxApplicationInvoker _invoker;
+
         public TheSequentializingBackendFxApplicationInvoker()
         {
             var fakes = new DiTestFakes();
@@ -21,16 +25,12 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             _decoratedInvoker = new SequentializingBackendFxApplicationInvoker(_invoker);
         }
 
-        private readonly int _actionDuration = 100;
-        private readonly IBackendFxApplicationInvoker _invoker;
-        private readonly IBackendFxApplicationInvoker _decoratedInvoker;
-
         private async Task InvokeSomeActions(int count, IBackendFxApplicationInvoker invoker)
         {
-            var tasks = Enumerable
-                        .Range(0, count)
-                        .Select(i => Task.Run(() => invoker.Invoke(DoTheAction, new AnonymousIdentity(), new TenantId(1))))
-                        .ToArray();
+            Task[] tasks = Enumerable
+                .Range(0, count)
+                .Select(_ => Task.Run(() => invoker.Invoke(DoTheAction, new AnonymousIdentity(), new TenantId(1))))
+                .ToArray();
 
             await Task.WhenAll(tasks);
         }
@@ -53,13 +53,10 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
                 sw.Start();
                 await InvokeSomeActions(count, _invoker);
                 long actualDuration = sw.ElapsedMilliseconds;
-                var expectedDuration = _actionDuration * count;
-                Assert.True(actualDuration < expectedDuration,
+                int expectedDuration = _actionDuration * count;
+                Assert.True(
+                    actualDuration < expectedDuration,
                     $"Actual duration of {actualDuration}ms is greater than maximum expected duration of {expectedDuration}ms");
-            }
-            else
-            {
-                // fails on CI Pipeline due to CPU count   
             }
         }
 

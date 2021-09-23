@@ -15,7 +15,7 @@ namespace Backend.Fx.InMemoryPersistence
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable) _dictionaryImplementation).GetEnumerator();
+            return ((IEnumerable)_dictionaryImplementation).GetEnumerator();
         }
 
         public void Add(KeyValuePair<int, T> item)

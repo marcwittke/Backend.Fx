@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.IdGeneration;
 
@@ -16,6 +15,7 @@ namespace Backend.Fx.Environment.Persistence
         }
 
         protected abstract string SequenceName { get; }
+
         protected virtual string SchemaName { get; } = "dbo";
 
         protected virtual int StartValue => 1;
@@ -23,14 +23,15 @@ namespace Backend.Fx.Environment.Persistence
         public void EnsureSequence()
         {
             Logger.Info($"Ensuring existence of mssql sequence {SchemaName}.{SequenceName}");
-            using (IDbConnection dbConnection = _dbConnectionFactory.Create())
+            using (var dbConnection = _dbConnectionFactory.Create())
             {
                 dbConnection.Open();
                 bool sequenceExists;
-                using (IDbCommand cmd = dbConnection.CreateCommand())
+                using (var cmd = dbConnection.CreateCommand())
                 {
-                    cmd.CommandText = $"SELECT count(*) FROM sys.sequences seq join sys.schemas s on s.schema_id  = seq.schema_id WHERE seq.name = '{SequenceName}' and s.name = '{SchemaName}'";
-                    sequenceExists = (int) cmd.ExecuteScalar() == 1;
+                    cmd.CommandText
+                        = $"SELECT count(*) FROM sys.sequences seq join sys.schemas s on s.schema_id  = seq.schema_id WHERE seq.name = '{SequenceName}' and s.name = '{SchemaName}'";
+                    sequenceExists = (int)cmd.ExecuteScalar() == 1;
                 }
 
                 if (sequenceExists)
@@ -40,9 +41,10 @@ namespace Backend.Fx.Environment.Persistence
                 else
                 {
                     Logger.Info($"Sequence {SchemaName}.{SequenceName} does not exist yet and will be created now");
-                    using (IDbCommand cmd = dbConnection.CreateCommand())
+                    using (var cmd = dbConnection.CreateCommand())
                     {
-                        cmd.CommandText = $"CREATE SEQUENCE [{SchemaName}].[{SequenceName}] START WITH {StartValue} INCREMENT BY {Increment}";
+                        cmd.CommandText
+                            = $"CREATE SEQUENCE [{SchemaName}].[{SequenceName}] START WITH {StartValue} INCREMENT BY {Increment}";
                         cmd.ExecuteNonQuery();
                         Logger.Info($"Sequence {SchemaName}.{SequenceName} created");
                     }
@@ -52,11 +54,11 @@ namespace Backend.Fx.Environment.Persistence
 
         public int GetNextValue()
         {
-            using (IDbConnection dbConnection = _dbConnectionFactory.Create())
+            using (var dbConnection = _dbConnectionFactory.Create())
             {
                 dbConnection.Open();
                 int nextValue;
-                using (IDbCommand selectNextValCommand = dbConnection.CreateCommand())
+                using (var selectNextValCommand = dbConnection.CreateCommand())
                 {
                     selectNextValCommand.CommandText = $"SELECT next value FOR {SchemaName}.{SequenceName}";
                     nextValue = Convert.ToInt32(selectNextValCommand.ExecuteScalar());

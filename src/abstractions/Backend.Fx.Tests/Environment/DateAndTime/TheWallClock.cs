@@ -9,7 +9,8 @@ namespace Backend.Fx.Tests.Environment.DateAndTime
 {
     public class TheWallClock
     {
-        private readonly IEqualityComparer<DateTime?> _tolerantDateTimeComparer = new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(10));
+        private readonly IEqualityComparer<DateTime?> _tolerantDateTimeComparer
+            = new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(10));
 
         [Fact]
         public void IsTheSystemClock()

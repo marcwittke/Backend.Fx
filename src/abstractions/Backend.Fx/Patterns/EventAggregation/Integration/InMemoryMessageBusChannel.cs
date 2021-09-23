@@ -1,14 +1,13 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
-    using System;
-    using System.Threading.Tasks;
-    
     public class InMemoryMessageBusChannel
     {
         private readonly ConcurrentBag<Task> _messageHandlingTasks = new ConcurrentBag<Task>();
-        
+
         internal event EventHandler<MessageReceivedEventArgs> MessageReceived;
 
         internal void Publish(IIntegrationEvent integrationEvent)
@@ -24,7 +23,8 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
                 await messageHandlingTask;
             }
         }
-        
+
+
         internal class MessageReceivedEventArgs
         {
             public IIntegrationEvent IntegrationEvent { get; set; }

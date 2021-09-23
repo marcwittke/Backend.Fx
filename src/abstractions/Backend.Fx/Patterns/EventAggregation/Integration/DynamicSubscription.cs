@@ -21,13 +21,13 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
             object handlerInstance = instanceProvider.GetInstance(_handlerType);
             using (Logger.InfoDuration($"Invoking subscribed handler {_handlerType.GetDetailedTypeName()}"))
             {
-                ((IIntegrationMessageHandler) handlerInstance).Handle(context.DynamicEvent);
+                ((IIntegrationMessageHandler)handlerInstance).Handle(context.DynamicEvent);
             }
         }
 
         public bool Matches(object handler)
         {
-            return (Type) handler == _handlerType;
+            return (Type)handler == _handlerType;
         }
     }
 }

@@ -9,11 +9,11 @@
             _sequence = sequence;
         }
 
+        protected override int BlockSize => _sequence.Increment;
+
         protected override int GetNextBlockStart()
         {
             return _sequence.GetNextValue();
         }
-
-        protected override int BlockSize => _sequence.Increment;
     }
 }

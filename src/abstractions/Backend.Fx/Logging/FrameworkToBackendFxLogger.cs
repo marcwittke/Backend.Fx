@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace Backend.Fx.Logging
 {
     using NetFxILogger = Microsoft.Extensions.Logging.ILogger;
-    using NetFxLogLevel = Microsoft.Extensions.Logging.LogLevel;
+    using NetFxLogLevel = LogLevel;
+
 
     [DebuggerStepThrough]
     public class FrameworkToBackendFxLogger : NetFxILogger
@@ -16,9 +18,14 @@ namespace Backend.Fx.Logging
             _logger = logger;
         }
 
-        public void Log<TState>(NetFxLogLevel logLevel, Microsoft.Extensions.Logging.EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        public void Log<TState>(
+            NetFxLogLevel logLevel,
+            EventId eventId,
+            TState state,
+            Exception exception,
+            Func<TState, Exception, string> formatter)
         {
-            var formatted = formatter(state, exception);
+            string formatted = formatter(state, exception);
             formatted = formatted?.Replace("{", "{{").Replace("}", "}}");
 
             switch (logLevel)

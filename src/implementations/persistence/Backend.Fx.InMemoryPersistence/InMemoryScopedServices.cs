@@ -13,7 +13,12 @@ namespace Backend.Fx.InMemoryPersistence
     {
         private readonly IInMemoryStores _inMemoryStores;
 
-        protected InMemoryScopedServices(IClock clock, IIdentity identity, TenantId tenantId, Assembly[] assemblies, IInMemoryStores inMemoryStores)
+        protected InMemoryScopedServices(
+            IClock clock,
+            IIdentity identity,
+            TenantId tenantId,
+            Assembly[] assemblies,
+            IInMemoryStores inMemoryStores)
             : base(clock, identity, tenantId, assemblies)
         {
             _inMemoryStores = inMemoryStores;
@@ -29,7 +34,9 @@ namespace Backend.Fx.InMemoryPersistence
             return new InMemoryRepository<TAggregateRoot>(
                 _inMemoryStores.GetStore<TAggregateRoot>(),
                 TenantIdHolder,
-                (IAggregateAuthorization<TAggregateRoot>)GetAggregateAuthorization(IdentityHolder, typeof(TAggregateRoot)));
+                (IAggregateAuthorization<TAggregateRoot>)GetAggregateAuthorization(
+                    IdentityHolder,
+                    typeof(TAggregateRoot)));
         }
     }
 }

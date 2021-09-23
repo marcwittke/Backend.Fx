@@ -6,7 +6,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
 {
     public class TheCorrelation
     {
-        private readonly Correlation _sut = new Correlation();
+        private readonly Correlation _sut = new();
 
         [Fact]
         public void CanResume()

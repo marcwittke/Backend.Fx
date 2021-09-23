@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Backend.Fx.BuildingBlocks;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
+using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
 using Backend.Fx.EfCorePersistence.Tests.Fixtures;
 using Backend.Fx.Extensions;
 using Backend.Fx.Patterns.IdGeneration;
@@ -12,11 +14,12 @@ namespace Backend.Fx.EfCorePersistence.Tests
 {
     public class TheRepositoryOfComposedAggregate
     {
-        private readonly IEqualityComparer<DateTime?> _tolerantDateTimeComparer =
-            new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(5000));
+        private readonly PersistenceFixture _fixture;
 
         private readonly IEntityIdGenerator _idGenerator;
-        private readonly PersistenceFixture _fixture;
+
+        private readonly IEqualityComparer<DateTime?> _tolerantDateTimeComparer =
+            new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(5000));
 
         public TheRepositoryOfComposedAggregate()
         {
@@ -24,10 +27,9 @@ namespace Backend.Fx.EfCorePersistence.Tests
             _idGenerator = _fixture.SingletonServices.EntityIdGenerator;
         }
 
-
         private int CreateBlogWithPost(TestScopedServices scope, int postCount = 1)
         {
-            var blogId = _idGenerator.NextId();
+            int blogId = _idGenerator.NextId();
             scope.DbConnection.Execute(
                 "INSERT INTO Blogs (Id, TenantId, Name, CreatedOn, CreatedBy) " +
                 $"VALUES ({blogId}, {scope.TenantId.Value}, 'my blog', CURRENT_TIMESTAMP, 'persistence test')");
@@ -35,9 +37,11 @@ namespace Backend.Fx.EfCorePersistence.Tests
             Assert.Equal(1, count);
 
             for (var i = 0; i < postCount; i++)
+            {
                 scope.DbConnection.Execute(
                     "INSERT INTO Posts (Id, BlogId, Name, TargetAudience_IsPublic, TargetAudience_Culture, CreatedOn, CreatedBy) " +
                     $"VALUES ({_idGenerator.NextId()}, {blogId}, 'my post {i:00}', '1', 'de-DE', CURRENT_TIMESTAMP, 'persistence test')");
+            }
 
             return blogId;
         }
@@ -75,17 +79,16 @@ namespace Backend.Fx.EfCorePersistence.Tests
         //     }
         // }
 
-
         [Fact]
         public void CanAddDependent()
         {
             using (var scope = _fixture.BeginScope())
             {
-                var id = CreateBlogWithPost(scope, 10);
+                int id = CreateBlogWithPost(scope, 10);
 
-                var sut = scope.GetRepository<Blog>();
+                IRepository<Blog> sut = scope.GetRepository<Blog>();
 
-                Blog blog = sut.Single(id);
+                var blog = sut.Single(id);
                 blog.Posts.Add(new Post(_idGenerator.NextId(), blog, "added"));
             }
 
@@ -110,7 +113,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (var scope = _fixture.BeginScope())
             {
-                var sut = scope.GetRepository<Blog>();
+                IRepository<Blog> sut = scope.GetRepository<Blog>();
                 var blog = new Blog(_idGenerator.NextId(), "my blog");
                 blog.AddPost(_idGenerator, "my post");
                 sut.Add(blog);
@@ -131,10 +134,10 @@ namespace Backend.Fx.EfCorePersistence.Tests
         {
             using (var scope = _fixture.BeginScope())
             {
-                var id = CreateBlogWithPost(scope);
+                int id = CreateBlogWithPost(scope);
 
-                var sut = scope.GetRepository<Blog>();
-                Blog blog = sut.Single(id);
+                IRepository<Blog> sut = scope.GetRepository<Blog>();
+                var blog = sut.Single(id);
                 sut.Delete(blog);
             }
 
@@ -161,12 +164,12 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (var scope = _fixture.BeginScope())
             {
-                var sut = scope.GetRepository<Blog>();
-                Blog blog = sut.Single(id);
-                Post firstPost = blog.Posts.First();
+                IRepository<Blog> sut = scope.GetRepository<Blog>();
+                var blog = sut.Single(id);
+                var firstPost = blog.Posts.First();
                 firstPost.SetName("Something different");
                 blog.Posts.Remove(firstPost);
-                
+
                 scope.DbContext.TraceChangeTrackerState();
             }
 
@@ -176,7 +179,6 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 Assert.Equal(9, count);
             }
         }
-
 
         [Fact]
         public void CanRead()
@@ -191,7 +193,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (var scope = _fixture.BeginScope())
             {
-                var sut = scope.GetRepository<Blog>();
+                IRepository<Blog> sut = scope.GetRepository<Blog>();
                 blog = sut.Single(id);
             }
 
@@ -200,7 +202,6 @@ namespace Backend.Fx.EfCorePersistence.Tests
             Assert.Equal("my blog", blog.Name);
             Assert.NotEmpty(blog.Posts);
         }
-
 
         [Fact]
         public void CanReplaceDependentCollection()
@@ -213,8 +214,8 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (var scope = _fixture.BeginScope())
             {
-                var sut = scope.GetRepository<Blog>();
-                Blog blog = sut.Single(id);
+                IRepository<Blog> sut = scope.GetRepository<Blog>();
+                var blog = sut.Single(id);
                 blog.Posts.Clear();
                 blog.Posts.Add(new Post(_idGenerator.NextId(), blog, "new name 1"));
                 blog.Posts.Add(new Post(_idGenerator.NextId(), blog, "new name 2"));
@@ -241,8 +242,8 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (var scope = _fixture.BeginScope())
             {
-                var sut = scope.GetRepository<Blog>();
-                Blog blog = sut.Single(id);
+                IRepository<Blog> sut = scope.GetRepository<Blog>();
+                var blog = sut.Single(id);
                 blog.Modify("modified");
             }
 
@@ -269,8 +270,8 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (var scope = _fixture.BeginScope())
             {
-                var sut = scope.GetRepository<Blog>();
-                Blog blog = sut.Single(id);
+                IRepository<Blog> sut = scope.GetRepository<Blog>();
+                var blog = sut.Single(id);
                 post = blog.Posts.First();
                 post.SetName("modified");
             }
@@ -280,9 +281,12 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 var name = scope.DbConnection.ExecuteScalar<string>($"SELECT name FROM Posts where id = {post.Id}");
                 Assert.Equal("modified", name);
 
-                var strChangedOn = scope.DbConnection.ExecuteScalar<string>($"SELECT ChangedOn FROM Posts where id = {post.Id}");
-                DateTime changedOn = DateTime.Parse(strChangedOn);
-                Assert.Equal(_fixture.SingletonServices.Clock.UtcNow, changedOn,
+                var strChangedOn
+                    = scope.DbConnection.ExecuteScalar<string>($"SELECT ChangedOn FROM Posts where id = {post.Id}");
+                var changedOn = DateTime.Parse(strChangedOn);
+                Assert.Equal(
+                    _fixture.SingletonServices.Clock.UtcNow,
+                    changedOn,
                     new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(500)));
             }
         }
@@ -298,18 +302,18 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 id = CreateBlogWithPost(scope, 10);
             }
 
-            DateTime expectedModifiedOn = _fixture.SingletonServices.Clock.Advance(TimeSpan.FromHours(1));
+            var expectedModifiedOn = _fixture.SingletonServices.Clock.Advance(TimeSpan.FromHours(1));
 
             using (var scope = _fixture.BeginScope())
             {
-                var sut = scope.GetRepository<Blog>();
-                Blog b = sut.Single(id);
+                IRepository<Blog> sut = scope.GetRepository<Blog>();
+                var b = sut.Single(id);
                 b.Posts.Remove(b.Posts.First());
             }
 
             using (var scope = _fixture.BeginScope())
             {
-                Blog blog = scope.DbContext.Set<Blog>().Find(id);
+                var blog = scope.DbContext.Set<Blog>().Find(id);
                 Assert.NotNull(blog.ChangedOn);
                 Assert.Equal(expectedModifiedOn, blog.ChangedOn.Value, _tolerantDateTimeComparer);
             }

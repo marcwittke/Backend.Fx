@@ -11,7 +11,8 @@ namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence
     {
         public TestDbContext CreateDbContext(string[] args)
         {
-            return new TestDbContext(new DbContextOptionsBuilder<TestDbContext>().UseSqlite("DataSource=:memory:").Options);
+            return new TestDbContext(
+                new DbContextOptionsBuilder<TestDbContext>().UseSqlite("DataSource=:memory:").Options);
         }
     }
 }

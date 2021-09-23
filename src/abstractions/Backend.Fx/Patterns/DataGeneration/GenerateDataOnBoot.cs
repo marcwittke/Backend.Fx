@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
@@ -10,23 +9,25 @@ using JetBrains.Annotations;
 namespace Backend.Fx.Patterns.DataGeneration
 {
     /// <summary>
-    /// Enriches the <see cref="IBackendFxApplication"/> by calling all data generators for all tenants on application start.
+    /// Enriches the <see cref="IBackendFxApplication" /> by calling all data generators for all tenants on application start.
     /// </summary>
     public class GenerateDataOnBoot : IBackendFxApplication
     {
         private static readonly ILogger Logger = LogManager.Create<GenerateDataOnBoot>();
-        private readonly ITenantIdProvider _tenantIdProvider;
         private readonly IBackendFxApplication _application;
         private readonly ManualResetEventSlim _dataGenerated = new ManualResetEventSlim(false);
-        public IDataGenerationContext DataGenerationContext { get; [UsedImplicitly] private set; }
+        private readonly ITenantIdProvider _tenantIdProvider;
 
         public GenerateDataOnBoot(ITenantIdProvider tenantIdProvider, IBackendFxApplication application)
         {
             _tenantIdProvider = tenantIdProvider;
             _application = application;
-            DataGenerationContext = new DataGenerationContext(_application.CompositionRoot,
-                                                              _application.Invoker);
+            DataGenerationContext = new DataGenerationContext(
+                _application.CompositionRoot,
+                _application.Invoker);
         }
+
+        public IDataGenerationContext DataGenerationContext { get; [UsedImplicitly] private set; }
 
         public void Dispose()
         {
@@ -34,20 +35,17 @@ namespace Backend.Fx.Patterns.DataGeneration
         }
 
         public IBackendFxApplicationAsyncInvoker AsyncInvoker => _application.AsyncInvoker;
+
         public ICompositionRoot CompositionRoot => _application.CompositionRoot;
+
         public IBackendFxApplicationInvoker Invoker => _application.Invoker;
 
         public IMessageBus MessageBus => _application.MessageBus;
 
-        public bool WaitForBoot(int timeoutMilliSeconds = Int32.MaxValue, CancellationToken cancellationToken = default)
-        {
-            return _dataGenerated.Wait(timeoutMilliSeconds, cancellationToken);
-        }
-
         public async Task BootAsync(CancellationToken cancellationToken = default)
         {
             await _application.BootAsync(cancellationToken);
-            
+
             SeedDataForAllActiveTenants();
 
             _dataGenerated.Set();
@@ -57,15 +55,15 @@ namespace Backend.Fx.Patterns.DataGeneration
         {
             using (Logger.InfoDuration("Seeding data"))
             {
-                var prodTenantIds = _tenantIdProvider.GetActiveProductionTenantIds();
-                foreach (TenantId prodTenantId in prodTenantIds)
+                TenantId[] prodTenantIds = _tenantIdProvider.GetActiveProductionTenantIds();
+                foreach (var prodTenantId in prodTenantIds)
                 {
                     DataGenerationContext.SeedDataForTenant(prodTenantId, false);
                     _application.MessageBus.Publish(new DataGenerated());
                 }
 
-                var demoTenantIds = _tenantIdProvider.GetActiveDemonstrationTenantIds();
-                foreach (TenantId demoTenantId in demoTenantIds)
+                TenantId[] demoTenantIds = _tenantIdProvider.GetActiveDemonstrationTenantIds();
+                foreach (var demoTenantId in demoTenantIds)
                 {
                     DataGenerationContext.SeedDataForTenant(demoTenantId, true);
                     _application.MessageBus.Publish(new DataGenerated());

@@ -8,44 +8,55 @@ namespace Backend.Fx.Tests.Patterns.IdGeneration
     {
         private readonly HiLoIdGenerator _sut = new InMemoryHiLoIdGenerator(1, 100);
 
-        private class IdConsument
+        [Fact]
+        public void AllowsMultipleThreadsToGetIds()
+        {
+            const int consumerCount = 50;
+            const int idCountPerConsumer = 1000;
+            var idConsumers = new IdConsumer[consumerCount];
+
+            for (var i = 0; i < consumerCount; i++)
+            {
+                idConsumers[i] = new IdConsumer();
+            }
+
+            idConsumers.AsParallel().ForAll(idConsumer => { idConsumer.GetIds(idCountPerConsumer, _sut); });
+
+            int[] allIds = idConsumers.SelectMany(idConsumer => idConsumer.Ids).ToArray();
+            Assert.Equal(consumerCount * idCountPerConsumer, allIds.Length);
+            Assert.Equal(consumerCount * idCountPerConsumer, allIds.Distinct().Count());
+            Assert.Equal(consumerCount * idCountPerConsumer + 1, _sut.NextId());
+        }
+
+        [Fact]
+        public void StartsWithInitialValueAndCountsUp()
+        {
+            for (var i = 1; i < 1000; i++)
+            {
+                Assert.Equal(i, _sut.NextId());
+            }
+        }
+
+
+        private class IdConsumer
         {
             public int[] Ids { get; private set; }
 
             public void GetIds(int count, IIdGenerator idGenerator)
             {
                 Ids = new int[count];
-                for (var i = 0; i < count; i++) Ids[i] = idGenerator.NextId();
+                for (var i = 0; i < count; i++)
+                {
+                    Ids[i] = idGenerator.NextId();
+                }
             }
-        }
-
-        [Fact]
-        public void AllowsMultipleThreadsToGetIds()
-        {
-            const int consumentCount = 50;
-            const int idCountPerConsument = 1000;
-            var idConsuments = new IdConsument[consumentCount];
-
-            for (var i = 0; i < consumentCount; i++) idConsuments[i] = new IdConsument();
-
-            idConsuments.AsParallel().ForAll(idConsument => { idConsument.GetIds(idCountPerConsument, _sut); });
-
-            var allIds = idConsuments.SelectMany(idConsument => idConsument.Ids).ToArray();
-            Assert.Equal(consumentCount * idCountPerConsument, allIds.Length);
-            Assert.Equal(consumentCount * idCountPerConsument, allIds.Distinct().Count());
-            Assert.Equal(consumentCount * idCountPerConsument + 1, _sut.NextId());
-        }
-
-        [Fact]
-        public void StartsWithInitialValueAndCountsUp()
-        {
-            for (var i = 1; i < 1000; i++) Assert.Equal(i, _sut.NextId());
         }
     }
 
+
     public class InMemoryHiLoIdGenerator : HiLoIdGenerator
     {
-        private readonly object _synclock = new object();
+        private readonly object _syncLock = new();
         private int _nextBlockStart;
 
         public InMemoryHiLoIdGenerator(int start, int increment)
@@ -58,10 +69,10 @@ namespace Backend.Fx.Tests.Patterns.IdGeneration
 
         protected override int GetNextBlockStart()
         {
-            lock (_synclock)
+            lock (_syncLock)
             {
                 // this simulates the behavior of a SQL sequence for example
-                var result = _nextBlockStart;
+                int result = _nextBlockStart;
                 _nextBlockStart += BlockSize;
                 return result;
             }

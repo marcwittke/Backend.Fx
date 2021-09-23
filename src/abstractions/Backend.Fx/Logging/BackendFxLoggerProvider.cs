@@ -12,7 +12,6 @@ namespace Backend.Fx.Logging
         }
 
         public void Dispose()
-        {
-        }
+        { }
     }
 }

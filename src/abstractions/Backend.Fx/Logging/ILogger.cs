@@ -1,4 +1,5 @@
 ﻿// ReSharper disable UnusedMethodReturnValue.Global
+
 using System;
 using JetBrains.Annotations;
 

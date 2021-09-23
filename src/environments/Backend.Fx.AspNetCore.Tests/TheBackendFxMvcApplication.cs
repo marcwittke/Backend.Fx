@@ -17,16 +17,19 @@ namespace Backend.Fx.AspNetCore.Tests
             using (var client = _factory.CreateClient())
             {
                 client.DefaultRequestHeaders.Add("Authorization", $"Bearer {JwtService.IssueJwt("testUser")}");
-                var result = await client.PostAsync("/api/calculations/addition/4/8?tenantId=1234", new StringContent(""));
-                var stringResult = await result.Content.ReadAsStringAsync();
+                var result = await client.PostAsync(
+                    "/api/calculations/addition/4/8?tenantId=1234",
+                    new StringContent(""));
+                string stringResult = await result.Content.ReadAsStringAsync();
 
                 Assert.True(result.IsSuccessStatusCode);
 
-                var calculationResult = JsonConvert.DeserializeObject<ICalculationService.CalculationResult>(stringResult);
+                var calculationResult
+                    = JsonConvert.DeserializeObject<ICalculationService.CalculationResult>(stringResult);
                 Assert.Equal(12d, calculationResult.Result);
             }
         }
-        
+
         [Fact]
         public async Task HandlesClientErrors()
         {
@@ -34,43 +37,50 @@ namespace Backend.Fx.AspNetCore.Tests
             {
                 client.DefaultRequestHeaders.Add("Authorization", $"Bearer {JwtService.IssueJwt("testUser")}");
                 client.DefaultRequestHeaders.Add("Accept", "application/json");
-                var result = await client.PostAsync("/api/calculations/division/4/0?tenantId=1234", new StringContent(""));
-                var stringResult = await result.Content.ReadAsStringAsync();
+                var result = await client.PostAsync(
+                    "/api/calculations/division/4/0?tenantId=1234",
+                    new StringContent(""));
+                string stringResult = await result.Content.ReadAsStringAsync();
 
                 Assert.Equal(HttpStatusCode.UnprocessableEntity, result.StatusCode);
                 Assert.Contains("Division by zero", stringResult);
             }
         }
-        
-        
+
         [Fact]
         public async Task MaintainsTheCurrentTenantId()
         {
             using (var client = _factory.CreateClient())
             {
                 client.DefaultRequestHeaders.Add("Authorization", $"Bearer {JwtService.IssueJwt("testUser")}");
-                var result = await client.PostAsync("/api/calculations/addition/4/8?tenantId=1234", new StringContent(""));
-                var stringResult = await result.Content.ReadAsStringAsync();
+                var result = await client.PostAsync(
+                    "/api/calculations/addition/4/8?tenantId=1234",
+                    new StringContent(""));
+                string stringResult = await result.Content.ReadAsStringAsync();
 
                 Assert.True(result.IsSuccessStatusCode);
 
-                var calculationResult = JsonConvert.DeserializeObject<ICalculationService.CalculationResult>(stringResult);
+                var calculationResult
+                    = JsonConvert.DeserializeObject<ICalculationService.CalculationResult>(stringResult);
                 Assert.Equal(1234, calculationResult.TenantId);
             }
         }
-        
+
         [Fact]
         public async Task MaintainsTheCurrentIdentity()
         {
             using (var client = _factory.CreateClient())
             {
                 client.DefaultRequestHeaders.Add("Authorization", $"Bearer {JwtService.IssueJwt("testUser")}");
-                var result = await client.PostAsync("/api/calculations/addition/4/8?tenantId=1234", new StringContent(""));
-                var stringResult = await result.Content.ReadAsStringAsync();
+                var result = await client.PostAsync(
+                    "/api/calculations/addition/4/8?tenantId=1234",
+                    new StringContent(""));
+                string stringResult = await result.Content.ReadAsStringAsync();
 
                 Assert.True(result.IsSuccessStatusCode);
 
-                var calculationResult = JsonConvert.DeserializeObject<ICalculationService.CalculationResult>(stringResult);
+                var calculationResult
+                    = JsonConvert.DeserializeObject<ICalculationService.CalculationResult>(stringResult);
                 Assert.Equal("testUser", calculationResult.Executor);
             }
         }

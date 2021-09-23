@@ -10,9 +10,8 @@ namespace Backend.Fx.Tests.Environment.DateAndTime
         [Fact]
         public void IsFrozen()
         {
-            
             IClock sut = new FrozenClock(new WallClock());
-            DateTime systemUtcNow = sut.UtcNow;
+            var systemUtcNow = sut.UtcNow;
             Thread.Sleep(100);
             Assert.Equal(systemUtcNow, sut.UtcNow);
             Assert.NotEqual(DateTime.UtcNow, sut.UtcNow);

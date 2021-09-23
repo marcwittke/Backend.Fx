@@ -13,36 +13,36 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
 {
     public class TheBackendFxApplication
     {
+        private readonly DiTestFakes _fakes;
+
+        private readonly IBackendFxApplication _sut;
+
         public TheBackendFxApplication()
         {
             _fakes = new DiTestFakes();
 
             Func<IDomainEventAggregator> domainEventAggregatorFactory = () => null;
-            A.CallTo(() => _fakes.InstanceProvider.GetInstance<IDomainEventAggregator>()).ReturnsLazily(() => domainEventAggregatorFactory.Invoke());
+            A.CallTo(() => _fakes.InstanceProvider.GetInstance<IDomainEventAggregator>())
+                .ReturnsLazily(() => domainEventAggregatorFactory.Invoke());
 
             Func<IMessageBusScope> messageBusScopeFactory = () => null;
-            A.CallTo(() => _fakes.InstanceProvider.GetInstance<IMessageBusScope>()).ReturnsLazily(() => messageBusScopeFactory.Invoke());
+            A.CallTo(() => _fakes.InstanceProvider.GetInstance<IMessageBusScope>())
+                .ReturnsLazily(() => messageBusScopeFactory.Invoke());
 
             _sut = new BackendFxApplication(_fakes.CompositionRoot, _fakes.MessageBus, A.Fake<IExceptionLogger>());
         }
 
-        private readonly IBackendFxApplication _sut;
-        private readonly DiTestFakes _fakes;
-
-        
         [Fact]
-        public void CanWaitForBoot()
+        public async Task CanWaitForBoot()
         {
-            int bootTime = 200;
+            var bootTime = 200;
             A.CallTo(() => _fakes.CompositionRoot.Verify()).Invokes(() => Thread.Sleep(bootTime));
             var sw = new Stopwatch();
-            
-            Task.Factory.StartNew(() => _sut.BootAsync());
+
             sw.Start();
-            Assert.True(_sut.WaitForBoot());
+            await _sut.BootAsync();
             Assert.True(sw.ElapsedMilliseconds >= bootTime);
         }
-        
 
         [Fact]
         public void DisposesCompositionRootOnDispose()
@@ -51,30 +51,26 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             _sut.Dispose();
             A.CallTo(() => _fakes.CompositionRoot.Dispose()).MustHaveHappenedOnceExactly();
         }
-        
 
         [Fact]
         public void ProvidesExceptionLoggingAsyncInvoker()
         {
             Assert.IsType<ExceptionLoggingAsyncInvoker>(_sut.AsyncInvoker);
         }
-        
-        
-        
+
         [Fact]
         public void ProvidesExceptionLoggingInvoker()
         {
             Assert.IsType<ExceptionLoggingInvoker>(_sut.Invoker);
         }
-        
 
         [Fact]
         public void IntegratesWithMessageBus()
         {
-            A.CallTo(() => _fakes.MessageBus.ProvideInvoker(A<IBackendFxApplicationInvoker>._)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakes.MessageBus.ProvideInvoker(A<IBackendFxApplicationInvoker>._))
+                .MustHaveHappenedOnceExactly();
         }
 
-        
         [Fact]
         public void VerifiesCompositionRootOnBoot()
         {

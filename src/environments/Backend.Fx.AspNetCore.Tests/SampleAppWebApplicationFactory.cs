@@ -1,5 +1,4 @@
 using Backend.Fx.AspNetCore.Tests.SampleApp;
-using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -21,12 +20,13 @@ namespace Backend.Fx.AspNetCore.Tests
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder
-                .ConfigureLogging(loggingBuilder =>
-                {
-                    loggingBuilder.ClearProviders();
-                    loggingBuilder.AddProvider(new BackendFxLoggerProvider());
-                    loggingBuilder.AddDebug();
-                })
+                .ConfigureLogging(
+                    loggingBuilder =>
+                    {
+                        loggingBuilder.ClearProviders();
+                        loggingBuilder.AddProvider(new BackendFxLoggerProvider());
+                        loggingBuilder.AddDebug();
+                    })
                 .CaptureStartupErrors(true)
                 .UseSolutionRelativeContentRoot("")
                 .UseSetting("detailedErrors", true.ToString())
@@ -36,16 +36,16 @@ namespace Backend.Fx.AspNetCore.Tests
 
         protected override TestServer CreateServer(IWebHostBuilder builder)
         {
-            TestServer server = base.CreateServer(builder);
+            var server = base.CreateServer(builder);
 
-            ITenantService tenantService = server.Services.GetRequiredService<SampleApplicationHostedService>().TenantService;
-            for (int i = 0; i < 100; i++)
+            var tenantService = server.Services.GetRequiredService<SampleApplicationHostedService>().TenantService;
+            for (var i = 0; i < 100; i++)
             {
                 var x = tenantService.CreateTenant($"t{i:000}", $"Tenant {i:000}", false);
                 Assert.True(x.Value > 0);
             }
-            
-            
+
+
             return server;
         }
     }

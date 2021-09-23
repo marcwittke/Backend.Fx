@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using Backend.Fx.Logging;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 
 namespace Backend.Fx.AspNetCore.ErrorHandling
 {
     public class ErrorLoggingMiddleware
     {
-        private readonly RequestDelegate _next;
         private readonly IExceptionLogger _exceptionLogger;
+        private readonly RequestDelegate _next;
 
         [UsedImplicitly]
         public ErrorLoggingMiddleware(RequestDelegate next, IExceptionLogger exceptionLogger)

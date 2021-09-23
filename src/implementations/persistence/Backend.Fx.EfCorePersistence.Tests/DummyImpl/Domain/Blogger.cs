@@ -7,8 +7,7 @@ namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain
     {
         [UsedImplicitly]
         private Blogger()
-        {
-        }
+        { }
 
         public Blogger(int id, string lastName, string firstName) : base(id)
         {
@@ -17,7 +16,9 @@ namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain
         }
 
         public string LastName { get; set; }
+
         public string FirstName { get; set; }
+
         public string Bio { get; set; }
     }
 }

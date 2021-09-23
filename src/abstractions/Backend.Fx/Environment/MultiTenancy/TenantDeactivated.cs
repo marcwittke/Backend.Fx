@@ -4,7 +4,6 @@
     {
         public TenantDeactivated(string name, string description, bool isDemoTenant)
             : base(name, description, isDemoTenant)
-        {
-        }
+        { }
     }
 }

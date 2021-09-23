@@ -17,19 +17,29 @@ namespace Backend.Fx.Patterns.DependencyInjection.Pure
     /// <summary>
     /// A strongly typed registry of instances available during a scope, without the need for a dependency injection container.
     /// </summary>
-    /// <remarks>This pattern is called "Pure DI", see https://blog.ploeh.dk/2012/11/06/WhentouseaDIContainer/ for details.
-    /// It is very useful in testing scenarios.</remarks>
+    /// <remarks>
+    /// This pattern is called "Pure DI", see https://blog.ploeh.dk/2012/11/06/WhentouseaDIContainer/ for details.
+    /// It is very useful in testing scenarios.
+    /// </remarks>
     public interface IScopedServices : IDisposable
     {
         IPersistenceSession PersistenceSession { get; }
+
         AdjustableClock Clock { get; }
+
         IDomainEventAggregator EventAggregator { get; }
+
         IMessageBusScope MessageBusScope { get; }
+
         ICurrentTHolder<IIdentity> IdentityHolder { get; }
+
         ICurrentTHolder<TenantId> TenantIdHolder { get; }
+
         ICurrentTHolder<Correlation> CorrelationHolder { get; }
+
         TenantId TenantId { get; }
     }
+
 
     public abstract class ScopedServices : IScopedServices
     {
@@ -52,7 +62,7 @@ namespace Backend.Fx.Patterns.DependencyInjection.Pure
         }
 
         public ICanFlush CanFlush => _persistenceSession.Value;
-        
+
         public IPersistenceSession PersistenceSession => _persistenceSession.Value;
 
         public ICurrentTHolder<TenantId> TenantIdHolder { get; }
@@ -68,6 +78,17 @@ namespace Backend.Fx.Patterns.DependencyInjection.Pure
         public abstract IMessageBusScope MessageBusScope { get; }
 
         public TenantId TenantId => TenantIdHolder.Current;
+
+        public void Dispose()
+        {
+            if (_doAutoFlush)
+            {
+                Flush();
+            }
+
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
         public ScopedServices OptOutOfAutoFlush()
         {
@@ -87,9 +108,11 @@ namespace Backend.Fx.Patterns.DependencyInjection.Pure
             return GetRepository<T>().Single(id);
         }
 
-        public abstract IRepository<TAggregateRoot> GetRepository<TAggregateRoot>() where TAggregateRoot : AggregateRoot;
+        public abstract IRepository<TAggregateRoot> GetRepository<TAggregateRoot>()
+            where TAggregateRoot : AggregateRoot;
 
-        public abstract IAsyncRepository<TAggregateRoot> GetAsyncRepository<TAggregateRoot>() where TAggregateRoot : AggregateRoot;
+        public abstract IAsyncRepository<TAggregateRoot> GetAsyncRepository<TAggregateRoot>()
+            where TAggregateRoot : AggregateRoot;
 
         public T GetRandom<T>() where T : AggregateRoot
         {
@@ -106,33 +129,25 @@ namespace Backend.Fx.Patterns.DependencyInjection.Pure
             Flush();
         }
 
-        public void Dispose()
-        {
-            if (_doAutoFlush)
-            {
-                Flush();
-            }
-
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
         protected object GetAggregateAuthorization(ICurrentTHolder<IIdentity> identityHolder, Type aggregateRootType)
         {
-            Type aggregateDefinitionType = _domainAssemblies
-                                           .SelectMany(ass => ass.GetTypes())
-                                           .Where(t => t.GetTypeInfo().IsClass && !t.GetTypeInfo().IsAbstract)
-                                           .SingleOrDefault(t =>
-                                               typeof(IAggregateAuthorization<>).MakeGenericType(aggregateRootType).GetTypeInfo()
-                                                                                .IsAssignableFrom(t.GetTypeInfo()));
+            var aggregateDefinitionType = _domainAssemblies
+                .SelectMany(ass => ass.GetTypes())
+                .Where(t => t.GetTypeInfo().IsClass && !t.GetTypeInfo().IsAbstract)
+                .SingleOrDefault(
+                    t =>
+                        typeof(IAggregateAuthorization<>).MakeGenericType(aggregateRootType)
+                            .GetTypeInfo()
+                            .IsAssignableFrom(t.GetTypeInfo()));
             if (aggregateDefinitionType == null)
             {
                 throw new InvalidOperationException($"No Aggregate authorization for {aggregateRootType.Name} found");
             }
 
-            var constructorParameterTypes = aggregateDefinitionType.GetConstructors().Single().GetParameters();
-            object[] constructorParameters = new object[constructorParameterTypes.Length];
-            for (int i = 0; i < constructorParameterTypes.Length; i++)
+            ParameterInfo[] constructorParameterTypes
+                = aggregateDefinitionType.GetConstructors().Single().GetParameters();
+            var constructorParameters = new object[constructorParameterTypes.Length];
+            for (var i = 0; i < constructorParameterTypes.Length; i++)
             {
                 if (constructorParameterTypes[i].ParameterType == typeof(IIdentity))
                 {
@@ -156,7 +171,8 @@ namespace Backend.Fx.Patterns.DependencyInjection.Pure
 
                 if (constructorParameters[i] == null)
                 {
-                    throw new InvalidOperationException($"No implementation for {constructorParameterTypes[i].ParameterType.Name} provided");
+                    throw new InvalidOperationException(
+                        $"No implementation for {constructorParameterTypes[i].ParameterType.Name} provided");
                 }
             }
 
@@ -169,8 +185,7 @@ namespace Backend.Fx.Patterns.DependencyInjection.Pure
         }
 
         protected virtual void Dispose(bool disposing)
-        {
-        }
+        { }
 
         protected abstract IPersistenceSession CreatePersistenceSession();
     }

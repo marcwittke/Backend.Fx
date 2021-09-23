@@ -9,8 +9,11 @@ namespace Backend.Fx.EfCorePersistence
     public class DbContextTransactionOperationDecorator : DbTransactionOperationDecorator
     {
         private readonly DbContext _dbContext;
-        
-        public DbContextTransactionOperationDecorator(DbContext dbContext, IDbConnection dbConnection, IOperation operation) 
+
+        public DbContextTransactionOperationDecorator(
+            DbContext dbContext,
+            IDbConnection dbConnection,
+            IOperation operation)
             : base(dbConnection, operation)
         {
             _dbContext = dbContext;
@@ -19,7 +22,7 @@ namespace Backend.Fx.EfCorePersistence
         public override void Begin()
         {
             base.Begin();
-            _dbContext.Database.UseTransaction((DbTransaction) CurrentTransaction);
+            _dbContext.Database.UseTransaction((DbTransaction)CurrentTransaction);
         }
     }
 }

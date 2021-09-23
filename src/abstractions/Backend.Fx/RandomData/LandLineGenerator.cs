@@ -11,8 +11,12 @@ namespace Backend.Fx.RandomData
 
         protected override string Next()
         {
-            var generated = Numbers.LandLineNetworks.Random();
-            while (generated.Length < TestRandom.Instance.Next(8, 11)) generated += Numbers.Ciphers.Random();
+            string generated = Numbers.LandLineNetworks.Random();
+            while (generated.Length < TestRandom.Instance.Next(8, 11))
+            {
+                generated += Numbers.Ciphers.Random();
+            }
+
             return generated;
         }
     }

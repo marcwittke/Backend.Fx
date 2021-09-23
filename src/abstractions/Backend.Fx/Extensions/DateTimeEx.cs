@@ -1,7 +1,7 @@
-﻿namespace Backend.Fx.Extensions
-{
-    using System;
+﻿using System;
 
+namespace Backend.Fx.Extensions
+{
     public static class DateTimeEx
     {
         /// <summary>
@@ -21,7 +21,10 @@
             return dt.AddDays(-1 * diff).Date;
         }
 
-        public static DateTime GetWeekDay(this DateTime dt, DayOfWeek dayOfWeek, DayOfWeek startOfWeek = DayOfWeek.Monday)
+        public static DateTime GetWeekDay(
+            this DateTime dt,
+            DayOfWeek dayOfWeek,
+            DayOfWeek startOfWeek = DayOfWeek.Monday)
         {
             dt = dt.StartOfWeek(startOfWeek);
             while (dt.DayOfWeek != dayOfWeek)
@@ -34,7 +37,7 @@
 
         public static long ToUnixEpochDate(this DateTime utcDate)
         {
-            return (long) Math.Round((utcDate - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds);
+            return (long)Math.Round((utcDate - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds);
         }
     }
 }

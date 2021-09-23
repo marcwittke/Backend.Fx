@@ -1,14 +1,13 @@
 using Backend.Fx.Patterns.IdGeneration;
 
-namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
+namespace Backend.Fx.EfCorePersistence.Tests.Fixtures.Sqlite
 {
     public class FakeSequence : ISequence
     {
         private static int _currentValue = 1;
-        
+
         public void EnsureSequence()
-        {
-        }
+        { }
 
         public int GetNextValue()
         {

@@ -11,6 +11,7 @@ namespace Backend.Fx.Exceptions
         void AddIf(string key, bool condition, string error);
     }
 
+
     public class ExceptionBuilder<TEx> : IExceptionBuilder where TEx : ClientException, new()
     {
         private readonly TEx _clientException = new TEx();

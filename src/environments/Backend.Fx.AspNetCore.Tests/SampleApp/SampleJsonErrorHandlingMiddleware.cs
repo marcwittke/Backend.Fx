@@ -5,8 +5,7 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp
 {
     public class SampleJsonErrorHandlingMiddleware : JsonErrorHandlingMiddleware
     {
-        public SampleJsonErrorHandlingMiddleware(RequestDelegate next) : base(next, showInternalServerErrorDetails: true)
-        {
-        }
+        public SampleJsonErrorHandlingMiddleware(RequestDelegate next) : base(next, true)
+        { }
     }
 }

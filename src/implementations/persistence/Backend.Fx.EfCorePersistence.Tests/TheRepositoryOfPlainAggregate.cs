@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Backend.Fx.BuildingBlocks;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
 using Backend.Fx.EfCorePersistence.Tests.Fixtures;
 using Backend.Fx.Extensions;
@@ -10,19 +11,19 @@ namespace Backend.Fx.EfCorePersistence.Tests
 {
     public class TheRepositoryOfPlainAggregate : IClassFixture<PersistenceFixture>
     {
+        private readonly PersistenceFixture _fixture;
+
         public TheRepositoryOfPlainAggregate(PersistenceFixture fixture)
         {
             _fixture = fixture;
         }
-
-        private readonly PersistenceFixture _fixture;
 
         [Fact]
         public void CanCreate()
         {
             using (var scope = _fixture.BeginScope())
             {
-                var repo = scope.GetRepository<Blogger>();
+                IRepository<Blogger> repo = scope.GetRepository<Blogger>();
                 repo.Add(new Blogger(345, "Metulsky", "Bratislav"));
             }
 
@@ -31,11 +32,10 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 var count = scope.DbConnection.ExecuteScalar<int>("SELECT Count(*) FROM Bloggers");
                 Assert.Equal(1, count);
 
-                count = scope.DbConnection.ExecuteScalar<int>($"SELECT Count(*) FROM Bloggers WHERE Id=345");
+                count = scope.DbConnection.ExecuteScalar<int>("SELECT Count(*) FROM Bloggers WHERE Id=345");
                 Assert.Equal(1, count);
             }
         }
-
 
         [Fact]
         public void CanDelete()
@@ -49,8 +49,8 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (var scope = _fixture.BeginScope())
             {
-                var repo = scope.GetRepository<Blogger>();
-                Blogger bratislavMetulsky = repo.Single(555);
+                IRepository<Blogger> repo = scope.GetRepository<Blogger>();
+                var bratislavMetulsky = repo.Single(555);
                 repo.Delete(bratislavMetulsky);
             }
 
@@ -60,7 +60,6 @@ namespace Backend.Fx.EfCorePersistence.Tests
                 Assert.Equal(0, count);
             }
         }
-
 
         [Fact]
         public void CanRead()
@@ -72,7 +71,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     $"VALUES (444, {scope.TenantId.Value}, '2012-05-12 23:12:09', 'the test', 'Bratislav', 'Metulsky', 'whatever')");
 
                 {
-                    var repo = scope.GetRepository<Blogger>();
+                    IRepository<Blogger> repo = scope.GetRepository<Blogger>();
 
                     bool any = repo.Any();
                     Assert.True(any);
@@ -80,7 +79,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     Blogger[] all = repo.GetAll();
                     Assert.NotEmpty(all);
 
-                    Blogger bratislavMetulsky = repo.Single(444);
+                    var bratislavMetulsky = repo.Single(444);
                     Assert.Equal(scope.TenantId.Value, bratislavMetulsky.TenantId);
                     Assert.Equal("the test", bratislavMetulsky.CreatedBy);
                     Assert.Equal(new DateTime(2012, 05, 12, 23, 12, 09), bratislavMetulsky.CreatedOn);
@@ -100,18 +99,17 @@ namespace Backend.Fx.EfCorePersistence.Tests
             }
         }
 
-
         [Fact]
         public async Task CanReadAsync()
         {
             using (var scope = _fixture.BeginScope())
             {
-                scope.DbConnection.Execute(
+                await scope.DbConnection.ExecuteAsync(
                     "INSERT INTO Bloggers (Id, TenantId, CreatedOn, CreatedBy, FirstName, LastName, Bio) " +
                     $"VALUES (555, {scope.TenantId.Value}, '2012-05-12 23:12:09', 'the test', 'Bratislav', 'Metulsky', 'whatever')");
 
                 {
-                    var repo = scope.GetAsyncRepository<Blogger>();
+                    IAsyncRepository<Blogger> repo = scope.GetAsyncRepository<Blogger>();
 
                     bool any = await repo.AnyAsync();
                     Assert.True(any);
@@ -119,7 +117,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
                     Blogger[] all = await repo.GetAllAsync();
                     Assert.NotEmpty(all);
 
-                    Blogger bratislavMetulsky = await repo.SingleAsync(555);
+                    var bratislavMetulsky = await repo.SingleAsync(555);
                     Assert.Equal(scope.TenantId.Value, bratislavMetulsky.TenantId);
                     Assert.Equal("the test", bratislavMetulsky.CreatedBy);
                     Assert.Equal(new DateTime(2012, 05, 12, 23, 12, 09), bratislavMetulsky.CreatedOn);
@@ -151,8 +149,8 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (var scope = _fixture.BeginScope())
             {
-                var repo = scope.GetRepository<Blogger>();
-                Blogger bratislavMetulsky = repo.Single(456);
+                IRepository<Blogger> repo = scope.GetRepository<Blogger>();
+                var bratislavMetulsky = repo.Single(456);
                 bratislavMetulsky.FirstName = "Johnny";
                 bratislavMetulsky.LastName = "Flash";
                 bratislavMetulsky.Bio = "Der lustige Clown";
@@ -167,9 +165,12 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (var scope = _fixture.BeginScope())
             {
-                var repo = scope.GetRepository<Blogger>();
-                Blogger johnnyFlash = repo.Single(456);
-                Assert.Equal(DateTime.UtcNow, johnnyFlash.ChangedOn, new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(5000)));
+                IRepository<Blogger> repo = scope.GetRepository<Blogger>();
+                var johnnyFlash = repo.Single(456);
+                Assert.Equal(
+                    DateTime.UtcNow,
+                    johnnyFlash.ChangedOn,
+                    new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(5000)));
                 Assert.Equal(scope.IdentityHolder.Current.Name, johnnyFlash.ChangedBy);
                 Assert.Equal("Johnny", johnnyFlash.FirstName);
                 Assert.Equal("Flash", johnnyFlash.LastName);

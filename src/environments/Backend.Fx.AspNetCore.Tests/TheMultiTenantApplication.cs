@@ -17,23 +17,31 @@ namespace Backend.Fx.AspNetCore.Tests
             using (var client = _factory.CreateClient())
             {
                 var response = await client.GetAsync("/api/tenants/21");
-                var responseContent = await response.Content.ReadAsStringAsync();
-                Assert.True(response.IsSuccessStatusCode, $"{(int)response.StatusCode}: {response.StatusCode.ToString()}");
-                var tenant = JsonConvert.DeserializeAnonymousType(responseContent, new {Id = 0, Name = "", Description = ""});
+                string responseContent = await response.Content.ReadAsStringAsync();
+                Assert.True(
+                    response.IsSuccessStatusCode,
+                    $"{(int)response.StatusCode}: {response.StatusCode.ToString()}");
+                var tenant = JsonConvert.DeserializeAnonymousType(
+                    responseContent,
+                    new { Id = 0, Name = "", Description = "" });
                 Assert.NotNull(tenant);
                 Assert.Equal(21, tenant.Id);
             }
         }
-        
+
         [Fact]
         public async Task ProvidesListOfTenants()
         {
             using (var client = _factory.CreateClient())
             {
                 var response = await client.GetAsync("/api/tenants");
-                var responseContent = await response.Content.ReadAsStringAsync();
-                Assert.True(response.IsSuccessStatusCode, $"{(int)response.StatusCode}: {response.StatusCode.ToString()}");
-                var tenants = JsonConvert.DeserializeAnonymousType(responseContent, new[] {new {Id = 0, Name = "", Description = ""}});
+                string responseContent = await response.Content.ReadAsStringAsync();
+                Assert.True(
+                    response.IsSuccessStatusCode,
+                    $"{(int)response.StatusCode}: {response.StatusCode.ToString()}");
+                var tenants = JsonConvert.DeserializeAnonymousType(
+                    responseContent,
+                    new[] { new { Id = 0, Name = "", Description = "" } });
                 Assert.NotEmpty(tenants);
                 Assert.True(tenants.Length >= 100);
             }
@@ -52,12 +60,16 @@ namespace Backend.Fx.AspNetCore.Tests
                     IsDemo = false,
                     Name = "Hello"
                 };
-                
+
                 var response = await client.PostAsJsonAsync("/api/tenants", createTenantParams);
-                var responseContent = await response.Content.ReadAsStringAsync();
-                Assert.True(response.IsSuccessStatusCode, $"{(int)response.StatusCode}: {response.StatusCode.ToString()}");
-                
-                var tenant = JsonConvert.DeserializeAnonymousType(responseContent, new {Id = 0, Name = "", Description = ""});
+                string responseContent = await response.Content.ReadAsStringAsync();
+                Assert.True(
+                    response.IsSuccessStatusCode,
+                    $"{(int)response.StatusCode}: {response.StatusCode.ToString()}");
+
+                var tenant = JsonConvert.DeserializeAnonymousType(
+                    responseContent,
+                    new { Id = 0, Name = "", Description = "" });
                 Assert.True(tenant.Id != 0);
                 Assert.Equal(createTenantParams.Name, tenant.Name);
             }

@@ -28,7 +28,7 @@ namespace Backend.Fx.EfCorePersistence
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable) InnerQueryable).GetEnumerator();
+            return ((IEnumerable)InnerQueryable).GetEnumerator();
         }
 
         public Type ElementType => InnerQueryable.ElementType;

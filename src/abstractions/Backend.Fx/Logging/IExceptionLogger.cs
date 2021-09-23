@@ -8,6 +8,7 @@ namespace Backend.Fx.Logging
         void LogException(Exception exception);
     }
 
+
     public class ExceptionLogger : IExceptionLogger
     {
         private readonly ILogger _logger;

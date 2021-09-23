@@ -15,7 +15,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
 
         public override IInstanceProvider InstanceProvider { get; }
 
-
         public override void Dispose()
         {
             _scope.Dispose();

@@ -4,12 +4,14 @@ using Backend.Fx.EfCorePersistence.Tests.Fixtures;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
+// ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local
+
 namespace Backend.Fx.EfCorePersistence.Tests
 {
     public class TheDbContext : IClassFixture<PersistenceFixture>
     {
-        private readonly PersistenceFixture _fixture;
         private static int _nextTenantId = 2675;
+        private readonly PersistenceFixture _fixture;
         private readonly int _tenantId = _nextTenantId++;
 
         public TheDbContext(PersistenceFixture fixture)
@@ -33,7 +35,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (var scope = _fixture.BeginScope())
             {
-                Blog blog = scope.DbContext.Blogs.Include(b => b.Posts).Single(b => b.Id == 1);
+                var blog = scope.DbContext.Blogs.Include(b => b.Posts).Single(b => b.Id == 1);
                 blog.Posts.Clear();
                 blog.Posts.Add(new Post(6, blog, "new name 6"));
                 blog.Posts.Add(new Post(7, blog, "new name 7"));
@@ -44,13 +46,19 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (var scope = _fixture.BeginScope())
             {
-                Blog blog = scope.DbContext.Blogs.Include(b => b.Posts).Single(b => b.Id == 1);
+                var blog = scope.DbContext.Blogs.Include(b => b.Posts).Single(b => b.Id == 1);
 
                 Assert.Equal(5, blog.Posts.Count);
 
-                for (var i = 1; i <= 5; i++) Assert.DoesNotContain(blog.Posts, p => p.Id == i);
+                for (var i = 1; i <= 5; i++)
+                {
+                    Assert.DoesNotContain(blog.Posts, p => p.Id == i);
+                }
 
-                for (var i = 6; i <= 10; i++) Assert.Contains(blog.Posts, p => p.Id == i);
+                for (var i = 6; i <= 10; i++)
+                {
+                    Assert.Contains(blog.Posts, p => p.Id == i);
+                }
             }
         }
     }

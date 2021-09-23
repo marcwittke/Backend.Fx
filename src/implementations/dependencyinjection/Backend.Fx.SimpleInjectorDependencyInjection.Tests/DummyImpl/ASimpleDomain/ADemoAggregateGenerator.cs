@@ -9,12 +9,13 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.ASimpleDo
         public static string Name = "Demo record";
 
         private readonly IRepository<AnAggregate> _repository;
-        public override int Priority => 1;
 
         public ADemoAggregateGenerator(IRepository<AnAggregate> repository)
         {
             _repository = repository;
         }
+
+        public override int Priority => 1;
 
         protected override void GenerateCore()
         {

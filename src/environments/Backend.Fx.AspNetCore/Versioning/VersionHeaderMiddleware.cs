@@ -8,10 +8,10 @@ using Microsoft.Extensions.Primitives;
 namespace Backend.Fx.AspNetCore.Versioning
 {
     [UsedImplicitly]
-    public class VersionHeaderMiddleware 
+    public class VersionHeaderMiddleware
     {
-        private readonly RequestDelegate _next;
         private readonly string _assemblyName;
+        private readonly RequestDelegate _next;
         private readonly string _version;
 
         public VersionHeaderMiddleware(RequestDelegate next)
@@ -20,13 +20,15 @@ namespace Backend.Fx.AspNetCore.Versioning
             var entryAssembly = Assembly.GetEntryAssembly();
             if (entryAssembly == null)
             {
-                throw new InvalidOperationException("Unable to determine the entry assembly. The Version Header Middleware cannot be used in this environment");
+                throw new InvalidOperationException(
+                    "Unable to determine the entry assembly. The Version Header Middleware cannot be used in this environment");
             }
 
-            AssemblyName entryAssemblyName = entryAssembly.GetName();
+            var entryAssemblyName = entryAssembly.GetName();
             if (entryAssemblyName.Version == null)
             {
-                throw new InvalidOperationException("Unable to determine the version of the entry assembly. The Version Header Middleware cannot be used in this environment");
+                throw new InvalidOperationException(
+                    "Unable to determine the version of the entry assembly. The Version Header Middleware cannot be used in this environment");
             }
 
             _assemblyName = entryAssemblyName.Name;

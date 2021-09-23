@@ -11,7 +11,11 @@ namespace Backend.Fx.ConfigurationSettings
         private readonly IRepository<Setting> _settingRepository;
         private readonly ISettingSerializerFactory _settingSerializerFactory;
 
-        protected SettingsService(string category, IEntityIdGenerator idGenerator, IRepository<Setting> settingRepository, ISettingSerializerFactory settingSerializerFactory)
+        protected SettingsService(
+            string category,
+            IEntityIdGenerator idGenerator,
+            IRepository<Setting> settingRepository,
+            ISettingSerializerFactory settingSerializerFactory)
         {
             _category = category;
             _idGenerator = idGenerator;
@@ -21,20 +25,20 @@ namespace Backend.Fx.ConfigurationSettings
 
         protected T ReadSetting<T>(string key)
         {
-            var categoryKey = _category + "." + key;
+            string categoryKey = _category + "." + key;
             var setting = _settingRepository.AggregateQueryable.SingleOrDefault(s => s.Key == categoryKey);
             if (setting == null)
             {
-                return default(T);
+                return default;
             }
 
-            var serializer = _settingSerializerFactory.GetSerializer<T>();
+            ISettingSerializer<T> serializer = _settingSerializerFactory.GetSerializer<T>();
             return setting.GetValue(serializer);
         }
 
         protected void WriteSetting<T>(string key, T value)
         {
-            var categoryKey = _category + "." + key;
+            string categoryKey = _category + "." + key;
             var setting = _settingRepository.AggregateQueryable.SingleOrDefault(s => s.Key == categoryKey);
             if (setting == null)
             {
@@ -42,7 +46,7 @@ namespace Backend.Fx.ConfigurationSettings
                 _settingRepository.Add(setting);
             }
 
-            var serializer = _settingSerializerFactory.GetSerializer<T>();
+            ISettingSerializer<T> serializer = _settingSerializerFactory.GetSerializer<T>();
             setting.SetValue(serializer, value);
         }
     }

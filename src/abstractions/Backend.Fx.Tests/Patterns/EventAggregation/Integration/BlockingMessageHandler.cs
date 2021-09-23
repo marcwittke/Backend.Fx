@@ -17,7 +17,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         public void Handle(TestIntegrationEvent eventData)
         {
             Assert.True(
-                _manualResetEvent.WaitOne(Debugger.IsAttached ? int.MaxValue : 1000), 
+                _manualResetEvent.WaitOne(Debugger.IsAttached ? int.MaxValue : 1000),
                 "The BlockingMessageHandler was not reset.");
         }
     }

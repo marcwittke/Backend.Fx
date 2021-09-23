@@ -8,14 +8,15 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp
 {
     public class SampleApplicationHostedService : BackendFxApplicationHostedService
     {
-        public  ITenantService TenantService { get; }
-        public override IBackendFxApplication Application { get; }
-
         public SampleApplicationHostedService(IExceptionLogger exceptionLogger)
         {
             IMessageBus messageBus = new InMemoryMessageBus();
             TenantService = new TenantService(messageBus, new InMemoryTenantRepository());
             Application = new SampleApplication(new TenantServiceTenantIdProvider(TenantService), exceptionLogger);
         }
+
+        public ITenantService TenantService { get; }
+
+        public override IBackendFxApplication Application { get; }
     }
 }

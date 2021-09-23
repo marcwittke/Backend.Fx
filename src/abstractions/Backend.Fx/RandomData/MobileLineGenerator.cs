@@ -9,11 +9,13 @@ namespace Backend.Fx.RandomData
             return new MobileLineGenerator().First();
         }
 
-
         protected override string Next()
         {
-            var generated = Numbers.MobileNetworks.Random();
-            while (generated.Length < TestRandom.Instance.Next(11)) generated += Numbers.Ciphers.Random();
+            string generated = Numbers.MobileNetworks.Random();
+            while (generated.Length < TestRandom.Instance.Next(11))
+            {
+                generated += Numbers.Ciphers.Random();
+            }
 
             return generated;
         }

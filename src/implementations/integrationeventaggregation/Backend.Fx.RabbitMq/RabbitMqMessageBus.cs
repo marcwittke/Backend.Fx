@@ -16,9 +16,18 @@ namespace Backend.Fx.RabbitMq
         private static readonly ILogger Logger = LogManager.Create<RabbitMqMessageBus>();
         private readonly RabbitMqChannel _channel;
 
-        public RabbitMqMessageBus(IConnectionFactory connectionFactory, int retryCount, string exchangeName, string receiveQueueName) 
+        public RabbitMqMessageBus(
+            IConnectionFactory connectionFactory,
+            int retryCount,
+            string exchangeName,
+            string receiveQueueName)
         {
-            _channel = new RabbitMqChannel(MessageNameProvider, connectionFactory, exchangeName, receiveQueueName, retryCount);
+            _channel = new RabbitMqChannel(
+                MessageNameProvider,
+                connectionFactory,
+                exchangeName,
+                receiveQueueName,
+                retryCount);
         }
 
         public override void Connect()
@@ -70,6 +79,7 @@ namespace Backend.Fx.RabbitMq
         protected override void Dispose(bool disposing)
         {
             if (disposing)
+            {
                 if (_channel != null)
                 {
                     Logger.Info("Closing RabbitMQ channel...");
@@ -77,9 +87,11 @@ namespace Backend.Fx.RabbitMq
                     _channel.Dispose();
                     Logger.Info("RabbitMQ channel closed");
                 }
+            }
 
             base.Dispose(disposing);
         }
+
 
         private class RabbitMqEventProcessingContext : EventProcessingContext
         {
@@ -88,10 +100,15 @@ namespace Backend.Fx.RabbitMq
             public RabbitMqEventProcessingContext(object rawReceivedMessage)
             {
                 Logger.Trace($"Deserializing a message of type {rawReceivedMessage?.GetType().Name ?? "???"}");
-                if (!(rawReceivedMessage is byte[] rawEventPayloadBytes)) throw new InvalidOperationException("Raw event payload is not a binary JSON string");
+                if (!(rawReceivedMessage is byte[] rawEventPayloadBytes))
+                {
+                    throw new InvalidOperationException("Raw event payload is not a binary JSON string");
+                }
 
                 _jsonString = Encoding.UTF8.GetString(rawEventPayloadBytes);
-                var eventStub = JsonConvert.DeserializeAnonymousType(_jsonString, new {tenantId = 0, correlationId = Guid.Empty});
+                var eventStub = JsonConvert.DeserializeAnonymousType(
+                    _jsonString,
+                    new { tenantId = 0, correlationId = Guid.Empty });
                 TenantId = new TenantId(eventStub.tenantId);
                 CorrelationId = eventStub.correlationId;
             }
@@ -99,11 +116,12 @@ namespace Backend.Fx.RabbitMq
             public override TenantId TenantId { get; }
 
             public override dynamic DynamicEvent => JObject.Parse(_jsonString);
+
             public override Guid CorrelationId { get; }
 
             public override IIntegrationEvent GetTypedEvent(Type eventType)
             {
-                return (IIntegrationEvent) JsonConvert.DeserializeObject(_jsonString, eventType);
+                return (IIntegrationEvent)JsonConvert.DeserializeObject(_jsonString, eventType);
             }
         }
     }

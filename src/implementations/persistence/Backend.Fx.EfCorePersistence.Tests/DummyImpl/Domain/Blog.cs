@@ -9,8 +9,7 @@ namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain
     {
         [UsedImplicitly]
         private Blog()
-        {
-        }
+        { }
 
         public Blog(int id, string name) : base(id)
         {
@@ -19,7 +18,7 @@ namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain
 
         public string Name { get; private set; }
 
-        public ISet<Post> Posts { get; private set; } = new HashSet<Post>();
+        public ISet<Post> Posts { get; } = new HashSet<Post>();
 
         public Post AddPost(IEntityIdGenerator idGenerator, string name, bool isPublic = false)
         {
@@ -31,7 +30,10 @@ namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain
         public void Modify(string modified)
         {
             Name = modified;
-            foreach (Post post in Posts) post.SetName(modified);
+            foreach (var post in Posts)
+            {
+                post.SetName(modified);
+            }
         }
     }
 }

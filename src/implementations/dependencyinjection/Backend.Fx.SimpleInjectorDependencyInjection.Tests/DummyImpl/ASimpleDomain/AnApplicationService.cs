@@ -5,6 +5,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.ASimpleDo
     public interface ITestApplicationService : IApplicationService
     { }
 
+
     public class AnApplicationService : ITestApplicationService
     { }
 }

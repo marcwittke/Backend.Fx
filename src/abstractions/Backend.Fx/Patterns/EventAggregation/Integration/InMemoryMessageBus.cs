@@ -1,9 +1,9 @@
-﻿namespace Backend.Fx.Patterns.EventAggregation.Integration
-{
-    using System;
-    using System.Threading.Tasks;
-    using Environment.MultiTenancy;
+﻿using System;
+using System.Threading.Tasks;
+using Backend.Fx.Environment.MultiTenancy;
 
+namespace Backend.Fx.Patterns.EventAggregation.Integration
+{
     public class InMemoryMessageBus : MessageBus
     {
         private readonly InMemoryMessageBusChannel _channel;
@@ -12,12 +12,12 @@
         {
             _channel = new InMemoryMessageBusChannel();
         }
-        
+
         public InMemoryMessageBus(InMemoryMessageBusChannel channel)
         {
             _channel = channel;
         }
-        
+
         public override void Connect()
         {
             _channel.MessageReceived += ChannelOnMessageReceived;
@@ -31,27 +31,26 @@
         protected override Task PublishOnMessageBus(IIntegrationEvent integrationEvent)
         {
             _channel.Publish(integrationEvent);
-            
+
             // the returning Task is about publishing the event, not processing!
             return Task.CompletedTask;
         }
 
         protected override void Subscribe(string messageName)
-        {
-        }
+        { }
 
         protected override void Unsubscribe(string messageName)
-        {
-        }
+        { }
 
         private void ChannelOnMessageReceived(
-            object sender, 
+            object sender,
             InMemoryMessageBusChannel.MessageReceivedEventArgs eventArgs)
         {
             Process(
-                MessageNameProvider.GetMessageName(eventArgs.IntegrationEvent), 
+                MessageNameProvider.GetMessageName(eventArgs.IntegrationEvent),
                 new InMemoryProcessingContext(eventArgs.IntegrationEvent));
         }
+
 
         private class InMemoryProcessingContext : EventProcessingContext
         {
@@ -65,6 +64,7 @@
             public override TenantId TenantId => new TenantId(_integrationEvent.TenantId);
 
             public override dynamic DynamicEvent => _integrationEvent;
+
             public override Guid CorrelationId => _integrationEvent.CorrelationId;
 
             public override IIntegrationEvent GetTypedEvent(Type eventType)

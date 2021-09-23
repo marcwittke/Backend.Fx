@@ -22,21 +22,23 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
         public void Process(IInstanceProvider instanceProvider, EventProcessingContext context)
         {
             IIntegrationEvent integrationEvent = context.GetTypedEvent(_eventType);
-            MethodInfo handleMethod = _handlerType.GetRuntimeMethod("Handle", new[] {_eventType});
-            Debug.Assert(handleMethod != null, $"No method with signature `Handle({_eventType.Name} event)` found on {_handlerType.Name}");
+            MethodInfo handleMethod = _handlerType.GetRuntimeMethod("Handle", new[] { _eventType });
+            Debug.Assert(
+                handleMethod != null,
+                $"No method with signature `Handle({_eventType.Name} event)` found on {_handlerType.Name}");
 
             Logger.Info($"Getting subscribed handler instance of type {_handlerType.Name}");
             object handlerInstance = instanceProvider.GetInstance(_handlerType);
 
             using (Logger.InfoDuration($"Invoking subscribed handler {_handlerType.GetDetailedTypeName()}"))
             {
-                handleMethod.Invoke(handlerInstance, new object[] {integrationEvent});
+                handleMethod.Invoke(handlerInstance, new object[] { integrationEvent });
             }
         }
 
         public bool Matches(object handler)
         {
-            return (Type) handler == _handlerType;
+            return (Type)handler == _handlerType;
         }
     }
 }

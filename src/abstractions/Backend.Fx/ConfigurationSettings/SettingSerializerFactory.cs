@@ -11,35 +11,39 @@ namespace Backend.Fx.ConfigurationSettings
         ISettingSerializer<T> GetSerializer<T>();
     }
 
+
     public class SettingSerializerFactory : ISettingSerializerFactory
     {
-        protected Dictionary<Type, ISettingSerializer> Serializers { get; }
-
         public SettingSerializerFactory()
         {
             Serializers = typeof(ISettingSerializer)
-                          .GetTypeInfo()
-                          .Assembly
-                          .ExportedTypes
-                          .Select(t => t.GetTypeInfo())
-                          .Where(t => !t.IsAbstract && t.IsClass && typeof(ISettingSerializer).GetTypeInfo().IsAssignableFrom(t))
-                          .ToDictionary(
-                              t => t.ImplementedInterfaces
-                                    .Single(i => i.GetTypeInfo().IsGenericType && i.GetGenericTypeDefinition() == typeof(ISettingSerializer<>))
-                                    .GenericTypeArguments.Single(),
-                              t => (ISettingSerializer) Activator.CreateInstance(t.AsType()));
+                .GetTypeInfo()
+                .Assembly
+                .ExportedTypes
+                .Select(t => t.GetTypeInfo())
+                .Where(t => !t.IsAbstract && t.IsClass && typeof(ISettingSerializer).GetTypeInfo().IsAssignableFrom(t))
+                .ToDictionary(
+                    t => t.ImplementedInterfaces
+                        .Single(
+                            i => i.GetTypeInfo().IsGenericType &&
+                                i.GetGenericTypeDefinition() == typeof(ISettingSerializer<>))
+                        .GenericTypeArguments.Single(),
+                    t => (ISettingSerializer)Activator.CreateInstance(t.AsType()));
         }
+
+        protected Dictionary<Type, ISettingSerializer> Serializers { get; }
 
         [NotNull]
         public ISettingSerializer<T> GetSerializer<T>()
         {
             if (Serializers.ContainsKey(typeof(T)))
             {
-                return (ISettingSerializer<T>) Serializers[typeof(T)];
+                return (ISettingSerializer<T>)Serializers[typeof(T)];
             }
 
-            throw new ArgumentOutOfRangeException(nameof(T),
-                                                  $"No Serializer for Setting Type {typeof(T).Name} available");
+            throw new ArgumentOutOfRangeException(
+                nameof(T),
+                $"No Serializer for Setting Type {typeof(T).Name} available");
         }
     }
 }

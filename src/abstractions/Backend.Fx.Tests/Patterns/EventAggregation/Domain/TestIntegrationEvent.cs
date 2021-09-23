@@ -11,6 +11,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Domain
             Whatever = whatever;
         }
 
-        [UsedImplicitly] public int Whatever { get; }
+        [UsedImplicitly]
+        public int Whatever { get; }
     }
 }

@@ -15,6 +15,7 @@ namespace Backend.Fx.Tests.Patterns.Transactions
             _operation = A.Fake<IOperation>();
             _sut = new ReadonlyDbTransactionOperationDecorator(_operation);
         }
+
         [Fact]
         public void DelegatesOtherCalls()
         {

@@ -13,13 +13,14 @@ namespace Backend.Fx.Tests.Logging
             // it's a static variable, ensure to reset it to default now:
             LogManager.Initialize(new DebugLoggerFactory());
         }
-        
+
         [Fact]
         public void DoesNotThrowOnZeroConfig()
         {
             Exception ex = new SecurityException("very bad");
             var msg = "the log message";
-            ILogger[] loggers = {
+            ILogger[] loggers =
+            {
                 LogManager.Create<TheLogManager>(),
                 LogManager.Create(typeof(TheLogManager)),
                 LogManager.Create("Backend.Fx.Tests.Logging.TheLogManager")
@@ -52,10 +53,12 @@ namespace Backend.Fx.Tests.Logging
             }
         }
     }
-    
+
+
     public class TheLogManager
     {
         private readonly ILoggerFactory _loggerFactory = A.Fake<ILoggerFactory>();
+
         public TheLogManager()
         {
             var logger = A.Fake<ILogger>();
@@ -69,7 +72,7 @@ namespace Backend.Fx.Tests.Logging
             LogManager.BeginActivity();
             A.CallTo(() => _loggerFactory.BeginActivity(A<int>._)).MustHaveHappenedOnceExactly();
         }
-        
+
         [Fact]
         public void CanShutdown()
         {

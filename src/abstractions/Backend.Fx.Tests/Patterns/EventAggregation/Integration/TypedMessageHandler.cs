@@ -6,7 +6,8 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
     {
         private readonly IIntegrationMessageHandler<TestIntegrationEvent> _integrationMessageHandlerImplementation;
 
-        public TypedMessageHandler(IIntegrationMessageHandler<TestIntegrationEvent> integrationMessageHandlerImplementation)
+        public TypedMessageHandler(
+            IIntegrationMessageHandler<TestIntegrationEvent> integrationMessageHandlerImplementation)
         {
             _integrationMessageHandlerImplementation = integrationMessageHandlerImplementation;
         }

@@ -6,7 +6,7 @@ namespace Backend.Fx.Environment.DateAndTime
     public class AdjustableClock : IClock
     {
         private static readonly ILogger Logger = LogManager.Create<AdjustableClock>();
-        
+
         private readonly IClock _clockImplementation;
         private DateTime? _overriddenUtcNow;
 

@@ -11,40 +11,12 @@ namespace Backend.Fx.Tests.BuildingBlocks
     {
         private static int _nextId;
 
-        public class TestAggregateRoot : AggregateRoot
-        {
-            public TestAggregateRoot(int id, string name) : base(id)
-            {
-                Name = name;
-                Children.Add(new TestEntity("Child 1", this));
-                Children.Add(new TestEntity("Child 2", this));
-                Children.Add(new TestEntity("Child 3", this));
-            }
-
-            [UsedImplicitly] public string Name { get; private set; }
-
-            public ISet<TestEntity> Children { get; } = new HashSet<TestEntity>();
-        }
-
-        public class TestEntity : Entity
-        {
-            public TestEntity(string name, TestAggregateRoot parent)
-            {
-                Name = name;
-                Parent = parent;
-            }
-
-            [UsedImplicitly] public string Name { get; set; }
-
-            [UsedImplicitly] public TestAggregateRoot Parent { get; set; }
-        }
-
         [Fact]
         public void ChangedByPropertyIsChoppedAt100Chars()
         {
-            DateTime now = DateTime.Now;
+            var now = DateTime.Now;
             var sut = new TestAggregateRoot(_nextId++, "gaga");
-            var moreThanHundred = Letters.RandomLowerCase(110);
+            string moreThanHundred = Letters.RandomLowerCase(110);
             sut.SetModifiedProperties(moreThanHundred, now);
             Assert.Equal(moreThanHundred.Substring(0, 99) + "…", sut.ChangedBy);
         }
@@ -52,7 +24,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void ChangedByPropertyIsStoredCorrectly()
         {
-            DateTime now = DateTime.Now;
+            var now = DateTime.Now;
             var sut = new TestAggregateRoot(_nextId++, "gaga");
             sut.SetModifiedProperties("me", now);
             Assert.Equal("me", sut.ChangedBy);
@@ -62,7 +34,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void ChangedOnPropertyIsStoredCorrectly()
         {
-            DateTime now = DateTime.Now;
+            var now = DateTime.Now;
             var sut = new TestAggregateRoot(_nextId++, "gaga");
             sut.SetModifiedProperties("me", now);
             Assert.Equal(now, sut.ChangedOn);
@@ -72,9 +44,9 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void CreatedByPropertyIsChoppedAt100Chars()
         {
-            DateTime now = DateTime.Now;
+            var now = DateTime.Now;
             var sut = new TestAggregateRoot(_nextId++, "gaga");
-            var moreThanHundred = Letters.RandomLowerCase(110);
+            string moreThanHundred = Letters.RandomLowerCase(110);
             sut.SetCreatedProperties(moreThanHundred, now);
             Assert.Equal(moreThanHundred.Substring(0, 99) + "…", sut.CreatedBy);
         }
@@ -82,7 +54,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void CreatedByPropertyIsStoredCorrectly()
         {
-            DateTime now = DateTime.Now;
+            var now = DateTime.Now;
             var sut = new TestAggregateRoot(_nextId++, "gaga");
             sut.SetCreatedProperties("me", now);
             Assert.Equal("me", sut.CreatedBy);
@@ -92,7 +64,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void CreatedOnPropertyIsStoredCorrectly()
         {
-            DateTime now = DateTime.Now;
+            var now = DateTime.Now;
             var sut = new TestAggregateRoot(_nextId++, "gaga");
             sut.SetCreatedProperties("me", now);
             Assert.Equal(now, sut.CreatedOn);
@@ -129,6 +101,39 @@ namespace Backend.Fx.Tests.BuildingBlocks
             var sut = new TestAggregateRoot(_nextId++, "gaga");
             // ReSharper disable once AssignNullToNotNullAttribute
             Assert.Throws<ArgumentNullException>(() => sut.SetCreatedProperties(null, DateTime.Now));
+        }
+
+
+        public class TestAggregateRoot : AggregateRoot
+        {
+            public TestAggregateRoot(int id, string name) : base(id)
+            {
+                Name = name;
+                Children.Add(new TestEntity("Child 1", this));
+                Children.Add(new TestEntity("Child 2", this));
+                Children.Add(new TestEntity("Child 3", this));
+            }
+
+            [UsedImplicitly]
+            public string Name { get; private set; }
+
+            public ISet<TestEntity> Children { get; } = new HashSet<TestEntity>();
+        }
+
+
+        public class TestEntity : Entity
+        {
+            public TestEntity(string name, TestAggregateRoot parent)
+            {
+                Name = name;
+                Parent = parent;
+            }
+
+            [UsedImplicitly]
+            public string Name { get; set; }
+
+            [UsedImplicitly]
+            public TestAggregateRoot Parent { get; set; }
         }
     }
 }

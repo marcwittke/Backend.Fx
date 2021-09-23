@@ -10,13 +10,13 @@ namespace Backend.Fx.Patterns.DependencyInjection
     /// </summary>
     public interface ICompositionRoot : IDisposable
     {
-        void Verify();
-
-        IInjectionScope BeginScope();
-        
         /// <summary>
         /// Access to the container's resolution functionality
         /// </summary>
         IInstanceProvider InstanceProvider { get; }
+
+        void Verify();
+
+        IInjectionScope BeginScope();
     }
 }

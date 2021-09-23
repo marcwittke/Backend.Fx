@@ -16,7 +16,6 @@ namespace Backend.Fx.InMemoryPersistence
             _queryableImplementation = store.Values.AsQueryable();
         }
 
-
         public IEnumerator<TAggregateRoot> GetEnumerator()
         {
             return _queryableImplementation.GetEnumerator();
@@ -24,7 +23,7 @@ namespace Backend.Fx.InMemoryPersistence
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable) _queryableImplementation).GetEnumerator();
+            return ((IEnumerable)_queryableImplementation).GetEnumerator();
         }
 
         public Type ElementType => _queryableImplementation.ElementType;

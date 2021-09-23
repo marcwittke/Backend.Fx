@@ -10,22 +10,24 @@ namespace Backend.Fx.EfCorePersistence
     public abstract class EfCoreSingletonServices<TDbContext, TScopedServices> : SingletonServices<TScopedServices>
         where TScopedServices : IScopedServices where TDbContext : DbContext
     {
-        public DbContextOptions<TDbContext> DbContextOptions { get; }
-
-        public string ConnectionString { get; } 
-        
-        public override IEntityIdGenerator EntityIdGenerator { get; }
-
         protected EfCoreSingletonServices(
-            string connectionString, 
+            string connectionString,
             DbContextOptions<TDbContext> dbContextOptions,
             IEntityIdGenerator entityIdGenerator,
-            params Assembly[] assemblies) 
-            : base((assemblies ?? Array.Empty<Assembly>()).Concat(new [] {typeof(EfCoreSingletonServices<,>).Assembly }).ToArray())
+            params Assembly[] assemblies)
+            : base(
+                (assemblies ?? Array.Empty<Assembly>()).Concat(new[] { typeof(EfCoreSingletonServices<,>).Assembly })
+                .ToArray())
         {
             ConnectionString = connectionString;
             DbContextOptions = dbContextOptions;
             EntityIdGenerator = entityIdGenerator;
         }
+
+        public DbContextOptions<TDbContext> DbContextOptions { get; }
+
+        public string ConnectionString { get; }
+
+        public override IEntityIdGenerator EntityIdGenerator { get; }
     }
 }

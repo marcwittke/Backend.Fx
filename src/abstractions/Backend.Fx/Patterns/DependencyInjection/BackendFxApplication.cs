@@ -12,7 +12,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
     public interface IBackendFxApplication : IDisposable
     {
         /// <summary>
-        /// The async invoker runs a given action asynchronously in an application scope with injection facilities 
+        /// The async invoker runs a given action asynchronously in an application scope with injection facilities
         /// </summary>
         IBackendFxApplicationAsyncInvoker AsyncInvoker { get; }
 
@@ -22,7 +22,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
         ICompositionRoot CompositionRoot { get; }
 
         /// <summary>
-        /// The invoker runs a given action in an application scope with injection facilities 
+        /// The invoker runs a given action in an application scope with injection facilities
         /// </summary>
         IBackendFxApplicationInvoker Invoker { get; }
 
@@ -30,11 +30,6 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// The message bus to send and receive event messages
         /// </summary>
         IMessageBus MessageBus { get; }
-
-        /// <summary>
-        /// allows synchronously awaiting application startup
-        /// </summary>
-        bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Initializes and starts the application (async)
@@ -47,23 +42,27 @@ namespace Backend.Fx.Patterns.DependencyInjection
     public class BackendFxApplication : IBackendFxApplication
     {
         private static readonly ILogger Logger = LogManager.Create<BackendFxApplication>();
-        private readonly ManualResetEventSlim _isBooted = new ManualResetEventSlim(false);
-
+        
         /// <summary>
         /// Initializes the application's runtime instance
         /// </summary>
         /// <param name="compositionRoot">The composition root of the dependency injection framework</param>
         /// <param name="messageBus">The message bus implementation used by this application instance</param>
         /// <param name="exceptionLogger"></param>
-        public BackendFxApplication(ICompositionRoot compositionRoot, IMessageBus messageBus, IExceptionLogger exceptionLogger)
+        public BackendFxApplication(
+            ICompositionRoot compositionRoot,
+            IMessageBus messageBus,
+            IExceptionLogger exceptionLogger)
         {
             var invoker = new BackendFxApplicationInvoker(compositionRoot);
             AsyncInvoker = new ExceptionLoggingAsyncInvoker(exceptionLogger, invoker);
             Invoker = new ExceptionLoggingInvoker(exceptionLogger, invoker);
             MessageBus = messageBus;
-            MessageBus.ProvideInvoker(new SequentializingBackendFxApplicationInvoker(
-                                          new WaitForBootInvoker(this, 
-                                                                 new ExceptionLoggingAndHandlingInvoker(exceptionLogger, Invoker))));
+            MessageBus.ProvideInvoker(
+                new SequentializingBackendFxApplicationInvoker(
+                    new WaitForBootInvoker(
+                        this,
+                        new ExceptionLoggingAndHandlingInvoker(exceptionLogger, Invoker))));
             CompositionRoot = compositionRoot;
         }
 
@@ -80,13 +79,13 @@ namespace Backend.Fx.Patterns.DependencyInjection
             Logger.Info("Booting application");
             CompositionRoot.Verify();
             MessageBus.Connect();
-            _isBooted.Set();
             return Task.CompletedTask;
         }
 
-        public bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue, CancellationToken cancellationToken = default)
+        public void Dispose()
         {
-            return _isBooted.Wait(timeoutMilliSeconds, cancellationToken);
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         protected void Dispose(bool disposing)
@@ -96,12 +95,6 @@ namespace Backend.Fx.Patterns.DependencyInjection
                 Logger.Info("Application shut down initialized");
                 CompositionRoot?.Dispose();
             }
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
     }
 }

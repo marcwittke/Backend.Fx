@@ -24,7 +24,7 @@ namespace Backend.Fx.NLogLogging
         public ILogger Create(Type t)
         {
             string s = t.FullName;
-            var indexOf = s?.IndexOf('[') ?? 0;
+            int indexOf = s?.IndexOf('[') ?? 0;
             if (indexOf > 0)
             {
                 s = s?.Substring(0, indexOf);

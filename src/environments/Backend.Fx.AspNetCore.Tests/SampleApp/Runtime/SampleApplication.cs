@@ -22,8 +22,9 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp.Runtime
             _application = new BackendFxApplication(compositionRoot, messageBus, exceptionLogger);
             _application = new MultiTenantApplication(_application);
             _application = new GenerateDataOnBoot(tenantIdProvider, _application);
-            
-            compositionRoot.Container.GetTypesToRegister<ControllerBase>(GetType().Assembly).ForAll(t => compositionRoot.Container.Register(t));
+
+            compositionRoot.Container.GetTypesToRegister<ControllerBase>(GetType().Assembly)
+                .ForAll(t => compositionRoot.Container.Register(t));
         }
 
         public void Dispose()
@@ -38,11 +39,6 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp.Runtime
         public IBackendFxApplicationInvoker Invoker => _application.Invoker;
 
         public IMessageBus MessageBus => _application.MessageBus;
-
-        public bool WaitForBoot(int timeoutMilliSeconds = 2147483647, CancellationToken cancellationToken = default)
-        {
-            return _application.WaitForBoot(timeoutMilliSeconds, cancellationToken);
-        }
 
         public Task BootAsync(CancellationToken cancellationToken = default)
         {

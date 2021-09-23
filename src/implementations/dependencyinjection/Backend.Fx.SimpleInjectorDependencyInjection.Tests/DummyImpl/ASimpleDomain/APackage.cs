@@ -15,22 +15,23 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.ASimpleDo
         }
     }
 
+
     public class InMemoryPersistencePackage : IPackage
     {
         public void RegisterServices(Container container)
         {
             // singleton id generator
             container.RegisterInstance(new InMemoryEntityIdGenerator());
- 
+
             // InMemory Repositories
             container.Register(typeof(IRepository<>), typeof(InMemoryRepository<>));
-            
+
             // IQueryable is supported, but should be use with caution, since it bypasses authorization
             container.Register(typeof(IQueryable<>), typeof(InMemoryQueryable<>));
-            
+
             // InMemory Stores
             container.Register(typeof(InMemoryStore<>), typeof(InMemoryStore<>));
-            container.RegisterInstance<InMemoryStores>(new InMemoryStores());
+            container.RegisterInstance(new InMemoryStores());
         }
     }
 }

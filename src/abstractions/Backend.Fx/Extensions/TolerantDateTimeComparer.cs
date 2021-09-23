@@ -14,9 +14,15 @@ namespace Backend.Fx.Extensions
 
         public bool Equals(DateTimeOffset? x, DateTimeOffset? y)
         {
-            if (x == null && y == null) return true;
+            if (x == null && y == null)
+            {
+                return true;
+            }
 
-            if (x == null || y == null) return false;
+            if (x == null || y == null)
+            {
+                return false;
+            }
 
             return Math.Abs((x.Value - y.Value).TotalMilliseconds) < _epsilon.TotalMilliseconds;
         }
@@ -26,6 +32,7 @@ namespace Backend.Fx.Extensions
             return obj?.GetHashCode() ?? 0;
         }
     }
+
 
     public class TolerantDateTimeComparer : IEqualityComparer<DateTime?>
     {
@@ -38,9 +45,15 @@ namespace Backend.Fx.Extensions
 
         public bool Equals(DateTime? x, DateTime? y)
         {
-            if (x == null && y == null) return true;
+            if (x == null && y == null)
+            {
+                return true;
+            }
 
-            if (x == null || y == null) return false;
+            if (x == null || y == null)
+            {
+                return false;
+            }
 
             return Math.Abs((x.Value - y.Value).TotalMilliseconds) < _epsilon.TotalMilliseconds;
         }

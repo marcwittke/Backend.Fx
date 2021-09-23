@@ -5,6 +5,5 @@
     /// Handlers are called through dependency injection
     /// </summary>
     public interface IDomainEvent
-    {
-    }
+    { }
 }

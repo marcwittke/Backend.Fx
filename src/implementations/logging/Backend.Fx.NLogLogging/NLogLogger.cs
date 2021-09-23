@@ -3,13 +3,16 @@ using System.Diagnostics;
 using System.Globalization;
 using Backend.Fx.Logging;
 using NLog;
+using ILogger = Backend.Fx.Logging.ILogger;
+
 // ReSharper disable TemplateIsNotCompileTimeConstantProblem
 
 namespace Backend.Fx.NLogLogging
 {
-    using BackendFxILogger = Logging.ILogger;
+    using BackendFxILogger = ILogger;
     using NLogILogger = NLog.ILogger;
     using NLogLogLevel = LogLevel;
+
 
     [DebuggerStepThrough]
     public class NLogLogger : BackendFxILogger
@@ -185,13 +188,19 @@ namespace Backend.Fx.NLogLogging
         [MessageTemplateFormatMethod("format")]
         public void Trace(string format, params object[] args)
         {
-            if (IsTraceEnabled()) _nlogLogger.Trace(CultureInfo.InvariantCulture, format, args);
+            if (IsTraceEnabled())
+            {
+                _nlogLogger.Trace(CultureInfo.InvariantCulture, format, args);
+            }
         }
 
         [MessageTemplateFormatMethod("format")]
         public Exception Trace(Exception exception, string format, params object[] args)
         {
-            if (IsTraceEnabled()) _nlogLogger.Trace(exception, CultureInfo.InvariantCulture, format, args);
+            if (IsTraceEnabled())
+            {
+                _nlogLogger.Trace(exception, CultureInfo.InvariantCulture, format, args);
+            }
 
             return exception;
         }

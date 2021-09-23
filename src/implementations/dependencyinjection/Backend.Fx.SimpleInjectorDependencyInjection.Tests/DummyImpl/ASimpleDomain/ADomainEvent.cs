@@ -6,6 +6,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.ASimpleDo
 {
     public class ADomainEvent : IDomainEvent
     {
-        public HashSet<Type> HandledBy { get; } = new HashSet<Type>();
+        public HashSet<Type> HandledBy { get; } = new();
     }
 }

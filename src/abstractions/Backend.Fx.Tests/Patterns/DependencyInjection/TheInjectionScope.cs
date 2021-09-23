@@ -9,6 +9,21 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
     {
         private readonly IInstanceProvider _instanceProvider = A.Fake<IInstanceProvider>();
 
+        [Fact]
+        public void InitializesWithSequenceNumber()
+        {
+            var injectionScope = new TestInjectionScope(42, _instanceProvider);
+            Assert.Equal(42, injectionScope.SequenceNumber);
+        }
+
+        [Fact]
+        public void KeepsInstanceProvider()
+        {
+            var injectionScope = new TestInjectionScope(42, _instanceProvider);
+            Assert.Equal(_instanceProvider, injectionScope.InstanceProvider);
+        }
+
+
         private class TestInjectionScope : InjectionScope
         {
             public TestInjectionScope(int sequenceNumber, IInstanceProvider instanceProvider) : base(sequenceNumber)
@@ -22,20 +37,6 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             {
                 throw new NotImplementedException();
             }
-        }
-
-        [Fact]
-        public void InitializesWithSequenceNumber()
-        {
-            var injectionScope = new TestInjectionScope(42, _instanceProvider);
-            Assert.Equal(42, injectionScope.SequenceNumber);
-        }
-
-        [Fact]
-        public void KeepsInstanceProvider()
-        {
-            var injectionScope = new TestInjectionScope(42, _instanceProvider);
-            Assert.Equal(_instanceProvider, injectionScope.InstanceProvider);
         }
     }
 }

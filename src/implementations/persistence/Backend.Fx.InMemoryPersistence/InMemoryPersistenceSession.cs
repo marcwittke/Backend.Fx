@@ -17,9 +17,9 @@ namespace Backend.Fx.InMemoryPersistence
         { }
 
         public ICurrentTHolder<IIdentity> IdentityHolder { get; }
-        
+
         public IClock Clock { get; }
-        
+
         public void MakeReadonly()
         { }
     }

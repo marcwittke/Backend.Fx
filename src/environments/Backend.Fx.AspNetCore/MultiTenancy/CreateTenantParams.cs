@@ -7,12 +7,12 @@ namespace Backend.Fx.AspNetCore.MultiTenancy
         [JsonProperty(PropertyName = "isDemo")]
         public bool IsDemo { get; set; }
 
-        [JsonProperty(PropertyName = "name")] 
+        [JsonProperty(PropertyName = "name")]
         public string Name { get; set; }
 
         [JsonProperty(PropertyName = "description")]
         public string Description { get; set; }
-        
+
         [JsonProperty(PropertyName = "administratorEmail")]
         public string AdministratorEmail { get; set; }
 

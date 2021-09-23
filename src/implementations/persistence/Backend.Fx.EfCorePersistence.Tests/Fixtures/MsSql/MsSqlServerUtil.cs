@@ -3,7 +3,7 @@ using Backend.Fx.Logging;
 using Microsoft.Data.SqlClient;
 using Polly;
 
-namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
+namespace Backend.Fx.EfCorePersistence.Tests.Fixtures.MsSql
 {
     public class MsSqlServerUtil
     {
@@ -23,14 +23,15 @@ namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
             // to get up and running
 
             // other generally known local sql instances are either up or considered as non existent
-            var environmentVariableValue = connectionStringEnvironmentVariable == null
+            string environmentVariableValue = connectionStringEnvironmentVariable == null
                 ? null
                 : System.Environment.GetEnvironmentVariable(connectionStringEnvironmentVariable);
 
             string connectionString = DetectLocalSqlServerWithRetries(environmentVariableValue, 7)
-                                      ?? DetectLocalSqlServer("Server=.\\SQLExpress;Integrated Security=true;")
-                                      ?? DetectLocalSqlServer("Server=.;Integrated Security=true;")
-                                      ?? DetectLocalSqlServer("Server=localhost;User=sa;Password=yourStrong(!)Password"); // default from docker hub
+                ?? DetectLocalSqlServer("Server=.\\SQLExpress;Integrated Security=true;")
+                ?? DetectLocalSqlServer("Server=.;Integrated Security=true;")
+                ?? DetectLocalSqlServer(
+                    "Server=localhost;User=sa;Password=yourStrong(!)Password"); // default from docker hub
 
             if (connectionString != null)
             {
@@ -45,12 +46,14 @@ namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
         {
             if (!string.IsNullOrEmpty(connectionString))
             {
-                Logger.Info($"Probing for SQL instance using connection string {connectionString} with {retries} retries.");
+                Logger.Info(
+                    $"Probing for SQL instance using connection string {connectionString} with {retries} retries.");
                 return Policy
-                       .HandleResult<string>(r => r == null)
-                       .WaitAndRetry(retries,
-                           retryAttempt => TimeSpan.FromSeconds(Math.Pow(retryAttempt, 2)) /* 1,2,4,8,16,32,64,128 secs */)
-                      .Execute(() => DetectLocalSqlServer(connectionString));
+                    .HandleResult<string>(r => r == null)
+                    .WaitAndRetry(
+                        retries,
+                        retryAttempt => TimeSpan.FromSeconds(Math.Pow(retryAttempt, 2)) /* 1,2,4,8,16,32,64,128 secs */)
+                    .Execute(() => DetectLocalSqlServer(connectionString));
             }
 
             return null;
@@ -62,7 +65,7 @@ namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
             {
                 try
                 {
-                    using (SqlConnection connection = new SqlConnection(connectionString))
+                    using (var connection = new SqlConnection(connectionString))
                     {
                         connection.Open();
                         var command = connection.CreateCommand();
@@ -93,7 +96,7 @@ namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
                 using (var command = connection.CreateCommand())
                 {
                     command.CommandText = $"SELECT count(*) FROM sys.databases WHERE Name = '{dbName}'";
-                    isExistent = (int) command.ExecuteScalar() == 1;
+                    isExistent = (int)command.ExecuteScalar() == 1;
                 }
 
                 if (!isExistent)
@@ -109,7 +112,7 @@ namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
 
         public void EnsureDroppedDatabase(string dbName)
         {
-            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            using (var connection = new SqlConnection(ConnectionString))
             {
                 connection.Open();
 
@@ -122,7 +125,8 @@ namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
 
                 using (var dropCommand = connection.CreateCommand())
                 {
-                    dropCommand.CommandText = $"IF EXISTS(SELECT * FROM sys.Databases WHERE Name='{dbName}') DROP DATABASE [{dbName}]";
+                    dropCommand.CommandText
+                        = $"IF EXISTS(SELECT * FROM sys.Databases WHERE Name='{dbName}') DROP DATABASE [{dbName}]";
                     dropCommand.ExecuteNonQuery();
                 }
             }
@@ -130,7 +134,7 @@ namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
 
         public void CreateDatabase(string dbName)
         {
-            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            using (var connection = new SqlConnection(ConnectionString))
             {
                 connection.Open();
 

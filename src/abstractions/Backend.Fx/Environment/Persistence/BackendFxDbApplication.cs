@@ -1,4 +1,3 @@
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Logging;
@@ -10,14 +9,15 @@ namespace Backend.Fx.Environment.Persistence
     public class BackendFxDbApplication : IBackendFxApplication
     {
         private static readonly ILogger Logger = LogManager.Create<BackendFxDbApplication>();
-        
-        private readonly IDatabaseBootstrapper _databaseBootstrapper;
-        private readonly IDatabaseAvailabilityAwaiter _databaseAvailabilityAwaiter;
         private readonly IBackendFxApplication _backendFxApplication;
+        private readonly IDatabaseAvailabilityAwaiter _databaseAvailabilityAwaiter;
 
-        public BackendFxDbApplication(IDatabaseBootstrapper databaseBootstrapper,
-                                      IDatabaseAvailabilityAwaiter databaseAvailabilityAwaiter,
-                                      IBackendFxApplication backendFxApplication)
+        private readonly IDatabaseBootstrapper _databaseBootstrapper;
+
+        public BackendFxDbApplication(
+            IDatabaseBootstrapper databaseBootstrapper,
+            IDatabaseAvailabilityAwaiter databaseAvailabilityAwaiter,
+            IBackendFxApplication backendFxApplication)
         {
             _databaseBootstrapper = databaseBootstrapper;
             _databaseAvailabilityAwaiter = databaseAvailabilityAwaiter;
@@ -38,12 +38,6 @@ namespace Backend.Fx.Environment.Persistence
         public IBackendFxApplicationInvoker Invoker => _backendFxApplication.Invoker;
 
         public IMessageBus MessageBus => _backendFxApplication.MessageBus;
-
-        public bool WaitForBoot(int timeoutMilliSeconds = Int32.MaxValue, CancellationToken cancellationToken = default)
-        {
-            Logger.Trace("Waiting for boot...");
-            return _backendFxApplication.WaitForBoot(timeoutMilliSeconds, cancellationToken);
-        }
 
         public async Task BootAsync(CancellationToken cancellationToken = default)
         {

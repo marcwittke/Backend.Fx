@@ -24,7 +24,8 @@ namespace Backend.Fx.Environment.MultiTenancy
             {
                 if (_id == null)
                 {
-                    throw new InvalidOperationException("You must not access the Value property when the tenant id is null");
+                    throw new InvalidOperationException(
+                        "You must not access the Value property when the tenant id is null");
                 }
 
                 return _id.Value;
@@ -55,8 +56,15 @@ namespace Backend.Fx.Environment.MultiTenancy
         {
             yield return _id;
         }
-        
-        public static explicit operator int(TenantId tid) => tid.Value;
-        public static explicit operator TenantId(int id) => new TenantId(id);
+
+        public static explicit operator int(TenantId tid)
+        {
+            return tid.Value;
+        }
+
+        public static explicit operator TenantId(int id)
+        {
+            return new TenantId(id);
+        }
     }
 }

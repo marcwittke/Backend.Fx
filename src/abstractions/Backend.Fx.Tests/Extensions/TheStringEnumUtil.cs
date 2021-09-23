@@ -11,6 +11,7 @@ namespace Backend.Fx.Tests.Extensions
         Three
     }
 
+
     public class TheStringEnumUtil
     {
         [Theory]

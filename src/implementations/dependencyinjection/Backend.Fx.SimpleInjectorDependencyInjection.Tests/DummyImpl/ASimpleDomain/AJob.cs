@@ -7,6 +7,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.ASimpleDo
     public class AJob : IJob
     {
         public void Run()
-        {}
+        { }
     }
 }
