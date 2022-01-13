@@ -2,9 +2,9 @@
 
 namespace Backend.Fx.Environment.MultiTenancy
 {
-    public abstract class TenantStatusChanged : IntegrationEvent
+    public abstract class TenantEvent : IntegrationEvent
     {
-        protected TenantStatusChanged(int tenantId, string name, string description, bool isDemoTenant) : base(tenantId)
+        protected TenantEvent(int tenantId, string name, string description, bool isDemoTenant) : base(tenantId)
         {
             Name = name;
             Description = description;

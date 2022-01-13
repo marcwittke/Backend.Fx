@@ -24,6 +24,7 @@ namespace Backend.Fx.Environment.MultiTenancy
         void ActivateTenant(TenantId tenantId);
         void DeactivateTenant(TenantId tenantId);
         void DeleteTenant(TenantId tenantId);
+        Tenant UpdateTenant(TenantId tenantId, string name, string description, string configuration);
 
         Tenant[] GetTenants();
         Tenant[] GetActiveTenants();
@@ -97,11 +98,23 @@ namespace Backend.Fx.Environment.MultiTenancy
             }
 
             _tenantRepository.DeleteTenant(tenantId);
+            _messageBus.Publish(new TenantDeactivated(tenant.Id, tenant.Name, tenant.Description, tenant.IsDemoTenant));
         }
 
         public Tenant GetTenant(TenantId tenantId)
         {
             return _tenantRepository.GetTenant(tenantId);
+        }
+
+        public Tenant UpdateTenant(TenantId tenantId, string name, string description, string configuration)
+        {
+            var tenant = _tenantRepository.GetTenant(tenantId);
+            tenant.Name = name;
+            tenant.Description = description;
+            tenant.Configuration = configuration;
+            _tenantRepository.SaveTenant(tenant);
+            _messageBus.Publish(new TenantUpdated(tenant.Id, name, description, tenant.IsDemoTenant));
+            return tenant;
         }
 
         public Tenant[] GetTenants()
