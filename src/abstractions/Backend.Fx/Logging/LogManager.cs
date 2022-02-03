@@ -1,44 +1,40 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Threading;
 
 namespace Backend.Fx.Logging
 {
-    [DebuggerStepThrough]
-    public abstract class LogManager
+    /// <summary>
+    /// static class to keep an ILoggerFactory instance to use Microsoft.Extension.Logging without dependency injection
+    /// </summary>
+    public static class LogManager
     {
-        private static int _activityIndex = 1;
-        private static ILoggerFactory _factory = new DebugLoggerFactory();
+        private static Microsoft.Extensions.Logging.ILoggerFactory _loggerFactory;
 
-        public static void Initialize(ILoggerFactory theFactory)
+        public static void Init(Microsoft.Extensions.Logging.ILoggerFactory loggerFactory)
         {
-            _factory = theFactory;
+            _loggerFactory = loggerFactory;
         }
 
-        public static ILogger Create<T>()
+        public static Microsoft.Extensions.Logging.ILogger Create<T>()
         {
-            return _factory.Create<T>();
+            return _loggerFactory.CreateLogger(typeof(T).FullName);
         }
-
-        public static ILogger Create(Type t)
+        
+        public static Microsoft.Extensions.Logging.ILogger Create(Type t)
         {
-            return _factory.Create(t);
+            return _loggerFactory.CreateLogger(t.FullName);
         }
-
-        public static ILogger Create(string s)
+        
+        public static Microsoft.Extensions.Logging.ILogger Create(string category)
         {
-            return _factory.Create(s);
+            return _loggerFactory.CreateLogger(category);
         }
-
-        public static void BeginActivity()
-        {
-            Interlocked.Increment(ref _activityIndex);
-            _factory.BeginActivity(_activityIndex);
-        }
+        
+        public static void BeginActivity() {}
 
         public static void Shutdown()
         {
-            _factory.Shutdown();
+            _loggerFactory.Dispose();
         }
     }
+    
 }

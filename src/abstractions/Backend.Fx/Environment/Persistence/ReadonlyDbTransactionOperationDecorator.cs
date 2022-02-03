@@ -1,5 +1,7 @@
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Environment.Persistence
 {
@@ -20,7 +22,7 @@ namespace Backend.Fx.Environment.Persistence
 
         public void Complete()
         {
-            Logger.Debug("Canceling operation instead of completing it due to classification as readonly operation");
+            Logger.LogDebug("Canceling operation instead of completing it due to classification as readonly operation");
             _operationImplementation.Cancel();
         }
 

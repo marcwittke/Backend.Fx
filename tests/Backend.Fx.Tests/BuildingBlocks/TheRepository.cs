@@ -5,12 +5,19 @@ using Backend.Fx.Exceptions;
 using Backend.Fx.InMemoryPersistence;
 using Backend.Fx.Patterns.Authorization;
 using FakeItEasy;
+using Serilog;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.BuildingBlocks
 {
     public class TheRepository
     {
+        public TheRepository(ITestOutputHelper toh)
+        {
+            
+        }
+        
         [Fact]
         public void AcceptsNullArrayToResolve()
         {

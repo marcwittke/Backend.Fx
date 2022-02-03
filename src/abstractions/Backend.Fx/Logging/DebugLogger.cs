@@ -3,6 +3,7 @@ using System.Diagnostics;
 
 namespace Backend.Fx.Logging
 {
+    [Obsolete]
     [DebuggerStepThrough]
     public class DebugLogger : ILogger
     {

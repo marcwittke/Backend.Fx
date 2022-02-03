@@ -14,6 +14,8 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.EfCorePersistence
 {
@@ -77,7 +79,7 @@ namespace Backend.Fx.EfCorePersistence
         {
             if (ids == null)
             {
-                return new TAggregateRoot[0];
+                return Array.Empty<TAggregateRoot>();
             }
 
             int[] idsToResolve = ids as int[] ?? ids.ToArray();
@@ -124,19 +126,19 @@ namespace Backend.Fx.EfCorePersistence
 
         protected override void AddPersistent(TAggregateRoot aggregateRoot)
         {
-            Logger.Debug($"Persistently adding new {AggregateTypeName}");
+            Logger.LogDebug("Persistently adding new {AggregateTypeName}", AggregateTypeName);
             DbContext.Set<TAggregateRoot>().Add(aggregateRoot);
         }
 
         protected override void AddRangePersistent(TAggregateRoot[] aggregateRoots)
         {
-            Logger.Debug($"Persistently adding {aggregateRoots.Length} item(s) of type {AggregateTypeName}");
+            Logger.LogDebug("Persistently adding {Count} item(s) of type {AggregateTypeName}", aggregateRoots.Length, AggregateTypeName);
             DbContext.Set<TAggregateRoot>().AddRange(aggregateRoots);
         }
 
         protected override void DeletePersistent(TAggregateRoot aggregateRoot)
         {
-            Logger.Debug($"Persistently removing {aggregateRoot.DebuggerDisplay}");
+            Logger.LogDebug("Persistently removing {AggregateTypeName}[{Id}]", AggregateTypeName, aggregateRoot.Id);
             DbContext.Set<TAggregateRoot>().Remove(aggregateRoot);
         }
     }

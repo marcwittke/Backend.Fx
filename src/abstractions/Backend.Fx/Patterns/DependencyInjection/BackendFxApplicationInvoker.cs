@@ -7,6 +7,8 @@ using Backend.Fx.Extensions;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.EventAggregation.Domain;
 using Backend.Fx.Patterns.EventAggregation.Integration;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Patterns.DependencyInjection
 {
@@ -43,7 +45,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
         public void Invoke(Action<IInstanceProvider> action, IIdentity identity, TenantId tenantId, Guid? correlationId = null)
         {
-            Logger.Info($"Invoking synchronous action as {identity.Name} in {tenantId}");
+            Logger.LogInformation("Invoking synchronous action as {Identity} in {TenantId}", identity, tenantId);
             using (IInjectionScope injectionScope = BeginScope(identity, tenantId, correlationId))
             {
                 using (UseDurationLogger(injectionScope))
@@ -70,7 +72,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
         public async Task InvokeAsync(Func<IInstanceProvider, Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId, Guid? correlationId = null)
         {
-            Logger.Info($"Invoking asynchronous action as {identity.Name} in {tenantId}");
+            Logger.LogInformation("Invoking asynchronous action as {Identity} in {TenantId}", identity, tenantId);
             using (IInjectionScope injectionScope = BeginScope(identity, tenantId, correlationId))
             {
                 using (UseDurationLogger(injectionScope))
@@ -118,7 +120,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
             IIdentity identity = injectionScope.InstanceProvider.GetInstance<ICurrentTHolder<IIdentity>>().Current;
             TenantId tenantId = injectionScope.InstanceProvider.GetInstance<ICurrentTHolder<TenantId>>().Current;
             Correlation correlation = injectionScope.InstanceProvider.GetInstance<ICurrentTHolder<Correlation>>().Current;
-            return Logger.InfoDuration(
+            return Logger.LogInformationDuration(
                 $"Starting scope {injectionScope.SequenceNumber} (correlation [{correlation.Id}]) for {identity.Name} in tenant {(tenantId.HasValue ? tenantId.Value.ToString() : "null")}",
                 $"Ended scope {injectionScope.SequenceNumber} (correlation [{correlation.Id}]) for {identity.Name} in tenant {(tenantId.HasValue ? tenantId.Value.ToString() : "null")}");
         }

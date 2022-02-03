@@ -1,17 +1,28 @@
 using Backend.Fx.AspNetCore.Tests.SampleApp;
 using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.NetCore.Logging;
+using Backend.Fx.Logging;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Events;
+using Serilog.Extensions.Logging;
 using Xunit;
+using ILogger = Serilog.ILogger;
 
 namespace Backend.Fx.AspNetCore.Tests
 {
     public class SampleAppWebApplicationFactory : WebApplicationFactory<Startup>
     {
+        private static readonly ILogger Logger = CreateLogger();
+
+        public SampleAppWebApplicationFactory()
+        {
+            LogManager.Init(new SerilogLoggerFactory(Logger));
+        }
+        
         protected override IWebHostBuilder CreateWebHostBuilder()
         {
             var webHostBuilder = new WebHostBuilder();
@@ -21,13 +32,7 @@ namespace Backend.Fx.AspNetCore.Tests
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder
-                .ConfigureLogging(loggingBuilder =>
-                {
-                    loggingBuilder.ClearProviders();
-                    loggingBuilder.AddProvider(new BackendFxLoggerProvider());
-                    loggingBuilder.AddDebug();
-                })
-                .CaptureStartupErrors(true)
+                .UseSerilog(Logger)
                 .UseSolutionRelativeContentRoot("")
                 .UseSetting("detailedErrors", true.ToString())
                 .UseEnvironment("Development")
@@ -47,6 +52,17 @@ namespace Backend.Fx.AspNetCore.Tests
             
             
             return server;
+        }
+        
+        private static ILogger CreateLogger()
+        {
+            ILogger serilogLogger = new LoggerConfiguration()
+                                            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                                            .Enrich.FromLogContext()
+                                            .WriteTo.Console()
+                                            .CreateLogger();
+
+            return serilogLogger;
         }
     }
 }

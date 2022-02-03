@@ -2,6 +2,8 @@ using System;
 using System.Data;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Environment.Persistence
 {
@@ -21,16 +23,16 @@ namespace Backend.Fx.Environment.Persistence
 
         public void Begin()
         {
-            Logger.Debug("Opening database connection");
+            Logger.LogDebug("Opening database connection");
             DbConnection.Open();
-            _connectionLifetimeLogger = Logger.DebugDuration("Database connection open", "Database connection closed");
+            _connectionLifetimeLogger = Logger.LogDebugDuration("Database connection open", "Database connection closed");
             Operation.Begin();
         }
 
         public void Complete()
         {
             Operation.Complete();
-            Logger.Debug("Closing database connection");
+            Logger.LogDebug("Closing database connection");
             DbConnection.Close();
             _connectionLifetimeLogger?.Dispose();
         }
@@ -38,7 +40,7 @@ namespace Backend.Fx.Environment.Persistence
         public void Cancel()
         {
             Operation.Cancel();
-            Logger.Debug("Closing database connection");
+            Logger.LogDebug("Closing database connection");
             DbConnection.Close();
             _connectionLifetimeLogger?.Dispose();
             

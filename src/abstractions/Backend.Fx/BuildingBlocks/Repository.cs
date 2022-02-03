@@ -8,6 +8,8 @@ using Backend.Fx.Logging;
 using Backend.Fx.Patterns.Authorization;
 using Backend.Fx.Patterns.DependencyInjection;
 using JetBrains.Annotations;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.BuildingBlocks
 {
@@ -19,7 +21,10 @@ namespace Backend.Fx.BuildingBlocks
 
         protected Repository(ICurrentTHolder<TenantId> tenantIdHolder, IAggregateAuthorization<TAggregateRoot> aggregateAuthorization)
         {
-            Logger.Trace($"Instantiating a new Repository<{AggregateTypeName}> for tenant [{(tenantIdHolder.Current.HasValue ? tenantIdHolder.Current.Value.ToString() : "null")}]");
+            Logger.LogTrace(
+                "Instantiating a new Repository<{AggregateTypeName}> for tenant [{TenantId}]",
+                    AggregateTypeName,
+                    tenantIdHolder.Current.HasValue ? tenantIdHolder.Current.Value.ToString() : "null");
             _tenantIdHolder = tenantIdHolder;
             _aggregateAuthorization = aggregateAuthorization;
         }
@@ -44,8 +49,8 @@ namespace Backend.Fx.BuildingBlocks
 
         public TAggregateRoot Single(int id)
         {
-            Logger.Debug($"Getting single {AggregateTypeName}[{id}]");
-            TAggregateRoot aggregateRoot = AggregateQueryable.FirstOrDefault(aggr => aggr.Id.Equals(id));
+            Logger.LogDebug("Getting single {AggregateTypeName}[{Id}]", AggregateTypeName, id);
+            TAggregateRoot aggregateRoot = AggregateQueryable.FirstOrDefault(agg => agg.Id.Equals(id));
             if (aggregateRoot == null)
             {
                 throw new NotFoundException<TAggregateRoot>(id);
@@ -56,8 +61,8 @@ namespace Backend.Fx.BuildingBlocks
 
         public TAggregateRoot SingleOrDefault(int id)
         {
-            Logger.Debug($"Getting single or default {AggregateTypeName}[{id}]");
-            return AggregateQueryable.FirstOrDefault(aggr => aggr.Id.Equals(id));
+            Logger.LogDebug("Getting single or default {AggregateTypeName}[{Id}]", AggregateTypeName, id);
+            return AggregateQueryable.FirstOrDefault(agg => agg.Id.Equals(id));
         }
 
         public TAggregateRoot[] GetAll()
@@ -72,7 +77,7 @@ namespace Backend.Fx.BuildingBlocks
                 throw new ArgumentNullException(nameof(aggregateRoot));
             }
 
-            Logger.Debug($"Deleting {AggregateTypeName}[{aggregateRoot.Id}]");
+            Logger.LogDebug("Deleting {AggregateTypeName}[{Id}]", AggregateTypeName, aggregateRoot.Id);
             if (aggregateRoot.TenantId != _tenantIdHolder.Current.Value || !_aggregateAuthorization.CanDelete(aggregateRoot))
             {
                 throw new ForbiddenException($"You are not allowed to delete {typeof(TAggregateRoot).Name}[{aggregateRoot.Id}]");
@@ -90,7 +95,7 @@ namespace Backend.Fx.BuildingBlocks
 
             if (_aggregateAuthorization.CanCreate(aggregateRoot))
             {
-                Logger.Debug($"Adding {AggregateTypeName}[{aggregateRoot.Id}]");
+                Logger.LogDebug("Adding {AggregateTypeName}[{Id}]", AggregateTypeName, aggregateRoot.Id);
                 aggregateRoot.TenantId = _tenantIdHolder.Current.Value;
                 AddPersistent(aggregateRoot);
             }
@@ -115,7 +120,7 @@ namespace Backend.Fx.BuildingBlocks
                 }
             });
             
-            Logger.Debug($"Adding {aggregateRoots.Length} items of type {AggregateTypeName}");
+            Logger.LogDebug("Adding {Count} items of type {AggregateTypeName}", aggregateRoots.Length, AggregateTypeName);
 
             aggregateRoots.ForAll(agg => agg.TenantId = _tenantIdHolder.Current.Value);
 
@@ -131,7 +136,7 @@ namespace Backend.Fx.BuildingBlocks
         {
             if (ids == null)
             {
-                return new TAggregateRoot[0];
+                return Array.Empty<TAggregateRoot>();
             }
 
             int[] idsToResolve = ids as int[] ?? ids.ToArray();

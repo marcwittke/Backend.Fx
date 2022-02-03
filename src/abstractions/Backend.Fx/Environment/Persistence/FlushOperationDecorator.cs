@@ -1,5 +1,7 @@
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Environment.Persistence
 {
@@ -22,7 +24,7 @@ namespace Backend.Fx.Environment.Persistence
 
         public void Complete()
         {
-            Logger.Debug("Flushing before completion of operation");
+            Logger.LogDebug("Flushing before completion of operation");
             _canFlush.Flush();
             _operationImplementation.Complete();
         }

@@ -3,6 +3,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Logging;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Patterns.Authorization
 {
@@ -30,7 +32,7 @@ namespace Backend.Fx.Patterns.Authorization
         public virtual bool CanModify(TAggregateRoot t)
         {
             var canCreate = CanCreate(t);
-            Logger.Trace($"CanCreate({t.DebuggerDisplay}): {canCreate}");
+            Logger.LogTrace("CanCreate({AggregateRootTypeName}): {CanCreate}", t.DebuggerDisplay, canCreate);
             return canCreate;
         }
 
@@ -38,7 +40,7 @@ namespace Backend.Fx.Patterns.Authorization
         public virtual bool CanDelete(TAggregateRoot t)
         {
             var canModify = CanModify(t);
-            Logger.Trace($"CanModify({t.DebuggerDisplay}): {canModify}");
+            Logger.LogTrace("CanModify({AggregateRootTypeName}): {CanCreate}", t.DebuggerDisplay, canModify);
             return canModify;
         }
     }

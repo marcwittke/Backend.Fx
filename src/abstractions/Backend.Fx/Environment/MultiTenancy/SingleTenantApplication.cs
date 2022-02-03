@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Environment.MultiTenancy
 {
@@ -49,7 +51,7 @@ namespace Backend.Fx.Environment.MultiTenancy
 
             await _application.BootAsync(cancellationToken);
 
-            Logger.Info("Ensuring existence of single tenant");
+            Logger.LogInformation("Ensuring existence of single tenant");
             TenantId = _tenantService.GetActiveTenants().SingleOrDefault()?.GetTenantId()
                        ?? _tenantService.CreateTenant("Single Tenant", "This application runs in single tenant mode", _isDemoTenant);
 

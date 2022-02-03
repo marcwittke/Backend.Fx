@@ -16,7 +16,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\abstractions\Backend.Fx\Backend.Fx.csproj" />
     <ProjectReference Include="..\..\src\implementations\Backend.Fx.InMemoryPersistence\Backend.Fx.InMemoryPersistence.csproj" />
-    <ProjectReference Include="..\..\src\implementations\Backend.Fx.NLogLogging\Backend.Fx.NLogLogging.csproj" />
     <ProjectReference Include="..\..\src\implementations\Backend.Fx.SimpleInjetorDependencyInjection\Backend.Fx.SimpleInjectorDependencyInjection.csproj" />
   </ItemGroup>
 

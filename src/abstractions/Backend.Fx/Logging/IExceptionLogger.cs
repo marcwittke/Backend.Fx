@@ -1,5 +1,6 @@
 ﻿using System;
 using Backend.Fx.Exceptions;
+using Microsoft.Extensions.Logging;
 
 namespace Backend.Fx.Logging
 {
@@ -10,9 +11,9 @@ namespace Backend.Fx.Logging
 
     public class ExceptionLogger : IExceptionLogger
     {
-        private readonly ILogger _logger;
+        private readonly Microsoft.Extensions.Logging.ILogger _logger;
 
-        public ExceptionLogger(ILogger logger)
+        public ExceptionLogger(Microsoft.Extensions.Logging.ILogger logger)
         {
             _logger = logger;
         }
@@ -21,11 +22,11 @@ namespace Backend.Fx.Logging
         {
             if (exception is ClientException cex)
             {
-                _logger.Warn(cex);
+                _logger.LogWarning(cex, "Client Exception");
             }
             else
             {
-                _logger.Error(exception);
+                _logger.LogError(exception, "Server Exception");
             }
         }
     }

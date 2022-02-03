@@ -3,6 +3,8 @@ using System.Data;
 using Backend.Fx.EfCorePersistence.Bootstrapping;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.IdGeneration;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.EfCorePersistence.Postgres
 {
@@ -21,7 +23,7 @@ namespace Backend.Fx.EfCorePersistence.Postgres
 
         public void EnsureSequence()
         {
-            Logger.Info($"Ensuring existence of postgres sequence {SchemaName}.{SequenceName}");
+            Logger.LogInformation("Ensuring existence of postgres sequence {SchemaName}.{SequenceName}", SchemaName, SequenceName);
 
             using (IDbConnection dbConnection = _dbConnectionFactory.Create())
             {
@@ -35,16 +37,19 @@ namespace Backend.Fx.EfCorePersistence.Postgres
 
                 if (sequenceExists)
                 {
-                    Logger.Info($"Sequence {SchemaName}.{SequenceName} exists");
+                    Logger.LogInformation("Sequence {SchemaName}.{SequenceName} exists", SchemaName, SequenceName);
                 }
                 else
                 {
-                    Logger.Info($"Sequence {SchemaName}.{SequenceName} does not exist yet and will be created now");
+                    Logger.LogInformation(
+                        "Sequence {SchemaName}.{SequenceName} does not exist yet and will be created now",
+                        SchemaName,
+                        SequenceName);
                     using (IDbCommand cmd = dbConnection.CreateCommand())
                     {
                         cmd.CommandText = $"CREATE SEQUENCE {SchemaName}.{SequenceName} START WITH 1 INCREMENT BY {Increment}";
                         cmd.ExecuteNonQuery();
-                        Logger.Info($"Sequence {SchemaName}.{SequenceName} created");
+                        Logger.LogInformation("Sequence {SchemaName}.{SequenceName} created", SchemaName, SequenceName);
                     }
                 }
             }
@@ -61,7 +66,7 @@ namespace Backend.Fx.EfCorePersistence.Postgres
                 {
                     command.CommandText = $"SELECT nextval('{SchemaName}.{SequenceName}');";
                     nextValue = Convert.ToInt32(command.ExecuteScalar());
-                    Logger.Debug($"{SchemaName}.{SequenceName} served {nextValue} as next value");
+                    Logger.LogDebug("{SchemaName}.{SequenceName} served {2} as next value", SchemaName, SequenceName, nextValue);
                 }
 
                 return nextValue;

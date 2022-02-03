@@ -3,6 +3,8 @@ using System.Data;
 using Backend.Fx.EfCorePersistence.Bootstrapping;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.IdGeneration;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.EfCorePersistence.Mssql
 {
@@ -21,7 +23,7 @@ namespace Backend.Fx.EfCorePersistence.Mssql
 
         public void EnsureSequence()
         {
-            Logger.Info($"Ensuring existence of mssql sequence {SchemaName}.{SequenceName}");
+            Logger.LogInformation("Ensuring existence of mssql sequence {SchemaName}.{SequenceName}", SchemaName, SequenceName);
             using (IDbConnection dbConnection = _dbConnectionFactory.Create())
             {
                 dbConnection.Open();
@@ -34,16 +36,16 @@ namespace Backend.Fx.EfCorePersistence.Mssql
 
                 if (sequenceExists)
                 {
-                    Logger.Info($"Sequence {SchemaName}.{SequenceName} exists");
+                    Logger.LogInformation("Sequence {SchemaName}.{SequenceName} exists", SchemaName, SequenceName);
                 }
                 else
                 {
-                    Logger.Info($"Sequence {SchemaName}.{SequenceName} does not exist yet and will be created now");
+                    Logger.LogInformation("Sequence {SchemaName}.{SequenceName} does not exist yet and will be created now", SchemaName, SequenceName);
                     using (IDbCommand cmd = dbConnection.CreateCommand())
                     {
                         cmd.CommandText = $"CREATE SEQUENCE [{SchemaName}].[{SequenceName}] START WITH 1 INCREMENT BY {Increment}";
                         cmd.ExecuteNonQuery();
-                        Logger.Info($"Sequence {SchemaName}.{SequenceName} created");
+                        Logger.LogInformation("Sequence {SchemaName}.{SequenceName} created", SchemaName, SequenceName);
                     }
                 }
             }
@@ -59,7 +61,7 @@ namespace Backend.Fx.EfCorePersistence.Mssql
                 {
                     selectNextValCommand.CommandText = $"SELECT next value FOR {SchemaName}.{SequenceName}";
                     nextValue = Convert.ToInt32(selectNextValCommand.ExecuteScalar());
-                    Logger.Debug($"{SchemaName}.{SequenceName} served {nextValue} as next value");
+                    Logger.LogDebug("{SchemaName}.{SequenceName} served {NextValue} as next value", SchemaName, SequenceName, nextValue);
                 }
 
                 return nextValue;

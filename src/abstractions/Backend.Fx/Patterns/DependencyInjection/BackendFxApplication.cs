@@ -8,6 +8,8 @@ using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.EventAggregation.Domain;
 using Backend.Fx.Patterns.EventAggregation.Integration;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Patterns.DependencyInjection
 {
@@ -95,7 +97,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
         
         public Task BootAsync(CancellationToken cancellationToken = default)
         {
-            Logger.Info("Booting application");
+            Logger.LogInformation("Booting application");
             CompositionRoot.Verify();
             MessageBus.Connect();
             _isBooted.Set();
@@ -111,7 +113,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
         {
             if (disposing)
             {
-                Logger.Info("Application shut down initialized");
+                Logger.LogInformation("Application shut down initialized");
                 CompositionRoot?.Dispose();
             }
         }

@@ -6,7 +6,9 @@ using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Xunit;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Tests.Patterns.DependencyInjection
 {
@@ -37,9 +39,9 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
 
         private void DoTheAction(IInstanceProvider _)
         {
-            Logger.Debug("start");
+            Logger.LogDebug("start");
             Thread.Sleep(_actionDuration);
-            Logger.Debug("end");
+            Logger.LogDebug("end");
         }
 
         [Fact]

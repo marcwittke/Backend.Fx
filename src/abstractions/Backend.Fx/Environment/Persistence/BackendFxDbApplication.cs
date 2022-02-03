@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Environment.Persistence
 {
@@ -26,7 +28,7 @@ namespace Backend.Fx.Environment.Persistence
 
         public void Dispose()
         {
-            Logger.Trace("Disposing...");
+            Logger.LogTrace("Disposing...");
             _databaseBootstrapper.Dispose();
             _backendFxApplication.Dispose();
         }
@@ -41,14 +43,14 @@ namespace Backend.Fx.Environment.Persistence
 
         public bool WaitForBoot(int timeoutMilliSeconds = Int32.MaxValue, CancellationToken cancellationToken = default)
         {
-            Logger.Trace("Waiting for boot...");
+            Logger.LogTrace("Waiting for boot...");
             return _backendFxApplication.WaitForBoot(timeoutMilliSeconds, cancellationToken);
         }
 
         public Task Boot(CancellationToken cancellationToken = default) => BootAsync(cancellationToken);
         public async Task BootAsync(CancellationToken cancellationToken = default)
         {
-            Logger.Trace("Booting...");
+            Logger.LogTrace("Booting...");
             await _databaseAvailabilityAwaiter.WaitForDatabase(cancellationToken);
             _databaseBootstrapper.EnsureDatabaseExistence();
             await _backendFxApplication.BootAsync(cancellationToken);

@@ -3,6 +3,8 @@ using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.AspNetCore.Bootstrapping
 {
@@ -30,7 +32,7 @@ namespace Backend.Fx.AspNetCore.Bootstrapping
         {
             while (!_application.WaitForBoot(3000))
             {
-                Logger.Info("Queuing Request while application is booting...");
+                Logger.LogInformation("Queuing Request while application is booting...");
             }
 
             await _next.Invoke(context);

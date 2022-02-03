@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace Backend.Fx.Logging
 {
@@ -43,6 +44,39 @@ namespace Backend.Fx.Logging
             }
 
             return $"{activity} - Duration: {duration:g}";
+        }
+    }
+
+    public static class DurationLoggerEx
+    {
+        public static IDisposable LogInformationDuration(this Microsoft.Extensions.Logging.ILogger logger, string activity)
+        {
+            return new DurationLogger(s => logger.LogInformation(s), activity);
+        }
+
+        public static IDisposable LogInformationDuration(this Microsoft.Extensions.Logging.ILogger logger, string beginMessage, string endMessage)
+        {
+            return new DurationLogger(s => logger.LogInformation(s), beginMessage, endMessage);
+        }
+        
+        public static IDisposable LogDebugDuration(this Microsoft.Extensions.Logging.ILogger logger, string activity)
+        {
+            return new DurationLogger(s => logger.LogDebug(s), activity);
+        }
+
+        public static IDisposable LogDebugDuration(this Microsoft.Extensions.Logging.ILogger logger, string beginMessage, string endMessage)
+        {
+            return new DurationLogger(s => logger.LogDebug(s), beginMessage, endMessage);
+        }
+        
+        public static IDisposable LogTraceDuration(this Microsoft.Extensions.Logging.ILogger logger, string activity)
+        {
+            return new DurationLogger(s => logger.LogTrace(s), activity);
+        }
+
+        public static IDisposable LogTraceDuration(this Microsoft.Extensions.Logging.ILogger logger, string beginMessage, string endMessage)
+        {
+            return new DurationLogger(s => logger.LogTrace(s), beginMessage, endMessage);
         }
     }
 }

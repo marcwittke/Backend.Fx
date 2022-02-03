@@ -3,6 +3,8 @@ using System.Data;
 using Backend.Fx.EfCorePersistence.Bootstrapping;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.IdGeneration;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.EfCorePersistence.Oracle
 {
@@ -31,7 +33,7 @@ namespace Backend.Fx.EfCorePersistence.Oracle
 
         public void EnsureSequence()
         {
-            Logger.Info($"Ensuring existence of oracle sequence {SchemaPrefix}{SequenceName}");
+            Logger.LogInformation("Ensuring existence of oracle sequence {SchemaPrefix}.{SequenceName}", SchemaPrefix, SequenceName);
 
             using (IDbConnection dbConnection = _dbConnectionFactory.Create())
             {
@@ -40,21 +42,23 @@ namespace Backend.Fx.EfCorePersistence.Oracle
                 using (IDbCommand command = dbConnection.CreateCommand())
                 {
                     command.CommandText = $"SELECT count(*) FROM user_sequences WHERE sequence_name = '{SequenceName}'";
-                    sequenceExists = (decimal) command.ExecuteScalar() == 1;
+                    sequenceExists = (decimal)command.ExecuteScalar() == 1;
                 }
 
                 if (sequenceExists)
                 {
-                    Logger.Info($"Sequence {SchemaPrefix}{SequenceName} exists");
+                    Logger.LogInformation("Oracle sequence {SchemaPrefix}.{SequenceName} exists", SchemaPrefix, SequenceName);
                 }
                 else
                 {
-                    Logger.Info($"Sequence {SchemaPrefix}{SequenceName} does not exist yet and will be created now");
+                    Logger.LogInformation("Oracle sequence {SchemaPrefix}.{SequenceName} does not exist yet and will be created now",
+                        SchemaPrefix,
+                        SequenceName);
                     using (IDbCommand cmd = dbConnection.CreateCommand())
                     {
                         cmd.CommandText = $"CREATE SEQUENCE {SchemaPrefix}{SequenceName} START WITH 1 INCREMENT BY {Increment}";
                         cmd.ExecuteNonQuery();
-                        Logger.Info($"Sequence {SchemaPrefix}{SequenceName} created");
+                        Logger.LogInformation("Oracle sequence {SchemaPrefix}.{SequenceName} created", SchemaPrefix, SequenceName);
                     }
                 }
             }
@@ -71,7 +75,10 @@ namespace Backend.Fx.EfCorePersistence.Oracle
                 {
                     command.CommandText = $"SELECT {SchemaPrefix}{SequenceName}.NEXTVAL FROM dual";
                     nextValue = Convert.ToInt32(command.ExecuteScalar());
-                    Logger.Debug($"{SchemaPrefix}{SequenceName} served {nextValue} as next value");
+                    Logger.LogDebug("Oracle sequence {SchemaPrefix}.{SequenceName} served {NextValue} as next value",
+                        SchemaPrefix,
+                        SequenceName,
+                        nextValue);
                 }
 
                 return nextValue;

@@ -4,6 +4,8 @@ using System.Reflection;
 using Backend.Fx.Extensions;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
@@ -25,10 +27,10 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
             MethodInfo handleMethod = _handlerType.GetRuntimeMethod("Handle", new[] {_eventType});
             Debug.Assert(handleMethod != null, $"No method with signature `Handle({_eventType.Name} event)` found on {_handlerType.Name}");
 
-            Logger.Info($"Getting subscribed handler instance of type {_handlerType.Name}");
+            Logger.LogInformation("Getting subscribed handler instance of type {HandlerTypeName}", _handlerType.Name);
             object handlerInstance = instanceProvider.GetInstance(_handlerType);
 
-            using (Logger.InfoDuration($"Invoking subscribed handler {_handlerType.GetDetailedTypeName()}"))
+            using (Logger.LogInformationDuration($"Invoking subscribed handler {_handlerType.GetDetailedTypeName()}"))
             {
                 handleMethod.Invoke(handlerInstance, new object[] {integrationEvent});
             }

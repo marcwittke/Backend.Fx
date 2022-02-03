@@ -6,6 +6,7 @@ using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using JetBrains.Annotations;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Patterns.DataGeneration
 {
@@ -59,7 +60,7 @@ namespace Backend.Fx.Patterns.DataGeneration
 
         private void SeedDataForAllActiveTenants()
         {
-            using (Logger.InfoDuration("Seeding data"))
+            using (Logger.LogInformationDuration("Seeding data"))
             {
                 var prodTenantIds = _tenantIdProvider.GetActiveProductionTenantIds();
                 foreach (TenantId prodTenantId in prodTenantIds)

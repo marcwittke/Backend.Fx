@@ -2,6 +2,8 @@ using System;
 using System.Data;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Environment.Persistence
 {
@@ -36,13 +38,13 @@ namespace Backend.Fx.Environment.Persistence
             _shouldHandleConnectionState = ShouldHandleConnectionState();
             if (_shouldHandleConnectionState)
             {
-                Logger.Debug("Opening connection");
+                Logger.LogDebug("Opening connection");
                 _dbConnection.Open();
             }
 
-            Logger.Debug("Beginning transaction");
+            Logger.LogDebug("Beginning transaction");
             CurrentTransaction = _dbConnection.BeginTransaction(_isolationLevel);
-            _transactionLifetimeLogger = Logger.DebugDuration("Transaction open", "Transaction terminated");
+            _transactionLifetimeLogger = Logger.LogDebugDuration("Transaction open", "Transaction terminated");
             _state = TxState.Active;
             _operation.Begin();
         }
@@ -58,7 +60,7 @@ namespace Backend.Fx.Environment.Persistence
 
             _operation.Complete();
 
-            Logger.Debug("Committing transaction");
+            Logger.LogDebug("Committing transaction");
             CurrentTransaction.Commit();
             CurrentTransaction.Dispose();
             CurrentTransaction = null;
@@ -66,7 +68,7 @@ namespace Backend.Fx.Environment.Persistence
             _transactionLifetimeLogger = null;
             if (_shouldHandleConnectionState)
             {
-                Logger.Debug("Closing connection");
+                Logger.LogDebug("Closing connection");
                 _dbConnection.Close();
             }
 
@@ -75,7 +77,7 @@ namespace Backend.Fx.Environment.Persistence
 
         public void Cancel()
         {
-            Logger.Debug("rolling back transaction");
+            Logger.LogDebug("rolling back transaction");
             if (_state != TxState.Active)
             {
                 throw new InvalidOperationException($"Cannot roll back a transaction that is {_state}");

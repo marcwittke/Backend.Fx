@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 using Backend.Fx.Exceptions;
 using Backend.Fx.Logging;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.AspNetCore.ErrorHandling
 {
@@ -42,7 +44,7 @@ namespace Backend.Fx.AspNetCore.ErrorHandling
         {
             if (context.Response.HasStarted)
             {
-                Logger.Warn("exception cannot be handled correctly, because the response has already started");
+                Logger.LogWarning("exception cannot be handled correctly, because the response has already started");
                 return;
             }
 
@@ -62,7 +64,7 @@ namespace Backend.Fx.AspNetCore.ErrorHandling
         {
             if (context.Response.HasStarted)
             {
-                Logger.Warn("exception cannot be handled correctly, because the response has already started");
+                Logger.LogWarning("exception cannot be handled correctly, because the response has already started");
                 return;
             }
 

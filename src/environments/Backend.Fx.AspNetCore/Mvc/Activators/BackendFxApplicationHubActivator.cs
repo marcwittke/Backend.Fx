@@ -2,6 +2,8 @@ using System;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.AspNetCore.Mvc.Activators
 {
@@ -20,16 +22,16 @@ namespace Backend.Fx.AspNetCore.Mvc.Activators
         public T Create()
         {
             var ip = _backendFxApplication.CompositionRoot.InstanceProvider;
-            Logger.Debug($"Providing {typeof(T).Name} using {ip.GetType().Name}");
+            Logger.LogDebug("Providing {HubTypeName} using {InstanceProvider}", typeof(T).Name, ip.GetType().Name);
             return ip.GetInstance<T>();
         }
 
         public void Release(T hub)
         {
-            Logger.Trace($"Releasing {hub.GetType().Name}");
+            Logger.LogTrace("Releasing {HubTypeName}", hub.GetType().Name);
             if (hub is IDisposable disposable)
             {
-                Logger.Debug($"Disposing {hub.GetType().Name}");
+                Logger.LogDebug("Disposing {HubTypeName}", hub.GetType().Name);
                 disposable.Dispose();
             }
         }

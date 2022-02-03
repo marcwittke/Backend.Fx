@@ -3,6 +3,8 @@ using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.AspNetCore.Mvc.Activators
 {
@@ -26,22 +28,22 @@ namespace Backend.Fx.AspNetCore.Mvc.Activators
 
         private static object CreateInstanceUsingInstanceProvider(object ip, Type requestedControllerType)
         {
-            Logger.Debug($"Providing {requestedControllerType.Name} using {ip.GetType().Name}");
+            Logger.LogDebug("Providing {ControllerTypeName} using {InstanceProvider}", requestedControllerType.Name, ip.GetType().Name);
             return ((IInstanceProvider)ip).GetInstance(requestedControllerType);
         }
 
         private static object CreateInstanceUsingSystemActivator(Type requestedControllerType)
         {
-            Logger.Debug($"Providing {requestedControllerType.Name} using {nameof(Activator)}");
+            Logger.LogDebug("Providing {ControllerTypeName} using {Activator}", requestedControllerType.Name, nameof(Activator));
             return Activator.CreateInstance(requestedControllerType);
         }
 
         public virtual void Release(ControllerContext c, object controller)
         {
-            Logger.Trace($"Releasing {controller.GetType().Name}");
+            Logger.LogTrace("Releasing {ControllerTypeName}", controller.GetType().Name);
             if (controller is IDisposable disposable)
             {
-                Logger.Debug($"Disposing {controller.GetType().Name}");
+                Logger.LogDebug("Disposing {ControllerTypeName}", controller.GetType().Name);
                 disposable.Dispose();
             }
         }

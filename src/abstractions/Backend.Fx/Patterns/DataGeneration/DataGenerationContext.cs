@@ -1,10 +1,10 @@
 using System;
 using System.Linq;
-using System.Reflection;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Patterns.DataGeneration
 {
@@ -28,7 +28,7 @@ namespace Backend.Fx.Patterns.DataGeneration
        
         public void SeedDataForTenant(TenantId tenantId, bool isDemoTenant)
         {
-            using (Logger.InfoDuration($"Seeding data for tenant {tenantId.Value}"))
+            using (Logger.LogInformationDuration($"Seeding data for tenant {tenantId.Value}"))
             {
                 Type[] dataGeneratorTypesToRun = GetDataGeneratorTypes(_compositionRoot, isDemoTenant);
                 foreach (Type dataGeneratorTypeToRun in dataGeneratorTypesToRun)

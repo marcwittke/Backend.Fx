@@ -6,9 +6,11 @@ using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Domain;
 using Backend.Fx.SimpleInjectorDependencyInjection.Modules;
+using Microsoft.Extensions.Logging;
 using SimpleInjector;
 using SimpleInjector.Advanced;
 using SimpleInjector.Lifestyles;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.SimpleInjectorDependencyInjection
 {
@@ -29,7 +31,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
 
         public SimpleInjectorCompositionRoot(ILifestyleSelectionBehavior lifestyleBehavior, ScopedLifestyle scopedLifestyle)
         {
-            Logger.Info("Initializing SimpleInjector");
+            Logger.LogInformation("Initializing SimpleInjector");
             ScopedLifestyle = scopedLifestyle;
             Container.Options.LifestyleSelectionBehavior = lifestyleBehavior;
             Container.Options.DefaultScopedLifestyle = ScopedLifestyle;
@@ -48,7 +50,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
         {
             foreach (var module in modules)
             {
-                Logger.Info($"Registering {module.GetType().Name}");
+                Logger.LogInformation("Registering {Module}", module.GetType().Name);
                 module.Register(this);
             }
         }
@@ -57,14 +59,14 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
 
         public void Verify()
         {
-            Logger.Info("container is being verified");
+            Logger.LogInformation("container is being verified");
             try
             {
                 Container.Verify(VerificationOption.VerifyAndDiagnose);
             }
             catch (Exception ex)
             {
-                Logger.Warn(ex, "container configuration invalid");
+                Logger.LogWarning(ex, "container configuration invalid");
                 throw;
             }
         }

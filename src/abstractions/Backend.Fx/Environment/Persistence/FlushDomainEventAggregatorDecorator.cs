@@ -1,5 +1,7 @@
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.EventAggregation.Domain;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Environment.Persistence
 {
@@ -23,7 +25,7 @@ namespace Backend.Fx.Environment.Persistence
 
         public void RaiseEvents()
         {
-            Logger.Debug("Flushing before raising domain events");
+            Logger.LogDebug("Flushing before raising domain events");
             _canFlush.Flush();
             _domainEventAggregatorImplementation.RaiseEvents();
         }

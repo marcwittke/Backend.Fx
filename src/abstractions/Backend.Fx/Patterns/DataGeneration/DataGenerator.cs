@@ -1,4 +1,6 @@
-﻿namespace Backend.Fx.Patterns.DataGeneration
+﻿using Microsoft.Extensions.Logging;
+
+namespace Backend.Fx.Patterns.DataGeneration
 {
     using Logging;
 
@@ -21,7 +23,7 @@
     /// </summary>
     public abstract class DataGenerator : IDataGenerator
     {
-        private static readonly ILogger Logger = LogManager.Create<DataGenerator>();
+        private static readonly Microsoft.Extensions.Logging.ILogger Logger = LogManager.Create<DataGenerator>();
 
         /// <summary>
         /// simple way of ordering the execution of DataGenerators. Priority 0 will be executed first.
@@ -33,12 +35,12 @@
             if (ShouldRun())
             {
                 Initialize();
-                Logger.Info($"{GetType().FullName} is now generating initial data");
+                Logger.LogInformation("{DataGeneratorTypeName} is now generating initial data", GetType().FullName);
                 GenerateCore();
             }
             else
             {
-                Logger.Info($"No need to run {GetType().FullName}");
+                Logger.LogInformation("No need to run {DataGeneratorTypeName}", GetType().FullName);
             }
         }
 

@@ -1,6 +1,9 @@
-﻿using Backend.Fx.Logging;
+﻿using System;
+using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using SimpleInjector;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
 {
@@ -12,7 +15,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
 
         public virtual void Register(ICompositionRoot compositionRoot)
         {
-            Logger.Debug($"Registering {GetType().Name}");
+            Logger.LogDebug("Registering {ServiceType}", GetType().Name);
             var simpleInjectorCompositionRoot = (SimpleInjectorCompositionRoot) compositionRoot;
             Register(simpleInjectorCompositionRoot.Container, simpleInjectorCompositionRoot.ScopedLifestyle);
         }

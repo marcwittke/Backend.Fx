@@ -1,5 +1,7 @@
 using System.Threading;
 using Backend.Fx.Logging;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Patterns.IdGeneration
 {
@@ -13,7 +15,7 @@ namespace Backend.Fx.Patterns.IdGeneration
 
         protected HiLoIdGenerator()
         {
-            _isTraceEnabled = Logger.IsTraceEnabled();
+            _isTraceEnabled = Logger.IsEnabled(LogLevel.Trace);
         }
 
         public int NextId()
@@ -23,7 +25,7 @@ namespace Backend.Fx.Patterns.IdGeneration
                 EnsureValidLowAndHiId();
                 var nextId = _lowId;
                 Interlocked.Increment(ref _lowId);
-                if (_isTraceEnabled) Logger.Trace("Providing id {0}", nextId);
+                if (_isTraceEnabled) Logger.LogTrace("Providing id {NextId}", nextId);
                 return nextId;
             }
         }

@@ -1,5 +1,6 @@
 ﻿using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
@@ -15,7 +16,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
 
         public void Process(IInstanceProvider instanceProvider, EventProcessingContext context)
         {
-            using (Logger.InfoDuration($"Invoking subscribed handler {_handler.GetType().Name}"))
+            using (Logger.LogInformationDuration($"Invoking subscribed handler {_handler.GetType().Name}"))
             {
                 _handler.Handle((TEvent) context.GetTypedEvent(typeof(TEvent)));
             }

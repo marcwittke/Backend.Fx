@@ -1,5 +1,7 @@
 ﻿using System;
 using Backend.Fx.Logging;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Environment.DateAndTime
 {
@@ -14,7 +16,7 @@ namespace Backend.Fx.Environment.DateAndTime
         public FrozenClock(IClock clock)
         {
             UtcNow = DateTime.UtcNow;
-            Logger.Trace($"Freezing clock at {UtcNow}");
+            Logger.LogTrace("Freezing clock at {UtcNow}", UtcNow);
         }
 
         public DateTime UtcNow { get; }
