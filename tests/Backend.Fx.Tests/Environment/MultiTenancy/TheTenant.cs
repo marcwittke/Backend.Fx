@@ -1,10 +1,11 @@
 ﻿using System;
 using Backend.Fx.Environment.MultiTenancy;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Environment.MultiTenancy
 {
-    public class TheTenant
+    public class TheTenant : TestWithLogging
     {
         [Fact]
         public void CannotBeInitializedWithoutName()
@@ -22,6 +23,10 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
             Assert.Equal("name", tenant.Name);
             Assert.Equal("description", tenant.Description);
             Assert.True(tenant.IsDemoTenant);
+        }
+
+        public TheTenant(ITestOutputHelper output) : base(output)
+        {
         }
     }
 }

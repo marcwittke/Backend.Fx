@@ -1,10 +1,11 @@
 ﻿using Backend.Fx.Exceptions;
 using Backend.Fx.Tests.BuildingBlocks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Exceptions
 {
-    public class TheNotFoundException
+    public class TheNotFoundException : TestWithLogging
     {
         [Fact]
         public void FillsNameAndIdProperties()
@@ -12,6 +13,10 @@ namespace Backend.Fx.Tests.Exceptions
             var exception = new NotFoundException<TheAggregateRoot.TestAggregateRoot>(4711);
             Assert.Equal("TestAggregateRoot", exception.EntityName);
             Assert.Equal(4711, exception.Id);
+        }
+
+        public TheNotFoundException(ITestOutputHelper output) : base(output)
+        {
         }
     }
 }

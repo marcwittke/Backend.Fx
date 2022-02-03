@@ -7,12 +7,13 @@ using Backend.Fx.Patterns.EventAggregation.Integration;
 using Backend.Fx.Tests.Patterns.DependencyInjection;
 using FakeItEasy;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Patterns.DataGeneration
 {
-    public class TheDataGenerationContext
+    public class TheDataGenerationContext : TestWithLogging
     {
-        public TheDataGenerationContext()
+        public TheDataGenerationContext(ITestOutputHelper output): base(output)
         {
             var fakes = new DiTestFakes();
             A.CallTo(() => fakes.InstanceProvider.GetInstances<IDataGenerator>()).Returns(_demoDataGenerators.Concat(_prodDataGenerators.Cast<IDataGenerator>()).ToArray());

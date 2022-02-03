@@ -7,13 +7,15 @@ using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Extensions;
 using Backend.Fx.Patterns.Authorization;
+using Backend.Fx.Tests;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.EfCorePersistence.Tests
 {
-    public class TheRepositoryOfPlainAggregate
+    public class TheRepositoryOfPlainAggregate: TestWithLogging
     {
-        public TheRepositoryOfPlainAggregate()
+        public TheRepositoryOfPlainAggregate(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
         {
             //_fixture = new SqlServerDatabaseFixture();
             _fixture = new SqliteDatabaseFixture();

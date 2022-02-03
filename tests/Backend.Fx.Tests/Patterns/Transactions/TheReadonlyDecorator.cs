@@ -2,19 +2,21 @@
 using Backend.Fx.Patterns.DependencyInjection;
 using FakeItEasy;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Patterns.Transactions
 {
-    public class TheReadonlyDecorator
+    public class TheReadonlyDecorator : TestWithLogging
     {
         private readonly IOperation _operation;
         private readonly IOperation _sut;
 
-        public TheReadonlyDecorator()
+        public TheReadonlyDecorator(ITestOutputHelper output): base(output)
         {
             _operation = A.Fake<IOperation>();
             _sut = new ReadonlyDbTransactionOperationDecorator(_operation);
         }
+        
         [Fact]
         public void DelegatesOtherCalls()
         {

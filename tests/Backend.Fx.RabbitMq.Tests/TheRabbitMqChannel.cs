@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Backend.Fx.Tests;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Xunit;
@@ -8,7 +9,7 @@ using Xunit.Abstractions;
 
 namespace Backend.Fx.RabbitMq.Tests
 {
-    public class TheRabbitMqChannel
+    public class TheRabbitMqChannel: TestWithLogging
     {
         private readonly ITestOutputHelper _testOutputHelper;
         
@@ -21,7 +22,7 @@ namespace Backend.Fx.RabbitMq.Tests
             Password = "R4bb!tMQ"
         };
 
-        public TheRabbitMqChannel(ITestOutputHelper testOutputHelper)
+        public TheRabbitMqChannel(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
         }

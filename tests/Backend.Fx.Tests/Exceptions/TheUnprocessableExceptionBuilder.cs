@@ -1,10 +1,11 @@
 ﻿using Backend.Fx.Exceptions;
 using Backend.Fx.Tests.BuildingBlocks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Exceptions
 {
-    public class TheUnprocessableExceptionBuilder
+    public class TheUnprocessableExceptionBuilder : TestWithLogging
     {
         [Fact]
         public void AddsExceptionWhenAggregateIsNull()
@@ -44,6 +45,10 @@ namespace Backend.Fx.Tests.Exceptions
             IExceptionBuilder sut = UnprocessableException.UseBuilder();
             sut.Add("something is broken");
             Assert.Throws<UnprocessableException>(() => sut.Dispose());
+        }
+
+        public TheUnprocessableExceptionBuilder(ITestOutputHelper output) : base(output)
+        {
         }
     }
 }

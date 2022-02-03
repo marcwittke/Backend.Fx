@@ -2,10 +2,11 @@ using System;
 using Backend.Fx.Patterns.DependencyInjection;
 using FakeItEasy;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Patterns.DependencyInjection
 {
-    public class TheInjectionScope
+    public class TheInjectionScope : TestWithLogging
     {
         private readonly IInstanceProvider _instanceProvider = A.Fake<IInstanceProvider>();
 
@@ -36,6 +37,10 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         {
             var injectionScope = new TestInjectionScope(42, _instanceProvider);
             Assert.Equal(_instanceProvider, injectionScope.InstanceProvider);
+        }
+
+        public TheInjectionScope(ITestOutputHelper output) : base(output)
+        {
         }
     }
 }

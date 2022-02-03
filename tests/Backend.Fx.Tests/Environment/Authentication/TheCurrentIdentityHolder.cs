@@ -1,9 +1,10 @@
 ﻿using Backend.Fx.Environment.Authentication;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Environment.Authentication
 {
-    public class TheCurrentIdentityHolder
+    public class TheCurrentIdentityHolder : TestWithLogging
     {
         [Fact]
         public void FallsBackToInitialValueWhenReplacingWithNull()
@@ -26,6 +27,10 @@ namespace Backend.Fx.Tests.Environment.Authentication
             var currentIdentityHolder = new CurrentIdentityHolder();
             currentIdentityHolder.ReplaceCurrent(new SystemIdentity());
             Assert.Equal("SYSTEM", currentIdentityHolder.Current.Name);
+        }
+
+        public TheCurrentIdentityHolder(ITestOutputHelper output) : base(output)
+        {
         }
     }
 }

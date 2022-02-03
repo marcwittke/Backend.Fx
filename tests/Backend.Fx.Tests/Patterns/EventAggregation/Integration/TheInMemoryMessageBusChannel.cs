@@ -2,10 +2,11 @@
 using System.Threading.Tasks;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
 {
-    public class TheInMemoryMessageBusChannel
+    public class TheInMemoryMessageBusChannel : TestWithLogging
     {
         [Fact]
         public async Task HandlesEventsAsynchronously()
@@ -92,6 +93,10 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             await channel.FinishHandlingAllMessagesAsync();
             
             Assert.True(allMessagesAreHandled);
+        }
+
+        public TheInMemoryMessageBusChannel(ITestOutputHelper output) : base(output)
+        {
         }
     }
 }

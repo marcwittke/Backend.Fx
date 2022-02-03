@@ -7,12 +7,13 @@ using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using FakeItEasy;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Patterns.DataGeneration
 {
-    public class TheGenerateDataOnBootDecorator
+    public class TheGenerateDataOnBootDecorator : TestWithLogging
     {
-        public TheGenerateDataOnBootDecorator()
+        public TheGenerateDataOnBootDecorator(ITestOutputHelper output): base(output)
         {
             _compositionRoot = A.Fake<ICompositionRoot>();
             _dataGenerationModule = A.Fake<IModule>();

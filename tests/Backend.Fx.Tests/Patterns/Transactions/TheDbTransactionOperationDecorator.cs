@@ -4,12 +4,13 @@ using Backend.Fx.Environment.Persistence;
 using Backend.Fx.Patterns.DependencyInjection;
 using FakeItEasy;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Patterns.Transactions
 {
-    public class TheDbTransactionOperationDecorator
+    public class TheDbTransactionOperationDecorator : TestWithLogging
     {
-        public TheDbTransactionOperationDecorator()
+        public TheDbTransactionOperationDecorator(ITestOutputHelper output): base(output)
         {
             _sut = new DbTransactionOperationDecorator(_dbConnection, _operation);
             A.CallTo(() => _dbConnection.BeginTransaction(A<IsolationLevel>._)).Returns(_dbTransaction);

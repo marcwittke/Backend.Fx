@@ -4,10 +4,11 @@ using Backend.Fx.BuildingBlocks;
 using Backend.Fx.RandomData;
 using JetBrains.Annotations;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.BuildingBlocks
 {
-    public class TheAggregateRoot
+    public class TheAggregateRoot : TestWithLogging
     {
         private static int _nextId;
 
@@ -129,6 +130,10 @@ namespace Backend.Fx.Tests.BuildingBlocks
             var sut = new TestAggregateRoot(_nextId++, "gaga");
             // ReSharper disable once AssignNullToNotNullAttribute
             Assert.Throws<ArgumentNullException>(() => sut.SetCreatedProperties(null, DateTime.Now));
+        }
+
+        public TheAggregateRoot(ITestOutputHelper output) : base(output)
+        {
         }
     }
 }

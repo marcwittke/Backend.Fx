@@ -2,10 +2,11 @@
 using System.Linq;
 using Backend.Fx.Extensions;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Extensions
 {
-    public class TheEnumerableEx
+    public class TheEnumerableEx : TestWithLogging
     {
         private class Item
         {
@@ -19,6 +20,10 @@ namespace Backend.Fx.Tests.Extensions
             enumerable.ForAll(itm => itm.Touched = true);
 
             Assert.All(enumerable, itm => Assert.True(itm.Touched));
+        }
+
+        public TheEnumerableEx(ITestOutputHelper output) : base(output)
+        {
         }
     }
 }

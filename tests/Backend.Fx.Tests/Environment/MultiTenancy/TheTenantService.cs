@@ -8,12 +8,13 @@ using Backend.Fx.InMemoryPersistence;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using FakeItEasy;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Environment.MultiTenancy
 {
-    public class TheTenantService
+    public class TheTenantService : TestWithLogging
     {
-        public TheTenantService()
+        public TheTenantService(ITestOutputHelper output): base(output)
         {
             _sut = new TenantService(_messageBus, _tenantRepository);
         }

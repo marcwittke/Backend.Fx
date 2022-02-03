@@ -1,9 +1,10 @@
 ﻿using Backend.Fx.Environment.MultiTenancy;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Environment.MultiTenancy
 {
-    public class TheCurrentTenantIdHolder
+    public class TheCurrentTenantIdHolder : TestWithLogging
     {
         [Fact]
         public void InitializesWithNullTenantIdIdentity()
@@ -18,6 +19,10 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
             var currentTenantIdHolder = new CurrentTenantIdHolder();
             currentTenantIdHolder.ReplaceCurrent(new TenantId(345));
             Assert.Equal(345, currentTenantIdHolder.Current.Value);
+        }
+
+        public TheCurrentTenantIdHolder(ITestOutputHelper output) : base(output)
+        {
         }
     }
 }

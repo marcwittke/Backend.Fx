@@ -1,14 +1,10 @@
 using Backend.Fx.AspNetCore.Tests.SampleApp;
 using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.Logging;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Serilog;
-using Serilog.Events;
-using Serilog.Extensions.Logging;
 using Xunit;
 using ILogger = Serilog.ILogger;
 
@@ -16,11 +12,11 @@ namespace Backend.Fx.AspNetCore.Tests
 {
     public class SampleAppWebApplicationFactory : WebApplicationFactory<Startup>
     {
-        private static readonly ILogger Logger = CreateLogger();
+        private readonly ILogger _logger;
 
-        public SampleAppWebApplicationFactory()
+        public SampleAppWebApplicationFactory(ILogger logger)
         {
-            LogManager.Init(new SerilogLoggerFactory(Logger));
+            _logger = logger;
         }
         
         protected override IWebHostBuilder CreateWebHostBuilder()
@@ -32,7 +28,7 @@ namespace Backend.Fx.AspNetCore.Tests
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder
-                .UseSerilog(Logger)
+                .UseSerilog(_logger)
                 .UseSolutionRelativeContentRoot("")
                 .UseSetting("detailedErrors", true.ToString())
                 .UseEnvironment("Development")
@@ -52,17 +48,6 @@ namespace Backend.Fx.AspNetCore.Tests
             
             
             return server;
-        }
-        
-        private static ILogger CreateLogger()
-        {
-            ILogger serilogLogger = new LoggerConfiguration()
-                                            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-                                            .Enrich.FromLogContext()
-                                            .WriteTo.Console()
-                                            .CreateLogger();
-
-            return serilogLogger;
         }
     }
 }

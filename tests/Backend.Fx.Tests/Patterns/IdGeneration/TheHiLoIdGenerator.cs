@@ -1,10 +1,11 @@
 ﻿using System.Linq;
 using Backend.Fx.Patterns.IdGeneration;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Patterns.IdGeneration
 {
-    public class TheHiLoIdGenerator
+    public class TheHiLoIdGenerator : TestWithLogging
     {
         private readonly HiLoIdGenerator _sut = new InMemoryHiLoIdGenerator(1, 100);
 
@@ -40,6 +41,10 @@ namespace Backend.Fx.Tests.Patterns.IdGeneration
         public void StartsWithInitialValueAndCountsUp()
         {
             for (var i = 1; i < 1000; i++) Assert.Equal(i, _sut.NextId());
+        }
+
+        public TheHiLoIdGenerator(ITestOutputHelper output) : base(output)
+        {
         }
     }
 

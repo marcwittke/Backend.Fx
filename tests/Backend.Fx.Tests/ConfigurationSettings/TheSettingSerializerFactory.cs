@@ -1,10 +1,11 @@
 ﻿using System;
 using Backend.Fx.ConfigurationSettings;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.ConfigurationSettings
 {
-    public class TheSettingSerializerFactory
+    public class TheSettingSerializerFactory : TestWithLogging
     {
         private readonly SettingSerializerFactory _sut = new SettingSerializerFactory();
 
@@ -65,6 +66,10 @@ namespace Backend.Fx.Tests.ConfigurationSettings
         public void ProvidesNoSerializerForInt()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => _sut.GetSerializer<int>());
+        }
+
+        public TheSettingSerializerFactory(ITestOutputHelper output) : base(output)
+        {
         }
     }
 }

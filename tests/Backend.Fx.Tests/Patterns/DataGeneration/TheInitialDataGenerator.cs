@@ -1,5 +1,6 @@
 ﻿using Backend.Fx.Patterns.DataGeneration;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Patterns.DataGeneration
 {
@@ -29,7 +30,7 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
         }
     }
 
-    public class TheInitialDataGenerator
+    public class TheInitialDataGenerator : TestWithLogging
     {
         private readonly ADataGenerator _sut = new ADataGenerator();
 
@@ -50,6 +51,10 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
             Assert.Equal(1, _sut.ShouldRunCalled);
             Assert.Equal(1, _sut.GenerateCoreCalled);
             Assert.Equal(1, _sut.InitializeCalled);
+        }
+
+        public TheInitialDataGenerator(ITestOutputHelper output) : base(output)
+        {
         }
     }
 }

@@ -2,15 +2,22 @@ using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Backend.Fx.AspNetCore.MultiTenancy;
 using Backend.Fx.RandomData;
+using Backend.Fx.Tests;
 using Newtonsoft.Json;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.AspNetCore.Tests
 {
-    public class TheMultiTenantApplication
+    public class TheMultiTenantApplication: TestWithLogging
     {
-        private readonly SampleAppWebApplicationFactory _factory = new();
-
+        private readonly SampleAppWebApplicationFactory _factory;
+        
+        public TheMultiTenantApplication(ITestOutputHelper output) : base(output)
+        {
+            _factory = new SampleAppWebApplicationFactory(base.Logger);
+        }
+        
         [Fact]
         public async Task ProvidesTenant()
         {
@@ -62,5 +69,6 @@ namespace Backend.Fx.AspNetCore.Tests
                 Assert.Equal(createTenantParams.Name, tenant.Name);
             }
         }
+
     }
 }

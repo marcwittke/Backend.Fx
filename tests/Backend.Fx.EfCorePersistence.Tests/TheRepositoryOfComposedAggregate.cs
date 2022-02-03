@@ -10,14 +10,16 @@ using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Extensions;
 using Backend.Fx.Patterns.Authorization;
 using Backend.Fx.Patterns.IdGeneration;
+using Backend.Fx.Tests;
 using FakeItEasy;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.EfCorePersistence.Tests
 {
-    public class TheRepositoryOfComposedAggregate
+    public class TheRepositoryOfComposedAggregate : TestWithLogging
     {
-        public TheRepositoryOfComposedAggregate()
+        public TheRepositoryOfComposedAggregate(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
         {
             A.CallTo(() => _idGenerator.NextId()).ReturnsLazily(() => _nextId++);
             //_fixture = new SqlServerDatabaseFixture();
@@ -28,7 +30,10 @@ namespace Backend.Fx.EfCorePersistence.Tests
         private static int _nextTenantId = 57839;
         private static int _nextId = 1;
         private readonly int _tenantId = _nextTenantId++;
-        private readonly IEqualityComparer<DateTime?> _tolerantDateTimeComparer = new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(5000));
+
+        private readonly IEqualityComparer<DateTime?> _tolerantDateTimeComparer =
+            new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(5000));
+
         private readonly IEntityIdGenerator _idGenerator = A.Fake<IEntityIdGenerator>();
         private readonly DatabaseFixture _fixture;
 
@@ -87,7 +92,10 @@ namespace Backend.Fx.EfCorePersistence.Tests
             using (TestDbSession dbSession = _fixture.CreateTestDbSession())
             {
                 var id = CreateBlogWithPost(dbSession.DbConnection, 10);
-                var sut = new EfRepository<Blog>(dbSession.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
+                var sut = new EfRepository<Blog>(dbSession.DbContext,
+                    new BlogMapping(),
+                    CurrentTenantIdHolder.Create(_tenantId),
+                    new AllowAll<Blog>());
                 Blog blog = sut.Single(id);
                 blog.Posts.Add(new Post(_idGenerator.NextId(), blog, "added"));
             }
@@ -113,7 +121,10 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (TestDbSession dbSession = _fixture.CreateTestDbSession())
             {
-                var sut = new EfRepository<Blog>(dbSession.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
+                var sut = new EfRepository<Blog>(dbSession.DbContext,
+                    new BlogMapping(),
+                    CurrentTenantIdHolder.Create(_tenantId),
+                    new AllowAll<Blog>());
                 var blog = new Blog(_idGenerator.NextId(), "my blog");
                 blog.AddPost(_idGenerator, "my post");
                 sut.Add(blog);
@@ -136,7 +147,10 @@ namespace Backend.Fx.EfCorePersistence.Tests
             {
                 var id = CreateBlogWithPost(dbSession.DbConnection);
 
-                var sut = new EfRepository<Blog>(dbSession.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
+                var sut = new EfRepository<Blog>(dbSession.DbContext,
+                    new BlogMapping(),
+                    CurrentTenantIdHolder.Create(_tenantId),
+                    new AllowAll<Blog>());
                 Blog blog = sut.Single(id);
                 sut.Delete(blog);
             }
@@ -164,8 +178,10 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (TestDbSession dbSession = _fixture.CreateTestDbSession())
             {
-                var sut = new EfRepository<Blog>(dbSession.DbContext, new BlogMapping(),
-                                                 CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
+                var sut = new EfRepository<Blog>(dbSession.DbContext,
+                    new BlogMapping(),
+                    CurrentTenantIdHolder.Create(_tenantId),
+                    new AllowAll<Blog>());
                 Blog blog = sut.Single(id);
                 Post firstPost = blog.Posts.First();
                 firstPost.SetName("sadfasfsadf");
@@ -193,8 +209,10 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (TestDbSession dbSession = _fixture.CreateTestDbSession())
             {
-                var sut = new EfRepository<Blog>(dbSession.DbContext, new BlogMapping(),
-                                                 CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
+                var sut = new EfRepository<Blog>(dbSession.DbContext,
+                    new BlogMapping(),
+                    CurrentTenantIdHolder.Create(_tenantId),
+                    new AllowAll<Blog>());
                 blog = sut.Single(id);
             }
 
@@ -216,7 +234,10 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (TestDbSession dbSession = _fixture.CreateTestDbSession())
             {
-                var sut = new EfRepository<Blog>(dbSession.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
+                var sut = new EfRepository<Blog>(dbSession.DbContext,
+                    new BlogMapping(),
+                    CurrentTenantIdHolder.Create(_tenantId),
+                    new AllowAll<Blog>());
                 Blog blog = sut.Single(id);
                 blog.Posts.Clear();
                 blog.Posts.Add(new Post(_idGenerator.NextId(), blog, "new name 1"));
@@ -244,8 +265,10 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (TestDbSession dbSession = _fixture.CreateTestDbSession())
             {
-                var sut = new EfRepository<Blog>(dbSession.DbContext, new BlogMapping(),
-                                                 CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
+                var sut = new EfRepository<Blog>(dbSession.DbContext,
+                    new BlogMapping(),
+                    CurrentTenantIdHolder.Create(_tenantId),
+                    new AllowAll<Blog>());
                 Blog blog = sut.Single(id);
                 blog.Modify("modified");
             }
@@ -275,8 +298,10 @@ namespace Backend.Fx.EfCorePersistence.Tests
 
             using (TestDbSession dbSession = _fixture.CreateTestDbSession(clock: clock))
             {
-                var sut = new EfRepository<Blog>(dbSession.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId),
-                                                 new AllowAll<Blog>());
+                var sut = new EfRepository<Blog>(dbSession.DbContext,
+                    new BlogMapping(),
+                    CurrentTenantIdHolder.Create(_tenantId),
+                    new AllowAll<Blog>());
                 Blog blog = sut.Single(id);
                 post = blog.Posts.First();
                 post.SetName("modified");
@@ -298,23 +323,26 @@ namespace Backend.Fx.EfCorePersistence.Tests
         {
             var clock = new AdjustableClock(new WallClock());
             clock.OverrideUtcNow(new DateTime(2020, 01, 20, 20, 30, 40));
-            
+
             int id;
-            using (TestDbSession dbSession = _fixture.CreateTestDbSession(clock:clock))
+            using (TestDbSession dbSession = _fixture.CreateTestDbSession(clock: clock))
             {
                 id = CreateBlogWithPost(dbSession.DbConnection, 10);
             }
 
             DateTime expectedModifiedOn = clock.Advance(TimeSpan.FromHours(1));
 
-            using (TestDbSession dbSession = _fixture.CreateTestDbSession(clock:clock))
+            using (TestDbSession dbSession = _fixture.CreateTestDbSession(clock: clock))
             {
-                var sut = new EfRepository<Blog>(dbSession.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blog>());
+                var sut = new EfRepository<Blog>(dbSession.DbContext,
+                    new BlogMapping(),
+                    CurrentTenantIdHolder.Create(_tenantId),
+                    new AllowAll<Blog>());
                 Blog b = sut.Single(id);
                 b.Posts.Remove(b.Posts.First());
             }
 
-            using (TestDbSession dbSession = _fixture.CreateTestDbSession(clock:clock))
+            using (TestDbSession dbSession = _fixture.CreateTestDbSession(clock: clock))
             {
                 Blog blog = dbSession.DbContext.Set<Blog>().Find(id);
                 Assert.NotNull(blog.ChangedOn);

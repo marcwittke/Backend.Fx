@@ -36,7 +36,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\abstractions\Backend.Fx\Backend.Fx.csproj" />
-    <ProjectReference Include="..\Backend.Fx.NetCore\Backend.Fx.NetCore.csproj" />
   </ItemGroup>
 
 </Project>

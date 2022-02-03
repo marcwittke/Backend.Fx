@@ -5,16 +5,17 @@ using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using FakeItEasy;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Environment.MultiTenancy
 {
-    public class TheSingleTenantApplication
+    public class TheSingleTenantApplication : TestWithLogging
     {
         private readonly IBackendFxApplication _sut;
         private readonly ITenantService _tenantService = A.Fake<ITenantService>();
         private readonly ICompositionRoot _compositionRoot = A.Fake<ICompositionRoot>();
 
-        public TheSingleTenantApplication()
+        public TheSingleTenantApplication(ITestOutputHelper output): base(output)
         {
             var application = A.Fake<IBackendFxApplication>();
 

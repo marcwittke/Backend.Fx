@@ -1,9 +1,10 @@
 ﻿using Backend.Fx.Environment.Authentication;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Environment.Authentication
 {
-    public class TheSystemIdentity
+    public class TheSystemIdentity : TestWithLogging
     {
         [Fact]
         public void HasAuthenticationTypeSystemInternal()
@@ -21,6 +22,10 @@ namespace Backend.Fx.Tests.Environment.Authentication
         public void IsAuthenticated()
         {
             Assert.True(new SystemIdentity().IsAuthenticated);
+        }
+
+        public TheSystemIdentity(ITestOutputHelper output) : base(output)
+        {
         }
     }
 }

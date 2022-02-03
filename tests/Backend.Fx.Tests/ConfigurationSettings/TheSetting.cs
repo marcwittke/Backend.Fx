@@ -4,10 +4,11 @@ using Backend.Fx.ConfigurationSettings;
 using Backend.Fx.Patterns.IdGeneration;
 using JetBrains.Annotations;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.ConfigurationSettings
 {
-    public class TheSetting
+    public class TheSetting : TestWithLogging
     {
         [UsedImplicitly]
         public class TestSettingsService : SettingsService
@@ -47,8 +48,8 @@ namespace Backend.Fx.Tests.ConfigurationSettings
             var sut = new Setting(5, "key");
             sut.SetValue(new DoubleSerializer(), doubleValue);
             Assert.Equal("2354.2341234", sut.SerializedValue);
-            var doubleeanValueRead = sut.GetValue(new DoubleSerializer());
-            Assert.Equal(doubleValue, doubleeanValueRead);
+            var doubleValueRead = sut.GetValue(new DoubleSerializer());
+            Assert.Equal(doubleValue, doubleValueRead);
         }
 
         [Fact]
@@ -58,8 +59,8 @@ namespace Backend.Fx.Tests.ConfigurationSettings
             var sut = new Setting(7, "key");
             sut.SetValue(new IntegerSerializer(), intValue);
             Assert.Equal("235234", sut.SerializedValue);
-            var inteanValueRead = sut.GetValue(new IntegerSerializer());
-            Assert.Equal(intValue, inteanValueRead);
+            var intValueRead = sut.GetValue(new IntegerSerializer());
+            Assert.Equal(intValue, intValueRead);
         }
 
         [Fact]
@@ -122,6 +123,10 @@ namespace Backend.Fx.Tests.ConfigurationSettings
             Assert.Equal(stringValue, sut.SerializedValue);
             var stringValueRead = sut.GetValue(new StringSerializer());
             Assert.Equal(stringValue, stringValueRead);
+        }
+
+        public TheSetting(ITestOutputHelper output) : base(output)
+        {
         }
     }
 }

@@ -5,12 +5,13 @@ using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using FakeItEasy;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Patterns.DependencyInjection
 {
-    public class TheBackendFxDbApplication
+    public class TheBackendFxDbApplication : TestWithLogging
     {
-        public TheBackendFxDbApplication()
+        public TheBackendFxDbApplication(ITestOutputHelper output): base(output)
         {
             IBackendFxApplication application = new BackendFxApplication(_fakes.CompositionRoot, _fakes.MessageBus, A.Fake<IExceptionLogger>());
             _sut = new BackendFxDbApplication(_databaseBootstrapper, _databaseAvailabilityAwaiter, application);

@@ -1,14 +1,17 @@
 using System.Linq;
 using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
 using Backend.Fx.EfCorePersistence.Tests.Fixtures;
+using Backend.Fx.Tests;
 using Microsoft.EntityFrameworkCore;
+using Serilog.Formatting.Display;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.EfCorePersistence.Tests
 {
-    public class TheDbContext
+    public class TheDbContext: TestWithLogging
     {
-        public TheDbContext()
+        public TheDbContext(ITestOutputHelper output) : base(output)
         {
             _fixture = new SqliteDatabaseFixture();
             _fixture.CreateDatabase();
@@ -19,7 +22,7 @@ namespace Backend.Fx.EfCorePersistence.Tests
         private readonly int _tenantId = _nextTenantId++;
 
         [Fact]
-        public void CanClearAndReplaceDependentEntites()
+        public void CanClearAndReplaceDependentEntities()
         {
             using (TestDbSession dbSession = _fixture.CreateTestDbSession())
             {

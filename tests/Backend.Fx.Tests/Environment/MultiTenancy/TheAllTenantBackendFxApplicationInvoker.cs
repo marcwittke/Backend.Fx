@@ -5,12 +5,13 @@ using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Patterns.DependencyInjection;
 using FakeItEasy;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Environment.MultiTenancy
 {
-    public class TheAllTenantBackendFxApplicationInvoker
+    public class TheAllTenantBackendFxApplicationInvoker : TestWithLogging
     {
-        public TheAllTenantBackendFxApplicationInvoker()
+        public TheAllTenantBackendFxApplicationInvoker(ITestOutputHelper output): base(output)
         {
             _sut = new AllTenantBackendFxApplicationInvoker(_tenantService, _invoker);
         }

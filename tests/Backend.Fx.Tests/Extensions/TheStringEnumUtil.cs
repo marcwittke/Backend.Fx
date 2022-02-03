@@ -1,6 +1,7 @@
 ﻿using System;
 using Backend.Fx.Extensions;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Extensions
 {
@@ -11,7 +12,7 @@ namespace Backend.Fx.Tests.Extensions
         Three
     }
 
-    public class TheStringEnumUtil
+    public class TheStringEnumUtil : TestWithLogging
     {
         [Theory]
         [InlineData("One")]
@@ -34,6 +35,10 @@ namespace Backend.Fx.Tests.Extensions
         public void ThrowsOnInvalidString()
         {
             Assert.Throws<ArgumentException>(() => "whatever".Parse<AnEnum>());
+        }
+
+        public TheStringEnumUtil(ITestOutputHelper output) : base(output)
+        {
         }
     }
 }

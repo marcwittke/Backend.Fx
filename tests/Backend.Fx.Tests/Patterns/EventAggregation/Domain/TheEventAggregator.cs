@@ -2,10 +2,11 @@
 using Backend.Fx.Patterns.EventAggregation.Domain;
 using FakeItEasy;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Patterns.EventAggregation.Domain
 {
-    public class TheEventAggregator
+    public class TheEventAggregator : TestWithLogging
     {
         [Fact]
         public void CallsAllDomainEventHandlers()
@@ -41,6 +42,10 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Domain
             IDomainEventAggregator sut = new DomainEventAggregator(fakeDomainEventHandlerProvider);
             sut.PublishDomainEvent(new TestDomainEvent(444));
             Assert.Throws<NotSupportedException>(() => sut.RaiseEvents());
+        }
+
+        public TheEventAggregator(ITestOutputHelper output) : base(output)
+        {
         }
     }
 }

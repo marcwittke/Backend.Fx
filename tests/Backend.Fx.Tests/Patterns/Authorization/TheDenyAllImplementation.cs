@@ -2,10 +2,11 @@ using System.Linq;
 using Backend.Fx.Patterns.Authorization;
 using Backend.Fx.Tests.BuildingBlocks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Patterns.Authorization
 {
-    public class TheDenyAllImplementation
+    public class TheDenyAllImplementation : TestWithLogging
     {
         private readonly IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot> _sut = new DenyAll<TheAggregateRoot.TestAggregateRoot>();
         private readonly TheAggregateRoot.TestAggregateRoot _testAggregateRoot = new TheAggregateRoot.TestAggregateRoot(1,"e");
@@ -34,6 +35,10 @@ namespace Backend.Fx.Tests.Patterns.Authorization
         public void DeniesDeletion()
         {
             Assert.False(_sut.CanDelete(_testAggregateRoot));
+        }
+
+        public TheDenyAllImplementation(ITestOutputHelper output) : base(output)
+        {
         }
     }
 }
