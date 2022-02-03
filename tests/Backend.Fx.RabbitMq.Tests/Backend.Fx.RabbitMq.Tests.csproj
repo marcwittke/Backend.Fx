@@ -7,20 +7,20 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="FakeItEasy" Version="6.2.1"/>
-        <PackageReference Include="MarcWittke.Xunit.AssemblyFixture" Version="1.0.1"/>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3"/>
-        <PackageReference Include="xunit" Version="2.4.1"/>
-        <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3"/>
-        <PackageReference Include="coverlet.collector" Version="3.0.2">
+        <PackageReference Include="FakeItEasy" Version="6.2.1" />
+        <PackageReference Include="MarcWittke.Xunit.AssemblyFixture" Version="1.0.1" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3" />
+        <PackageReference Include="xunit" Version="2.4.1" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3" />
+        <PackageReference Include="coverlet.collector" Version="3.1.1">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\implementations\Backend.Fx.RabbitMq\Backend.Fx.RabbitMq.csproj"/>
-        <ProjectReference Include="..\Backend.Fx.Tests\Backend.Fx.Tests.csproj"/>
+        <ProjectReference Include="..\..\src\implementations\Backend.Fx.RabbitMq\Backend.Fx.RabbitMq.csproj" />
+        <ProjectReference Include="..\Backend.Fx.Tests\Backend.Fx.Tests.csproj" />
     </ItemGroup>
 
 </Project>
