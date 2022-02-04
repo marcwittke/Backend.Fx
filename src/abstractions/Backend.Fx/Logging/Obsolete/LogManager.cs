@@ -10,7 +10,7 @@ namespace Backend.Fx.Logging
         private static ILoggerFactory _loggerFactory = new BackendFxToMicrosoftLoggingLoggerFactory(new NullLoggerFactory());
         private static int _activityIndex;
 
-        public static void Init(ILoggerFactory loggerFactory)
+        public static void Initialize(ILoggerFactory loggerFactory)
         {
             _loggerFactory = loggerFactory;
         }

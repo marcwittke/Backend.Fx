@@ -15,7 +15,7 @@ namespace Backend.Fx.Logging
         private static readonly AsyncLocal<Microsoft.Extensions.Logging.ILoggerFactory> AsyncLocalLoggerFactory =
             new AsyncLocal<Microsoft.Extensions.Logging.ILoggerFactory>();
 
-        public static void Init(Microsoft.Extensions.Logging.ILoggerFactory loggerFactory)
+        public static void Initialize(Microsoft.Extensions.Logging.ILoggerFactory loggerFactory)
         {
             _loggerFactory = loggerFactory;
         }
