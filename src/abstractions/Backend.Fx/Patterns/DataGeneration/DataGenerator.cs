@@ -23,7 +23,7 @@ namespace Backend.Fx.Patterns.DataGeneration
     /// </summary>
     public abstract class DataGenerator : IDataGenerator
     {
-        private static readonly Microsoft.Extensions.Logging.ILogger Logger = LogManager.Create<DataGenerator>();
+        private static readonly Microsoft.Extensions.Logging.ILogger Logger = Log.Create<DataGenerator>();
 
         /// <summary>
         /// simple way of ordering the execution of DataGenerators. Priority 0 will be executed first.

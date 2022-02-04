@@ -11,7 +11,7 @@ namespace Backend.Fx.Environment.MultiTenancy
 {
     public class SingleTenantApplication : TenantApplication, IBackendFxApplication
     {
-        private static readonly ILogger Logger = LogManager.Create<SingleTenantApplication>();
+        private static readonly ILogger Logger = Log.Create<SingleTenantApplication>();
         private readonly bool _isDemoTenant;
         private readonly ITenantService _tenantService;
         private readonly IBackendFxApplication _application;

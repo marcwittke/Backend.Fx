@@ -11,7 +11,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
     public class TypedSubscription : ISubscription
     {
-        private static readonly ILogger Logger = LogManager.Create<TypedSubscription>();
+        private static readonly ILogger Logger = Log.Create<TypedSubscription>();
         private readonly Type _handlerType;
         private readonly Type _eventType;
 

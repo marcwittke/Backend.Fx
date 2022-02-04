@@ -10,7 +10,7 @@ namespace Backend.Fx.AspNetCore.Mvc.Activators
     public class BackendFxApplicationHubActivator<T> : IHubActivator<T> where T : Hub
     {
         private readonly IBackendFxApplication _backendFxApplication;
-        private static readonly ILogger Logger = LogManager.Create<BackendFxApplicationHubActivator<T>>();
+        private static readonly ILogger Logger = Log.Create<BackendFxApplicationHubActivator<T>>();
         
 
         public BackendFxApplicationHubActivator(IBackendFxApplication backendFxApplication)

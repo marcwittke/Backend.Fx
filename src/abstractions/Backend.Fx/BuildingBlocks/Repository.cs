@@ -15,7 +15,7 @@ namespace Backend.Fx.BuildingBlocks
 {
     public abstract class Repository<TAggregateRoot> : IRepository<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
-        private static readonly ILogger Logger = LogManager.Create<Repository<TAggregateRoot>>();
+        private static readonly ILogger Logger = Log.Create<Repository<TAggregateRoot>>();
         private readonly IAggregateAuthorization<TAggregateRoot> _aggregateAuthorization;
         private readonly ICurrentTHolder<TenantId> _tenantIdHolder;
 

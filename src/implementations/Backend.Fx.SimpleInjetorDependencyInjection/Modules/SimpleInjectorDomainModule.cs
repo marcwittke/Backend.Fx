@@ -26,7 +26,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
     /// </summary>
     public class SimpleInjectorDomainModule : SimpleInjectorModule
     {
-        private static readonly ILogger Logger = LogManager.Create<SimpleInjectorDomainModule>();
+        private static readonly ILogger Logger = Log.Create<SimpleInjectorDomainModule>();
         private readonly Assembly[] _domainAssemblies;
         private readonly string _domainAssembliesForLogging;
 

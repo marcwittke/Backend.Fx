@@ -13,7 +13,7 @@ namespace Backend.Fx.Environment.Persistence
     /// </summary>
     public class DbTransactionOperationDecorator : IOperation
     {
-        private static readonly ILogger Logger = LogManager.Create<DbTransactionOperationDecorator>();
+        private static readonly ILogger Logger = Log.Create<DbTransactionOperationDecorator>();
         private readonly IDbConnection _dbConnection;
         private readonly IOperation _operation;
         private bool _shouldHandleConnectionState;

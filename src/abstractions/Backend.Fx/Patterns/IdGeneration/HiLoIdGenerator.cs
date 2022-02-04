@@ -7,7 +7,7 @@ namespace Backend.Fx.Patterns.IdGeneration
 {
     public abstract class HiLoIdGenerator : IIdGenerator
     {
-        private static readonly ILogger Logger = LogManager.Create<HiLoIdGenerator>();
+        private static readonly ILogger Logger = Log.Create<HiLoIdGenerator>();
         private int _highId = -1;
         private int _lowId = -1;
         private static readonly object Mutex = new object();

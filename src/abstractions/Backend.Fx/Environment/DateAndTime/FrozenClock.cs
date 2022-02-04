@@ -10,7 +10,7 @@ namespace Backend.Fx.Environment.DateAndTime
     /// </summary>
     public class FrozenClock : IClock
     {
-        private static readonly ILogger Logger = LogManager.Create<FrozenClock>();
+        private static readonly ILogger Logger = Log.Create<FrozenClock>();
         
         // ReSharper disable once UnusedParameter.Local
         public FrozenClock(IClock clock)

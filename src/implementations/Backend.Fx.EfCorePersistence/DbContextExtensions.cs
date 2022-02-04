@@ -14,7 +14,7 @@ namespace Backend.Fx.EfCorePersistence
 {
     public static class DbContextExtensions
     {
-        private static readonly ILogger Logger = LogManager.Create(typeof(DbContextExtensions));
+        private static readonly ILogger Logger = Log.Create(typeof(DbContextExtensions));
 
         public static void DisableChangeTracking(this DbContext dbContext)
         {

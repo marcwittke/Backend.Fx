@@ -15,7 +15,7 @@ namespace Backend.Fx.AspNetCore.MultiTenancy
 {
     public abstract class TenantAdminMiddlewareBase
     {
-        private static readonly ILogger Logger = LogManager.Create<TenantAdminMiddlewareBase>();
+        private static readonly ILogger Logger = Log.Create<TenantAdminMiddlewareBase>();
         private readonly RequestDelegate _next;
         protected virtual string TenantsApiBaseUrl { get; } = "/api/tenants";
         protected ITenantService TenantService { get; }

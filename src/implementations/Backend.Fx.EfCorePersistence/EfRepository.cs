@@ -21,7 +21,7 @@ namespace Backend.Fx.EfCorePersistence
 {
     public class EfRepository<TAggregateRoot> : Repository<TAggregateRoot>, IAsyncRepository<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
-        private static readonly ILogger Logger = LogManager.Create<EfRepository<TAggregateRoot>>();
+        private static readonly ILogger Logger = Log.Create<EfRepository<TAggregateRoot>>();
         private readonly IAggregateAuthorization<TAggregateRoot> _aggregateAuthorization;
         private readonly IAggregateMapping<TAggregateRoot> _aggregateMapping;
         private DbContext _dbContext;

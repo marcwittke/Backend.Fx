@@ -10,7 +10,7 @@ namespace Backend.Fx.EfCorePersistence.Oracle
 {
     public abstract class OracleSequence : ISequence
     {
-        private static readonly ILogger Logger = LogManager.Create<OracleSequence>();
+        private static readonly ILogger Logger = Log.Create<OracleSequence>();
         private readonly IDbConnectionFactory _dbConnectionFactory;
 
         protected OracleSequence(IDbConnectionFactory dbConnectionFactory)

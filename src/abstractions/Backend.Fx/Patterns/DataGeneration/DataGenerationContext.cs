@@ -15,7 +15,7 @@ namespace Backend.Fx.Patterns.DataGeneration
 
     public class DataGenerationContext : IDataGenerationContext
     {
-        private static readonly ILogger Logger = LogManager.Create<DataGenerationContext>();
+        private static readonly ILogger Logger = Log.Create<DataGenerationContext>();
 
         private readonly ICompositionRoot _compositionRoot;
         private readonly IBackendFxApplicationInvoker _invoker;

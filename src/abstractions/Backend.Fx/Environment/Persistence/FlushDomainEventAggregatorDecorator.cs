@@ -7,7 +7,7 @@ namespace Backend.Fx.Environment.Persistence
 {
     public class FlushDomainEventAggregatorDecorator : IDomainEventAggregator
     {
-        private static readonly ILogger Logger = LogManager.Create<FlushDomainEventAggregatorDecorator>();
+        private static readonly ILogger Logger = Log.Create<FlushDomainEventAggregatorDecorator>();
         
         private readonly ICanFlush _canFlush;
         private readonly IDomainEventAggregator _domainEventAggregatorImplementation;

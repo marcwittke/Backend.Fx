@@ -10,7 +10,7 @@ namespace Backend.Fx.EfCorePersistence.Postgres
 {
     public abstract class PostgresSequence : ISequence
     {
-        private static readonly ILogger Logger = LogManager.Create<PostgresSequence>();
+        private static readonly ILogger Logger = Log.Create<PostgresSequence>();
         private readonly IDbConnectionFactory _dbConnectionFactory;
 
         protected PostgresSequence(IDbConnectionFactory dbConnectionFactory)

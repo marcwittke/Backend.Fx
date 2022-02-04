@@ -15,7 +15,7 @@ namespace Backend.Fx.Tests
         {
             var loggerConfiguration = new LoggerConfiguration().MinimumLevel.Debug().WriteTo.TestOutput(output);
             Logger = loggerConfiguration.CreateLogger();
-            _disposableLogger = LogManager.InitAsyncLocal(new SerilogLoggerFactory(Logger));
+            _disposableLogger = Logging.Log.InitAsyncLocal(new SerilogLoggerFactory(Logger));
         }
 
         protected ILogger Logger { get; }

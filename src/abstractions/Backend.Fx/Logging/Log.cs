@@ -8,7 +8,7 @@ namespace Backend.Fx.Logging
     /// <summary>
     /// static class to keep an ILoggerFactory instance to use Microsoft.Extension.Logging without dependency injection
     /// </summary>
-    public static class LogManager
+    public static class Log
     {
         private static Microsoft.Extensions.Logging.ILoggerFactory _loggerFactory = new NullLoggerFactory();
 
@@ -43,15 +43,6 @@ namespace Backend.Fx.Logging
         public static Microsoft.Extensions.Logging.ILogger Create(string category)
         {
             return GetLoggerFactory().CreateLogger(category);
-        }
-
-        public static void BeginActivity()
-        {
-        }
-
-        public static void Shutdown()
-        {
-            _loggerFactory.Dispose();
         }
 
         private static Microsoft.Extensions.Logging.ILoggerFactory GetLoggerFactory()

@@ -4,6 +4,7 @@ using System.Diagnostics;
 namespace Backend.Fx.Logging
 {
     [DebuggerStepThrough]
+    [Obsolete]
     public class DebugLoggerFactory : ILoggerFactory
     {
         public ILogger Create(string s)

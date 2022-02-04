@@ -9,7 +9,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
 {
     public abstract class SimpleInjectorModule : IModule
     {
-        private static readonly ILogger Logger = LogManager.Create<SimpleInjectorModule>();
+        private static readonly ILogger Logger = Log.Create<SimpleInjectorModule>();
 
         protected abstract void Register(Container container, ScopedLifestyle scopedLifestyle);
 

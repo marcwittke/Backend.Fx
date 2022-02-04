@@ -20,7 +20,7 @@ namespace Backend.Fx.EfCorePersistence
 {
     public class EfFlush : ICanFlush
     {
-        private static readonly ILogger Logger = LogManager.Create<EfFlush>();
+        private static readonly ILogger Logger = Log.Create<EfFlush>();
         public DbContext DbContext { get; }
         public ICurrentTHolder<IIdentity> IdentityHolder { get; }
         public IClock Clock { get; }

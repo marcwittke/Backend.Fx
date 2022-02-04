@@ -6,7 +6,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
     public class SingletonSubscription<TEvent> : ISubscription where TEvent : IIntegrationEvent
     {
-        private static readonly ILogger Logger = LogManager.Create<SingletonSubscription<TEvent>>();
+        private static readonly ILogger Logger = Log.Create<SingletonSubscription<TEvent>>();
         private readonly IIntegrationMessageHandler<TEvent> _handler;
 
         public SingletonSubscription(IIntegrationMessageHandler<TEvent> handler)

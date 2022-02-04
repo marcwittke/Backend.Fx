@@ -35,7 +35,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
     public class BackendFxApplicationInvoker : IBackendFxApplicationInvoker, IBackendFxApplicationAsyncInvoker
     {
         private readonly ICompositionRoot _compositionRoot;
-        private static readonly ILogger Logger = LogManager.Create<BackendFxApplicationInvoker>();
+        private static readonly ILogger Logger = Log.Create<BackendFxApplicationInvoker>();
 
         public BackendFxApplicationInvoker(ICompositionRoot compositionRoot)
         {

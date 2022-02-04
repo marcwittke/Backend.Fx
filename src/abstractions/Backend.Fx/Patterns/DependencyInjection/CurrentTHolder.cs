@@ -19,7 +19,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
     public abstract class CurrentTHolder<T> : ICurrentTHolder<T> where T : class
     {
-        private static readonly ILogger Logger = LogManager.Create<CurrentTHolder<T>>();
+        private static readonly ILogger Logger = Log.Create<CurrentTHolder<T>>();
         private T _current;
 
         protected CurrentTHolder()

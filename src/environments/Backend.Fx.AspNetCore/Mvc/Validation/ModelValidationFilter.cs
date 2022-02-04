@@ -19,8 +19,8 @@ namespace Backend.Fx.AspNetCore.Mvc.Validation
         protected void LogErrors(FilterContext context, string controllerName, Errors errors)
         {
             ILogger logger = TryGetControllerType(controllerName, out Type controllerType)
-                ? LogManager.Create(controllerType)
-                : LogManager.Create<ModelValidationFilter>();
+                ? Log.Create(controllerType)
+                : Log.Create<ModelValidationFilter>();
             logger.LogWarning("Model validation failed during {@HttpRequest}: {@Errors}", context.HttpContext.Request, errors);
         }
 

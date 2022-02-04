@@ -11,7 +11,7 @@ namespace Backend.Fx.Environment.Persistence
 {
     public class BackendFxDbApplication : IBackendFxApplication
     {
-        private static readonly ILogger Logger = LogManager.Create<BackendFxDbApplication>();
+        private static readonly ILogger Logger = Log.Create<BackendFxDbApplication>();
         
         private readonly IDatabaseBootstrapper _databaseBootstrapper;
         private readonly IDatabaseAvailabilityAwaiter _databaseAvailabilityAwaiter;

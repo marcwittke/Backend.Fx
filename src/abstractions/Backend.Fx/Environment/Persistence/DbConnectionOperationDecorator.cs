@@ -9,7 +9,7 @@ namespace Backend.Fx.Environment.Persistence
 {
     public class DbConnectionOperationDecorator : IOperation
     {
-        private static readonly ILogger Logger = LogManager.Create<DbConnectionOperationDecorator>();
+        private static readonly ILogger Logger = Log.Create<DbConnectionOperationDecorator>();
         private IDisposable _connectionLifetimeLogger;       
         public DbConnectionOperationDecorator(IDbConnection dbConnection, IOperation operation)
         {

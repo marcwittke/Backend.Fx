@@ -22,7 +22,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Domain
             public Action Action { get; }
         }
 
-        private static readonly ILogger Logger = LogManager.Create<DomainEventAggregator>();
+        private static readonly ILogger Logger = Log.Create<DomainEventAggregator>();
         private readonly IDomainEventHandlerProvider _domainEventHandlerProvider;
         private readonly ConcurrentQueue<HandleAction> _handleActions = new ConcurrentQueue<HandleAction>();
 

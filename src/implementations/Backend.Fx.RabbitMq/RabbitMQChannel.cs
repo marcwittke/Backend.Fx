@@ -16,7 +16,7 @@ namespace Backend.Fx.RabbitMq
 {
     public class RabbitMqChannel : IDisposable
     {
-        private static readonly ILogger Logger = LogManager.Create<RabbitMqChannel>();
+        private static readonly ILogger Logger = Log.Create<RabbitMqChannel>();
         private readonly string _exchangeName;
         private readonly IMessageNameProvider _messageNameProvider;
         private readonly IConnectionFactory _connectionFactory;

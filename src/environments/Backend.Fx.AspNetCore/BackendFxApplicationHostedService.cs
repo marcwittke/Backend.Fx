@@ -16,7 +16,7 @@ namespace Backend.Fx.AspNetCore
     
     public abstract class BackendFxApplicationHostedService : IBackendFxApplicationHostedService
     {
-        private static readonly ILogger Logger = LogManager.Create<BackendFxApplicationHostedService>();
+        private static readonly ILogger Logger = Log.Create<BackendFxApplicationHostedService>();
 
         public abstract IBackendFxApplication Application { get; }
 

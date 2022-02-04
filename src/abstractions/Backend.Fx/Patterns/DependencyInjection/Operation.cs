@@ -21,7 +21,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
     public class Operation : IOperation
     {
-        private static readonly ILogger Logger = LogManager.Create<Operation>();
+        private static readonly ILogger Logger = Log.Create<Operation>();
         private static int _index;
         private readonly int _instanceId = _index++;
         private bool? _isActive;

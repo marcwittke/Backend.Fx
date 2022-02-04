@@ -10,7 +10,7 @@ namespace Backend.Fx.EfCorePersistence.Mssql
 {
     public abstract class MsSqlSequence : ISequence
     {
-        private static readonly ILogger Logger = LogManager.Create<MsSqlSequence>();
+        private static readonly ILogger Logger = Log.Create<MsSqlSequence>();
         private readonly IDbConnectionFactory _dbConnectionFactory;
 
         protected MsSqlSequence(IDbConnectionFactory dbConnectionFactory)

@@ -10,7 +10,7 @@ namespace Backend.Fx.Environment.MultiTenancy
 {
     public abstract class TenantApplication
     {
-        private static readonly ILogger Logger = LogManager.Create<TenantApplication>();
+        private static readonly ILogger Logger = Log.Create<TenantApplication>();
 
         private readonly IBackendFxApplication _application;
         private readonly DataGenerationContext _dataGenerationContext;

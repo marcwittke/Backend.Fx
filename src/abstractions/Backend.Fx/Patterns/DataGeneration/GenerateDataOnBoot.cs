@@ -15,7 +15,7 @@ namespace Backend.Fx.Patterns.DataGeneration
     /// </summary>
     public class GenerateDataOnBoot : IBackendFxApplication
     {
-        private static readonly ILogger Logger = LogManager.Create<GenerateDataOnBoot>();
+        private static readonly ILogger Logger = Log.Create<GenerateDataOnBoot>();
         private readonly ITenantIdProvider _tenantIdProvider;
         private readonly IBackendFxApplication _application;
         private readonly IModule _dataGenerationModule;

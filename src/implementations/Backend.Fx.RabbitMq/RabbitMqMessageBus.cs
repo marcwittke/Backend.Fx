@@ -15,7 +15,7 @@ namespace Backend.Fx.RabbitMq
 {
     public class RabbitMqMessageBus : MessageBus
     {
-        private static readonly ILogger Logger = LogManager.Create<RabbitMqMessageBus>();
+        private static readonly ILogger Logger = Log.Create<RabbitMqMessageBus>();
         private readonly RabbitMqChannel _channel;
 
         public RabbitMqMessageBus(IConnectionFactory connectionFactory, int retryCount, string exchangeName, string receiveQueueName) 

@@ -17,7 +17,7 @@ namespace Backend.Fx.AspNetCore.ErrorHandling
     public class JsonErrorHandlingMiddleware : ErrorHandlingMiddleware
     {
         private readonly bool _showInternalServerErrorDetails;
-        private static readonly ILogger Logger = LogManager.Create<JsonErrorHandlingMiddleware>();
+        private static readonly ILogger Logger = Log.Create<JsonErrorHandlingMiddleware>();
 
         protected JsonSerializerSettings JsonSerializerSettings { get; } = new JsonSerializerSettings
         {

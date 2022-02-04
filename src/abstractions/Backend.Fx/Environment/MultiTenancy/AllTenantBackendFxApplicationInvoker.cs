@@ -10,7 +10,7 @@ namespace Backend.Fx.Environment.MultiTenancy
 {
     public class AllTenantBackendFxApplicationInvoker
     {
-        private static readonly ILogger Logger = LogManager.Create<AllTenantBackendFxApplicationInvoker>();
+        private static readonly ILogger Logger = Log.Create<AllTenantBackendFxApplicationInvoker>();
         private readonly ITenantIdProvider _tenantIdProvider;
         private readonly IBackendFxApplicationInvoker _invoker;
 

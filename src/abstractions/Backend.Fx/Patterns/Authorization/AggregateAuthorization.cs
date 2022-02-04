@@ -10,7 +10,7 @@ namespace Backend.Fx.Patterns.Authorization
 {
     public abstract class AggregateAuthorization<TAggregateRoot> : IAggregateAuthorization<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
-        private static readonly ILogger Logger = LogManager.Create<AggregateAuthorization<TAggregateRoot>>();
+        private static readonly ILogger Logger = Log.Create<AggregateAuthorization<TAggregateRoot>>();
         
         /// <inheritdoc />>
         public abstract Expression<Func<TAggregateRoot, bool>> HasAccessExpression { get; }

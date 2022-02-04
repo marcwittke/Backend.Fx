@@ -19,7 +19,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
     /// </summary>
     public class SimpleInjectorCompositionRoot : ICompositionRoot
     {
-        private static readonly ILogger Logger = LogManager.Create<SimpleInjectorCompositionRoot>();
+        private static readonly ILogger Logger = Log.Create<SimpleInjectorCompositionRoot>();
 
         private int _scopeSequenceNumber = 1;
         /// <summary>

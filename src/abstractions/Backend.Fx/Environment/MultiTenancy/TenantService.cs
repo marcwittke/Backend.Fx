@@ -37,7 +37,7 @@ namespace Backend.Fx.Environment.MultiTenancy
 
     public class TenantService : ITenantService
     {
-        private static readonly ILogger Logger = LogManager.Create<TenantService>();
+        private static readonly ILogger Logger = Log.Create<TenantService>();
         private readonly IMessageBus _messageBus;
         private readonly ITenantRepository _tenantRepository;
 

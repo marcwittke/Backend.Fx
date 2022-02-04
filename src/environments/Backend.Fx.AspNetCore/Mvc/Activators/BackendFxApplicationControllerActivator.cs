@@ -15,7 +15,7 @@ namespace Backend.Fx.AspNetCore.Mvc.Activators
     /// </summary>
     public class BackendFxApplicationControllerActivator : IControllerActivator
     {
-        private static readonly ILogger Logger = LogManager.Create<BackendFxApplicationControllerActivator>();
+        private static readonly ILogger Logger = Log.Create<BackendFxApplicationControllerActivator>();
 
         public virtual object Create(ControllerContext c)
         {

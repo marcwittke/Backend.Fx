@@ -56,7 +56,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
     public class BackendFxApplication : IBackendFxApplication
     {
-        private static readonly ILogger Logger = LogManager.Create<BackendFxApplication>();
+        private static readonly ILogger Logger = Log.Create<BackendFxApplication>();
         private readonly ManualResetEventSlim _isBooted = new ManualResetEventSlim(false);
 
         /// <summary>

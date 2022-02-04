@@ -9,7 +9,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
     public class DynamicSubscription : ISubscription
     {
-        private static readonly ILogger Logger = LogManager.Create<DynamicSubscription>();
+        private static readonly ILogger Logger = Log.Create<DynamicSubscription>();
         private readonly Type _handlerType;
 
         public DynamicSubscription(Type handlerType)

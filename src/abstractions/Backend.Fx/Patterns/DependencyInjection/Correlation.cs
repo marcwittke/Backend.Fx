@@ -11,7 +11,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
     /// </summary>
     public class Correlation
     {
-        private static readonly ILogger Logger = LogManager.Create<Correlation>();
+        private static readonly ILogger Logger = Log.Create<Correlation>();
 
         public Guid Id { get; private set; } = Guid.NewGuid();
 
