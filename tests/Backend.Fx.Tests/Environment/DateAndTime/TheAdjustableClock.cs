@@ -2,10 +2,12 @@ using System;
 using System.Threading;
 using Backend.Fx.Environment.DateAndTime;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Environment.DateAndTime
 {
-    public class TheAdjustableClock
+    public 
+        class TheAdjustableClock : TestWithLogging
     {
         [Fact]
         public void AllowsOverridingOfUtcNow()
@@ -16,6 +18,10 @@ namespace Backend.Fx.Tests.Environment.DateAndTime
             Assert.Equal(overriddenUtcNow, sut.UtcNow);
             Thread.Sleep(100);
             Assert.Equal(overriddenUtcNow, sut.UtcNow);
+        }
+
+        public TheAdjustableClock(ITestOutputHelper output) : base(output)
+        {
         }
     }
 }

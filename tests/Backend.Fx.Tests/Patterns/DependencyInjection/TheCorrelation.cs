@@ -1,10 +1,11 @@
 using System;
 using Backend.Fx.Patterns.DependencyInjection;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Patterns.DependencyInjection
 {
-    public class TheCorrelation
+    public class TheCorrelation : TestWithLogging
     {
         private readonly Correlation _sut = new Correlation();
 
@@ -20,6 +21,10 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         public void InitializesWithId()
         {
             Assert.NotEqual(Guid.Empty, _sut.Id);
+        }
+
+        public TheCorrelation(ITestOutputHelper output) : base(output)
+        {
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using Backend.Fx.Logging;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Patterns.EventAggregation.Domain
 {
@@ -20,7 +22,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Domain
             public Action Action { get; }
         }
 
-        private static readonly ILogger Logger = LogManager.Create<DomainEventAggregator>();
+        private static readonly ILogger Logger = Log.Create<DomainEventAggregator>();
         private readonly IDomainEventHandlerProvider _domainEventHandlerProvider;
         private readonly ConcurrentQueue<HandleAction> _handleActions = new ConcurrentQueue<HandleAction>();
 
@@ -45,7 +47,10 @@ namespace Backend.Fx.Patterns.EventAggregation.Domain
                     () => injectedHandler.Handle(domainEvent));
 
                 _handleActions.Enqueue(handleAction);
-                Logger.Debug($"Invocation of {injectedHandler.GetType().Name} for domain event {typeof(TDomainEvent).Name} registered. It will be executed on completion of operation");
+                Logger.LogDebug(
+                    "Invocation of {HandlerTypeName} for domain event {DomainEvent} registered. It will be executed on completion of operation",
+                    injectedHandler.GetType().Name,
+                    domainEvent);
             }
         }
 
@@ -59,7 +64,10 @@ namespace Backend.Fx.Patterns.EventAggregation.Domain
                 }
                 catch (Exception ex)
                 {
-                    Logger.Error(ex, $"Handling of {handleAction.DomainEventName} by {handleAction.HandlerTypeName} failed.");
+                    Logger.LogError(ex,
+                        "Handling of {DomainEvent} by {HandlerTypeName} failed",
+                        handleAction.DomainEventName,
+                        handleAction.HandlerTypeName);
                     throw;
                 }
             }

@@ -3,6 +3,8 @@ using System.Linq;
 using Backend.Fx.Exceptions;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.EventAggregation.Integration;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Environment.MultiTenancy
 {
@@ -35,7 +37,7 @@ namespace Backend.Fx.Environment.MultiTenancy
 
     public class TenantService : ITenantService
     {
-        private static readonly ILogger Logger = LogManager.Create<TenantService>();
+        private static readonly ILogger Logger = Log.Create<TenantService>();
         private readonly IMessageBus _messageBus;
         private readonly ITenantRepository _tenantRepository;
 
@@ -50,8 +52,8 @@ namespace Backend.Fx.Environment.MultiTenancy
 
         public TenantId CreateTenant(string name, string description, bool isDemonstrationTenant, string configuration = null)
         {
-            Logger.Info($"Creating tenant: {name}");
-            
+            Logger.LogInformation("Creating tenant: {Name}", name);
+
             if (string.IsNullOrWhiteSpace(name))
             {
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(name));
@@ -62,7 +64,7 @@ namespace Backend.Fx.Environment.MultiTenancy
                 throw new ArgumentException($"There is already a tenant named {name}");
             }
 
-            var tenant = new Tenant(name, description, isDemonstrationTenant) {Configuration = configuration};
+            var tenant = new Tenant(name, description, isDemonstrationTenant) { Configuration = configuration };
             _tenantRepository.SaveTenant(tenant);
             var tenantId = new TenantId(tenant.Id);
             _messageBus.Publish(new TenantActivated(tenant.Id, tenant.Name, tenant.Description, tenant.IsDemoTenant));
@@ -71,7 +73,7 @@ namespace Backend.Fx.Environment.MultiTenancy
 
         public void ActivateTenant(TenantId tenantId)
         {
-            Logger.Info($"Activating tenant: {tenantId}");
+            Logger.LogInformation("Activating tenant: {TenantId}", tenantId);
             Tenant tenant = _tenantRepository.GetTenant(tenantId);
             tenant.State = TenantState.Active;
             _tenantRepository.SaveTenant(tenant);
@@ -80,7 +82,7 @@ namespace Backend.Fx.Environment.MultiTenancy
 
         public void DeactivateTenant(TenantId tenantId)
         {
-            Logger.Info($"Deactivating tenant: {tenantId}");
+            Logger.LogInformation("Deactivating tenant: {TenantId}", tenantId);
             Tenant tenant = _tenantRepository.GetTenant(tenantId);
             tenant.State = TenantState.Inactive;
             _tenantRepository.SaveTenant(tenant);
@@ -89,7 +91,7 @@ namespace Backend.Fx.Environment.MultiTenancy
 
         public void DeleteTenant(TenantId tenantId)
         {
-            Logger.Info($"Deleting tenant: {tenantId}");
+            Logger.LogInformation("Deleting tenant: {TenantId}", tenantId);
             Tenant tenant = _tenantRepository.GetTenant(tenantId);
             if (tenant.State != TenantState.Inactive)
             {
@@ -120,37 +122,39 @@ namespace Backend.Fx.Environment.MultiTenancy
         public Tenant[] GetTenants()
         {
             var tenants = _tenantRepository.GetTenants();
-            Logger.Trace($"TenantIds: {string.Join(",", tenants.Select(t => t.ToString()))}");
+            Logger.LogTrace("TenantIds: {TenantIds}", string.Join(",", tenants.Select(t => t.ToString())));
             return tenants;
         }
 
         public Tenant[] GetActiveTenants()
         {
             var activeTenants = _tenantRepository
-                                  .GetTenants()
-                                  .Where(t => t.State == TenantState.Active)
-                                  .ToArray();
-            Logger.Trace($"Active TenantIds: {string.Join(",", activeTenants.Select(t => t.ToString()))}");
+                                .GetTenants()
+                                .Where(t => t.State == TenantState.Active)
+                                .ToArray();
+            Logger.LogTrace("Active TenantIds: {TenantIds}", string.Join(",", activeTenants.Select(t => t.ToString())));
             return activeTenants;
         }
 
         public Tenant[] GetActiveDemonstrationTenants()
         {
             var activeDemonstrationTenants = _tenantRepository
-                                               .GetTenants()
-                                               .Where(t => t.State == TenantState.Active && t.IsDemoTenant)
-                                               .ToArray();
-            Logger.Trace($"Active Demonstration TenantIds: {string.Join(",", activeDemonstrationTenants.Select(t => t.ToString()))}");
+                                             .GetTenants()
+                                             .Where(t => t.State == TenantState.Active && t.IsDemoTenant)
+                                             .ToArray();
+            Logger.LogTrace("Active Demonstration TenantIds: {TenantIds}",
+                string.Join(",", activeDemonstrationTenants.Select(t => t.ToString())));
             return activeDemonstrationTenants;
         }
 
         public Tenant[] GetActiveProductionTenants()
         {
             var activeProductionTenants = _tenantRepository
-                                            .GetTenants()
-                                            .Where(t => t.State == TenantState.Active && !t.IsDemoTenant)
-                                            .ToArray();
-            Logger.Trace($"Active Production TenantIds: {string.Join(",", activeProductionTenants.Select(t => t.ToString()))}");
+                                          .GetTenants()
+                                          .Where(t => t.State == TenantState.Active && !t.IsDemoTenant)
+                                          .ToArray();
+            Logger.LogTrace("Active Production TenantIds: {TenantIds}",
+                string.Join(",", activeProductionTenants.Select(t => t.ToString())));
             return activeProductionTenants;
         }
 

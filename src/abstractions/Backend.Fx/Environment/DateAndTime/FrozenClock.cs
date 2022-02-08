@@ -1,5 +1,7 @@
 ﻿using System;
 using Backend.Fx.Logging;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Environment.DateAndTime
 {
@@ -8,13 +10,13 @@ namespace Backend.Fx.Environment.DateAndTime
     /// </summary>
     public class FrozenClock : IClock
     {
-        private static readonly ILogger Logger = LogManager.Create<FrozenClock>();
+        private static readonly ILogger Logger = Log.Create<FrozenClock>();
         
         // ReSharper disable once UnusedParameter.Local
         public FrozenClock(IClock clock)
         {
             UtcNow = DateTime.UtcNow;
-            Logger.Trace($"Freezing clock at {UtcNow}");
+            Logger.LogTrace("Freezing clock at {UtcNow}", UtcNow);
         }
 
         public DateTime UtcNow { get; }

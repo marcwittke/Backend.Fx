@@ -1,25 +1,27 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
 namespace Backend.Fx.Logging
 {
     public class ExceptionLoggers : ICollection<IExceptionLogger>, IExceptionLogger
     {
-        private static readonly ILogger Logger = LogManager.Create<ExceptionLoggers>();
+        private static readonly Microsoft.Extensions.Logging.ILogger Logger = Log.Create<ExceptionLoggers>();
         private readonly ICollection<IExceptionLogger> _collectionImplementation = new List<IExceptionLogger>();
 
         public ExceptionLoggers()
-        { }
+        {
+        }
 
         public ExceptionLoggers(params IExceptionLogger[] exceptionLoggers)
         {
             foreach (IExceptionLogger exceptionLogger in exceptionLoggers)
             {
-                _collectionImplementation.Add(exceptionLogger);    
+                _collectionImplementation.Add(exceptionLogger);
             }
         }
-        
+
         public void LogException(Exception ex)
         {
             foreach (IExceptionLogger exceptionLogger in _collectionImplementation)
@@ -30,7 +32,11 @@ namespace Backend.Fx.Logging
                 }
                 catch (Exception ex2)
                 {
-                    Logger.Error(ex, $"{exceptionLogger.GetType().Name} failed to log the {ex2.GetType()} with message {ex.Message}");
+                    Logger.LogError(ex,
+                        "{ExceptionLoggerTypeName} failed to log the {ExceptionTypeName} with message {ExceptionMessage}",
+                        exceptionLogger.GetType().Name,
+                        ex2.GetType(),
+                        ex.Message);
                 }
             }
         }
@@ -42,7 +48,7 @@ namespace Backend.Fx.Logging
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable) _collectionImplementation).GetEnumerator();
+            return ((IEnumerable)_collectionImplementation).GetEnumerator();
         }
 
         public void Add(IExceptionLogger item)

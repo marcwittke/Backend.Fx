@@ -36,11 +36,11 @@
             return Task.CompletedTask;
         }
 
-        protected override void Subscribe(string messageName)
+        protected override void Subscribe(string eventName)
         {
         }
 
-        protected override void Unsubscribe(string messageName)
+        protected override void Unsubscribe(string eventName)
         {
         }
 

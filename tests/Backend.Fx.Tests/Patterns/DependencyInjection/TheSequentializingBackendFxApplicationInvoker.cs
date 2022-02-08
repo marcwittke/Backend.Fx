@@ -4,18 +4,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Patterns.DependencyInjection
 {
-    public class TheSequentializingBackendFxApplicationInvoker
+    public class TheSequentializingBackendFxApplicationInvoker : TestWithLogging
     {
-        private static readonly ILogger Logger = LogManager.Create<TheSequentializingBackendFxApplicationInvoker>();
-        
-        public TheSequentializingBackendFxApplicationInvoker()
+        private readonly ITestOutputHelper _output;
+
+        public TheSequentializingBackendFxApplicationInvoker(ITestOutputHelper output): base(output)
         {
+            _output = output;
             var fakes = new DiTestFakes();
             _invoker = new BackendFxApplicationInvoker(fakes.CompositionRoot);
             _decoratedInvoker = new SequentializingBackendFxApplicationInvoker(_invoker);
@@ -37,9 +38,9 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
 
         private void DoTheAction(IInstanceProvider _)
         {
-            Logger.Debug("start");
+            _output.WriteLine("start");
             Thread.Sleep(_actionDuration);
-            Logger.Debug("end");
+            _output.WriteLine("end");
         }
 
         [Fact]

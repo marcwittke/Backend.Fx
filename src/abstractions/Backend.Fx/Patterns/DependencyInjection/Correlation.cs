@@ -1,5 +1,7 @@
 using System;
 using Backend.Fx.Logging;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Patterns.DependencyInjection
 {
@@ -9,14 +11,14 @@ namespace Backend.Fx.Patterns.DependencyInjection
     /// </summary>
     public class Correlation
     {
-        private static readonly ILogger Logger = LogManager.Create<Correlation>();
+        private static readonly ILogger Logger = Log.Create<Correlation>();
 
         public Guid Id { get; private set; } = Guid.NewGuid();
 
         public void Resume(Guid correlationId)
         {
-            Logger.Info($"Resuming correlation {correlationId}");
             Id = correlationId;
+            Logger.LogInformation("Resuming correlation {@Correlation}", this);
         }
     }
 }

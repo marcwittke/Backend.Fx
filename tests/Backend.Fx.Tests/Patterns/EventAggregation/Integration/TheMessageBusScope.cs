@@ -2,16 +2,17 @@ using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using FakeItEasy;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
 {
-    public class TheMessageBusScope
+    public class TheMessageBusScope : TestWithLogging
     {
         private readonly IMessageBus _messageBus = A.Fake<IMessageBus>();
         private readonly ICurrentTHolder<Correlation> _currentCorrelationHolder = new CurrentCorrelationHolder();
         private readonly IMessageBusScope _sut;
 
-        public TheMessageBusScope()
+        public TheMessageBusScope(ITestOutputHelper output): base(output)
         {
             _sut = new MessageBusScope(_messageBus, _currentCorrelationHolder);
         }

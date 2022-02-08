@@ -1,12 +1,14 @@
 using System;
 using Backend.Fx.BuildingBlocks;
 using Backend.Fx.SimpleInjectorDependencyInjection.Modules;
+using Backend.Fx.Tests;
 using SimpleInjector;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
 {
-    public class TheMisconfiguredSimpleInjectorCompositionRoot
+    public class TheMisconfiguredSimpleInjectorCompositionRoot : TestWithLogging
     {
         [Fact]
         public void ThrowsOnValidation()
@@ -20,7 +22,8 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         {
             public UnresolvableService(Entity e)
             {
-                throw new Exception($"This constructor should never be called, since the Entity {e?.GetType().Name} cannot be resolved by the container");
+                throw new Exception(
+                    $"This constructor should never be called, since the Entity {e?.GetType().Name} cannot be resolved by the container");
             }
         }
 
@@ -31,6 +34,10 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
                 // this registration should be recognized as unresolvable during validation
                 container.Register<UnresolvableService>();
             }
+        }
+
+        public TheMisconfiguredSimpleInjectorCompositionRoot(ITestOutputHelper output) : base(output)
+        {
         }
     }
 }

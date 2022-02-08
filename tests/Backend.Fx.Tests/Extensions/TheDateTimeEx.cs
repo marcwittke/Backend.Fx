@@ -1,10 +1,11 @@
 ﻿using System;
 using Backend.Fx.Extensions;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Extensions
 {
-    public class TheDateTimeEx
+    public class TheDateTimeEx : TestWithLogging
     {
         [Fact]
         public void CanConvertToUnixEpochDate()
@@ -12,7 +13,7 @@ namespace Backend.Fx.Tests.Extensions
             Assert.Equal(0L, new DateTime(1970, 1, 1).ToUnixEpochDate());
             Assert.Equal(1495675672L, new DateTime(2017, 5, 25, 1, 27, 52).ToUnixEpochDate());
             Assert.Equal(int.MaxValue, new DateTime(2038, 1, 19, 3, 14, 7).ToUnixEpochDate());
-            Assert.Equal((long) int.MaxValue + 1, new DateTime(2038, 1, 19, 3, 14, 8).ToUnixEpochDate());
+            Assert.Equal((long)int.MaxValue + 1, new DateTime(2038, 1, 19, 3, 14, 8).ToUnixEpochDate());
         }
 
         [Fact]
@@ -34,6 +35,10 @@ namespace Backend.Fx.Tests.Extensions
             Assert.Equal(new DateTime(2017, 05, 26), dt.GetWeekDay(DayOfWeek.Friday));
             Assert.Equal(new DateTime(2017, 05, 27), dt.GetWeekDay(DayOfWeek.Saturday));
             Assert.Equal(new DateTime(2017, 05, 28), dt.GetWeekDay(DayOfWeek.Sunday));
+        }
+
+        public TheDateTimeEx(ITestOutputHelper output) : base(output)
+        {
         }
     }
 }

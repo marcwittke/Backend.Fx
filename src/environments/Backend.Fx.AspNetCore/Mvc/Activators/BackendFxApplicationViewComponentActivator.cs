@@ -2,12 +2,14 @@
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using Microsoft.AspNetCore.Mvc.ViewComponents;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.AspNetCore.Mvc.Activators
 {
     public class BackendFxApplicationViewComponentActivator : IViewComponentActivator
     {
-        private static readonly ILogger Logger = LogManager.Create<BackendFxApplicationViewComponentActivator>();
+        private static readonly ILogger Logger = Log.Create<BackendFxApplicationViewComponentActivator>();
         
         public object Create(ViewComponentContext context)
         {
@@ -20,13 +22,13 @@ namespace Backend.Fx.AspNetCore.Mvc.Activators
 
         private static object CreateInstanceUsingInstanceProvider(object ip, Type requestedViewComponentType)
         {
-            Logger.Debug($"Providing {requestedViewComponentType.Name} using {ip.GetType().Name}");
+            Logger.LogDebug("Providing {ViewComponentName} using {InstanceProvider}", requestedViewComponentType.Name, ip.GetType().Name);
             return ((IInstanceProvider)ip).GetInstance(requestedViewComponentType);
         }
 
         private static object CreateInstanceUsingSystemActivator(Type requestedViewComponentType)
         {
-            Logger.Debug($"Providing {requestedViewComponentType.Name} using {nameof(Activator)}");
+            Logger.LogDebug("Providing {ViewComponentName} using {InstanceProvider}", requestedViewComponentType.Name, nameof(Activator));
             return Activator.CreateInstance(requestedViewComponentType);
         }
         

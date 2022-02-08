@@ -13,12 +13,14 @@ using Backend.Fx.Patterns.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.EfCorePersistence
 {
     public class EfFlush : ICanFlush
     {
-        private static readonly ILogger Logger = LogManager.Create<EfFlush>();
+        private static readonly ILogger Logger = Log.Create<EfFlush>();
         public DbContext DbContext { get; }
         public ICurrentTHolder<IIdentity> IdentityHolder { get; }
         public IClock Clock { get; }
@@ -26,7 +28,7 @@ namespace Backend.Fx.EfCorePersistence
         public EfFlush(DbContext dbContext, ICurrentTHolder<IIdentity> identityHolder, IClock clock)
         {
             DbContext = dbContext;
-            Logger.Info("Disabling auto detect changes on this DbContext. Changes will be detected explicitly when flushing.");
+            Logger.LogInformation("Disabling auto detect changes on this DbContext. Changes will be detected explicitly when flushing");
             DbContext.ChangeTracker.AutoDetectChangesEnabled = false;
             IdentityHolder = identityHolder;
             Clock = clock;
@@ -43,7 +45,7 @@ namespace Backend.Fx.EfCorePersistence
 
         private void DetectChanges()
         {
-            using (Logger.DebugDuration("Detecting changes"))
+            using (Logger.LogDebugDuration("Detecting changes"))
             {
                 DbContext.ChangeTracker.DetectChanges();
             }
@@ -51,7 +53,7 @@ namespace Backend.Fx.EfCorePersistence
 
         private void UpdateTrackingProperties()
         {
-            using (Logger.DebugDuration("Updating tracking properties of created and modified entities"))
+            using (Logger.LogDebugDuration("Updating tracking properties of created and modified entities"))
             {
                 UpdateTrackingProperties(IdentityHolder.Current.Name, Clock.UtcNow);
             }
@@ -59,7 +61,7 @@ namespace Backend.Fx.EfCorePersistence
 
         private void CheckForMissingTenantIds()
         {
-            using (Logger.DebugDuration("Checking for missing tenant ids"))
+            using (Logger.LogDebugDuration("Checking for missing tenant ids"))
             {
                 AggregateRoot[] aggregatesWithoutTenantId = DbContext
                                                             .ChangeTracker
@@ -79,7 +81,7 @@ namespace Backend.Fx.EfCorePersistence
         
         private void SaveChanges()
         {
-            using (Logger.DebugDuration("Saving changes"))
+            using (Logger.LogDebugDuration("Saving changes"))
             {
                 try
                 {
@@ -92,10 +94,10 @@ namespace Backend.Fx.EfCorePersistence
             }
         }
         
-        private void UpdateTrackingProperties(string userId, DateTime utcNow)
+        private void UpdateTrackingProperties(string identity, DateTime utcNow)
         {
-            userId ??= "anonymous";
-            var isTraceEnabled = Logger.IsTraceEnabled();
+            identity ??= "anonymous";
+            var isTraceEnabled = Logger.IsEnabled(LogLevel.Trace);
             var count = 0;
 
             // Modifying an entity (also removing an entity from an aggregate) should leave the aggregate root as modified
@@ -122,13 +124,13 @@ namespace Backend.Fx.EfCorePersistence
 
                              if (entry.State == EntityState.Added)
                              {
-                                 if (isTraceEnabled) Logger.Trace("tracking that {0}[{1}] was created by {2} at {3:T} UTC", entity.GetType().Name, entity.Id, userId, utcNow);
-                                 entity.SetCreatedProperties(userId, utcNow);
+                                 if (isTraceEnabled) Logger.LogTrace("tracking that {EntityTypeName}[{Id}] was created by {Identity} at {UtcNow}", entity.GetType().Name, entity.Id, identity, utcNow);
+                                 entity.SetCreatedProperties(identity, utcNow);
                              }
                              else if (entry.State == EntityState.Modified)
                              {
-                                 if (isTraceEnabled) Logger.Trace("tracking that {0}[{1}] was modified by {2} at {3:T} UTC", entity.GetType().Name, entity.Id, userId, utcNow);
-                                 entity.SetModifiedProperties(userId, utcNow);
+                                 if (isTraceEnabled) Logger.LogTrace("tracking that {EntityTypeName}[{Id}] was modified by {Identity} at {UtcNow}", entity.GetType().Name, entity.Id, identity, utcNow);
+                                 entity.SetModifiedProperties(identity, utcNow);
 
                                  // this line causes the recent changes of tracking properties to be detected before flushing
                                  entry.State = EntityState.Modified;
@@ -136,11 +138,11 @@ namespace Backend.Fx.EfCorePersistence
                          }
                          catch (Exception ex)
                          {
-                             Logger.Warn(ex, "Updating tracking properties failed");
+                             Logger.LogWarning(ex, "Updating tracking properties failed");
                              throw;
                          }
                      });
-            if (count > 0) Logger.Debug($"Tracked {count} entities as created/changed on {utcNow:u} by {userId}");
+            if (count > 0) Logger.LogDebug("Tracked {EntityCount} entities as created/changed on {UtcNow} by {Identity}", count, utcNow, identity);
         }
         
         /// <summary>
@@ -150,8 +152,7 @@ namespace Backend.Fx.EfCorePersistence
         [return: NotNull]
         private static EntityEntry GetAggregateRootEntry(ChangeTracker changeTracker, EntityEntry entry)
         {
-            var entityIdentifier = $"{entry.Entity.GetType().Name}[{(entry.Entity as Identified)?.Id}]";
-            Logger.Debug($"Searching aggregate root of {entityIdentifier}");
+            Logger.LogDebug("Searching aggregate root of {EntityTypeName}[{Id}]", entry.Entity.GetType().Name, (entry.Entity as Identified)?.Id);
             foreach (NavigationEntry navigation in entry.Navigations)
             {
                 TypeInfo navTargetTypeInfo = navigation.Metadata.TargetEntityType.ClrType.GetTypeInfo();
@@ -183,11 +184,11 @@ namespace Backend.Fx.EfCorePersistence
                 if (typeof(AggregateRoot).GetTypeInfo().IsAssignableFrom(navTargetTypeInfo)) return navigationTargetEntry;
 
                 // recurse in case of "Entity -> Entity -> AggregateRoot"
-                Logger.Debug("Recursing...");
+                Logger.LogDebug("Recursing...");
                 return GetAggregateRootEntry(changeTracker, navigationTargetEntry);
             }
 
-            throw new InvalidOperationException($"Could not find aggregate root of {entityIdentifier}");
+            throw new InvalidOperationException($"Could not find aggregate root of {entry.Entity.GetType().Name}[{(entry.Entity as Identified)?.Id}]");
         }
     }
 }

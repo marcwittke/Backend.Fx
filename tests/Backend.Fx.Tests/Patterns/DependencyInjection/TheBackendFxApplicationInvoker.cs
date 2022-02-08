@@ -5,12 +5,13 @@ using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Patterns.DependencyInjection;
 using FakeItEasy;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Patterns.DependencyInjection
 {
-    public class TheBackendFxApplicationInvoker
+    public class TheBackendFxApplicationInvoker : TestWithLogging
     {
-        public TheBackendFxApplicationInvoker()
+        public TheBackendFxApplicationInvoker(ITestOutputHelper output): base(output)
         {
             _fakes = new DiTestFakes();
             _sut = new BackendFxApplicationInvoker(_fakes.CompositionRoot);

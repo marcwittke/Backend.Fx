@@ -1,13 +1,34 @@
 using System.Linq;
 using Backend.Fx.RandomData;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.RandomData
 {
-    public class TheLandLineGenerator : TheGenerator<LandLineGenerator, string>{}
-    public class TheMobileLineGenerator : TheGenerator<MobileLineGenerator, string>{}
-    public class TheTestAddressGenerator : TheGenerator<TestAddressGenerator, TestAddress>{}
-    public class TheTestPersonGenerator : TheGenerator<TestPersonGenerator, TestPerson>{}
+    public class TheLandLineGenerator : TheGenerator<LandLineGenerator, string>
+    {
+        public TheLandLineGenerator(ITestOutputHelper output) : base(output)
+        {
+        }
+    }
+    public class TheMobileLineGenerator : TheGenerator<MobileLineGenerator, string>
+    {
+        public TheMobileLineGenerator(ITestOutputHelper output) : base(output)
+        {
+        }
+    }
+    public class TheTestAddressGenerator : TheGenerator<TestAddressGenerator, TestAddress>
+    {
+        public TheTestAddressGenerator(ITestOutputHelper output) : base(output)
+        {
+        }
+    }
+    public class TheTestPersonGenerator : TheGenerator<TestPersonGenerator, TestPerson>
+    {
+        public TheTestPersonGenerator(ITestOutputHelper output) : base(output)
+        {
+        }
+    }
 
     public class TheLoremIpsumGenerator : TheGenerator<LoremIpsumGenerator, string>
     {
@@ -22,13 +43,17 @@ namespace Backend.Fx.Tests.RandomData
             Assert.Equal(10, sentence.Split(" ").Length);
             Assert.False(sentence.EndsWith('.'));
         }
+
+        public TheLoremIpsumGenerator(ITestOutputHelper output) : base(output)
+        {
+        }
     }
     
-    public abstract class TheGenerator<TGen, T> where TGen : Generator<T>, new()
+    public abstract class TheGenerator<TGen, T> : TestWithLogging where TGen : Generator<T>, new()
     {
         private readonly TGen _sut;
 
-        protected TheGenerator()
+        protected TheGenerator(ITestOutputHelper output): base(output)
         {
             _sut = new TGen();
         }

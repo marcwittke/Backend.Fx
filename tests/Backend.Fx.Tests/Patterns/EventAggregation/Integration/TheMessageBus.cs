@@ -9,12 +9,13 @@ using Backend.Fx.Patterns.EventAggregation.Integration;
 using FakeItEasy;
 using JetBrains.Annotations;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
 {
     public sealed class TheInMemoryMessageBus : TheMessageBus
     {
-        public TheInMemoryMessageBus()
+        public TheInMemoryMessageBus(ITestOutputHelper output): base(output)
         {
             Sut.ProvideInvoker(FakeApplication.Invoker);
             Sut.Connect();
@@ -38,7 +39,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
     [UsedImplicitly]
     public sealed class TheSerializingMessageBus : TheMessageBus
     {
-        public TheSerializingMessageBus()
+        public TheSerializingMessageBus(ITestOutputHelper output): base(output)
         {
             Sut.ProvideInvoker(FakeApplication.Invoker);
         }
@@ -46,11 +47,11 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         protected override IMessageBus Sut { get; } = new SerializingMessageBus();
     }
 
-    public abstract class TheMessageBus
+    public abstract class TheMessageBus : TestWithLogging
     {
         protected IBackendFxApplication FakeApplication { get; } = A.Fake<IBackendFxApplication>();
 
-        protected TheMessageBus()
+        protected TheMessageBus(ITestOutputHelper output): base(output)
         {
             A.CallTo(() => FakeApplication.Invoker).Returns(Invoker);
             A.CallTo(() => FakeApplication.WaitForBoot(A<int>._, A<CancellationToken>._)).Returns(true);

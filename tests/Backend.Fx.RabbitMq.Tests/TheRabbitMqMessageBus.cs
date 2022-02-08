@@ -3,19 +3,21 @@ using System.Diagnostics;
 using System.Threading;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
+using Backend.Fx.Tests;
 using FakeItEasy;
 using RabbitMQ.Client;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.RabbitMq.Tests
 {
-    public class TheRabbitMqMessageBus
+    public class TheRabbitMqMessageBus : TestWithLogging
     {
         private readonly ManualResetEvent _received = new ManualResetEvent(false);
         private readonly BackendFxApplicationInvoker _senderInvoker;
         private readonly BackendFxApplicationInvoker _receiverInvoker;
 
-        public TheRabbitMqMessageBus()
+        public TheRabbitMqMessageBus(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
         {
             var fakeSenderApplication = A.Fake<IBackendFxApplication>();
             _senderInvoker = new BackendFxApplicationInvoker(fakeSenderApplication.CompositionRoot);

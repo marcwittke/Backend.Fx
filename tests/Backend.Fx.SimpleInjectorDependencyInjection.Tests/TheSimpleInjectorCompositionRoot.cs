@@ -4,16 +4,18 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.ASimpleDomain;
+using Backend.Fx.Tests;
 using SimpleInjector;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
 {
-    public class TheSimpleInjectorCompositionRoot : IDisposable
+    public class TheSimpleInjectorCompositionRoot : TestWithLogging, IDisposable
     {
         private readonly SimpleInjectorCompositionRoot _sut;
-        
-        public TheSimpleInjectorCompositionRoot()
+
+        public TheSimpleInjectorCompositionRoot(ITestOutputHelper output) : base(output)
         {
             _sut = new SimpleInjectorCompositionRoot();
             Assembly domainAssembly = typeof(AnAggregate).GetTypeInfo().Assembly;
@@ -55,7 +57,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
             }
         }
 
-        
 
         [Fact]
         public void ProvidesScopedInstancesWhenScopeHasBeenStarted()
@@ -81,7 +82,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         [Fact]
         public void ProvidesSingletonAndScopedInstancesAccordingly()
         {
-            
             const int parallelScopeCount = 1000;
             object[] scopedInstances = new object[parallelScopeCount];
             object[] singletonInstances = new object[parallelScopeCount];
@@ -154,14 +154,14 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
             using (_sut.BeginScope())
             {
                 var handlers = _sut.GetAllEventHandlers<ADomainEvent>().ToArray();
-                
+
                 // these three handlers should have been auto registered during boot by scanning the assembly
                 Assert.True(handlers.OfType<ADomainEventHandler1>().Any());
                 Assert.True(handlers.OfType<ADomainEventHandler2>().Any());
                 Assert.True(handlers.OfType<ADomainEventHandler3>().Any());
             }
         }
-        
+
         public void Dispose()
         {
             _sut.Dispose();

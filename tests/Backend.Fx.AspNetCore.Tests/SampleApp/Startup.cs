@@ -35,7 +35,7 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             // log exceptions to file
-            _exceptionLoggers.Add(new ExceptionLogger(LogManager.Create("Mep.WebHost")));
+            _exceptionLoggers.Add(new ExceptionLogger(Log.Create("Mep.WebHost")));
             
             // use the ASP.Net Core routing middleware that decides the endpoint to be hit later
             app.UseRouting();

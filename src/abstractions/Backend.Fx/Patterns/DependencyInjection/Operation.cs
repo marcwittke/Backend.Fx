@@ -1,5 +1,7 @@
 using System;
 using Backend.Fx.Logging;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Patterns.DependencyInjection
 {
@@ -19,7 +21,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
     public class Operation : IOperation
     {
-        private static readonly ILogger Logger = LogManager.Create<Operation>();
+        private static readonly ILogger Logger = Log.Create<Operation>();
         private static int _index;
         private readonly int _instanceId = _index++;
         private bool? _isActive;
@@ -32,13 +34,13 @@ namespace Backend.Fx.Patterns.DependencyInjection
                 throw new InvalidOperationException($"Cannot begin an operation that is {(_isActive.Value ? "active" : "terminated")}");
             }
 
-            _lifetimeLogger = Logger.DebugDuration($"Beginning operation #{_instanceId}", $"Terminating operation #{_instanceId}");
+            _lifetimeLogger = Logger.LogDebugDuration($"Beginning operation #{_instanceId}", $"Terminating operation #{_instanceId}");
             _isActive = true;
         }
 
         public virtual void Complete()
         {
-            Logger.Info($"Completing operation #{_instanceId}.");
+            Logger.LogInformation("Completing operation #{OperationId}", _instanceId);
             if (_isActive != true)
             {
                 throw new InvalidOperationException($"Cannot begin an operation that is {(_isActive == false ? "terminated" : "not active")}");
@@ -51,7 +53,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
         public void Cancel()
         {
-            Logger.Info($"Canceling operation #{_instanceId}.");
+            Logger.LogInformation("Canceling operation #{OperationId}", _instanceId);
             if (_isActive != true)
             {
                 throw new InvalidOperationException($"Cannot cancel an operation that is {(_isActive == false ? "terminated" : "not active")}");

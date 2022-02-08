@@ -2,10 +2,11 @@
 using System.Threading;
 using Backend.Fx.Environment.DateAndTime;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Environment.DateAndTime
 {
-    public class TheFrozenClock
+    public class TheFrozenClock : TestWithLogging
     {
         [Fact]
         public void IsFrozen()
@@ -16,6 +17,10 @@ namespace Backend.Fx.Tests.Environment.DateAndTime
             Thread.Sleep(100);
             Assert.Equal(systemUtcNow, sut.UtcNow);
             Assert.NotEqual(DateTime.UtcNow, sut.UtcNow);
+        }
+
+        public TheFrozenClock(ITestOutputHelper output) : base(output)
+        {
         }
     }
 }

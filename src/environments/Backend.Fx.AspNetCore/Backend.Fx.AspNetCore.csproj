@@ -29,14 +29,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.22" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
 	<PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\abstractions\Backend.Fx\Backend.Fx.csproj" />
-    <ProjectReference Include="..\Backend.Fx.NetCore\Backend.Fx.NetCore.csproj" />
   </ItemGroup>
 
 </Project>

@@ -2,22 +2,23 @@
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Extensions;
 using Backend.Fx.Logging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.EfCorePersistence
 {
     public static class DbContextExtensions
     {
-        private static readonly ILogger Logger = LogManager.Create(typeof(DbContextExtensions));
+        private static readonly ILogger Logger = Log.Create(typeof(DbContextExtensions));
 
         public static void DisableChangeTracking(this DbContext dbContext)
         {
-            Logger.Debug($"Disabling change tracking on {dbContext.GetType().Name} instance");
+            Logger.LogDebug("Disabling change tracking on {DbContextTypeName} instance", dbContext.GetType().Name);
             dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
             dbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
@@ -59,32 +60,22 @@ namespace Backend.Fx.EfCorePersistence
 
         public static void TraceChangeTrackerState(this DbContext dbContext)
         {
-            if (Logger.IsTraceEnabled())
+            if (Logger.IsEnabled(LogLevel.Trace))
                 try
                 {
-                    var added = dbContext.ChangeTracker.Entries().Where(entry => entry.State == EntityState.Added).ToArray();
-                    var modified = dbContext.ChangeTracker.Entries().Where(entry => entry.State == EntityState.Modified).ToArray();
-                    var deleted = dbContext.ChangeTracker.Entries().Where(entry => entry.State == EntityState.Deleted).ToArray();
-                    var unchanged = dbContext.ChangeTracker.Entries().Where(entry => entry.State == EntityState.Unchanged).ToArray();
+                    var changeTrackerState = new
+                    {
+                        added = dbContext.ChangeTracker.Entries().Where(entry => entry.State == EntityState.Added).ToArray(),
+                        modified = dbContext.ChangeTracker.Entries().Where(entry => entry.State == EntityState.Modified).ToArray(),
+                        deleted = dbContext.ChangeTracker.Entries().Where(entry => entry.State == EntityState.Deleted).ToArray(),
+                        unchanged = dbContext.ChangeTracker.Entries().Where(entry => entry.State == EntityState.Unchanged).ToArray()
+                    };
 
-                    var stateDumpBuilder = new StringBuilder();
-                    stateDumpBuilder.AppendFormat("{0} entities added{1}{2}", added.Length, deleted.Length == 0 ? "." : ":", System.Environment.NewLine);
-                    foreach (EntityEntry entry in added)
-                        stateDumpBuilder.AppendFormat("added: {0}[{1}]{2}", entry.Entity.GetType().Name, GetPrimaryKeyValue(entry), System.Environment.NewLine);
-                    stateDumpBuilder.AppendFormat("{0} entities modified{1}{2}", modified.Length, deleted.Length == 0 ? "." : ":", System.Environment.NewLine);
-                    foreach (EntityEntry entry in modified)
-                        stateDumpBuilder.AppendFormat("modified: {0}[{1}]{2}", entry.Entity.GetType().Name, GetPrimaryKeyValue(entry), System.Environment.NewLine);
-                    stateDumpBuilder.AppendFormat("{0} entities deleted{1}{2}", deleted.Length, deleted.Length == 0 ? "." : ":", System.Environment.NewLine);
-                    foreach (EntityEntry entry in deleted)
-                        stateDumpBuilder.AppendFormat("deleted: {0}[{1}]{2}", entry.Entity.GetType().Name, GetPrimaryKeyValue(entry), System.Environment.NewLine);
-                    stateDumpBuilder.AppendFormat("{0} entities unchanged{1}{2}", unchanged.Length, deleted.Length == 0 ? "." : ":", System.Environment.NewLine);
-                    foreach (EntityEntry entry in unchanged)
-                        stateDumpBuilder.AppendFormat("unchanged: {0}[{1}]{2}", entry.Entity.GetType().Name, GetPrimaryKeyValue(entry), System.Environment.NewLine);
-                    Logger.Trace(stateDumpBuilder.ToString());
+                    Logger.LogTrace("Change tracker state: {@ChangeTrackerState}", changeTrackerState);
                 }
                 catch (Exception ex)
                 {
-                    Logger.Warn(ex, "Change tracker state could not be dumped");
+                    Logger.LogWarning(ex, "Change tracker state could not be dumped");
                 }
         }
 

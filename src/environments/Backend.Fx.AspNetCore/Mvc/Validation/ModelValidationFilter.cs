@@ -5,7 +5,9 @@ using Backend.Fx.Exceptions;
 using Backend.Fx.Logging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.AspNetCore.Mvc.Validation
 {
@@ -17,10 +19,9 @@ namespace Backend.Fx.AspNetCore.Mvc.Validation
         protected void LogErrors(FilterContext context, string controllerName, Errors errors)
         {
             ILogger logger = TryGetControllerType(controllerName, out Type controllerType)
-                ? LogManager.Create(controllerType)
-                : LogManager.Create<ModelValidationFilter>();
-            logger.Warn($"Model validation failed during {context.HttpContext.Request.Method} {context.HttpContext.Request.PathBase}: " +
-                        string.Join(System.Environment.NewLine, errors.Select(err => err.ToString())));
+                ? Log.Create(controllerType)
+                : Log.Create<ModelValidationFilter>();
+            logger.LogWarning("Model validation failed during {@HttpRequest}: {@Errors}", context.HttpContext.Request, errors);
         }
 
         protected bool AcceptsJson(FilterContext context)

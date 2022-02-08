@@ -1,11 +1,13 @@
 using System;
 using Backend.Fx.Logging;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Environment.DateAndTime
 {
     public class AdjustableClock : IClock
     {
-        private static readonly ILogger Logger = LogManager.Create<AdjustableClock>();
+        private static readonly ILogger Logger = Log.Create<AdjustableClock>();
         
         private readonly IClock _clockImplementation;
         private DateTime? _overriddenUtcNow;
@@ -19,14 +21,14 @@ namespace Backend.Fx.Environment.DateAndTime
 
         public void OverrideUtcNow(DateTime utcNow)
         {
-            Logger.Trace($"Adjusting clock to {utcNow}");
+            Logger.LogTrace("Adjusting clock to {UtcNow}", utcNow);
             _overriddenUtcNow = utcNow;
         }
 
         public DateTime Advance(TimeSpan timespan)
         {
             _overriddenUtcNow = _overriddenUtcNow ?? _clockImplementation.UtcNow;
-            Logger.Trace($"Advancing clock by {timespan}");
+            Logger.LogTrace("Advancing clock by {TimeSpan}", timespan);
             _overriddenUtcNow = _overriddenUtcNow.Value.Add(timespan);
             return _overriddenUtcNow.Value;
         }

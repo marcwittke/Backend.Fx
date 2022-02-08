@@ -1,12 +1,13 @@
 using Backend.Fx.Patterns.IdGeneration;
 using FakeItEasy;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Patterns.IdGeneration
 {
-    public class TheSequenceHiLoIdGenerator
+    public class TheSequenceHiLoIdGenerator : TestWithLogging
     {
-        public TheSequenceHiLoIdGenerator()
+        public TheSequenceHiLoIdGenerator(ITestOutputHelper output): base(output)
         {
             A.CallTo(() => _sequence.Increment).Returns(10);
             _sut = new TestIdGenerator(_sequence);

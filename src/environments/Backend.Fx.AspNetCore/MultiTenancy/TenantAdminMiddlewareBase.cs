@@ -7,13 +7,15 @@ using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Exceptions;
 using Backend.Fx.Logging;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.AspNetCore.MultiTenancy
 {
     public abstract class TenantAdminMiddlewareBase
     {
-        private static readonly ILogger Logger = LogManager.Create<TenantAdminMiddlewareBase>();
+        private static readonly ILogger Logger = Log.Create<TenantAdminMiddlewareBase>();
         private readonly RequestDelegate _next;
         protected virtual string TenantsApiBaseUrl { get; } = "/api/tenants";
         protected ITenantService TenantService { get; }
@@ -30,14 +32,14 @@ namespace Backend.Fx.AspNetCore.MultiTenancy
             {
                 if (!IsTenantsAdmin(context))
                 {
-                    Logger.Warn("Unauthorized attempt to access tenant endpoints");
+                    Logger.LogWarning("Unauthorized attempt to access tenant endpoints");
                     context.Response.StatusCode = (int) HttpStatusCode.Forbidden;
                     return;
                 }
 
                 if (context.Request.Method.ToLower() == "post")
                 {
-                    Logger.Info("Creating Tenant");
+                    Logger.LogInformation("Creating Tenant");
                     
                     try
                     {
@@ -49,14 +51,14 @@ namespace Backend.Fx.AspNetCore.MultiTenancy
                             if (createTenantParams == null) throw new ClientException();
 
                             Tenant tenant = await CreateTenant(createTenantParams);
-                            Logger.Info($"Created Tenant[{tenant.Id}] ({tenant.Name})");
+                            Logger.LogInformation("Created Tenant {@Tenant}", tenant);
                             
                             await context.Response.WriteJsonAsync(tenant);
                         }
                     }
                     catch (Exception ex)
                     {
-                        Logger.Error(ex, "Tenant Creation failed");
+                        Logger.LogError(ex, "Tenant Creation failed");
                         context.Response.StatusCode = (int) HttpStatusCode.BadRequest;
                         await context.Response.WriteAsync(ex.Message);
                         return;
@@ -70,14 +72,14 @@ namespace Backend.Fx.AspNetCore.MultiTenancy
                     var tenantIdStr = context.Request.Path.Value.Split('/').Last();
                     if (int.TryParse(tenantIdStr, out int tenantId))
                     {
-                        Logger.Info($"Getting Tenant[{tenantId}]");
+                        Logger.LogInformation("Getting Tenant[{TenantId}]", tenantId);
 
                         var tenant = TenantService.GetTenant(new TenantId(tenantId));
                         await context.Response.WriteJsonAsync(tenant);
                     }
                     else
                     {
-                        Logger.Info($"Getting Tenants");
+                        Logger.LogInformation("Getting Tenants");
                         
                         var tenants = TenantService.GetTenants();
                         await context.Response.WriteJsonAsync(tenants);

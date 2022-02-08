@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 
 namespace Backend.Fx.Logging
 {
+    [Obsolete]
     public interface ILogger
     {
         #region fatal

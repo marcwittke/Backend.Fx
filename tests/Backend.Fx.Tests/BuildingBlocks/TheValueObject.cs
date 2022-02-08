@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using Backend.Fx.BuildingBlocks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.BuildingBlocks
 {
-    public class TheValueObject
+    public class TheValueObject : TestWithLogging
     {
         [Fact]
         public void IsConsideredEqualWhenAllPropertiesAreEqual()
@@ -108,6 +109,10 @@ namespace Backend.Fx.Tests.BuildingBlocks
             {
                 yield return Order;
             }
+        }
+
+        public TheValueObject(ITestOutputHelper output) : base(output)
+        {
         }
     }
 }

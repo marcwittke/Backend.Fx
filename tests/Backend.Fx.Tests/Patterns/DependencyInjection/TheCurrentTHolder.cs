@@ -1,10 +1,11 @@
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Patterns.DependencyInjection;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Patterns.DependencyInjection
 {
-    public class TheCurrentTHolder
+    public class TheCurrentTHolder : TestWithLogging
     {
         private readonly ICurrentTHolder<TenantId> _sut = new CurrentTenantIdHolder();
         private readonly TenantId _instance2 = new TenantId(2);
@@ -21,6 +22,10 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         {
             TenantId current = _sut.Current;
             Assert.False(current.HasValue);
+        }
+
+        public TheCurrentTHolder(ITestOutputHelper output) : base(output)
+        {
         }
     }
 }

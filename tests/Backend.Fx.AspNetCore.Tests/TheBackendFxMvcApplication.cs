@@ -2,15 +2,23 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Backend.Fx.AspNetCore.Tests.SampleApp.Domain;
+using Backend.Fx.Tests;
 using Newtonsoft.Json;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.AspNetCore.Tests
 {
-    public class TheBackendFxMvcApplication
+    public class TheBackendFxMvcApplication : TestWithLogging
     {
-        private readonly SampleAppWebApplicationFactory _factory = new();
-
+        
+        private readonly SampleAppWebApplicationFactory _factory;
+        
+        public TheBackendFxMvcApplication(ITestOutputHelper output) : base(output)
+        {
+            _factory = new SampleAppWebApplicationFactory(base.Logger);
+        }
+        
         [Fact]
         public async Task CanBeCalledWithCorrectArguments()
         {

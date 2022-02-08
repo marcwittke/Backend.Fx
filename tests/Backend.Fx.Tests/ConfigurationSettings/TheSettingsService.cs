@@ -8,12 +8,13 @@ using Backend.Fx.Patterns.Authorization;
 using Backend.Fx.Patterns.IdGeneration;
 using FakeItEasy;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.ConfigurationSettings
 {
-    public class TheSettingsService
+    public class TheSettingsService : TestWithLogging
     {
-        public TheSettingsService()
+        public TheSettingsService(ITestOutputHelper output): base(output)
         {
             var settingAuthorization = A.Fake<IAggregateAuthorization<Setting>>();
             A.CallTo(() => settingAuthorization.HasAccessExpression).Returns(setting => true);

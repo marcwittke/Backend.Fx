@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.AspNetCore
 {
@@ -14,13 +16,13 @@ namespace Backend.Fx.AspNetCore
     
     public abstract class BackendFxApplicationHostedService : IBackendFxApplicationHostedService
     {
-        private static readonly ILogger Logger = LogManager.Create<BackendFxApplicationHostedService>();
+        private static readonly ILogger Logger = Log.Create<BackendFxApplicationHostedService>();
 
         public abstract IBackendFxApplication Application { get; }
 
         public async Task StartAsync(CancellationToken ct)
         {
-            using (Logger.InfoDuration("Application starting..."))
+            using (Logger.LogInformationDuration("Application starting..."))
             {
                 try
                 {
@@ -28,14 +30,15 @@ namespace Backend.Fx.AspNetCore
                 }
                 catch (Exception ex)
                 {
-                    throw Logger.Fatal(ex, "Application could not be started");
+                    Logger.LogCritical(ex, "Application could not be started");
+                    throw;
                 }
             }
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            using (Logger.InfoDuration("Application stopping..."))
+            using (Logger.LogInformationDuration("Application stopping..."))
             {
                 Application.Dispose();
                 return Task.CompletedTask;

@@ -11,12 +11,13 @@ using Backend.Fx.Patterns.EventAggregation.Domain;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using FakeItEasy;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Patterns.DependencyInjection
 {
-    public class TheBackendFxApplication
+    public class TheBackendFxApplication : TestWithLogging
     {
-        public TheBackendFxApplication()
+        public TheBackendFxApplication(ITestOutputHelper output): base(output)
         {
             _fakes = new DiTestFakes();
 

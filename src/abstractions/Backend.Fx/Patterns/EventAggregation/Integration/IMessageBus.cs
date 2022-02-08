@@ -28,8 +28,8 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
         /// Subscribes to an integration event with a dynamic event handler
         /// </summary>
         /// <typeparam name="THandler">The handler type</typeparam>
-        /// <param name="messageName">The event name to subscribe to. </param>
-        void Subscribe<THandler>(string messageName)
+        /// <param name="eventName">The event name to subscribe to. </param>
+        void Subscribe<THandler>(string eventName)
             where THandler : IIntegrationMessageHandler;
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
         void Subscribe<TEvent>(IIntegrationMessageHandler<TEvent> handler)
             where TEvent : IIntegrationEvent;
 
-        void Unsubscribe<THandler>(string messageName)
+        void Unsubscribe<THandler>(string eventName)
             where THandler : IIntegrationMessageHandler;
 
         void Unsubscribe<THandler, TEvent>()

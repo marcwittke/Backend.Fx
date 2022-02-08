@@ -5,12 +5,14 @@ using System.Threading.Tasks;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
     public abstract class MessageBus : IMessageBus
     {
-        private static readonly ILogger Logger = LogManager.Create<MessageBus>();
+        private static readonly ILogger Logger = Log.Create<MessageBus>();
 
         /// <summary>
         /// Holds the registered handlers.
@@ -42,26 +44,26 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
 
 
         /// <inheritdoc />
-        public void Subscribe<THandler>(string messageName) where THandler : IIntegrationMessageHandler
+        public void Subscribe<THandler>(string eventName) where THandler : IIntegrationMessageHandler
         {
-            Logger.Info($"Subscribing to {messageName}");
+            Logger.LogInformation("Subscribing to {EventName}", eventName);
             EnsureInvoker();
             var subscription = new DynamicSubscription(typeof(THandler));
-            _subscriptions.AddOrUpdate(messageName,
+            _subscriptions.AddOrUpdate(eventName,
                                        s => new List<ISubscription> {subscription},
                                        (s, list) =>
                                        {
                                            list.Add(subscription);
                                            return list;
                                        });
-            Subscribe(messageName);
+            Subscribe(eventName);
         }
 
         /// <inheritdoc />
         public void Subscribe<THandler, TEvent>() where THandler : IIntegrationMessageHandler<TEvent> where TEvent : IIntegrationEvent
         {
             string eventName = MessageNameProvider.GetMessageName<TEvent>();
-            Logger.Info($"Subscribing to {eventName}");
+            Logger.LogInformation("Subscribing to {EventName}", eventName);
             EnsureInvoker();
             var subscription = new TypedSubscription(typeof(THandler), typeof(TEvent));
             _subscriptions.AddOrUpdate(eventName,
@@ -78,7 +80,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
             where TEvent : IIntegrationEvent
         {
             string eventName = MessageNameProvider.GetMessageName<TEvent>();
-            Logger.Info($"Subscribing to {eventName}");
+            Logger.LogInformation("Subscribing to {EventName}", eventName);
             EnsureInvoker();
             var subscription = new SingletonSubscription<TEvent>(handler);
             _subscriptions.AddOrUpdate(eventName,
@@ -91,21 +93,21 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
             Subscribe(eventName);
         }
 
-        public void Unsubscribe<THandler>(string messageName) where THandler : IIntegrationMessageHandler
+        public void Unsubscribe<THandler>(string eventName) where THandler : IIntegrationMessageHandler
         {
-            Logger.Info($"Unsubscribing from {messageName}");
-            if (_subscriptions.TryGetValue(messageName, out var handlers))
+            Logger.LogInformation("Unsubscribing from {EventName}", eventName);
+            if (_subscriptions.TryGetValue(eventName, out var handlers))
             {
                 handlers.RemoveAll(t => t.Matches(typeof(THandler)));
             }
 
-            Unsubscribe(messageName);
+            Unsubscribe(eventName);
         }
 
         public void Unsubscribe<THandler, TEvent>() where THandler : IIntegrationMessageHandler<TEvent> where TEvent : IIntegrationEvent
         {
             string eventName = MessageNameProvider.GetMessageName<TEvent>();
-            Logger.Info($"Unsubscribing from {eventName}");
+            Logger.LogInformation("Unsubscribing from {EventName}", eventName);
             if (_subscriptions.TryGetValue(eventName, out var handlers))
             {
                 handlers.RemoveAll(t => t.Matches(typeof(THandler)));
@@ -117,7 +119,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
         public void Unsubscribe<TEvent>(IIntegrationMessageHandler<TEvent> handler) where TEvent : IIntegrationEvent
         {
             string eventName = MessageNameProvider.GetMessageName<TEvent>();
-            Logger.Info($"Unsubscribing from {eventName}");
+            Logger.LogInformation("Unsubscribing from {EventName}", eventName);
             if (_subscriptions.TryGetValue(eventName, out var handlers))
             {
                 handlers.RemoveAll(t => t.Matches(handler));
@@ -126,15 +128,15 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
             Unsubscribe(eventName);
         }
 
-        protected abstract void Subscribe(string messageName);
-        protected abstract void Unsubscribe(string messageName);
+        protected abstract void Subscribe(string eventName);
+        protected abstract void Unsubscribe(string eventName);
 
-        protected void Process(string messageName, EventProcessingContext context)
+        protected void Process(string eventName, EventProcessingContext context)
         {
-            Logger.Info($"Processing a {messageName} message");
+            Logger.LogInformation("Processing a {EventName} message", eventName);
             EnsureInvoker();
 
-            if (_subscriptions.TryGetValue(messageName, out List<ISubscription> subscriptions))
+            if (_subscriptions.TryGetValue(eventName, out List<ISubscription> subscriptions))
             {
                 foreach (ISubscription subscription in subscriptions)
                 {
@@ -148,14 +150,14 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
                     }
                     catch (Exception ex)
                     {
-                        Logger.Warn(ex, $"Processing a {messageName} message failed");
+                        Logger.LogWarning(ex, "Processing a {EventName} message failed", eventName);
                         throw;
                     }
                 }
             }
             else
             {
-                Logger.Info($"No handler registered. Ignoring {messageName} event");
+                Logger.LogInformation("No handler registered. Ignoring {EventName} event", eventName);
             }
         }
 
@@ -186,7 +188,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
 
             public string GetMessageName(Type t)
             {
-                var messageName = t.Name ?? throw new ArgumentException("Type name is null!");
+                var messageName = t.Name;
                 return messageName;
             }
 

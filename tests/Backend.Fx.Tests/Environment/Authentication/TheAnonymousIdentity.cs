@@ -1,9 +1,10 @@
 ﻿using Backend.Fx.Environment.Authentication;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Environment.Authentication
 {
-    public class TheAnonymousIdentity
+    public class TheAnonymousIdentity : TestWithLogging
     {
         [Fact]
         public void HasNameAnonymous()
@@ -21,6 +22,10 @@ namespace Backend.Fx.Tests.Environment.Authentication
         public void IsNotAuthenticated()
         {
             Assert.False(new AnonymousIdentity().IsAuthenticated);
+        }
+
+        public TheAnonymousIdentity(ITestOutputHelper output) : base(output)
+        {
         }
     }
 }

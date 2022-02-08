@@ -1,17 +1,24 @@
 using Backend.Fx.AspNetCore.Tests.SampleApp;
 using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.NetCore.Logging;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using Serilog;
 using Xunit;
+using ILogger = Serilog.ILogger;
 
 namespace Backend.Fx.AspNetCore.Tests
 {
     public class SampleAppWebApplicationFactory : WebApplicationFactory<Startup>
     {
+        private readonly ILogger _logger;
+
+        public SampleAppWebApplicationFactory(ILogger logger)
+        {
+            _logger = logger;
+        }
+        
         protected override IWebHostBuilder CreateWebHostBuilder()
         {
             var webHostBuilder = new WebHostBuilder();
@@ -21,13 +28,7 @@ namespace Backend.Fx.AspNetCore.Tests
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder
-                .ConfigureLogging(loggingBuilder =>
-                {
-                    loggingBuilder.ClearProviders();
-                    loggingBuilder.AddProvider(new BackendFxLoggerProvider());
-                    loggingBuilder.AddDebug();
-                })
-                .CaptureStartupErrors(true)
+                .UseSerilog(_logger)
                 .UseSolutionRelativeContentRoot("")
                 .UseSetting("detailedErrors", true.ToString())
                 .UseEnvironment("Development")
