@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -11,7 +10,7 @@ using Xunit.Abstractions;
 
 namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
 {
-    public class TheSimpleInjectorCompositionRoot : TestWithLogging, IDisposable
+    public class TheSimpleInjectorCompositionRoot : TestWithLogging
     {
         private readonly SimpleInjectorCompositionRoot _sut;
 
@@ -162,9 +161,10 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
             }
         }
 
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
             _sut.Dispose();
+            base.Dispose(disposing);
         }
     }
 }
