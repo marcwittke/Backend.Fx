@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using Backend.Fx.Extensions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Backend.Fx.Logging
@@ -32,23 +33,37 @@ namespace Backend.Fx.Logging
 
         public static Microsoft.Extensions.Logging.ILogger Create<T>()
         {
-            return GetLoggerFactory().CreateLogger(typeof(T).FullName);
+            return LoggerFactory.CreateLogger(typeof(T).FullName);
         }
 
         public static Microsoft.Extensions.Logging.ILogger Create(Type t)
         {
-            return GetLoggerFactory().CreateLogger(t.FullName);
+            return LoggerFactory.CreateLogger(t.FullName);
         }
 
         public static Microsoft.Extensions.Logging.ILogger Create(string category)
         {
-            return GetLoggerFactory().CreateLogger(category);
+            return LoggerFactory.CreateLogger(category);
         }
 
-        private static Microsoft.Extensions.Logging.ILoggerFactory GetLoggerFactory()
+        public static Microsoft.Extensions.Logging.ILoggerFactory LoggerFactory { get; }
+            = new MaybeAsyncLocalLoggerFactory();
+
+        private class MaybeAsyncLocalLoggerFactory : Microsoft.Extensions.Logging.ILoggerFactory
         {
-            return AsyncLocalLoggerFactory.Value ?? _loggerFactory;
+            public void Dispose()
+            {
+            }
+
+            public Microsoft.Extensions.Logging.ILogger CreateLogger(string categoryName)
+            {
+                return (AsyncLocalLoggerFactory.Value ?? _loggerFactory)
+                    .CreateLogger(categoryName);
+            }
+
+            public void AddProvider(ILoggerProvider provider)
+            {
+            }
         }
     }
-
 }
