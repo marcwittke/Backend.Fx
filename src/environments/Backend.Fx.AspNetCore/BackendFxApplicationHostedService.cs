@@ -20,7 +20,7 @@ namespace Backend.Fx.AspNetCore
 
         public abstract IBackendFxApplication Application { get; }
 
-        public async Task StartAsync(CancellationToken ct)
+        public virtual async Task StartAsync(CancellationToken ct)
         {
             using (Logger.LogInformationDuration("Application starting..."))
             {
@@ -36,7 +36,7 @@ namespace Backend.Fx.AspNetCore
             }
         }
 
-        public Task StopAsync(CancellationToken cancellationToken)
+        public virtual Task StopAsync(CancellationToken cancellationToken)
         {
             using (Logger.LogInformationDuration("Application stopping..."))
             {

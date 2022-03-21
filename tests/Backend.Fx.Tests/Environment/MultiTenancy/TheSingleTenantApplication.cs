@@ -1,7 +1,6 @@
-using System.Threading;
+using System.Threading.Tasks;
 using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.Hacking;
-using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.InMemoryPersistence;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using FakeItEasy;
 using Xunit;
@@ -11,65 +10,72 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
 {
     public class TheSingleTenantApplication : TestWithLogging
     {
-        private readonly IBackendFxApplication _sut;
-        private readonly ITenantService _tenantService = A.Fake<ITenantService>();
-        private readonly ICompositionRoot _compositionRoot = A.Fake<ICompositionRoot>();
+        private readonly SingleTenantApplication _sut;
+        private readonly ITenantRepository _tenantRepository = new InMemoryTenantRepository();
+        private readonly IMessageBus _messageBus = A.Fake<IMessageBus>();
 
-        public TheSingleTenantApplication(ITestOutputHelper output): base(output)
+        public TheSingleTenantApplication(ITestOutputHelper output) : base(output)
         {
-            var application = A.Fake<IBackendFxApplication>();
-
-            A.CallTo(() => application.CompositionRoot).Returns(_compositionRoot);
-
-            _sut = new SingleTenantApplication(false, _tenantService, application);
+            _sut = new SingleTenantApplication(_messageBus, _tenantRepository, false);
         }
 
         [Fact]
         public void CreatesTenantOnBootWhenNotExistent()
         {
-            _sut.BootAsync();
-            A.CallTo(() => _tenantService.CreateTenant(A<string>._, A<string>._, A<bool>._, A<string>._)).MustHaveHappenedOnceExactly();
+            var tenants = _tenantRepository.GetTenants();
+            Assert.Empty(tenants);
+
+            _sut.Boot();
+
+            tenants = _tenantRepository.GetTenants();
+            Assert.Single(tenants);
         }
 
         [Fact]
         public void CreatesNoTenantOnBootWhenExistent()
         {
             var tenant = new Tenant("single tenant", "", false);
-            tenant.SetPrivate(t => t.Id, 1);
-            
-            A.CallTo(() => _tenantService.GetActiveTenants()).Returns(new[] {tenant});
-            _sut.BootAsync();
-            A.CallTo(() => _tenantService.CreateTenant(A<string>._, A<string>._, A<bool>._, A<string>._)).MustNotHaveHappened();
+            _tenantRepository.SaveTenant(tenant);
+
+            _sut.Boot();
+
+            var tenants = _tenantRepository.GetTenants();
+            Assert.Single(tenants);
+
+            Assert.Equal(tenant.Id, tenants[0].Id);
         }
 
         [Fact]
-        public void DelegatesAllCalls()
+        public void CreatesOnlyOneTenantEvenWhenBootedMultipleTimes()
         {
-            var application = A.Fake<IBackendFxApplication>();
-            var sut = new SingleTenantApplication(false, A.Fake<ITenantService>(), application);
+            var tenants = _tenantRepository.GetTenants();
+            Assert.Empty(tenants);
 
-            Fake.ClearRecordedCalls(application);
-            // ReSharper disable once UnusedVariable
-            IBackendFxApplicationAsyncInvoker ai = sut.AsyncInvoker;
-            A.CallTo(() => application.AsyncInvoker).MustHaveHappenedOnceExactly();
+            _sut.Boot();
+            _sut.Boot();
+            _sut.Boot();
+            _sut.Boot();
 
-            // ReSharper disable once UnusedVariable
-            ICompositionRoot cr = sut.CompositionRoot;
-            A.CallTo(() => application.CompositionRoot).MustHaveHappenedOnceExactly();
+            tenants = _tenantRepository.GetTenants();
+            Assert.Single(tenants);
+        }
 
-            // ReSharper disable once UnusedVariable
-            IBackendFxApplicationInvoker i = sut.Invoker;
-            A.CallTo(() => application.Invoker).MustHaveHappenedOnceExactly();
+        [Fact]
+        public void CreatesOnlyOneTenantEvenWhenBootedMultipleTimesInParallel()
+        {
+            var tenants = _tenantRepository.GetTenants();
+            Assert.Empty(tenants);
 
-            // ReSharper disable once UnusedVariable
-            IMessageBus mb = sut.MessageBus;
-            A.CallTo(() => application.MessageBus).MustHaveHappenedOnceExactly();
+            Task.WaitAll(
+                Task.Run(() => _sut.Boot()),
+                Task.Run(() => _sut.Boot()),
+                Task.Run(() => _sut.Boot()),
+                Task.Run(() => _sut.Boot())
+            );
 
-            sut.BootAsync();
-            A.CallTo(() => application.BootAsync(A<CancellationToken>._)).MustHaveHappenedOnceExactly();
 
-            sut.Dispose();
-            A.CallTo(() => application.Dispose()).MustHaveHappenedOnceExactly();
+            tenants = _tenantRepository.GetTenants();
+            Assert.Single(tenants);
         }
     }
 }
