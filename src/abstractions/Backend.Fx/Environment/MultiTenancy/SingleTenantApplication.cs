@@ -1,61 +1,40 @@
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
-using Microsoft.Extensions.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Environment.MultiTenancy
 {
-    public class SingleTenantApplication : TenantApplication, IBackendFxApplication
+    public class SingleTenantApplication
     {
         private static readonly ILogger Logger = Log.Create<SingleTenantApplication>();
-        private readonly bool _isDemoTenant;
         private readonly ITenantService _tenantService;
-        private readonly IBackendFxApplication _application;
-        private readonly ManualResetEventSlim _defaultTenantEnsured = new ManualResetEventSlim(false);
-        
-        public SingleTenantApplication(bool isDemoTenant, ITenantService tenantService, IBackendFxApplication application) : base(application)
+        private readonly bool _singleTenantIsDemoTenant;
+        private readonly object _padlock = new object();
+
+        public SingleTenantApplication(
+            IMessageBus messageBus,
+            ITenantRepository tenantRepository,
+            bool singleTenantIsDemoTenant)
         {
-            _isDemoTenant = isDemoTenant;
-            _tenantService = tenantService;
-            _application = application;
+            _tenantService = new TenantService(messageBus, tenantRepository);
+            _singleTenantIsDemoTenant = singleTenantIsDemoTenant;
         }
-
-        public void Dispose()
-        {
-            _application.Dispose();
-        }
-
-        public IBackendFxApplicationAsyncInvoker AsyncInvoker => _application.AsyncInvoker;
-
-        public ICompositionRoot CompositionRoot => _application.CompositionRoot;
-
-        public IBackendFxApplicationInvoker Invoker => _application.Invoker;
-
-        public IMessageBus MessageBus => _application.MessageBus;
 
         public TenantId TenantId { get; private set; }
 
-        public bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue, CancellationToken cancellationToken = default)
+        public ITenantIdProvider TenantProvider => _tenantService.TenantIdProvider;
+
+        public void Boot()
         {
-            return _defaultTenantEnsured.Wait(timeoutMilliSeconds, cancellationToken);
-        }
-
-        public Task Boot(CancellationToken cancellationToken = default) => BootAsync(cancellationToken);
-        public async Task BootAsync(CancellationToken cancellationToken = default)
-        {
-            EnableDataGenerationForNewTenants();
-
-            await _application.BootAsync(cancellationToken);
-
-            Logger.LogInformation("Ensuring existence of single tenant");
-            TenantId = _tenantService.GetActiveTenants().SingleOrDefault()?.GetTenantId()
-                       ?? _tenantService.CreateTenant("Single Tenant", "This application runs in single tenant mode", _isDemoTenant);
-
-            _defaultTenantEnsured.Set();
+            lock (_padlock)
+            {
+                Logger.Info("Ensuring existence of single tenant");
+                TenantId = _tenantService.GetActiveTenants().SingleOrDefault()?.GetTenantId()
+                           ?? _tenantService.CreateTenant("Single Tenant",
+                               "This application runs in single tenant mode",
+                               _singleTenantIsDemoTenant);
+            }
         }
     }
 }
