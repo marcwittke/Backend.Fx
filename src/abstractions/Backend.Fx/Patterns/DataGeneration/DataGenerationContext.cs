@@ -19,27 +19,37 @@ namespace Backend.Fx.Patterns.DataGeneration
 
         private readonly ICompositionRoot _compositionRoot;
         private readonly IBackendFxApplicationInvoker _invoker;
+        private readonly ITenantWideMutexManager _mutexManager;
 
-        public DataGenerationContext(ICompositionRoot compositionRoot, IBackendFxApplicationInvoker invoker)
+        public DataGenerationContext(
+            ICompositionRoot compositionRoot,
+            IBackendFxApplicationInvoker invoker,
+            ITenantWideMutexManager mutexManager)
         {
             _compositionRoot = compositionRoot;
             _invoker = invoker;
+            _mutexManager = mutexManager;
         }
-       
+
         public void SeedDataForTenant(TenantId tenantId, bool isDemoTenant)
         {
-            using (Logger.LogInformationDuration($"Seeding data for tenant {tenantId.Value}"))
+            if (!_mutexManager.TryAcquire(tenantId, GetType().Name, out var mutex)) return;
+            
+            using (mutex)
             {
-                Type[] dataGeneratorTypesToRun = GetDataGeneratorTypes(_compositionRoot, isDemoTenant);
-                foreach (Type dataGeneratorTypeToRun in dataGeneratorTypesToRun)
+                using (Logger.LogInformationDuration($"Seeding data for tenant {tenantId.Value}"))
                 {
-                    _invoker.Invoke(instanceProvider =>
+                    Type[] dataGeneratorTypesToRun = GetDataGeneratorTypes(_compositionRoot, isDemoTenant);
+                    foreach (Type dataGeneratorTypeToRun in dataGeneratorTypesToRun)
                     {
-                        IDataGenerator dataGenerator = instanceProvider
-                                                       .GetInstances<IDataGenerator>()
-                                                       .Single(dg => dg.GetType() == dataGeneratorTypeToRun);
-                        dataGenerator.Generate();
-                    }, new SystemIdentity(), tenantId);
+                        _invoker.Invoke(instanceProvider =>
+                        {
+                            IDataGenerator dataGenerator = instanceProvider
+                                .GetInstances<IDataGenerator>()
+                                .Single(dg => dg.GetType() == dataGeneratorTypeToRun);
+                            dataGenerator.Generate();
+                        }, new SystemIdentity(), tenantId);
+                    }
                 }
             }
         }
@@ -49,10 +59,10 @@ namespace Backend.Fx.Patterns.DataGeneration
             using (IInjectionScope scope = compositionRoot.BeginScope())
             {
                 var dataGenerators = scope
-                                     .InstanceProvider
-                                     .GetInstances<IDataGenerator>()
-                                     .OrderBy(dg => dg.Priority)
-                                     .Select(dg => dg.GetType());
+                    .InstanceProvider
+                    .GetInstances<IDataGenerator>()
+                    .OrderBy(dg => dg.Priority)
+                    .Select(dg => dg.GetType());
 
                 if (!includeDemoDataGenerators)
                 {

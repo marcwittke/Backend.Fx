@@ -17,17 +17,19 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp.Runtime
 
         public SampleApplication(ITenantIdProvider tenantIdProvider, IExceptionLogger exceptionLogger)
         {
+            ITenantWideMutexManager tenantWideMutexManager = new InMemoryTenantWideMutexManager();
             Assembly domainAssembly = GetType().Assembly;
             
             _application = new BackendFxApplication(
                 new SimpleInjectorCompositionRoot(),
                 new InMemoryMessageBus(),
                 exceptionLogger);
-            _application = new MultiTenantApplication(_application);
+            _application = new GenerateDataOnTenantCreated(_application, tenantWideMutexManager);
             _application = new GenerateDataOnBoot(
                 tenantIdProvider,
                 new SimpleInjectorDataGenerationModule(domainAssembly), 
-                _application);
+                _application,
+                tenantWideMutexManager);
             _application.CompositionRoot.RegisterModules(
                 new SimpleInjectorDomainModule(domainAssembly));
         }
