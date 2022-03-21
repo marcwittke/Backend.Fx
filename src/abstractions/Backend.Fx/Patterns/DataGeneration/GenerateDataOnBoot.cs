@@ -22,13 +22,14 @@ namespace Backend.Fx.Patterns.DataGeneration
         private readonly ManualResetEventSlim _dataGenerated = new ManualResetEventSlim(false);
         public IDataGenerationContext DataGenerationContext { get; [UsedImplicitly] private set; }
 
-        public GenerateDataOnBoot(ITenantIdProvider tenantIdProvider, IModule dataGenerationModule, IBackendFxApplication application)
+        public GenerateDataOnBoot(ITenantIdProvider tenantIdProvider, IModule dataGenerationModule, IBackendFxApplication application, ITenantWideMutexManager tenantWideMutexManager)
         {
             _tenantIdProvider = tenantIdProvider;
             _application = application;
             _dataGenerationModule = dataGenerationModule;
             DataGenerationContext = new DataGenerationContext(_application.CompositionRoot,
-                                                              _application.Invoker);
+                                                              _application.Invoker,
+                                                              tenantWideMutexManager);
         }
 
         public void Dispose()

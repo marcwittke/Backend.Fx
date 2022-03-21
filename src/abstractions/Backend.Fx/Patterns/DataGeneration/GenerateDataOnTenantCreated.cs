@@ -1,25 +1,30 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.DataGeneration;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using Microsoft.Extensions.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
-namespace Backend.Fx.Environment.MultiTenancy
+namespace Backend.Fx.Patterns.DataGeneration
 {
-    public class MultiTenantApplication : IBackendFxApplication
+    public class GenerateDataOnTenantCreated : IBackendFxApplication
     {
-        private static readonly ILogger Logger = Log.Create<MultiTenantApplication>();
+        private static readonly ILogger Logger = Log.Create<GenerateDataOnTenantCreated>();
         private readonly DataGenerationContext _dataGenerationContext;
         private readonly IBackendFxApplication _application;
 
-        public MultiTenantApplication(IBackendFxApplication application)
+        public GenerateDataOnTenantCreated(
+            IBackendFxApplication application,
+            ITenantWideMutexManager tenantWideMutexManager)
         {
             _application = application;
-            _dataGenerationContext = new DataGenerationContext(_application.CompositionRoot, _application.Invoker);
+            _dataGenerationContext = new DataGenerationContext(
+                _application.CompositionRoot,
+                _application.Invoker,
+                tenantWideMutexManager);
         }
 
         public void Dispose()

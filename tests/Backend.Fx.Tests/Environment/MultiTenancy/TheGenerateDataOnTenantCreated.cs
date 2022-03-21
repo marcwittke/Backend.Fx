@@ -1,5 +1,6 @@
 using System.Threading;
 using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Patterns.DataGeneration;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using FakeItEasy;
@@ -8,16 +9,16 @@ using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Environment.MultiTenancy
 {
-    public class TheMultiTenantApplication : TestWithLogging
+    public class TheGenerateDataOnTenantCreated : TestWithLogging
     {
         private readonly IBackendFxApplication _sut;
         private readonly IModule _multiTenancyModule = A.Fake<IModule>();
         private readonly ITenantService _tenantService = A.Fake<ITenantService>();
         private readonly IBackendFxApplication _application = A.Fake<IBackendFxApplication>();
 
-        public TheMultiTenantApplication(ITestOutputHelper output): base(output)
+        public TheGenerateDataOnTenantCreated(ITestOutputHelper output): base(output)
         {
-            _sut = new MultiTenantApplication(_application);
+            _sut = new GenerateDataOnTenantCreated(_application, new InMemoryTenantWideMutexManager());
         }
 
         
