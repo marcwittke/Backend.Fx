@@ -29,11 +29,11 @@ namespace Backend.Fx.AspNetCore.Mvc.Validation
 
         public static void Add(this ModelStateDictionary modelState, Errors errors)
         {
-            foreach (var keyValuePair in errors)
+            foreach (var (key, value) in errors)
             {
-                foreach (var errorMessage in keyValuePair.Value)
+                foreach (var errorMessage in value)
                 {
-                    modelState.AddModelError(keyValuePair.Key, errorMessage);
+                    modelState.AddModelError(key, errorMessage);
                 }
             }
         }

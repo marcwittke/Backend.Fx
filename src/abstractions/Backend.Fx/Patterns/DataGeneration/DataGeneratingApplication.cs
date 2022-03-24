@@ -6,30 +6,42 @@ using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using JetBrains.Annotations;
+using Microsoft.Extensions.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Patterns.DataGeneration
 {
     /// <summary>
-    /// Enriches the <see cref="IBackendFxApplication"/> by calling all data generators for all tenants on application start.
+    /// Enriches the <see cref="IBackendFxApplication"/> by calling all data generators for all tenants
+    /// on application start and when a tenant gets activated
     /// </summary>
-    public class GenerateDataOnBoot : IBackendFxApplication
+    public class DataGeneratingApplication : IBackendFxApplication
     {
-        private static readonly ILogger Logger = Log.Create<GenerateDataOnBoot>();
+        private static readonly ILogger Logger = Log.Create<DataGeneratingApplication>();
+
         private readonly ITenantIdProvider _tenantIdProvider;
         private readonly IBackendFxApplication _application;
         private readonly IModule _dataGenerationModule;
-        private readonly ManualResetEventSlim _dataGenerated = new ManualResetEventSlim(false);
+
         public IDataGenerationContext DataGenerationContext { get; [UsedImplicitly] private set; }
 
-        public GenerateDataOnBoot(ITenantIdProvider tenantIdProvider, IModule dataGenerationModule, IBackendFxApplication application, ITenantWideMutexManager tenantWideMutexManager)
+        /// <param name="tenantIdProvider">To be able to query all active demo/production tenants</param>
+        /// <param name="dataGenerationModule">To register the collection of <code>IDataGenerator</code> with the composition root. Internally, <code>IInstanceProvider.GetInstances&lt;IDataGenerator&gt;()</code> is being used</param>
+        /// <param name="tenantWideMutexManager">to make sure data generation will never run in parallel for the same tenant</param>
+        /// <param name="application">the decorated instance</param>
+        public DataGeneratingApplication(
+            ITenantIdProvider tenantIdProvider, 
+            IModule dataGenerationModule,
+            ITenantWideMutexManager tenantWideMutexManager,
+            IBackendFxApplication application)
         {
             _tenantIdProvider = tenantIdProvider;
             _application = application;
             _dataGenerationModule = dataGenerationModule;
-            DataGenerationContext = new DataGenerationContext(_application.CompositionRoot,
-                                                              _application.Invoker,
-                                                              tenantWideMutexManager);
+            DataGenerationContext = new DataGenerationContext(
+                _application.CompositionRoot,
+                _application.Invoker,
+                tenantWideMutexManager);
         }
 
         public void Dispose()
@@ -45,18 +57,19 @@ namespace Backend.Fx.Patterns.DataGeneration
 
         public bool WaitForBoot(int timeoutMilliSeconds = Int32.MaxValue, CancellationToken cancellationToken = default)
         {
-            return _dataGenerated.Wait(timeoutMilliSeconds, cancellationToken);
+            return _application.WaitForBoot(timeoutMilliSeconds, cancellationToken);
         }
 
         public Task Boot(CancellationToken cancellationToken = default) => BootAsync(cancellationToken);
+
         public async Task BootAsync(CancellationToken cancellationToken = default)
         {
             _application.CompositionRoot.RegisterModules(_dataGenerationModule);
-            await _application.BootAsync(cancellationToken);
-            
-            SeedDataForAllActiveTenants();
+            EnableDataGenerationForNewTenants();
 
-            _dataGenerated.Set();
+            await _application.BootAsync(cancellationToken);
+
+            SeedDataForAllActiveTenants();
         }
 
         private void SeedDataForAllActiveTenants()
@@ -77,6 +90,29 @@ namespace Backend.Fx.Patterns.DataGeneration
                     _application.MessageBus.Publish(new DataGenerated(demoTenantId.Value));
                 }
             }
+        }
+
+        private void EnableDataGenerationForNewTenants()
+        {
+            _application.MessageBus.Subscribe(new DelegateIntegrationMessageHandler<TenantActivated>(tenantCreated =>
+            {
+                Logger.LogInformation(
+                    "Seeding data for recently activated tenant (with demo data: {IsDemoTenant}) {TenantId}",
+                    tenantCreated.IsDemoTenant,
+                    tenantCreated.TenantId);
+                try
+                {
+                    DataGenerationContext.SeedDataForTenant(new TenantId(tenantCreated.TenantId),
+                        tenantCreated.IsDemoTenant);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ex,
+                        "Seeding data for recently activated tenant (with demo data: {IsDemoTenant}) {TenantId} failed",
+                        tenantCreated.IsDemoTenant,
+                        tenantCreated.TenantId);
+                }
+            }));
         }
     }
 }
