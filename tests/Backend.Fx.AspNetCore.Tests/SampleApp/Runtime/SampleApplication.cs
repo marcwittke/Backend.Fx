@@ -24,12 +24,12 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp.Runtime
                 new SimpleInjectorCompositionRoot(),
                 new InMemoryMessageBus(),
                 exceptionLogger);
-            _application = new GenerateDataOnTenantCreated(_application, tenantWideMutexManager);
-            _application = new GenerateDataOnBoot(
+            
+            _application = new DataGeneratingApplication(
                 tenantIdProvider,
-                new SimpleInjectorDataGenerationModule(domainAssembly), 
-                _application,
-                tenantWideMutexManager);
+                new SimpleInjectorDataGenerationModule(domainAssembly),
+                tenantWideMutexManager, _application);
+            
             _application.CompositionRoot.RegisterModules(
                 new SimpleInjectorDomainModule(domainAssembly));
         }

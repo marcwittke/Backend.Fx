@@ -22,16 +22,15 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
 
             var backendFxApplication = A.Fake<IBackendFxApplication>();
             A.CallTo(() => backendFxApplication.CompositionRoot).Returns(_compositionRoot);
-            _sut = new GenerateDataOnBoot(
+            _sut = new DataGeneratingApplication(
                 _tenantIdProvider,
                 _dataGenerationModule,
-                backendFxApplication,
-                tenantWideMutexManager);
+                tenantWideMutexManager, backendFxApplication);
 
             _sut.SetPrivate(f => f.DataGenerationContext, _dataGenerationContext);
         }
 
-        private readonly GenerateDataOnBoot _sut;
+        private readonly DataGeneratingApplication _sut;
         private readonly IModule _dataGenerationModule;
         private readonly IDataGenerationContext _dataGenerationContext;
         private readonly ICompositionRoot _compositionRoot;
@@ -41,7 +40,7 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
         public void DelegatesAllOtherCalls()
         {
             var app = A.Fake<IBackendFxApplication>();
-            IBackendFxApplication sut = new GenerateDataOnBoot(A.Fake<ITenantIdProvider>(), A.Fake<IModule>(), app, new InMemoryTenantWideMutexManager());
+            IBackendFxApplication sut = new DataGeneratingApplication(A.Fake<ITenantIdProvider>(), A.Fake<IModule>(), new InMemoryTenantWideMutexManager(), app);
 
 
             // ReSharper disable UnusedVariable
@@ -83,19 +82,21 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
             A.CallTo(() => _tenantIdProvider.GetActiveProductionTenantIds()).Returns(new[] {tenantId3, tenantId4});
             await _sut.BootAsync();
             A.CallTo(() =>
-                _dataGenerationContext.SeedDataForTenant(A<TenantId>.That.IsEqualTo(tenantId1),
+                _dataGenerationContext.SeedDataForTenant(
+                    A<TenantId>.That.IsEqualTo(tenantId1),
                     A<bool>.That.IsEqualTo(true))).MustHaveHappenedOnceExactly();
             A.CallTo(() =>
-                _dataGenerationContext.SeedDataForTenant(A<TenantId>.That.IsEqualTo(tenantId2),
+                _dataGenerationContext.SeedDataForTenant(
+                    A<TenantId>.That.IsEqualTo(tenantId2),
                     A<bool>.That.IsEqualTo(true))).MustHaveHappenedOnceExactly();
             A.CallTo(() =>
-                _dataGenerationContext.SeedDataForTenant(A<TenantId>.That.IsEqualTo(tenantId3),
+                _dataGenerationContext.SeedDataForTenant(
+                    A<TenantId>.That.IsEqualTo(tenantId3),
                     A<bool>.That.IsEqualTo(false))).MustHaveHappenedOnceExactly();
             A.CallTo(() =>
-                _dataGenerationContext.SeedDataForTenant(A<TenantId>.That.IsEqualTo(tenantId4),
+                _dataGenerationContext.SeedDataForTenant(
+                    A<TenantId>.That.IsEqualTo(tenantId4),
                     A<bool>.That.IsEqualTo(false))).MustHaveHappenedOnceExactly();
-
-            Assert.True(_sut.WaitForBoot(1000));
         }
     }
 }

@@ -33,13 +33,6 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         }
 
         [Fact]
-        public void CallsDatabaseBootstrapperDisposeOnDispose()
-        {
-            _sut.Dispose();
-            A.CallTo(() => _databaseBootstrapper.Dispose()).MustHaveHappenedOnceExactly();
-        }
-
-        [Fact]
         public void DelegatesAllCalls()
         {
             var application =A.Fake<IBackendFxApplication>();
