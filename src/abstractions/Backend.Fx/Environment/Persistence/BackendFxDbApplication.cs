@@ -13,9 +13,9 @@ namespace Backend.Fx.Environment.Persistence
     {
         private static readonly ILogger Logger = Log.Create<BackendFxDbApplication>();
         
-        private readonly IDatabaseBootstrapper _databaseBootstrapper;
         private readonly IDatabaseAvailabilityAwaiter _databaseAvailabilityAwaiter;
         private readonly IBackendFxApplication _backendFxApplication;
+        private readonly IDatabaseBootstrapper _databaseBootstrapper;
 
         public BackendFxDbApplication(IDatabaseBootstrapper databaseBootstrapper,
                                       IDatabaseAvailabilityAwaiter databaseAvailabilityAwaiter,
@@ -29,7 +29,6 @@ namespace Backend.Fx.Environment.Persistence
         public void Dispose()
         {
             Logger.LogTrace("Disposing...");
-            _databaseBootstrapper.Dispose();
             _backendFxApplication.Dispose();
         }
 
