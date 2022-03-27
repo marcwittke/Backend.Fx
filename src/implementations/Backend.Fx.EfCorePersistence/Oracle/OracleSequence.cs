@@ -12,10 +12,12 @@ namespace Backend.Fx.EfCorePersistence.Oracle
     {
         private static readonly ILogger Logger = Log.Create<OracleSequence>();
         private readonly IDbConnectionFactory _dbConnectionFactory;
+        private readonly int _startWith;
 
-        protected OracleSequence(IDbConnectionFactory dbConnectionFactory)
+        protected OracleSequence(IDbConnectionFactory dbConnectionFactory, int startWith = 1)
         {
             _dbConnectionFactory = dbConnectionFactory;
+            _startWith = startWith;
         }
 
         protected abstract string SequenceName { get; }
@@ -56,7 +58,7 @@ namespace Backend.Fx.EfCorePersistence.Oracle
                         SequenceName);
                     using (IDbCommand cmd = dbConnection.CreateCommand())
                     {
-                        cmd.CommandText = $"CREATE SEQUENCE {SchemaPrefix}{SequenceName} START WITH 1 INCREMENT BY {Increment}";
+                        cmd.CommandText = $"CREATE SEQUENCE {SchemaPrefix}{SequenceName} START WITH {_startWith} INCREMENT BY {Increment}";
                         cmd.ExecuteNonQuery();
                         Logger.LogInformation("Oracle sequence {SchemaPrefix}.{SequenceName} created", SchemaPrefix, SequenceName);
                     }
