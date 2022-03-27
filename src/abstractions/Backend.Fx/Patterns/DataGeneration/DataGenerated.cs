@@ -7,7 +7,7 @@ namespace Backend.Fx.Patterns.DataGeneration
     /// </summary>
     public class DataGenerated : IntegrationEvent
     {
-        public DataGenerated(int tenantId) : base(tenantId)
+        public DataGenerated(int tenantId) : base()
         {
         }
     }

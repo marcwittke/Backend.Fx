@@ -1,4 +1,5 @@
 ﻿using System;
+using Backend.Fx.Environment.MultiTenancy;
 
 namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
@@ -20,18 +21,28 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
 
         public DateTime CreationDate { get; } = DateTime.UtcNow;
 
-        public int TenantId { get; }
+        public int TenantId { get; private set; }
 
         public Guid CorrelationId { get; private set; }
+
+        protected IntegrationEvent()
+        {
+        }
+
+        [Obsolete("TenantId is maintained by the framework now")]
+        protected IntegrationEvent(int tenantId)
+        {
+            TenantId = tenantId;
+        }
 
         internal void SetCorrelationId(Guid correlationId)
         {
             CorrelationId = correlationId;
         }
 
-        protected IntegrationEvent(int tenantId)
+        public void SetTenantId(TenantId tenantId)
         {
-            TenantId = tenantId;
+            TenantId = (int) tenantId;
         }
     }
 }

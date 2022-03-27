@@ -6,7 +6,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests.DummyImpl.ASimpleDo
     [UsedImplicitly]
     public class AnIntegrationEvent : IntegrationEvent
     {
-        public AnIntegrationEvent(int tenantId, int whatever) : base(tenantId)
+        public AnIntegrationEvent(int tenantId, int whatever) : base()
         {
             Whatever = whatever;
         }

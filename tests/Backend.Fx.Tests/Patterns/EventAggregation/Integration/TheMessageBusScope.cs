@@ -1,3 +1,4 @@
+using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using FakeItEasy;
@@ -10,25 +11,35 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
     {
         private readonly IMessageBus _messageBus = A.Fake<IMessageBus>();
         private readonly ICurrentTHolder<Correlation> _currentCorrelationHolder = new CurrentCorrelationHolder();
+        private readonly ICurrentTHolder<TenantId> _currentTenantIdHolder = new CurrentTenantIdHolder();
         private readonly IMessageBusScope _sut;
 
         public TheMessageBusScope(ITestOutputHelper output): base(output)
         {
-            _sut = new MessageBusScope(_messageBus, _currentCorrelationHolder);
+            _currentTenantIdHolder.ReplaceCurrent(new TenantId(789));
+            _sut = new MessageBusScope(_messageBus, _currentCorrelationHolder, _currentTenantIdHolder);
         }
 
         [Fact]
         public void MaintainsCorrelationIdOnPublish()
         {
-            var testIntegrationEvent = new Domain.TestIntegrationEvent(44, 1111);
+            var testIntegrationEvent = new Domain.TestIntegrationEvent(44);
             _sut.Publish(testIntegrationEvent);
             Assert.Equal(_currentCorrelationHolder.Current.Id, testIntegrationEvent.CorrelationId);
+        }
+        
+        [Fact]
+        public void MaintainsTenantIdOnPublish()
+        {
+            var testIntegrationEvent = new Domain.TestIntegrationEvent(44);
+            _sut.Publish(testIntegrationEvent);
+            Assert.Equal(_currentTenantIdHolder.Current.Value, testIntegrationEvent.TenantId);
         }
 
         [Fact]
         public void DoesNotPublishOnBusWhenPublishing()
         {
-            var testIntegrationEvent = new Domain.TestIntegrationEvent(44, 1111);
+            var testIntegrationEvent = new Domain.TestIntegrationEvent(44);
             _sut.Publish(testIntegrationEvent);
             A.CallTo(()=>_messageBus.Publish(A<IIntegrationEvent>._)).MustNotHaveHappened();
         }
@@ -36,10 +47,10 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         [Fact]
         public void PublishesAllEventsOnRaise()
         {
-            var ev1 = new Domain.TestIntegrationEvent(44, 1111);
-            var ev2 = new Domain.TestIntegrationEvent(45, 1111);
-            var ev3 = new Domain.TestIntegrationEvent(46, 1111);
-            var ev4 = new Domain.TestIntegrationEvent(47, 1111);
+            var ev1 = new Domain.TestIntegrationEvent(44);
+            var ev2 = new Domain.TestIntegrationEvent(45);
+            var ev3 = new Domain.TestIntegrationEvent(46);
+            var ev4 = new Domain.TestIntegrationEvent(47);
             _sut.Publish(ev1);
             _sut.Publish(ev2);
             _sut.Publish(ev3);

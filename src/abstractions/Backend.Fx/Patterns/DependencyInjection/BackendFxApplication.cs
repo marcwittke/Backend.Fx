@@ -82,7 +82,10 @@ namespace Backend.Fx.Patterns.DependencyInjection
             CompositionRoot.InfrastructureModule.RegisterScoped<IOperation, Operation>();
             CompositionRoot.InfrastructureModule.RegisterScoped<IDomainEventAggregator>(() => new DomainEventAggregator(compositionRoot));
             CompositionRoot.InfrastructureModule.RegisterScoped<IMessageBusScope>(
-                () => new MessageBusScope(MessageBus, compositionRoot.InstanceProvider.GetInstance<ICurrentTHolder<Correlation>>()));
+                () => new MessageBusScope(
+                    MessageBus,
+                    compositionRoot.InstanceProvider.GetInstance<ICurrentTHolder<Correlation>>(),
+                    compositionRoot.InstanceProvider.GetInstance<ICurrentTHolder<TenantId>>()));
         }
 
         public IBackendFxApplicationAsyncInvoker AsyncInvoker { get; }

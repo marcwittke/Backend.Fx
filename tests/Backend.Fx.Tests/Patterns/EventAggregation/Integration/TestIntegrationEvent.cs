@@ -5,7 +5,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
 {
     public class TestIntegrationEvent : IntegrationEvent
     {
-        public TestIntegrationEvent(int intParam, string stringParam) : base(55)
+        public TestIntegrationEvent(int intParam, string stringParam) : base()
         {
             IntParam = intParam;
             StringParam = stringParam;
