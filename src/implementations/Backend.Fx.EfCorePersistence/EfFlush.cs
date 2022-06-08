@@ -155,7 +155,7 @@ namespace Backend.Fx.EfCorePersistence
             Logger.LogDebug("Searching aggregate root of {EntityTypeName}[{Id}]", entry.Entity.GetType().Name, (entry.Entity as Identified)?.Id);
             foreach (NavigationEntry navigation in entry.Navigations)
             {
-                TypeInfo navTargetTypeInfo = navigation.Metadata.TargetEntityType.ClrType.GetTypeInfo();
+                TypeInfo navTargetTypeInfo = navigation.Metadata.TargetEntityType.GetClrType().GetTypeInfo();
                 int navigationTargetForeignKeyValue;
 
                 if (navigation.CurrentValue == null)

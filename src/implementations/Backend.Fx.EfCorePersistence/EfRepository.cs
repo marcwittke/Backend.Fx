@@ -116,7 +116,7 @@ namespace Backend.Fx.EfCorePersistence
         [SuppressMessage("ReSharper", "EF1001")]
         private void AuthorizeChanges(InternalEntityEntry entry, EntityState previousState)
         {
-            if (previousState == EntityState.Unchanged && entry.EntityState == EntityState.Modified && entry.EntityType.ClrType == typeof(TAggregateRoot))
+            if (previousState == EntityState.Unchanged && entry.EntityState == EntityState.Modified && entry.EntityType.GetClrType() == typeof(TAggregateRoot))
             {
                 var aggregateRoot = (TAggregateRoot) entry.Entity;
                 if (!_aggregateAuthorization.CanModify(aggregateRoot)) throw new ForbiddenException("Unauthorized attempt to modify {AggregateTypeName}[{aggregateRoot.Id}]")

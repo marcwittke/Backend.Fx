@@ -7,6 +7,7 @@ using Backend.Fx.Extensions;
 using Backend.Fx.Logging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -27,16 +28,16 @@ namespace Backend.Fx.EfCorePersistence
         {
             modelBuilder.Model
                         .GetEntityTypes()
-                        .Where(mt => typeof(Entity).GetTypeInfo().IsAssignableFrom(mt.ClrType.GetTypeInfo()))
-                        .ForAll(mt => modelBuilder.Entity(mt.ClrType).Property<byte[]>("RowVersion").IsRowVersion());
+                        .Where(mt => typeof(Entity).GetTypeInfo().IsAssignableFrom(mt.GetClrType().GetTypeInfo()))
+                        .ForAll(mt => modelBuilder.Entity(mt.GetClrType()).Property<byte[]>("RowVersion").IsRowVersion());
         }
 
         public static void RegisterEntityIdAsNeverGenerated(this ModelBuilder modelBuilder)
         {
             modelBuilder.Model
                         .GetEntityTypes()
-                        .Where(mt => typeof(Entity).GetTypeInfo().IsAssignableFrom(mt.ClrType.GetTypeInfo()))
-                        .ForAll(mt => modelBuilder.Entity(mt.ClrType).Property(nameof(Entity.Id)).ValueGeneratedNever());
+                        .Where(mt => typeof(Entity).GetTypeInfo().IsAssignableFrom(mt.GetClrType().GetTypeInfo()))
+                        .ForAll(mt => modelBuilder.Entity(mt.GetClrType()).Property(nameof(Entity.Id)).ValueGeneratedNever());
         }
 
         public static void ApplyAggregateMappings(this DbContext dbContext, ModelBuilder modelBuilder)
@@ -82,6 +83,11 @@ namespace Backend.Fx.EfCorePersistence
         private static string GetPrimaryKeyValue(EntityEntry entry)
         {
             return (entry.Entity as Entity)?.Id.ToString(CultureInfo.InvariantCulture) ?? "?";
+        }
+
+        internal static Type GetClrType(this IEntityType mt)
+        {
+            return (Type) mt.GetType().GetProperty("ClrType")!.GetValue(mt);
         }
     }
 }
