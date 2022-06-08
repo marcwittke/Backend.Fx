@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Extensions;
 using Backend.Fx.Logging;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -85,9 +87,12 @@ namespace Backend.Fx.EfCorePersistence
             return (entry.Entity as Entity)?.Id.ToString(CultureInfo.InvariantCulture) ?? "?";
         }
 
-        internal static Type GetClrType(this IEntityType mt)
+        internal static Type GetClrType([NotNull] this IEntityType mt)
         {
-            return (Type) mt.GetType().GetProperty("ClrType")!.GetValue(mt);
+            if (mt == null) throw new ArgumentNullException(nameof(mt));
+            var propertyInfo = mt.GetType().GetProperty("ClrType");
+            Debug.Assert(propertyInfo != null);
+            return (Type) propertyInfo.GetValue(mt);
         }
     }
 }
