@@ -16,7 +16,7 @@ namespace Backend.Fx.Environment.DateAndTime
         public FrozenClock(IClock clock)
         {
             UtcNow = DateTime.UtcNow;
-            Logger.LogTrace("Freezing clock at {UtcNow}", UtcNow);
+            Logger.LogTrace("Freezing clock at {UtcNow} UTC", UtcNow);
         }
 
         public DateTime UtcNow { get; }
