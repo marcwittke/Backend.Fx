@@ -13,6 +13,13 @@ namespace Backend.Fx.Tests.Environment.DateAndTime
         private readonly IEqualityComparer<DateTime?> _tolerantDateTimeComparer = new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(10));
 
         [Fact]
+        public void IsKindUtc()
+        {
+            IClock sut = new WallClock();
+            Assert.True(sut.UtcNow.Kind == DateTimeKind.Utc);
+        }
+        
+        [Fact]
         public void IsTheSystemClock()
         {
             IClock sut = new WallClock();

@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using Backend.Fx.Logging;
 using Microsoft.Extensions.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
@@ -21,8 +22,8 @@ namespace Backend.Fx.Environment.DateAndTime
 
         public void OverrideUtcNow(DateTime utcNow)
         {
-            Logger.LogTrace("Adjusting clock to {UtcNow}", utcNow);
-            _overriddenUtcNow = utcNow;
+            Logger.LogTrace("Adjusting clock to {UtcNow} UTC", utcNow);
+            _overriddenUtcNow = new DateTime(utcNow.Ticks, DateTimeKind.Utc);
         }
 
         public DateTime Advance(TimeSpan timespan)

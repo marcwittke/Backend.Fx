@@ -20,6 +20,15 @@ namespace Backend.Fx.Tests.Environment.DateAndTime
             Assert.Equal(overriddenUtcNow, sut.UtcNow);
         }
 
+        [Fact]
+        public void OverriddenTimeIsKindUtc()
+        {
+            var overriddenUtcNow = new DateTime(2000, 1, 1, 12, 0, 0);
+            var sut = new AdjustableClock(new WallClock());
+            sut.OverrideUtcNow(overriddenUtcNow);
+            Assert.Equal(DateTimeKind.Utc, sut.UtcNow.Kind);
+        }
+
         public TheAdjustableClock(ITestOutputHelper output) : base(output)
         {
         }
