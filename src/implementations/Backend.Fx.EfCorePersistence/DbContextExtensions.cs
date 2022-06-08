@@ -87,12 +87,17 @@ namespace Backend.Fx.EfCorePersistence
             return (entry.Entity as Entity)?.Id.ToString(CultureInfo.InvariantCulture) ?? "?";
         }
 
-        internal static Type GetClrType([NotNull] this IEntityType mt)
+        internal static Type GetClrType([NotNull] this IMutableEntityType met)
         {
-            if (mt == null) throw new ArgumentNullException(nameof(mt));
-            var propertyInfo = mt.GetType().GetProperty("ClrType");
+            if (met == null) throw new ArgumentNullException(nameof(met));
+            var propertyInfo = met.GetType().GetProperty("ClrType");
             Debug.Assert(propertyInfo != null);
-            return (Type) propertyInfo.GetValue(mt);
+            return (Type) propertyInfo.GetValue(met);
+        }
+        
+        internal static Type GetClrType([NotNull] this IEntityType et)
+        {
+            return et.ClrType;
         }
     }
 }
