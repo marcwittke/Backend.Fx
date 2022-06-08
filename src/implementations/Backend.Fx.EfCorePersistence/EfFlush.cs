@@ -155,7 +155,6 @@ namespace Backend.Fx.EfCorePersistence
             Logger.LogDebug("Searching aggregate root of {EntityTypeName}[{Id}]", entry.Entity.GetType().Name, (entry.Entity as Identified)?.Id);
             foreach (NavigationEntry navigation in entry.Navigations)
             {
-                TypeInfo navTargetTypeInfo = navigation.Metadata.TargetEntityType.ClrType.GetTypeInfo();
                 int navigationTargetForeignKeyValue;
 
                 if (navigation.CurrentValue == null)
@@ -175,6 +174,7 @@ namespace Backend.Fx.EfCorePersistence
 
                 // assumption: an entity cannot be loaded on its own. Everything on the navigation path starting from the 
                 // aggregate root must have been loaded before, therefore we can find it using the change tracker
+                TypeInfo navTargetTypeInfo = navigation.Metadata.TargetEntityType.GetClrType().GetTypeInfo();
                 var navigationTargetEntry = changeTracker
                                             .Entries<Entity>()
                                             .Single(ent => Equals(ent.Entity.GetType().GetTypeInfo(), navTargetTypeInfo)

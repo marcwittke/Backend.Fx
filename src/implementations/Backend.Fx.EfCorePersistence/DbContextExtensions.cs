@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Extensions;
 using Backend.Fx.Logging;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -27,16 +30,16 @@ namespace Backend.Fx.EfCorePersistence
         {
             modelBuilder.Model
                         .GetEntityTypes()
-                        .Where(mt => typeof(Entity).GetTypeInfo().IsAssignableFrom(mt.ClrType.GetTypeInfo()))
-                        .ForAll(mt => modelBuilder.Entity(mt.ClrType).Property<byte[]>("RowVersion").IsRowVersion());
+                        .Where(mt => typeof(Entity).GetTypeInfo().IsAssignableFrom(mt.GetClrType().GetTypeInfo()))
+                        .ForAll(mt => modelBuilder.Entity(mt.GetClrType()).Property<byte[]>("RowVersion").IsRowVersion());
         }
 
         public static void RegisterEntityIdAsNeverGenerated(this ModelBuilder modelBuilder)
         {
             modelBuilder.Model
                         .GetEntityTypes()
-                        .Where(mt => typeof(Entity).GetTypeInfo().IsAssignableFrom(mt.ClrType.GetTypeInfo()))
-                        .ForAll(mt => modelBuilder.Entity(mt.ClrType).Property(nameof(Entity.Id)).ValueGeneratedNever());
+                        .Where(mt => typeof(Entity).GetTypeInfo().IsAssignableFrom(mt.GetClrType().GetTypeInfo()))
+                        .ForAll(mt => modelBuilder.Entity(mt.GetClrType()).Property(nameof(Entity.Id)).ValueGeneratedNever());
         }
 
         public static void ApplyAggregateMappings(this DbContext dbContext, ModelBuilder modelBuilder)
@@ -82,6 +85,19 @@ namespace Backend.Fx.EfCorePersistence
         private static string GetPrimaryKeyValue(EntityEntry entry)
         {
             return (entry.Entity as Entity)?.Id.ToString(CultureInfo.InvariantCulture) ?? "?";
+        }
+
+        internal static Type GetClrType([NotNull] this IMutableEntityType met)
+        {
+            if (met == null) throw new ArgumentNullException(nameof(met));
+            var propertyInfo = met.GetType().GetProperty("ClrType");
+            Debug.Assert(propertyInfo != null);
+            return (Type) propertyInfo.GetValue(met);
+        }
+        
+        internal static Type GetClrType([NotNull] this IEntityType et)
+        {
+            return et.ClrType;
         }
     }
 }
