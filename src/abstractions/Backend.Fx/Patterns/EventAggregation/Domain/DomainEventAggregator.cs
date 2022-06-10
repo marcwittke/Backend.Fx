@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using Backend.Fx.Logging;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -23,12 +24,12 @@ namespace Backend.Fx.Patterns.EventAggregation.Domain
         }
 
         private static readonly ILogger Logger = Log.Create<DomainEventAggregator>();
-        private readonly IDomainEventHandlerProvider _domainEventHandlerProvider;
+        private readonly IServiceProvider _serviceProvider;
         private readonly ConcurrentQueue<HandleAction> _handleActions = new ConcurrentQueue<HandleAction>();
 
-        public DomainEventAggregator(IDomainEventHandlerProvider domainEventHandlerProvider)
+        public DomainEventAggregator(IServiceProvider serviceProvider)
         {
-            _domainEventHandlerProvider = domainEventHandlerProvider;
+            _serviceProvider = serviceProvider;
         }
 
         /// <summary>
@@ -39,7 +40,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Domain
         /// <param name="domainEvent"></param>
         public void PublishDomainEvent<TDomainEvent>(TDomainEvent domainEvent) where TDomainEvent : IDomainEvent
         {
-            foreach (var injectedHandler in _domainEventHandlerProvider.GetAllEventHandlers<TDomainEvent>())
+            foreach (var injectedHandler in _serviceProvider.GetServices<IDomainEventHandler<TDomainEvent>>())
             {
                 var handleAction = new HandleAction(
                     typeof(TDomainEvent).Name,

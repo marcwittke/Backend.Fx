@@ -17,11 +17,11 @@ namespace Backend.Fx.Patterns.DependencyInjection
             _invoker = invoker;
         }
 
-        public async Task InvokeAsync(Func<IInstanceProvider, Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId, Guid? correlationId = null)
+        public async Task InvokeAsync(Func<IServiceProvider, Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId, Guid? correlationId = null)
         {
             try
             {
-                await _invoker.InvokeAsync(awaitableAsyncAction, identity, tenantId, correlationId);
+                await _invoker.InvokeAsync(awaitableAsyncAction, identity, tenantId, correlationId).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

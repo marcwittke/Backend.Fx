@@ -46,7 +46,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
         {
             while (_integrationEvents.TryDequeue(out IIntegrationEvent integrationEvent))
             {
-                await _messageBus.Publish(integrationEvent);
+                await _messageBus.Publish(integrationEvent).ConfigureAwait(false);
             }
         }
     }

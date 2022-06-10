@@ -1,5 +1,6 @@
 using Backend.Fx.Environment.Persistence;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Backend.Fx.AspNetCore.Mvc.Execution
 {
@@ -14,7 +15,7 @@ namespace Backend.Fx.AspNetCore.Mvc.Execution
 
         public void OnActionExecuted(ActionExecutedContext context)
         {
-            context.HttpContext.GetInstanceProvider().GetInstance<ICanFlush>().Flush();
+            context.HttpContext.GetServiceProvider().GetRequiredService<ICanFlush>().Flush();
         }
     }
 }

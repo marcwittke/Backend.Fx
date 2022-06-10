@@ -1,42 +1,41 @@
 using System;
-using Backend.Fx.Patterns.DependencyInjection;
 using Microsoft.AspNetCore.Http;
 
 namespace Backend.Fx.AspNetCore.Mvc
 {
     public static class HttpContextEx
     {
-        private const string InstanceProvider = nameof(InstanceProvider);
+        private const string ServiceProvider = nameof(ServiceProvider);
 
-        public static void SetCurrentInstanceProvider(this HttpContext httpContext, IInstanceProvider tenantId)
+        public static void SetCurrentServiceProvider(this HttpContext httpContext, IServiceProvider serviceProvider)
         {
-            if (httpContext.Items.TryGetValue(InstanceProvider, out object untyped))
+            if (httpContext.Items.TryGetValue(ServiceProvider, out _))
             {
-                throw new InvalidOperationException("IInstanceProvider has been set already in this HttpContext");
+                throw new InvalidOperationException("IServiceProvider has been set already in this HttpContext");
             }
 
-            httpContext.Items[InstanceProvider] = tenantId;
+            httpContext.Items[ServiceProvider] = serviceProvider;
         }
 
-        public static IInstanceProvider GetInstanceProvider(this HttpContext httpContext)
+        public static IServiceProvider GetServiceProvider(this HttpContext httpContext)
         {
-            if (httpContext.Items.TryGetValue(InstanceProvider, out object untyped))
+            if (httpContext.Items.TryGetValue(ServiceProvider, out object untyped))
             {
-                return (IInstanceProvider) untyped;
+                return (IServiceProvider) untyped;
             }
 
-            throw new InvalidOperationException("No IInstanceProvider present in this HttpContext");
+            throw new InvalidOperationException("No IServiceProvider present in this HttpContext");
         }
 
-        public static bool TryGetInstanceProvider(this HttpContext httpContext, out IInstanceProvider instanceProvider)
+        public static bool TryGetServiceProvider(this HttpContext httpContext, out IServiceProvider serviceProvider)
         {
-            if (httpContext.Items.TryGetValue(InstanceProvider, out object untyped))
+            if (httpContext.Items.TryGetValue(ServiceProvider, out object untyped))
             {
-                instanceProvider = (IInstanceProvider) untyped;
+                serviceProvider = (IServiceProvider) untyped;
                 return true;
             }
 
-            instanceProvider = null;
+            serviceProvider = null;
             return false;
         }
     }

@@ -143,7 +143,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
                     try
                     {
                         _invoker.Invoke(
-                            instanceProvider => subscription.Process(instanceProvider, context),
+                            serviceProvider => subscription.Process(serviceProvider, context),
                             new SystemIdentity(),
                             context.TenantId,
                             context.CorrelationId);

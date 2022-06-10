@@ -1,7 +1,7 @@
 ﻿using System;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.DependencyInjection;
 using Microsoft.AspNetCore.Mvc.ViewComponents;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -15,20 +15,20 @@ namespace Backend.Fx.AspNetCore.Mvc.Activators
         {
             var requestedViewComponentType = context.ViewComponentDescriptor.TypeInfo.AsType();
             
-            return context.ViewContext.HttpContext.TryGetInstanceProvider(out var ip) 
-                ? CreateInstanceUsingInstanceProvider(ip, requestedViewComponentType)
+            return context.ViewContext.HttpContext.TryGetServiceProvider(out var sp) 
+                ? CreateInstanceUsingServiceProvider(sp, requestedViewComponentType)
                 : CreateInstanceUsingSystemActivator(requestedViewComponentType);
         }
 
-        private static object CreateInstanceUsingInstanceProvider(object ip, Type requestedViewComponentType)
+        private static object CreateInstanceUsingServiceProvider(object sp, Type requestedViewComponentType)
         {
-            Logger.LogDebug("Providing {ViewComponentName} using {InstanceProvider}", requestedViewComponentType.Name, ip.GetType().Name);
-            return ((IInstanceProvider)ip).GetInstance(requestedViewComponentType);
+            Logger.LogDebug("Providing {ViewComponentName} using {ServiceProvider}", requestedViewComponentType.Name, sp.GetType().Name);
+            return ((IServiceProvider)sp).GetRequiredService(requestedViewComponentType);
         }
 
         private static object CreateInstanceUsingSystemActivator(Type requestedViewComponentType)
         {
-            Logger.LogDebug("Providing {ViewComponentName} using {InstanceProvider}", requestedViewComponentType.Name, nameof(Activator));
+            Logger.LogDebug("Providing {ViewComponentName} using {ServiceProvider}", requestedViewComponentType.Name, nameof(Activator));
             return Activator.CreateInstance(requestedViewComponentType);
         }
         

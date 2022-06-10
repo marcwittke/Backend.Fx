@@ -18,7 +18,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
         }
 
 
-        public void Invoke(Action<IInstanceProvider> action, IIdentity identity, TenantId tenantId, Guid? correlationId = null)
+        public void Invoke(Action<IServiceProvider> action, IIdentity identity, TenantId tenantId, Guid? correlationId = null)
         {
             lock (_syncLock)
             {

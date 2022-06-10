@@ -1,11 +1,10 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
+using System.Linq;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
-using Backend.Fx.Patterns.EventAggregation.Domain;
 using Backend.Fx.SimpleInjectorDependencyInjection.Modules;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SimpleInjector;
 using SimpleInjector.Advanced;
@@ -21,7 +20,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
     {
         private static readonly ILogger Logger = Log.Create<SimpleInjectorCompositionRoot>();
 
-        private int _scopeSequenceNumber = 1;
         /// <summary>
         /// This constructor creates a composition root that prefers scoped lifestyle
         /// </summary>
@@ -35,16 +33,14 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             ScopedLifestyle = scopedLifestyle;
             Container.Options.LifestyleSelectionBehavior = lifestyleBehavior;
             Container.Options.DefaultScopedLifestyle = ScopedLifestyle;
-            InfrastructureModule = new SimpleInjectorInfrastructureModule(Container);
-            InstanceProvider = new SimpleInjectorInstanceProvider(Container);
-            
-            // SimpleInjector 5 needs this to resolve controllers
-            Container.Options.ResolveUnregisteredConcreteTypes = true;
+            ServiceProvider = Container;
         }
 
         public Container Container { get; } = new Container();
 
         internal ScopedLifestyle ScopedLifestyle { get; }
+
+        #region ICompositionRoot implementation
 
         public void RegisterModules(params IModule[] modules)
         {
@@ -55,7 +51,50 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             }
         }
 
-        #region ICompositionRoot implementation
+        public void RegisterServiceDescriptor(ServiceDescriptor serviceDescriptor)
+        {
+            if (serviceDescriptor.ImplementationType != null)
+            {
+                Container.Register(
+                    serviceDescriptor.ServiceType, 
+                    serviceDescriptor.ImplementationType,
+                    serviceDescriptor.Lifetime.Translate());
+            }
+            else if (serviceDescriptor.ImplementationFactory != null)
+            {
+                Container.Register(
+                    serviceDescriptor.ServiceType,
+                    () => serviceDescriptor.ImplementationFactory(Container),
+                    serviceDescriptor.Lifetime.Translate());
+            }
+            else if (serviceDescriptor.ImplementationInstance != null &&
+                     serviceDescriptor.Lifetime == ServiceLifetime.Singleton)
+            {
+                Container.RegisterInstance(serviceDescriptor.ServiceType, serviceDescriptor.ImplementationInstance);
+            }
+            else
+            {
+                throw new InvalidOperationException("Bad service descriptor");
+            }
+        }
+
+        public void RegisterServiceDescriptors(IEnumerable<ServiceDescriptor> serviceDescriptors)
+        {
+            var serviceDescriptorArray = serviceDescriptors as ServiceDescriptor[] ?? serviceDescriptors.ToArray();
+            
+            if (serviceDescriptorArray.Select(sd => sd.ServiceType).Distinct().Count() > 1)
+            {
+                throw new InvalidOperationException("To register a collection of services they must implement the same service type");
+            }
+
+            foreach (var serviceDescriptor in serviceDescriptorArray)
+            {
+                Container.Collection.Append(
+                    serviceDescriptor.ServiceType,
+                    serviceDescriptor.ImplementationType,
+                    serviceDescriptor.Lifetime.Translate());
+            }
+        }
 
         public void Verify()
         {
@@ -71,49 +110,17 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             }
         }
 
-
-        public object GetInstance(Type serviceType)
-        {
-            return Container.GetInstance(serviceType);
-        }
-
-        public IEnumerable GetInstances(Type serviceType)
-        {
-            return Container.GetAllInstances(serviceType);
-        }
-
-        public T GetInstance<T>() where T : class
-        {
-            return Container.GetInstance<T>();
-        }
-
-        public IEnumerable<T> GetInstances<T>() where T : class
-        {
-            return Container.GetAllInstances<T>();
-        }
-        
         /// <inheritdoc />
-        public IInjectionScope BeginScope()
+        public IServiceScope BeginScope()
         {
-            return new SimpleInjectorInjectionScope(Interlocked.Increment(ref _scopeSequenceNumber), AsyncScopedLifestyle.BeginScope(Container));
+            return new SimpleInjectorServiceScope(AsyncScopedLifestyle.BeginScope(Container));
         }
 
-        public IInstanceProvider InstanceProvider { get; }
-
-        public IInfrastructureModule InfrastructureModule { get; }
+        public IServiceProvider ServiceProvider { get; }
 
         public Scope GetCurrentScope()
         {
             return ScopedLifestyle.GetCurrentScope(Container);
-        }
-        #endregion
-
-        #region IEventHandlerProvider implementation
-
-        /// <inheritdoc />
-        public IEnumerable<IDomainEventHandler<TDomainEvent>> GetAllEventHandlers<TDomainEvent>() where TDomainEvent : IDomainEvent
-        {
-            return Container.GetAllInstances<IDomainEventHandler<TDomainEvent>>();
         }
         #endregion
 

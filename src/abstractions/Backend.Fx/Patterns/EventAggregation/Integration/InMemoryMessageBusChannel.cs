@@ -21,7 +21,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
         {
             while (_messageHandlingTasks.TryTake(out var messageHandlingTask))
             {
-                await messageHandlingTask;
+                await messageHandlingTask.ConfigureAwait(false);
             }
         }
         

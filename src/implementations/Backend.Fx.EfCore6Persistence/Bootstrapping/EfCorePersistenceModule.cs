@@ -31,6 +31,14 @@ namespace Backend.Fx.EfCorePersistence.Bootstrapping
             _assemblies = assemblies;
         }
 
+        public virtual Func<ICompositionRoot, IDbConnection> DbConnectionFactory => _ => _dbConnectionFactory.Create();
+        public virtual Func<ICompositionRoot, IOperation> OperationFactory => _ => new Operation();
+        public virtual Func<ICompositionRoot, ICurrentTHolder<Correlation>> CorrelationHolderFactory => _ => new CurrentCorrelationHolder();
+        public virtual Func<ICompositionRoot, ICurrentTHolder<IIdentity>> IdentityHolderFactory => _ => new CurrentIdentityHolder();
+        public virtual Func<ICompositionRoot, ICurrentTHolder<TenantId>> TenantIdHolderFactory => _ => new CurrentTenantIdHolder();
+        public virtual Func<ICompositionRoot, IDomainEventAggregator> DomainEventAggregatorFactory => compositionRoot => new DomainEventAggregator(compositionRoot);
+
+        public abstract void Register(ICompositionRoot compositionRoot);
         public void Register(ICompositionRoot compositionRoot)
         {
             // by letting the container create the connection we can be sure, that only one connection per scope is used, and disposing is done accordingly

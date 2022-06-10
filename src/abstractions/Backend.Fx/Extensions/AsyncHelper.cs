@@ -26,7 +26,7 @@ namespace Backend.Fx.Extensions
                 {
                     try
                     {
-                        await task();
+                        await task().ConfigureAwait(false);
                     }
                     catch (Exception e)
                     {
@@ -64,7 +64,7 @@ namespace Backend.Fx.Extensions
                 {
                     try
                     {
-                        ret = await task();
+                        ret = await task().ConfigureAwait(false);
                     }
                     catch (Exception e)
                     {

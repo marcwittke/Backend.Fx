@@ -32,7 +32,7 @@ namespace Backend.Fx.AspNetCore
                 application.WaitForBoot();
 
                 // set the instance provider for the controller activator
-                context.SetCurrentInstanceProvider(application.CompositionRoot.InstanceProvider);
+                context.SetCurrentServiceProvider(application.CompositionRoot.ServiceProvider);
 
                 // the ambient tenant id has been set before by a TenantMiddleware
                 var tenantId = context.GetTenantId();

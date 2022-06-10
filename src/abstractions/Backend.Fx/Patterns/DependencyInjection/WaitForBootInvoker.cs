@@ -15,7 +15,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
             _invoker = invoker;
         }
 
-        public void Invoke(Action<IInstanceProvider> action, IIdentity identity, TenantId tenantId, Guid? correlationId = null)
+        public void Invoke(Action<IServiceProvider> action, IIdentity identity, TenantId tenantId, Guid? correlationId = null)
         {
             _application.WaitForBoot();
             _invoker.Invoke(action, identity, tenantId, correlationId);

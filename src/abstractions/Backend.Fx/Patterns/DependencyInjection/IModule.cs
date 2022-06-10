@@ -1,4 +1,6 @@
-﻿namespace Backend.Fx.Patterns.DependencyInjection
+﻿using Microsoft.Extensions.DependencyInjection;
+
+namespace Backend.Fx.Patterns.DependencyInjection
 {
     /// <summary>
     /// A logically cohesive bunch of services

@@ -17,7 +17,7 @@ namespace Backend.Fx.Environment.MultiTenancy
             ITenantRepository tenantRepository,
             bool singleTenantIsDemoTenant)
         {
-            _tenantService = new TenantService(messageBus, tenantRepository);
+            _tenantService = new TenantService(tenantRepository);
             _singleTenantIsDemoTenant = singleTenantIsDemoTenant;
         }
 

@@ -7,6 +7,7 @@ using Backend.Fx.Extensions;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.EventAggregation.Domain;
 using Backend.Fx.Patterns.EventAggregation.Integration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -18,7 +19,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// <param name="identity">The acting identity</param>
         /// <param name="tenantId">The targeted tenant id</param>
         /// <param name="correlationId">The correlation id, when it was continued</param>
-        Task InvokeAsync(Func<IInstanceProvider, Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId, Guid? correlationId = null);
+        Task InvokeAsync(Func<IServiceProvider, Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId, Guid? correlationId = null);
     }
 
 
@@ -28,7 +29,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// <param name="identity">The acting identity</param>
         /// <param name="tenantId">The targeted tenant id</param>
         /// <param name="correlationId">The correlation id, when it was continued</param>
-        void Invoke(Action<IInstanceProvider> action, IIdentity identity, TenantId tenantId, Guid? correlationId = null);
+        void Invoke(Action<IServiceProvider> action, IIdentity identity, TenantId tenantId, Guid? correlationId = null);
     }
 
 
@@ -43,19 +44,19 @@ namespace Backend.Fx.Patterns.DependencyInjection
         }
 
 
-        public void Invoke(Action<IInstanceProvider> action, IIdentity identity, TenantId tenantId, Guid? correlationId = null)
+        public void Invoke(Action<IServiceProvider> action, IIdentity identity, TenantId tenantId, Guid? correlationId = null)
         {
             Logger.LogInformation("Invoking synchronous action as {Identity} in {TenantId}", identity, tenantId);
-            using (IInjectionScope injectionScope = BeginScope(identity, tenantId, correlationId))
+            using (IServiceScope serviceScope = BeginScope(identity, tenantId, correlationId))
             {
-                using (UseDurationLogger(injectionScope))
+                using (UseDurationLogger(serviceScope))
                 {
-                    var operation = injectionScope.InstanceProvider.GetInstance<IOperation>();
+                    var operation = serviceScope.ServiceProvider.GetRequiredService<IOperation>();
                     try
                     {
                         operation.Begin();
-                        action.Invoke(injectionScope.InstanceProvider);
-                        injectionScope.InstanceProvider.GetInstance<IDomainEventAggregator>().RaiseEvents();
+                        action.Invoke(serviceScope.ServiceProvider);
+                        serviceScope.ServiceProvider.GetRequiredService<IDomainEventAggregator>().RaiseEvents();
                         operation.Complete();
                     }
                     catch
@@ -63,26 +64,23 @@ namespace Backend.Fx.Patterns.DependencyInjection
                         operation.Cancel();
                         throw;
                     }
-
-                    var messageBusScope = injectionScope.InstanceProvider.GetInstance<IMessageBusScope>();
-                    AsyncHelper.RunSync(() => messageBusScope.RaiseEvents());
                 }
             }
         }
 
-        public async Task InvokeAsync(Func<IInstanceProvider, Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId, Guid? correlationId = null)
+        public async Task InvokeAsync(Func<IServiceProvider, Task> awaitableAsyncAction, IIdentity identity, TenantId tenantId, Guid? correlationId = null)
         {
             Logger.LogInformation("Invoking asynchronous action as {Identity} in {TenantId}", identity, tenantId);
-            using (IInjectionScope injectionScope = BeginScope(identity, tenantId, correlationId))
+            using (IServiceScope serviceScope = BeginScope(identity, tenantId, correlationId))
             {
-                using (UseDurationLogger(injectionScope))
+                using (UseDurationLogger(serviceScope))
                 {
-                    var operation = injectionScope.InstanceProvider.GetInstance<IOperation>();
+                    var operation = serviceScope.ServiceProvider.GetRequiredService<IOperation>();
                     try
                     {
                         operation.Begin();
-                        await awaitableAsyncAction.Invoke(injectionScope.InstanceProvider);
-                        injectionScope.InstanceProvider.GetInstance<IDomainEventAggregator>().RaiseEvents();
+                        await awaitableAsyncAction.Invoke(serviceScope.ServiceProvider).ConfigureAwait(false);
+                        serviceScope.ServiceProvider.GetRequiredService<IDomainEventAggregator>().RaiseEvents();
                         operation.Complete();
                     }
                     catch
@@ -91,38 +89,38 @@ namespace Backend.Fx.Patterns.DependencyInjection
                         throw;
                     }
 
-                    await injectionScope.InstanceProvider.GetInstance<IMessageBusScope>().RaiseEvents();
+                    await serviceScope.ServiceProvider.GetRequiredService<IMessageBusScope>().RaiseEvents().ConfigureAwait(false);
                 }
             }
         }
 
 
-        private IInjectionScope BeginScope(IIdentity identity, TenantId tenantId, Guid? correlationId)
+        private IServiceScope BeginScope(IIdentity identity, TenantId tenantId, Guid? correlationId)
         {
-            IInjectionScope injectionScope = _compositionRoot.BeginScope();
+            IServiceScope serviceScope = _compositionRoot.BeginScope();
             tenantId = tenantId ?? new TenantId(null);
-            injectionScope.InstanceProvider.GetInstance<ICurrentTHolder<TenantId>>().ReplaceCurrent(tenantId);
+            serviceScope.ServiceProvider.GetRequiredService<ICurrentTHolder<TenantId>>().ReplaceCurrent(tenantId);
 
             identity = identity ?? new AnonymousIdentity();
-            injectionScope.InstanceProvider.GetInstance<ICurrentTHolder<IIdentity>>().ReplaceCurrent(identity);
+            serviceScope.ServiceProvider.GetRequiredService<ICurrentTHolder<IIdentity>>().ReplaceCurrent(identity);
 
             if (correlationId.HasValue)
             {
-                injectionScope.InstanceProvider.GetInstance<ICurrentTHolder<Correlation>>().Current.Resume(correlationId.Value);
+                serviceScope.ServiceProvider.GetRequiredService<ICurrentTHolder<Correlation>>().Current.Resume(correlationId.Value);
             }
 
-            return injectionScope;
+            return serviceScope;
         }
 
 
-        private static IDisposable UseDurationLogger(IInjectionScope injectionScope)
+        private static IDisposable UseDurationLogger(IServiceScope serviceScope)
         {
-            IIdentity identity = injectionScope.InstanceProvider.GetInstance<ICurrentTHolder<IIdentity>>().Current;
-            TenantId tenantId = injectionScope.InstanceProvider.GetInstance<ICurrentTHolder<TenantId>>().Current;
-            Correlation correlation = injectionScope.InstanceProvider.GetInstance<ICurrentTHolder<Correlation>>().Current;
+            IIdentity identity = serviceScope.ServiceProvider.GetRequiredService<ICurrentTHolder<IIdentity>>().Current;
+            TenantId tenantId = serviceScope.ServiceProvider.GetRequiredService<ICurrentTHolder<TenantId>>().Current;
+            Correlation correlation = serviceScope.ServiceProvider.GetRequiredService<ICurrentTHolder<Correlation>>().Current;
             return Logger.LogInformationDuration(
-                $"Starting scope {injectionScope.SequenceNumber} (correlation [{correlation.Id}]) for {identity.Name} in tenant {(tenantId.HasValue ? tenantId.Value.ToString() : "null")}",
-                $"Ended scope {injectionScope.SequenceNumber} (correlation [{correlation.Id}]) for {identity.Name} in tenant {(tenantId.HasValue ? tenantId.Value.ToString() : "null")}");
+                $"Starting scope (correlation [{correlation.Id}]) for {identity.Name} in tenant {(tenantId.HasValue ? tenantId.Value.ToString() : "null")}",
+                $"Ended scope (correlation [{correlation.Id}]) for {identity.Name} in tenant {(tenantId.HasValue ? tenantId.Value.ToString() : "null")}");
         }
     }
 }

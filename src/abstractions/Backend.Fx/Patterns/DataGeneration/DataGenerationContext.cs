@@ -4,6 +4,7 @@ using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Patterns.DataGeneration
@@ -39,13 +40,13 @@ namespace Backend.Fx.Patterns.DataGeneration
             {
                 using (Logger.LogInformationDuration($"Seeding data for tenant {tenantId.Value}"))
                 {
-                    Type[] dataGeneratorTypesToRun = GetDataGeneratorTypes(_compositionRoot, isDemoTenant);
+                    Type[] dataGeneratorTypesToRun = GetDataGeneratorTypes(_compositionRoot.ServiceProvider, isDemoTenant);
                     foreach (Type dataGeneratorTypeToRun in dataGeneratorTypesToRun)
                     {
-                        _invoker.Invoke(instanceProvider =>
+                        _invoker.Invoke(serviceProvider =>
                         {
-                            IDataGenerator dataGenerator = instanceProvider
-                                .GetInstances<IDataGenerator>()
+                            IDataGenerator dataGenerator = serviceProvider
+                                .GetServices<IDataGenerator>()
                                 .Single(dg => dg.GetType() == dataGeneratorTypeToRun);
                             dataGenerator.Generate();
                         }, new SystemIdentity(), tenantId);
@@ -54,13 +55,13 @@ namespace Backend.Fx.Patterns.DataGeneration
             }
         }
 
-        private static Type[] GetDataGeneratorTypes(ICompositionRoot compositionRoot, bool includeDemoDataGenerators)
+        private static Type[] GetDataGeneratorTypes(IServiceProvider serviceProvider, bool includeDemoDataGenerators)
         {
-            using (IInjectionScope scope = compositionRoot.BeginScope())
+            using (IServiceScope scope = serviceProvider.CreateScope())
             {
                 var dataGenerators = scope
-                    .InstanceProvider
-                    .GetInstances<IDataGenerator>()
+                    .ServiceProvider
+                    .GetServices<IDataGenerator>()
                     .OrderBy(dg => dg.Priority)
                     .Select(dg => dg.GetType());
 

@@ -2,7 +2,6 @@
 using System.Linq;
 using Backend.Fx.Exceptions;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.EventAggregation.Integration;
 using Microsoft.Extensions.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -38,14 +37,12 @@ namespace Backend.Fx.Environment.MultiTenancy
     public class TenantService : ITenantService
     {
         private static readonly ILogger Logger = Log.Create<TenantService>();
-        private readonly IMessageBus _messageBus;
         private readonly ITenantRepository _tenantRepository;
 
         public ITenantIdProvider TenantIdProvider { get; }
 
-        public TenantService(IMessageBus messageBus, ITenantRepository tenantRepository)
+        public TenantService(ITenantRepository tenantRepository)
         {
-            _messageBus = messageBus;
             _tenantRepository = tenantRepository;
             TenantIdProvider = new TenantServiceTenantIdProvider(this);
         }
@@ -67,7 +64,6 @@ namespace Backend.Fx.Environment.MultiTenancy
             var tenant = new Tenant(name, description, isDemonstrationTenant) { Configuration = configuration };
             _tenantRepository.SaveTenant(tenant);
             var tenantId = new TenantId(tenant.Id);
-            _messageBus.Publish(new TenantActivated(tenant.Id, tenant.Name, tenant.Description, tenant.IsDemoTenant));
             return tenantId;
         }
 
@@ -77,7 +73,6 @@ namespace Backend.Fx.Environment.MultiTenancy
             Tenant tenant = _tenantRepository.GetTenant(tenantId);
             tenant.State = TenantState.Active;
             _tenantRepository.SaveTenant(tenant);
-            _messageBus.Publish(new TenantActivated(tenant.Id, tenant.Name, tenant.Description, tenant.IsDemoTenant));
         }
 
         public void DeactivateTenant(TenantId tenantId)
@@ -86,7 +81,6 @@ namespace Backend.Fx.Environment.MultiTenancy
             Tenant tenant = _tenantRepository.GetTenant(tenantId);
             tenant.State = TenantState.Inactive;
             _tenantRepository.SaveTenant(tenant);
-            _messageBus.Publish(new TenantDeactivated(tenant.Id, tenant.Name, tenant.Description, tenant.IsDemoTenant));
         }
 
         public void DeleteTenant(TenantId tenantId)
@@ -100,7 +94,6 @@ namespace Backend.Fx.Environment.MultiTenancy
             }
 
             _tenantRepository.DeleteTenant(tenantId);
-            _messageBus.Publish(new TenantDeactivated(tenant.Id, tenant.Name, tenant.Description, tenant.IsDemoTenant));
         }
 
         public Tenant GetTenant(TenantId tenantId)
@@ -115,7 +108,6 @@ namespace Backend.Fx.Environment.MultiTenancy
             tenant.Description = description;
             tenant.Configuration = configuration;
             _tenantRepository.SaveTenant(tenant);
-            _messageBus.Publish(new TenantUpdated(tenant.Id, name, description, tenant.IsDemoTenant));
             return tenant;
         }
 

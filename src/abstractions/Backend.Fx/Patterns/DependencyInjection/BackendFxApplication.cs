@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Security.Principal;
+using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Backend.Fx.Environment.Authentication;
-using Backend.Fx.Environment.DateAndTime;
-using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.EventAggregation.Domain;
-using Backend.Fx.Patterns.EventAggregation.Integration;
 using Microsoft.Extensions.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -34,18 +30,17 @@ namespace Backend.Fx.Patterns.DependencyInjection
         IBackendFxApplicationInvoker Invoker { get; }
 
         /// <summary>
-        /// The message bus to send and receive event messages
+        /// The global exception logger of this application
         /// </summary>
-        IMessageBus MessageBus { get; }
+        IExceptionLogger ExceptionLogger { get; }
+
+        Assembly[] Assemblies { get; }
 
         /// <summary>
         /// allows synchronously awaiting application startup
         /// </summary>
         bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue, CancellationToken cancellationToken = default);
 
-        [Obsolete("Use BootAsync()")]
-        Task Boot(CancellationToken cancellationToken = default);
-        
         /// <summary>
         /// Initializes and starts the application (async)
         /// </summary>
@@ -63,48 +58,41 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// Initializes the application's runtime instance
         /// </summary>
         /// <param name="compositionRoot">The composition root of the dependency injection framework</param>
-        /// <param name="messageBus">The message bus implementation used by this application instance</param>
         /// <param name="exceptionLogger"></param>
-        public BackendFxApplication(ICompositionRoot compositionRoot, IMessageBus messageBus, IExceptionLogger exceptionLogger)
+        public BackendFxApplication(ICompositionRoot compositionRoot, IExceptionLogger exceptionLogger, params Assembly[] assemblies)
         {
             var invoker = new BackendFxApplicationInvoker(compositionRoot);
             AsyncInvoker = new ExceptionLoggingAsyncInvoker(exceptionLogger, invoker);
             Invoker = new ExceptionLoggingInvoker(exceptionLogger, invoker);
-            MessageBus = messageBus;
-            MessageBus.ProvideInvoker(new SequentializingBackendFxApplicationInvoker(
-                                          new WaitForBootInvoker(this, 
-                                                                 new ExceptionLoggingAndHandlingInvoker(exceptionLogger, Invoker))));
+
             CompositionRoot = compositionRoot;
-            CompositionRoot.InfrastructureModule.RegisterScoped<IClock, WallClock>();
-            CompositionRoot.InfrastructureModule.RegisterScoped<ICurrentTHolder<Correlation>, CurrentCorrelationHolder>();
-            CompositionRoot.InfrastructureModule.RegisterScoped<ICurrentTHolder<IIdentity>, CurrentIdentityHolder>();
-            CompositionRoot.InfrastructureModule.RegisterScoped<ICurrentTHolder<TenantId>, CurrentTenantIdHolder>();
-            CompositionRoot.InfrastructureModule.RegisterScoped<IOperation, Operation>();
-            CompositionRoot.InfrastructureModule.RegisterScoped<IDomainEventAggregator>(() => new DomainEventAggregator(compositionRoot));
-            CompositionRoot.InfrastructureModule.RegisterScoped<IMessageBusScope>(
-                () => new MessageBusScope(
-                    MessageBus,
-                    compositionRoot.InstanceProvider.GetInstance<ICurrentTHolder<Correlation>>(),
-                    compositionRoot.InstanceProvider.GetInstance<ICurrentTHolder<TenantId>>()));
+            ExceptionLogger = exceptionLogger;
+            Assemblies = assemblies.Concat(new[] {typeof(BackendFxApplication).Assembly}).Distinct().ToArray();
+            CompositionRoot.RegisterModules(new DomainModule(Assemblies));
         }
+
+        public Assembly[] Assemblies { get; }
 
         public IBackendFxApplicationAsyncInvoker AsyncInvoker { get; }
 
         public ICompositionRoot CompositionRoot { get; }
 
+        public IExceptionLogger ExceptionLogger { get; }
+        
         public IBackendFxApplicationInvoker Invoker { get; }
 
-        public IMessageBus MessageBus { get; }
-
-        public Task Boot(CancellationToken cancellationToken = default) => BootAsync(cancellationToken);
-        
         public Task BootAsync(CancellationToken cancellationToken = default)
         {
             Logger.LogInformation("Booting application");
             CompositionRoot.Verify();
-            MessageBus.Connect();
             _isBooted.Set();
             return Task.CompletedTask;
+        }
+
+        public TBackendFxApplication As<TBackendFxApplication>()
+            where TBackendFxApplication : class, IBackendFxApplication
+        {
+            return this as TBackendFxApplication;
         }
 
         public bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue, CancellationToken cancellationToken = default)

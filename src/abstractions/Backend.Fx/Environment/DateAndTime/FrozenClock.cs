@@ -12,10 +12,9 @@ namespace Backend.Fx.Environment.DateAndTime
     {
         private static readonly ILogger Logger = Log.Create<FrozenClock>();
         
-        // ReSharper disable once UnusedParameter.Local
         public FrozenClock(IClock clock)
         {
-            UtcNow = DateTime.UtcNow;
+            UtcNow = clock.UtcNow;
             Logger.LogTrace("Freezing clock at {UtcNow}", UtcNow);
         }
 
