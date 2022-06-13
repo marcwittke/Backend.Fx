@@ -5,30 +5,22 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Backend.Fx.MicrosoftDependencyInjection
 {
-    public class MicrosoftCompositionRoot : ICompositionRoot
+    public class MicrosoftCompositionRoot : CompositionRoot
     {
         private readonly IServiceCollection _serviceCollection = new ServiceCollection();
         private readonly Lazy<IServiceProvider> _serviceProvider;
+        
         public MicrosoftCompositionRoot()
         {
             _serviceProvider = new Lazy<IServiceProvider>(() => _serviceCollection.BuildServiceProvider());
         }
-        public void Dispose()
-        {
-        }
 
-        public void Verify()
+        public override IServiceProvider ServiceProvider => _serviceProvider.Value;
+        
+        public override void Verify()
         { }
 
-        public void RegisterModules(params IModule[] modules)
-        {
-            foreach (var module in modules)
-            {
-                module.Register(this);
-            }
-        }
-
-        public void RegisterServiceDescriptor(ServiceDescriptor serviceDescriptor)
+        public override void RegisterServiceDescriptor(ServiceDescriptor serviceDescriptor)
         {
             if (_serviceProvider.IsValueCreated)
             {
@@ -37,7 +29,7 @@ namespace Backend.Fx.MicrosoftDependencyInjection
             _serviceCollection.Add(serviceDescriptor);
         }
 
-        public void RegisterServiceDescriptors(IEnumerable<ServiceDescriptor> serviceDescriptors)
+        public override void RegisterServiceDescriptors(IEnumerable<ServiceDescriptor> serviceDescriptors)
         {
             foreach (var serviceDescriptor in serviceDescriptors)
             {
@@ -45,11 +37,12 @@ namespace Backend.Fx.MicrosoftDependencyInjection
             }
         }
 
-        public IServiceScope BeginScope()
+        public override IServiceScope BeginScope()
         {
             return ServiceProvider.CreateScope();
         }
 
-        public IServiceProvider ServiceProvider => _serviceProvider.Value;
+        protected override void Dispose(bool disposing)
+        { }
     }
 }

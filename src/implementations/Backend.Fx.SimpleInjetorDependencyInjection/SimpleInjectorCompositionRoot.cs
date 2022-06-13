@@ -16,9 +16,11 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
     /// <summary>
     ///     Provides a reusable composition root assuming Simple Injector as container
     /// </summary>
-    public class SimpleInjectorCompositionRoot : ICompositionRoot
+    public class SimpleInjectorCompositionRoot : CompositionRoot
     {
         private static readonly ILogger Logger = Log.Create<SimpleInjectorCompositionRoot>();
+        private readonly Container _container = new Container();
+        private readonly ScopedLifestyle _scopedLifestyle;
 
         /// <summary>
         /// This constructor creates a composition root that prefers scoped lifestyle
@@ -30,47 +32,34 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
         public SimpleInjectorCompositionRoot(ILifestyleSelectionBehavior lifestyleBehavior, ScopedLifestyle scopedLifestyle)
         {
             Logger.LogInformation("Initializing SimpleInjector");
-            ScopedLifestyle = scopedLifestyle;
-            Container.Options.LifestyleSelectionBehavior = lifestyleBehavior;
-            Container.Options.DefaultScopedLifestyle = ScopedLifestyle;
-            ServiceProvider = Container;
+            _scopedLifestyle = scopedLifestyle;
+            _container.Options.LifestyleSelectionBehavior = lifestyleBehavior;
+            _container.Options.DefaultScopedLifestyle = _scopedLifestyle;
         }
 
-        public Container Container { get; } = new Container();
-
-        internal ScopedLifestyle ScopedLifestyle { get; }
-
+        
         #region ICompositionRoot implementation
 
-        public void RegisterModules(params IModule[] modules)
-        {
-            foreach (var module in modules)
-            {
-                Logger.LogInformation("Registering {Module}", module.GetType().Name);
-                module.Register(this);
-            }
-        }
-
-        public void RegisterServiceDescriptor(ServiceDescriptor serviceDescriptor)
+        public override void RegisterServiceDescriptor(ServiceDescriptor serviceDescriptor)
         {
             if (serviceDescriptor.ImplementationType != null)
             {
-                Container.Register(
+                _container.Register(
                     serviceDescriptor.ServiceType, 
                     serviceDescriptor.ImplementationType,
                     serviceDescriptor.Lifetime.Translate());
             }
             else if (serviceDescriptor.ImplementationFactory != null)
             {
-                Container.Register(
+                _container.Register(
                     serviceDescriptor.ServiceType,
-                    () => serviceDescriptor.ImplementationFactory(Container),
+                    () => serviceDescriptor.ImplementationFactory(_container),
                     serviceDescriptor.Lifetime.Translate());
             }
             else if (serviceDescriptor.ImplementationInstance != null &&
                      serviceDescriptor.Lifetime == ServiceLifetime.Singleton)
             {
-                Container.RegisterInstance(serviceDescriptor.ServiceType, serviceDescriptor.ImplementationInstance);
+                _container.RegisterInstance(serviceDescriptor.ServiceType, serviceDescriptor.ImplementationInstance);
             }
             else
             {
@@ -78,7 +67,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             }
         }
 
-        public void RegisterServiceDescriptors(IEnumerable<ServiceDescriptor> serviceDescriptors)
+        public override void RegisterServiceDescriptors(IEnumerable<ServiceDescriptor> serviceDescriptors)
         {
             var serviceDescriptorArray = serviceDescriptors as ServiceDescriptor[] ?? serviceDescriptors.ToArray();
             
@@ -89,19 +78,19 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
 
             foreach (var serviceDescriptor in serviceDescriptorArray)
             {
-                Container.Collection.Append(
+                _container.Collection.Append(
                     serviceDescriptor.ServiceType,
                     serviceDescriptor.ImplementationType,
                     serviceDescriptor.Lifetime.Translate());
             }
         }
 
-        public void Verify()
+        public override void Verify()
         {
             Logger.LogInformation("container is being verified");
             try
             {
-                Container.Verify(VerificationOption.VerifyAndDiagnose);
+                _container.Verify(VerificationOption.VerifyAndDiagnose);
             }
             catch (Exception ex)
             {
@@ -111,26 +100,18 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
         }
 
         /// <inheritdoc />
-        public IServiceScope BeginScope()
+        public override IServiceScope BeginScope()
         {
-            return new SimpleInjectorServiceScope(AsyncScopedLifestyle.BeginScope(Container));
+            return new SimpleInjectorServiceScope(AsyncScopedLifestyle.BeginScope(_container));
         }
 
-        public IServiceProvider ServiceProvider { get; }
+        public override IServiceProvider ServiceProvider => _container;
 
         public Scope GetCurrentScope()
         {
-            return ScopedLifestyle.GetCurrentScope(Container);
+            return _scopedLifestyle.GetCurrentScope(_container);
         }
-        #endregion
-
-        #region IDisposable implementation
-        public void Dispose()
-        {
-            Container?.Dispose();
-        }
-        #endregion
-
+        
         /// <summary>
         ///     A behavior that defaults to scoped life style for injected instances
         /// </summary>
@@ -141,5 +122,16 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
                 return Lifestyle.Scoped;
             }
         }
+        #endregion
+
+        #region IDisposable implementation
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _container?.Dispose();
+            }
+        }
+        #endregion
     }
 }
