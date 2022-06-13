@@ -32,13 +32,13 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
 
             foreach (TenantId tenantId in demoTenantIds)
             {
-                A.CallTo(() => _invoker.Invoke(A<Action<IInstanceProvider>>._, A<IIdentity>._, A<TenantId>.That.IsSameAs(tenantId), A<Guid?>._))
+                A.CallTo(() => _invoker.Invoke(A<Action<IServiceProvider>>._, A<IIdentity>._, A<TenantId>.That.IsSameAs(tenantId), A<Guid?>._))
                  .MustHaveHappenedOnceExactly();
             }
             
             foreach (TenantId tenantId in prodTenantIds)
             {
-                A.CallTo(() => _invoker.Invoke(A<Action<IInstanceProvider>>._, A<IIdentity>._, A<TenantId>.That.IsSameAs(tenantId), A<Guid?>._))
+                A.CallTo(() => _invoker.Invoke(A<Action<IServiceProvider>>._, A<IIdentity>._, A<TenantId>.That.IsSameAs(tenantId), A<Guid?>._))
                  .MustHaveHappenedOnceExactly();
             }
         }

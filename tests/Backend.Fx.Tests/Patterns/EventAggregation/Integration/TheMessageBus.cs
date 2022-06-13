@@ -70,29 +70,29 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
                 A.CallTo(() => TypedHandler.Handle(A<TestIntegrationEvent>._)).Invokes((TestIntegrationEvent e) => IntegrationEvent.TypedProcessed.Set());
                 A.CallTo(() => DynamicHandler.Handle(new object())).WithAnyArguments().Invokes((object e) => IntegrationEvent.DynamicProcessed.Set());
 
-                A.CallTo(() => FakeInstanceProvider.GetInstance(A<Type>.That.IsEqualTo(typeof(TypedMessageHandler))))
+                A.CallTo(() => FakeServiceProvider.GetService(A<Type>.That.IsEqualTo(typeof(TypedMessageHandler))))
                  .Returns(new TypedMessageHandler(TypedHandler));
 
-                A.CallTo(() => FakeInstanceProvider.GetInstance(A<Type>.That.IsEqualTo(typeof(LongRunningMessageHandler))))
+                A.CallTo(() => FakeServiceProvider.GetService(A<Type>.That.IsEqualTo(typeof(LongRunningMessageHandler))))
                  .Returns(new LongRunningMessageHandler(TypedHandler));
 
-                A.CallTo(() => FakeInstanceProvider.GetInstance(A<Type>.That.IsEqualTo(typeof(ThrowingTypedMessageHandler))))
+                A.CallTo(() => FakeServiceProvider.GetService(A<Type>.That.IsEqualTo(typeof(ThrowingTypedMessageHandler))))
                  .Returns(new ThrowingTypedMessageHandler(TypedHandler));
 
-                A.CallTo(() => FakeInstanceProvider.GetInstance(A<Type>.That.IsEqualTo(typeof(DynamicMessageHandler))))
+                A.CallTo(() => FakeServiceProvider.GetService(A<Type>.That.IsEqualTo(typeof(DynamicMessageHandler))))
                  .Returns(new DynamicMessageHandler(DynamicHandler));
 
-                A.CallTo(() => FakeInstanceProvider.GetInstance(A<Type>.That.IsEqualTo(typeof(ThrowingDynamicMessageHandler))))
+                A.CallTo(() => FakeServiceProvider.GetService(A<Type>.That.IsEqualTo(typeof(ThrowingDynamicMessageHandler))))
                  .Returns(new ThrowingDynamicMessageHandler(DynamicHandler));
             }
 
             public IIntegrationMessageHandler<TestIntegrationEvent> TypedHandler { get; } = A.Fake<IIntegrationMessageHandler<TestIntegrationEvent>>();
             public IIntegrationMessageHandler DynamicHandler { get; } = A.Fake<IIntegrationMessageHandler>();
-            public IInstanceProvider FakeInstanceProvider { get; } = A.Fake<IInstanceProvider>();
+            public IServiceProvider FakeServiceProvider { get; } = A.Fake<IServiceProvider>();
 
-            public void Invoke(Action<IInstanceProvider> action, IIdentity identity, TenantId tenantId, Guid? correlationId = null)
+            public void Invoke(Action<IServiceProvider> action, IIdentity identity, TenantId tenantId, Guid? correlationId = null)
             {
-                action(FakeInstanceProvider);
+                action(FakeServiceProvider);
             }
         }
 

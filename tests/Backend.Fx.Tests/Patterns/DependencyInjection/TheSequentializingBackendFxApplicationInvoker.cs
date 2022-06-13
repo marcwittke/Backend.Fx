@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -36,7 +37,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             await Task.WhenAll(tasks);
         }
 
-        private void DoTheAction(IInstanceProvider _)
+        private void DoTheAction(IServiceProvider _)
         {
             _output.WriteLine("start");
             Thread.Sleep(_actionDuration);

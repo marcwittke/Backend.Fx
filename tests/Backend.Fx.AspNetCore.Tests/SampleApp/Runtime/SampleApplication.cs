@@ -5,9 +5,7 @@ using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DataGeneration;
 using Backend.Fx.Patterns.DependencyInjection;
-using Backend.Fx.Patterns.EventAggregation.Integration;
 using Backend.Fx.SimpleInjectorDependencyInjection;
-using Backend.Fx.SimpleInjectorDependencyInjection.Modules;
 
 namespace Backend.Fx.AspNetCore.Tests.SampleApp.Runtime
 {
@@ -22,8 +20,8 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp.Runtime
             
             _application = new BackendFxApplication(
                 new SimpleInjectorCompositionRoot(),
-                new InMemoryMessageBus(),
-                exceptionLogger);
+                exceptionLogger,
+                new SimpleInjectorInfrastructureModule());
             
             _application = new DataGeneratingApplication(
                 tenantIdProvider,
@@ -31,7 +29,7 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp.Runtime
                 tenantWideMutexManager, _application);
             
             _application.CompositionRoot.RegisterModules(
-                new SimpleInjectorDomainModule(domainAssembly));
+                new DomainModule(domainAssembly));
         }
 
         public void Dispose()
@@ -44,8 +42,6 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp.Runtime
         public ICompositionRoot CompositionRoot => _application.CompositionRoot;
 
         public IBackendFxApplicationInvoker Invoker => _application.Invoker;
-
-        public IMessageBus MessageBus => _application.MessageBus;
 
         public bool WaitForBoot(int timeoutMilliSeconds = 2147483647, CancellationToken cancellationToken = default)
         {

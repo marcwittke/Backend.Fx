@@ -88,8 +88,6 @@ namespace Backend.Fx.Patterns.DependencyInjection
                         operation.Cancel();
                         throw;
                     }
-
-                    await serviceScope.ServiceProvider.GetRequiredService<IMessageBusScope>().RaiseEvents().ConfigureAwait(false);
                 }
             }
         }

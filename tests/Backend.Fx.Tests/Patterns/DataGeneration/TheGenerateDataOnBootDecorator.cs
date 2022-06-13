@@ -3,7 +3,6 @@ using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Hacking;
 using Backend.Fx.Patterns.DataGeneration;
 using Backend.Fx.Patterns.DependencyInjection;
-using Backend.Fx.Patterns.EventAggregation.Integration;
 using FakeItEasy;
 using Xunit;
 using Xunit.Abstractions;
@@ -15,33 +14,29 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
         public TheGenerateDataOnBootDecorator(ITestOutputHelper output) : base(output)
         {
             ITenantWideMutexManager tenantWideMutexManager = new InMemoryTenantWideMutexManager();
-            _compositionRoot = A.Fake<ICompositionRoot>();
-            _dataGenerationModule = A.Fake<IModule>();
+            A.Fake<ICompositionRoot>();
             _dataGenerationContext = A.Fake<IDataGenerationContext>();
             _tenantIdProvider = A.Fake<ITenantIdProvider>();
 
             var backendFxApplication = A.Fake<IBackendFxApplication>();
-            A.CallTo(() => backendFxApplication.CompositionRoot).Returns(_compositionRoot);
-            _sut = new DataGeneratingApplication(
-                _tenantIdProvider,
-                _dataGenerationModule,
-                tenantWideMutexManager, backendFxApplication);
+            _sut = new DataGeneratingApplication(_tenantIdProvider, tenantWideMutexManager, backendFxApplication);
 
             _sut.SetPrivate(f => f.DataGenerationContext, _dataGenerationContext);
         }
 
         private readonly DataGeneratingApplication _sut;
-        private readonly IModule _dataGenerationModule;
         private readonly IDataGenerationContext _dataGenerationContext;
-        private readonly ICompositionRoot _compositionRoot;
         private readonly ITenantIdProvider _tenantIdProvider;
 
         [Fact]
         public void DelegatesAllOtherCalls()
         {
             var app = A.Fake<IBackendFxApplication>();
-            IBackendFxApplication sut = new DataGeneratingApplication(A.Fake<ITenantIdProvider>(), A.Fake<IModule>(), new InMemoryTenantWideMutexManager(), app);
-
+            
+            IBackendFxApplication sut = new DataGeneratingApplication(
+                A.Fake<ITenantIdProvider>(),
+                new InMemoryTenantWideMutexManager(),
+                app);
 
             // ReSharper disable UnusedVariable
             IBackendFxApplicationAsyncInvoker ai = sut.AsyncInvoker;
@@ -55,20 +50,9 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
 
             IBackendFxApplicationInvoker i = sut.Invoker;
             A.CallTo(() => app.Invoker).MustHaveHappenedOnceOrMore();
-
-            IMessageBus mb = sut.MessageBus;
-            A.CallTo(() => app.MessageBus).MustHaveHappenedOnceExactly();
-
             // ReSharper restore UnusedVariable
         }
 
-        [Fact]
-        public async Task RegistersDataGenerationModuleOnBoot()
-        {
-            await _sut.BootAsync();
-            A.CallTo(() => _compositionRoot.RegisterModules(A<IModule[]>.That.Contains(_dataGenerationModule)))
-                .MustHaveHappenedOnceExactly();
-        }
 
         [Fact]
         public async Task RunsDataGeneratorsOnBoot()

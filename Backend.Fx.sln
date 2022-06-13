@@ -58,6 +58,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend.Fx.EfCore6Persisten
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend.Fx.EfCore6Persistence.Tests", "tests\Backend.Fx.EfCore6Persistence.Tests\Backend.Fx.EfCore6Persistence.Tests.csproj", "{E50D7E8D-D012-4683-BA05-C877BAA25230}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend.Fx.MicrosoftDependencyInjection", "src\implementations\Backend.Fx.MicrosoftDependencyInjection\Backend.Fx.MicrosoftDependencyInjection.csproj", "{B4791DB0-F8DD-4248-86CB-407E46F55B13}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -119,6 +121,10 @@ Global
 		{E50D7E8D-D012-4683-BA05-C877BAA25230}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E50D7E8D-D012-4683-BA05-C877BAA25230}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E50D7E8D-D012-4683-BA05-C877BAA25230}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4791DB0-F8DD-4248-86CB-407E46F55B13}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4791DB0-F8DD-4248-86CB-407E46F55B13}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4791DB0-F8DD-4248-86CB-407E46F55B13}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4791DB0-F8DD-4248-86CB-407E46F55B13}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -145,6 +151,7 @@ Global
 		{FF042FB5-BA44-4655-8903-2644FE549810} = {22E4DE95-C3E5-49E6-83BF-BF30905A746B}
 		{38034961-CE3B-4286-A9EB-496DECA39632} = {ADC35CAD-F5B1-42B6-A0CC-B96974C11F11}
 		{E50D7E8D-D012-4683-BA05-C877BAA25230} = {C7885592-A4B8-4BA8-8D3A-1EDA4025D17A}
+		{B4791DB0-F8DD-4248-86CB-407E46F55B13} = {22E4DE95-C3E5-49E6-83BF-BF30905A746B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {45648557-C751-44AD-9C87-0F12EB673969}

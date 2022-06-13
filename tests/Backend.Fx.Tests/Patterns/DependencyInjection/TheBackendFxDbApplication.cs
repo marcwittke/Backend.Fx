@@ -2,7 +2,6 @@ using System.Threading;
 using Backend.Fx.Environment.Persistence;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
-using Backend.Fx.Patterns.EventAggregation.Integration;
 using FakeItEasy;
 using Xunit;
 using Xunit.Abstractions;
@@ -13,7 +12,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
     {
         public TheBackendFxDbApplication(ITestOutputHelper output): base(output)
         {
-            IBackendFxApplication application = new BackendFxApplication(_fakes.CompositionRoot, _fakes.MessageBus, A.Fake<IExceptionLogger>());
+            IBackendFxApplication application = new BackendFxApplication(_fakes.CompositionRoot, A.Fake<IExceptionLogger>());
             _sut = new BackendFxDbApplication(_databaseBootstrapper, _databaseAvailabilityAwaiter, application);
         }
 
@@ -51,10 +50,6 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             // ReSharper disable once UnusedVariable
             IBackendFxApplicationInvoker i = sut.Invoker;
             A.CallTo(() => application.Invoker).MustHaveHappenedOnceExactly();
-
-            // ReSharper disable once UnusedVariable
-            IMessageBus mb = sut.MessageBus;
-            A.CallTo(() => application.MessageBus).MustHaveHappenedOnceExactly();
 
             sut.BootAsync();
             A.CallTo(() => application.BootAsync(A<CancellationToken>._)).MustHaveHappenedOnceExactly();

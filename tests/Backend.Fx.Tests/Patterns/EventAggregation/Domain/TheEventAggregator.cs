@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Backend.Fx.Patterns.EventAggregation.Domain;
 using FakeItEasy;
 using Xunit;
@@ -13,15 +15,15 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Domain
         {
             var handler1 = new TestDomainEventHandler();
             var handler2 = new TestDomainEventHandler();
-            var fakeDomainEventHandlerProvider = A.Fake<IDomainEventHandlerProvider>();
-            A.CallTo(() => fakeDomainEventHandlerProvider.GetAllEventHandlers<TestDomainEvent>()).Returns(new[] {handler1, handler2});
+            var fakeServiceProvider = A.Fake<IServiceProvider>();
+            A.CallTo(() => fakeServiceProvider
+                    .GetService(A<Type>.That.IsEqualTo(typeof(IEnumerable<IDomainEventHandler<TestDomainEvent>>))))
+                .Returns(new[] {handler1, handler2}.AsEnumerable());
 
-            IDomainEventAggregator sut = new DomainEventAggregator(fakeDomainEventHandlerProvider);
+            IDomainEventAggregator sut = new DomainEventAggregator(fakeServiceProvider);
 
             sut.PublishDomainEvent(new TestDomainEvent(4711));
             sut.RaiseEvents();
-
-            A.CallTo(() => fakeDomainEventHandlerProvider.GetAllEventHandlers<TestDomainEvent>()).MustHaveHappenedOnceExactly();
 
             Assert.Single(handler1.Events);
             Assert.Equal(4711, handler1.Events[0].Id);
@@ -36,10 +38,12 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Domain
         public void DoesNotSwallowExceptionOnDomainEventHandling()
         {
             IDomainEventHandler<TestDomainEvent> handler = new FailingDomainEventHandler();
-            var fakeDomainEventHandlerProvider = A.Fake<IDomainEventHandlerProvider>();
-            A.CallTo(() => fakeDomainEventHandlerProvider.GetAllEventHandlers<TestDomainEvent>()).Returns(new[] {handler});
+            var fakeServiceProvider = A.Fake<IServiceProvider>();
+            A.CallTo(() => fakeServiceProvider
+                    .GetService(A<Type>.That.IsEqualTo(typeof(IEnumerable<IDomainEventHandler<TestDomainEvent>>))))
+                .Returns(new[] {handler}.AsEnumerable());
 
-            IDomainEventAggregator sut = new DomainEventAggregator(fakeDomainEventHandlerProvider);
+            IDomainEventAggregator sut = new DomainEventAggregator(fakeServiceProvider);
             sut.PublishDomainEvent(new TestDomainEvent(444));
             Assert.Throws<NotSupportedException>(() => sut.RaiseEvents());
         }

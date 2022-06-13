@@ -15,7 +15,7 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp
         public SampleApplicationHostedService(IExceptionLogger exceptionLogger)
         {
             IMessageBus messageBus = new InMemoryMessageBus();
-            TenantService = new TenantService(messageBus, new InMemoryTenantRepository());
+            TenantService = new TenantService(new InMemoryTenantRepository());
             Application = new SampleApplication(TenantService.TenantIdProvider, exceptionLogger);
         }
     }

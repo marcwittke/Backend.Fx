@@ -26,10 +26,10 @@ namespace Backend.Fx.RabbitMq.Tests
             var fakeReceiverApplication = A.Fake<IBackendFxApplication>();
             _receiverInvoker = new BackendFxApplicationInvoker(fakeReceiverApplication.CompositionRoot);
             var fakeScope = A.Fake<IInjectionScope>();
-            var fakeInstanceProvider = A.Fake<IInstanceProvider>();
+            var fakeServiceProvider = A.Fake<IServiceProvider>();
             A.CallTo(() => fakeReceiverApplication.CompositionRoot.BeginScope()).Returns(fakeScope);
-            A.CallTo(() => fakeScope.InstanceProvider).Returns(fakeInstanceProvider);
-            A.CallTo(() => fakeInstanceProvider.GetInstance(A<Type>.That.IsEqualTo(typeof(TestIntegrationEventHandler))))
+            A.CallTo(() => fakeScope.ServiceProvider).Returns(fakeServiceProvider);
+            A.CallTo(() => fakeServiceProvider.GetService(A<Type>.That.IsEqualTo(typeof(TestIntegrationEventHandler))))
              .Returns(new TestIntegrationEventHandler(_received));
         }
 

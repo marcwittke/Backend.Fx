@@ -1,10 +1,10 @@
-using System.Linq;
-using System.Threading;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Logging;
+using Backend.Fx.MicrosoftDependencyInjection;
 using Backend.Fx.Patterns.DataGeneration;
 using Backend.Fx.Patterns.DependencyInjection;
-using Backend.Fx.Patterns.EventAggregation.Integration;
-using Backend.Fx.Tests.Patterns.DependencyInjection;
 using FakeItEasy;
 using Xunit;
 using Xunit.Abstractions;
@@ -17,39 +17,27 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
 
         public TheDataGenerationContext(ITestOutputHelper output) : base(output)
         {
-            var fakes = new DiTestFakes();
-            A.CallTo(() => fakes.InstanceProvider.GetInstances<IDataGenerator>())
-                .Returns(_demoDataGenerators.Concat(_prodDataGenerators.Cast<IDataGenerator>()).ToArray());
-
-            var application = A.Fake<IBackendFxApplication>();
-            A.CallTo(() => application.Invoker).Returns(fakes.Invoker);
-            A.CallTo(() => application.WaitForBoot(A<int>._, A<CancellationToken>._)).Returns(true);
-
-            var messageBus = new InMemoryMessageBus();
-            messageBus.ProvideInvoker(application.Invoker);
-
             var tenantIdProvider = A.Fake<ITenantIdProvider>();
             A.CallTo(() => tenantIdProvider.GetActiveDemonstrationTenantIds()).Returns(_demoTenants);
             A.CallTo(() => tenantIdProvider.GetActiveProductionTenantIds()).Returns(_prodTenants);
 
-            _sut = new DataGenerationContext(fakes.CompositionRoot,
-                fakes.Invoker,
-                _tenantWideMutexManager);
+            var backendFxApplication =
+                new BackendFxApplication(new MicrosoftCompositionRoot(), A.Fake<IExceptionLogger>(),
+                    GetType().Assembly);
+
+            _sut = new DataGeneratingApplication(tenantIdProvider, _tenantWideMutexManager, backendFxApplication);
+            TestDataGenerator.Calls.Clear();
         }
 
-        private readonly DataGenerationContext _sut;
+        private readonly DataGeneratingApplication _sut;
 
-        private readonly IDemoDataGenerator[] _demoDataGenerators =
-            {new DemoDataGenerator1(), new DemoDataGenerator2()};
-
-        private readonly IProductiveDataGenerator[] _prodDataGenerators = {new ProdDataGenerator1()};
         private readonly TenantId[] _demoTenants = {new TenantId(1), new TenantId(2)};
         private readonly TenantId[] _prodTenants = {new TenantId(11), new TenantId(12)};
 
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void CallsDataGeneratorWhenSeedingForSpecificTenant(bool isDemoTenant)
+        public async Task CallsDataGeneratorWhenSeedingForSpecificTenant(bool isDemoTenant)
         {
             ITenantWideMutex disposable = A.Fake<ITenantWideMutex>();
             ITenantWideMutex m;
@@ -63,23 +51,28 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
                 .Returns(true)
                 .AssignsOutAndRefParameters(disposable);
 
-            _sut.SeedDataForTenant(new TenantId(123), isDemoTenant);
+            await _sut.BootAsync();
+            _sut.DataGenerationContext.SeedDataForTenant(new TenantId(123), isDemoTenant);
 
-            foreach (IProductiveDataGenerator dataGenerator in _prodDataGenerators)
-                A.CallTo(() => ((ProdDataGenerator) dataGenerator).Impl.Generate()).MustHaveHappenedOnceExactly();
+            Assert.Contains(nameof(ProdDataGenerator1), TestDataGenerator.Calls);
 
-            foreach (IDemoDataGenerator dataGenerator in _demoDataGenerators)
-                if (isDemoTenant)
-                    A.CallTo(() => ((DemoDataGenerator) dataGenerator).Impl.Generate()).MustHaveHappenedOnceExactly();
-                else
-                    A.CallTo(() => ((DemoDataGenerator) dataGenerator).Impl.Generate()).MustNotHaveHappened();
+            if (isDemoTenant)
+            {
+                Assert.Contains(nameof(DemoDataGenerator1), TestDataGenerator.Calls);
+                Assert.Contains(nameof(DemoDataGenerator2), TestDataGenerator.Calls);
+            }
+            else
+            {
+                Assert.DoesNotContain(nameof(DemoDataGenerator1), TestDataGenerator.Calls);
+                Assert.DoesNotContain(nameof(DemoDataGenerator2), TestDataGenerator.Calls);
+            }
 
             tryAcquireCall.MustHaveHappenedOnceExactly();
             A.CallTo(() => disposable.Dispose()).MustHaveHappenedOnceExactly();
         }
-        
+
         [Fact]
-        public void DoesNothingWhenCannotAcquireTenantWideMutex()
+        public async Task DoesNothingWhenCannotAcquireTenantWideMutex()
         {
             ITenantWideMutex m;
             var tryAcquireCall = A.CallTo(() =>
@@ -90,65 +83,36 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
                     out m));
             tryAcquireCall.Returns(false);
 
-            _sut.SeedDataForTenant(new TenantId(123), false);
+            await _sut.BootAsync();
+            _sut.DataGenerationContext.SeedDataForTenant(new TenantId(123), false);
 
-            foreach (IProductiveDataGenerator dataGenerator in _prodDataGenerators)
-            {
-                A.CallTo(() => ((ProdDataGenerator) dataGenerator).Impl.Generate()).MustNotHaveHappened();
-            }
-
-            foreach (IDemoDataGenerator dataGenerator in _demoDataGenerators)
-            {
-                A.CallTo(() => ((DemoDataGenerator) dataGenerator).Impl.Generate()).MustNotHaveHappened();
-            }
+            Assert.Empty(TestDataGenerator.Calls);
 
             tryAcquireCall.MustHaveHappenedOnceExactly();
         }
 
-        private abstract class DemoDataGenerator : IDemoDataGenerator
+        private class DemoDataGenerator1 : TestDataGenerator, IDemoDataGenerator
         {
-            public readonly IDemoDataGenerator Impl;
+        }
 
-            protected DemoDataGenerator()
-            {
-                Impl = A.Fake<IDemoDataGenerator>(o => o.Named(GetType().Name));
-            }
+        private class DemoDataGenerator2 : TestDataGenerator, IDemoDataGenerator
+        {
+        }
 
-            public int Priority => Impl.Priority;
+        private class ProdDataGenerator1 : TestDataGenerator, IProductiveDataGenerator
+        {
+        }
+
+        private abstract class TestDataGenerator
+        {
+            public static List<string> Calls = new List<string>();
+
+            public int Priority => 0;
 
             public void Generate()
             {
-                Impl.Generate();
+                Calls.Add(GetType().Name);
             }
-        }
-
-        private class DemoDataGenerator1 : DemoDataGenerator
-        {
-        }
-
-        private class DemoDataGenerator2 : DemoDataGenerator
-        {
-        }
-
-        private abstract class ProdDataGenerator : IProductiveDataGenerator
-        {
-            public readonly IProductiveDataGenerator Impl;
-
-            protected ProdDataGenerator()
-            {
-                Impl = A.Fake<IProductiveDataGenerator>(o => o.Named(GetType().Name));
-            }
-
-            public int Priority => Impl.Priority;
-
-            public void Generate()
-            {
-                Impl.Generate();
-            }
-        }
-
-        private class ProdDataGenerator1 : ProdDataGenerator
-        {
         }
     }
 }
