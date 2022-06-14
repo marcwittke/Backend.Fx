@@ -17,18 +17,18 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         private readonly IBackendFxApplication _sut;
         private readonly DiTestFakes _fakes = new DiTestFakes();
 
-        public TheBackendFxApplication(ITestOutputHelper output): base(output)
+        public TheBackendFxApplication(ITestOutputHelper output) : base(output)
         {
             _sut = new BackendFxApplication(_fakes.CompositionRoot, A.Fake<IExceptionLogger>());
         }
-        
+
         [Fact]
         public void CanWaitForBoot()
         {
             int bootTime = 200;
             A.CallTo(() => _fakes.CompositionRoot.Verify()).Invokes(() => Thread.Sleep(bootTime));
             var sw = new Stopwatch();
-            
+
             Task.Factory.StartNew(() => _sut.BootAsync());
             sw.Start();
             Assert.True(_sut.WaitForBoot());
@@ -68,7 +68,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             Assert.IsType<ExceptionLoggingInvoker>(_sut.Invoker);
         }
 
-        
+
         [Fact]
         public void VerifiesCompositionRootOnBoot()
         {

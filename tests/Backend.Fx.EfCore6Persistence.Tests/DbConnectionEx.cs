@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using JetBrains.Annotations;
 
-namespace Backend.Fx.EfCorePersistence.Tests
+namespace Backend.Fx.EfCore6Persistence.Tests
 {
     public static class DbConnectionEx
     {

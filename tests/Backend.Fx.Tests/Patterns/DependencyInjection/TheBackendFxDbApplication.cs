@@ -13,7 +13,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         public TheBackendFxDbApplication(ITestOutputHelper output): base(output)
         {
             IBackendFxApplication application = new BackendFxApplication(_fakes.CompositionRoot, A.Fake<IExceptionLogger>());
-            _sut = new BackendFxDbApplication(_databaseBootstrapper, _databaseAvailabilityAwaiter, application);
+            _sut = new PersistentApplication(_databaseBootstrapper, _databaseAvailabilityAwaiter, application);
         }
 
         private readonly DiTestFakes _fakes = new DiTestFakes();
@@ -35,7 +35,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         public void DelegatesAllCalls()
         {
             var application =A.Fake<IBackendFxApplication>();
-            var sut = new BackendFxDbApplication(A.Fake<IDatabaseBootstrapper>(),
+            var sut = new PersistentApplication(A.Fake<IDatabaseBootstrapper>(),
                                                  A.Fake<IDatabaseAvailabilityAwaiter>(),
                                                  application);
             

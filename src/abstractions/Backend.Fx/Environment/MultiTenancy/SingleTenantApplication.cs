@@ -1,11 +1,11 @@
 using System.Linq;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.EventAggregation.Integration;
+using Backend.Fx.Patterns.DependencyInjection;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Environment.MultiTenancy
 {
-    public class SingleTenantApplication
+    public class SingleTenantApplication : BackendFxApplicationDecorator
     {
         private static readonly ILogger Logger = Log.Create<SingleTenantApplication>();
         private readonly ITenantService _tenantService;
@@ -13,9 +13,10 @@ namespace Backend.Fx.Environment.MultiTenancy
         private readonly object _padlock = new object();
 
         public SingleTenantApplication(
-            IMessageBus messageBus,
             ITenantRepository tenantRepository,
-            bool singleTenantIsDemoTenant)
+            bool singleTenantIsDemoTenant,
+            IBackendFxApplication application)
+            : base(application)
         {
             _tenantService = new TenantService(tenantRepository);
             _singleTenantIsDemoTenant = singleTenantIsDemoTenant;

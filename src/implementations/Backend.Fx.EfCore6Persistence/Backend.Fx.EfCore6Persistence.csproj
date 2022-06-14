@@ -14,7 +14,7 @@
     <Authors>Marc Wittke</Authors>
     <Company>anic GmbH</Company>
     <Copyright>All rights reserved. Distributed under the terms of the MIT License.</Copyright>
-    <Description>Persistence implementation for Backend.Fx using Entity Framework Core 6</Description>
+    <Description>Persistence implementation for Backend.Fx using Entity Framework Core 2</Description>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <PackageLicense>MIT</PackageLicense>
     <PackageProjectUrl>https://github.com/marcwittke/Backend.Fx</PackageProjectUrl>

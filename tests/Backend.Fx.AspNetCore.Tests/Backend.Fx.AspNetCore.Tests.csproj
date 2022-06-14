@@ -35,4 +35,8 @@
         <ProjectReference Include="..\Backend.Fx.Tests\Backend.Fx.Tests.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="SampleApp\Runtime" />
+    </ItemGroup>
+
 </Project>

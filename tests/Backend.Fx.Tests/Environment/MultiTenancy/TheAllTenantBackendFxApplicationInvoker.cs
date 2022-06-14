@@ -27,6 +27,7 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
             var prodTenantIds = Enumerable.Range(10, 10).Select(i => new TenantId(i)).ToArray();
             A.CallTo(() => _tenantService.GetActiveDemonstrationTenantIds()).Returns(demoTenantIds);
             A.CallTo(() => _tenantService.GetActiveProductionTenantIds()).Returns(prodTenantIds);
+            A.CallTo(() => _tenantService.GetActiveTenantIds()).Returns(prodTenantIds.Concat(demoTenantIds).ToArray());
 
             _sut.Invoke(_ => { });
 

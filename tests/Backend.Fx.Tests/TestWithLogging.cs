@@ -1,5 +1,4 @@
 ﻿using System;
-using Backend.Fx.Logging;
 using Serilog;
 using Serilog.Extensions.Logging;
 using Xunit.Abstractions;

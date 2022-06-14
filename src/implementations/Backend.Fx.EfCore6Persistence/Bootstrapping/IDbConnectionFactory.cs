@@ -1,6 +1,6 @@
 ﻿using System.Data;
 
-namespace Backend.Fx.EfCorePersistence.Bootstrapping
+namespace Backend.Fx.EfCore6Persistence.Bootstrapping
 {
     public interface IDbConnectionFactory
     {

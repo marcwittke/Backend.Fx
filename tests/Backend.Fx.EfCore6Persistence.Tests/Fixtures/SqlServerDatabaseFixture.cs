@@ -1,12 +1,12 @@
 using System;
 using System.Data;
 using System.Data.SqlClient;
-using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
+using Backend.Fx.EfCore6Persistence.Tests.DummyImpl.Persistence;
 using Backend.Fx.Environment.Persistence;
 using Backend.Fx.Patterns.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 
-namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
+namespace Backend.Fx.EfCore6Persistence.Tests.Fixtures
 {
     [Obsolete("Not supported on build agents")]
     public class SqlServerDatabaseFixture : DatabaseFixture

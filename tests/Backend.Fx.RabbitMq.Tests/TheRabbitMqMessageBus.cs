@@ -5,6 +5,7 @@ using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 using Backend.Fx.Tests;
 using FakeItEasy;
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 using Xunit;
 using Xunit.Abstractions;
@@ -25,7 +26,7 @@ namespace Backend.Fx.RabbitMq.Tests
 
             var fakeReceiverApplication = A.Fake<IBackendFxApplication>();
             _receiverInvoker = new BackendFxApplicationInvoker(fakeReceiverApplication.CompositionRoot);
-            var fakeScope = A.Fake<IInjectionScope>();
+            var fakeScope = A.Fake<IServiceScope>();
             var fakeServiceProvider = A.Fake<IServiceProvider>();
             A.CallTo(() => fakeReceiverApplication.CompositionRoot.BeginScope()).Returns(fakeScope);
             A.CallTo(() => fakeScope.ServiceProvider).Returns(fakeServiceProvider);

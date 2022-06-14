@@ -7,7 +7,7 @@ using Backend.Fx.BuildingBlocks;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
-namespace Backend.Fx.EfCorePersistence
+namespace Backend.Fx.EfCore6Persistence
 {
     public class EntityQueryable<TEntity> : IQueryable<TEntity> where TEntity : Entity
     {

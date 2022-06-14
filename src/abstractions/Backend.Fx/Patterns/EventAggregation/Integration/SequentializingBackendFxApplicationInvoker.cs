@@ -1,8 +1,9 @@
 using System;
 using System.Security.Principal;
 using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Patterns.DependencyInjection;
 
-namespace Backend.Fx.Patterns.DependencyInjection
+namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
     /// <summary>
     /// Decorates the <see cref="IBackendFxApplicationInvoker"/> to prevent parallel invocation.

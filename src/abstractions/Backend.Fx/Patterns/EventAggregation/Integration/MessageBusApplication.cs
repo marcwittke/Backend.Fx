@@ -7,12 +7,15 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
     public class MessageBusApplication : BackendFxApplicationDecorator
     {
         private readonly IMessageBus _messageBus;
+        private readonly IBackendFxApplicationInvoker _invoker;
 
         public MessageBusApplication(IMessageBus messageBus, IBackendFxApplication application)
             : base(application)
         {
             application.CompositionRoot.RegisterModules(new MessageBusModule(messageBus, application.Assemblies));
             _messageBus = messageBus;
+            Invoker = new RaiseIntegrationEventsInvokerDecorator(application.CompositionRoot.ServiceProvider, base.Invoker);
+            AsyncInvoker = new RaiseIntegrationEventsAsyncInvokerDecorator(application.CompositionRoot.ServiceProvider, base.AsyncInvoker);
         }
 
         public override async Task BootAsync(CancellationToken cancellationToken = default)
@@ -20,6 +23,19 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
             await base.BootAsync(cancellationToken).ConfigureAwait(false);
             _messageBus.ProvideInvoker(new SequentializingBackendFxApplicationInvoker(new ExceptionLoggingAndHandlingInvoker(ExceptionLogger, Invoker)));
             _messageBus.Connect();
+        }
+
+        public override IBackendFxApplicationInvoker Invoker { get; }
+        
+        public override IBackendFxApplicationAsyncInvoker AsyncInvoker { get; }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _messageBus.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 }

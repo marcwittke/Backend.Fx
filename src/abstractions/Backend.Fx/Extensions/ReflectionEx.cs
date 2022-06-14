@@ -7,15 +7,19 @@ namespace Backend.Fx.Extensions
 {
     public static class ReflectionEx
     {
+        public static IEnumerable<Type> GetImplementingTypes<TService>(this IEnumerable<Assembly> assemblies)
+        {
+            return assemblies.GetImplementingTypes(typeof(TService));
+        }
+        
         public static IEnumerable<Type> GetImplementingTypes(this IEnumerable<Assembly> assemblies, Type serviceType)
         {
             return assemblies
                 .Distinct()
                 .Where(assembly => !assembly.IsDynamic)
-                .SelectMany(assembly => assembly.GetTypes(), (assembly, type) => new {assembly, type})
-                .Where(t => t.type.IsClass && !t.type.IsAbstract)
-                .Where(t => serviceType.IsAssignableFrom(t.type))
-                .Select(t => t.type);
+                .SelectMany(assembly => assembly.GetTypes())
+                .Where(t => t.IsClass && !t.IsAbstract)
+                .Where(serviceType.IsAssignableFrom);
         }
         
         public static bool IsImplementationOfOpenGenericInterface(this Type t, Type openGenericInterface)

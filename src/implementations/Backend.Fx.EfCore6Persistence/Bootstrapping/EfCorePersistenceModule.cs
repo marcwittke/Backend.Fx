@@ -1,16 +1,17 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
 using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Environment.Persistence;
 using Backend.Fx.Patterns.DependencyInjection;
-using Backend.Fx.Patterns.EventAggregation.Domain;
 using Backend.Fx.Patterns.IdGeneration;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Backend.Fx.EfCorePersistence.Bootstrapping
+namespace Backend.Fx.EfCore6Persistence.Bootstrapping
 {
     public class EfCorePersistenceModule<TDbContext> : IModule
         where TDbContext : DbContext
@@ -19,63 +20,155 @@ namespace Backend.Fx.EfCorePersistence.Bootstrapping
         private readonly Action<DbContextOptionsBuilder<TDbContext>, IDbConnection> _configure;
         private readonly IDbConnectionFactory _dbConnectionFactory;
         private readonly IEntityIdGenerator _entityIdGenerator;
-        private readonly Assembly[] _assemblies;
+        private readonly Type[] _aggregateRootTypes;
+        private readonly Type[] _entityTypes;
+        private readonly Dictionary<Type, Type> _aggregateMappingTypes;
 
-        public EfCorePersistenceModule(IDbConnectionFactory dbConnectionFactory, IEntityIdGenerator entityIdGenerator, 
-                                       ILoggerFactory loggerFactory, Action<DbContextOptionsBuilder<TDbContext>, IDbConnection> configure, params Assembly[] assemblies)
+        public EfCorePersistenceModule(
+            IDbConnectionFactory dbConnectionFactory,
+            IEntityIdGenerator entityIdGenerator,
+            ILoggerFactory loggerFactory,
+            Action<DbContextOptionsBuilder<TDbContext>, IDbConnection> configure,
+            params Assembly[] assemblies)
         {
             _dbConnectionFactory = dbConnectionFactory;
             _entityIdGenerator = entityIdGenerator;
             _loggerFactory = loggerFactory;
             _configure = configure;
-            _assemblies = assemblies;
+
+            _aggregateRootTypes = assemblies
+                .SelectMany(ass => ass
+                    .GetExportedTypes()
+                    .Where(t => !t.IsAbstract && t.IsClass)
+                    .Where(t => typeof(AggregateRoot).IsAssignableFrom(t)))
+                .ToArray();
+
+            _entityTypes = assemblies
+                .SelectMany(ass => ass
+                    .GetExportedTypes()
+                    .Where(t => !t.IsAbstract && t.IsClass)
+                    .Where(t => typeof(Entity).IsAssignableFrom(t)))
+                .ToArray();
+
+            _aggregateMappingTypes = assemblies
+                .SelectMany(ass => ass
+                    .GetExportedTypes()
+                    .Where(t => !t.IsAbstract && t.IsClass)
+                    .Where(t => typeof(IAggregateMapping).IsAssignableFrom(t)))
+                .ToDictionary(
+                    t => t
+                        .GetInterfaces()
+                        .Single(i => i.GenericTypeArguments.Length == 1
+                                     && typeof(AggregateRoot).IsAssignableFrom(i.GenericTypeArguments[0]))
+                        .GenericTypeArguments[0],
+                    t => t);
         }
 
-        public virtual Func<ICompositionRoot, IDbConnection> DbConnectionFactory => _ => _dbConnectionFactory.Create();
-        public virtual Func<ICompositionRoot, IOperation> OperationFactory => _ => new Operation();
-        public virtual Func<ICompositionRoot, ICurrentTHolder<Correlation>> CorrelationHolderFactory => _ => new CurrentCorrelationHolder();
-        public virtual Func<ICompositionRoot, ICurrentTHolder<IIdentity>> IdentityHolderFactory => _ => new CurrentIdentityHolder();
-        public virtual Func<ICompositionRoot, ICurrentTHolder<TenantId>> TenantIdHolderFactory => _ => new CurrentTenantIdHolder();
-        public virtual Func<ICompositionRoot, IDomainEventAggregator> DomainEventAggregatorFactory => compositionRoot => new DomainEventAggregator(compositionRoot);
-
-        public abstract void Register(ICompositionRoot compositionRoot);
         public void Register(ICompositionRoot compositionRoot)
         {
-            // by letting the container create the connection we can be sure, that only one connection per scope is used, and disposing is done accordingly
-            compositionRoot.InfrastructureModule.RegisterScoped(() => _dbConnectionFactory.Create());
-
             // singleton id generator
-            compositionRoot.InfrastructureModule.RegisterInstance(_entityIdGenerator);
+            compositionRoot.Register(
+                new ServiceDescriptor(
+                    typeof(IEntityIdGenerator),
+                    _entityIdGenerator));
+
+            // by letting the container create the connection we can be sure, that only one connection per scope is used, and disposing is done accordingly
+            compositionRoot.Register(
+                new ServiceDescriptor(
+                    typeof(IDbConnection),
+                    sp => _dbConnectionFactory.Create(),
+                    ServiceLifetime.Scoped));
 
             // EF core requires us to flush frequently, because of a missing identity map
-            compositionRoot.InfrastructureModule.RegisterScoped<ICanFlush, EfFlush>();
+            compositionRoot.Register(
+                new ServiceDescriptor(
+                    typeof(ICanFlush),
+                    typeof(EfFlush),
+                    ServiceLifetime.Scoped));
 
-            // EF Repositories
-            compositionRoot.InfrastructureModule.RegisterScoped(typeof(IRepository<>), typeof(EfRepository<>));
+            // DbContext is injected into repositories (not TDbContext!)
+            compositionRoot.Register(
+                new ServiceDescriptor(
+                    typeof(DbContext),
+                    typeof(TDbContext),
+                    ServiceLifetime.Scoped));
 
-            // IQueryable is supported, but should be use with caution, since it bypasses authorization
-            compositionRoot.InfrastructureModule.RegisterScoped(typeof(IQueryable<>), typeof(EntityQueryable<>));
+            // TDbContext ctor requires DbContextOptions<TDbContext>, which is configured to use a container managed db connection
+            compositionRoot.Register(
+                new ServiceDescriptor(typeof(DbContextOptions<TDbContext>),
+                    sp =>
+                    {
+                        var dbContextOptionsBuilder = new DbContextOptionsBuilder<TDbContext>();
+                        var dbConnection = sp.GetRequiredService<IDbConnection>();
+                        _configure.Invoke(dbContextOptionsBuilder, dbConnection);
 
-            // DbContext is injected into repositories
-            compositionRoot.InfrastructureModule.RegisterScoped(() => CreateDbContextOptions(compositionRoot.InstanceProvider.GetInstance<IDbConnection>()));
-            compositionRoot.InfrastructureModule.RegisterScoped<DbContext, TDbContext>();
+                        return dbContextOptionsBuilder.UseLoggerFactory(_loggerFactory).Options;
+                    }, ServiceLifetime.Scoped));
 
-            // wrapping the operation: connection.open - transaction.begin - operation - (flush) - transaction.commit - connection.close
-            compositionRoot.InfrastructureModule.RegisterDecorator<IOperation, FlushOperationDecorator>();
-            compositionRoot.InfrastructureModule.RegisterDecorator<IOperation, DbContextTransactionOperationDecorator>();
-            compositionRoot.InfrastructureModule.RegisterDecorator<IOperation, DbConnectionOperationDecorator>();
-            
-            // ensure everything dirty is flushed to the db before handling domain events  
-            compositionRoot.InfrastructureModule.RegisterDecorator<IDomainEventAggregator, FlushDomainEventAggregatorDecorator>();
+            // loop through aggregate root types to...
+            foreach (var aggregateRootType in _aggregateRootTypes)
+            {
+                // ... register the Entity Framework implementation of IRepository<T>  
+                var genericRepositoryInterface = typeof(IRepository<>).MakeGenericType(aggregateRootType);
+                var genericRepositoryImplementation = typeof(EfRepository<>).MakeGenericType(aggregateRootType);
+                compositionRoot.Register(
+                    new ServiceDescriptor(
+                        genericRepositoryInterface,
+                        genericRepositoryImplementation,
+                        ServiceLifetime.Scoped));
 
-            compositionRoot.InfrastructureModule.RegisterScoped(typeof(IAggregateMapping<>), _assemblies);
-        }
+                // ... register the aggregate mapping definition (singleton)
+                var genericAggregateMappingInterface = typeof(IAggregateMapping<>).MakeGenericType(aggregateRootType);
+                var aggregateMappingImplementation = _aggregateMappingTypes[aggregateRootType];
+                compositionRoot.Register(
+                    new ServiceDescriptor(
+                        genericAggregateMappingInterface,
+                        aggregateMappingImplementation,
+                        ServiceLifetime.Singleton));
+            }
 
-        protected virtual DbContextOptions<TDbContext> CreateDbContextOptions(IDbConnection connection)
-        {
-            var dbContextOptionsBuilder = new DbContextOptionsBuilder<TDbContext>();
-            _configure.Invoke(dbContextOptionsBuilder, connection);
-            return dbContextOptionsBuilder.UseLoggerFactory(_loggerFactory).Options;
+            // loop through entity types ...
+            foreach (var entityType in _entityTypes)
+            {
+                // to register the Entity Framework implementation of IQueryable<T>
+                compositionRoot.Register(new ServiceDescriptor(
+                    typeof(IQueryable<>).MakeGenericType(entityType),
+                    typeof(EntityQueryable<>).MakeGenericType(entityType),
+                    ServiceLifetime.Scoped));
+            }
+
+            // wrapping the operation:
+            //   invoke   -> connection.open  -> transaction.begin ---+
+            //                                                        |
+            //                                                        v
+            //                                                      operation
+            //                                                        |
+            //                                                        v
+            //                                                      flush
+            //                                                        |
+            // end invoke <- connection.close <- transaction.commit <-+ 
+            compositionRoot.RegisterDecorator(
+                new ServiceDescriptor(
+                    typeof(IOperation),
+                    typeof(FlushOperationDecorator),
+                    ServiceLifetime.Scoped));
+            compositionRoot.RegisterDecorator(
+                new ServiceDescriptor(
+                    typeof(IOperation),
+                    typeof(DbContextTransactionOperationDecorator),
+                    ServiceLifetime.Scoped));
+            compositionRoot.RegisterDecorator(
+                new ServiceDescriptor(
+                    typeof(IOperation),
+                    typeof(DbConnectionOperationDecorator),
+                    ServiceLifetime.Scoped));
+
+            // // ensure everything dirty is flushed to the db before handling domain events  
+            // compositionRoot.Register(
+            //     new ServiceDescriptor(
+            //         typeof(IDomainEventAggregator),
+            //         typeof(FlushDomainEventAggregatorDecorator),
+            //         ServiceLifetime.Scoped));
         }
     }
 }

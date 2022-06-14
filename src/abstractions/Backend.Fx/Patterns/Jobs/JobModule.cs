@@ -20,7 +20,7 @@ namespace Backend.Fx.Patterns.Jobs
             // all jobs are dynamically registered
             foreach (Type jobType in _assemblies.GetImplementingTypes(typeof(IJob)))
             {
-                compositionRoot.RegisterServiceDescriptor(
+                compositionRoot.Register(
                     new ServiceDescriptor(jobType, jobType, ServiceLifetime.Scoped));
             }
         }

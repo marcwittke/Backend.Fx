@@ -1,9 +1,9 @@
-﻿using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
+﻿using Backend.Fx.EfCore6Persistence.Tests.DummyImpl.Domain;
 using Backend.Fx.Environment.MultiTenancy;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
-namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence
+namespace Backend.Fx.EfCore6Persistence.Tests.DummyImpl.Persistence
 {
     public sealed class TestDbContext : DbContext
     {

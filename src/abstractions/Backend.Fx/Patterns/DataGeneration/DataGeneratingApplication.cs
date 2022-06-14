@@ -1,13 +1,9 @@
-﻿using System.Linq;
-using System.Reflection;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.Extensions;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using JetBrains.Annotations;
-using Microsoft.Extensions.DependencyInjection;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Patterns.DataGeneration
@@ -90,25 +86,5 @@ namespace Backend.Fx.Patterns.DataGeneration
         //         }
         //     }));
         // }
-    }
-
-    public class DataGenerationModule : IModule
-    {
-        private readonly Assembly[] _assemblies;
-
-        public DataGenerationModule(Assembly[] assemblies)
-        {
-            _assemblies = assemblies;
-        }
-        
-        public void Register(ICompositionRoot compositionRoot)
-        {
-            ServiceDescriptor[] serviceDescriptors = _assemblies
-                .GetImplementingTypes(typeof(IDataGenerator))
-                .Select(t => new ServiceDescriptor(typeof(IDataGenerator), t, ServiceLifetime.Scoped))
-                .ToArray();
-            
-            compositionRoot.RegisterServiceDescriptors(serviceDescriptors);
-        }
     }
 }

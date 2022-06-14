@@ -17,11 +17,10 @@ using ILogger = Microsoft.Extensions.Logging.ILogger;
 namespace Backend.Fx.Patterns.DependencyInjection
 {
     /// <summary>
-    /// Wires all public domain services to be injected as scoped instances provided by the array of domain assemblies:
+    /// Wires all public services to be injected as scoped instances provided by the array of domain assemblies:
     /// - <see cref="IApplicationService"/>s
     /// - <see cref="IDomainEventHandler{TDomainEvent}"/>s
     /// - <see cref="IDomainService"/>s
-    /// - <see cref="IAggregateAuthorization{TAggregateRoot}"/>s
     /// </summary>
     public class DomainModule : IModule
     {
@@ -41,27 +40,27 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
             RegisterDomainAndApplicationServices(compositionRoot);
 
-            RegisterAuthorization(compositionRoot);
+            RegisterPermissiveAuthorization(compositionRoot);
 
             RegisterDomainEventHandlers(compositionRoot);
         }
 
         private static void RegisterDomainInfrastructureServices(ICompositionRoot compositionRoot)
         {
-            compositionRoot.RegisterServiceDescriptor(
+            compositionRoot.Register(
                 new ServiceDescriptor(typeof(IClock), _ => new WallClock(), ServiceLifetime.Scoped));
-            compositionRoot.RegisterServiceDescriptor(
+            compositionRoot.Register(
                 new ServiceDescriptor(typeof(IOperation), _ => new Operation(), ServiceLifetime.Scoped));
-            compositionRoot.RegisterServiceDescriptor(
+            compositionRoot.Register(
                 new ServiceDescriptor(typeof(ICurrentTHolder<Correlation>), _ => new CurrentCorrelationHolder(),
                     ServiceLifetime.Scoped));
-            compositionRoot.RegisterServiceDescriptor(
+            compositionRoot.Register(
                 new ServiceDescriptor(typeof(ICurrentTHolder<IIdentity>), _ => new CurrentIdentityHolder(),
                     ServiceLifetime.Scoped));
-            compositionRoot.RegisterServiceDescriptor(
+            compositionRoot.Register(
                 new ServiceDescriptor(typeof(ICurrentTHolder<TenantId>), _ => new CurrentTenantIdHolder(),
                     ServiceLifetime.Scoped));
-            compositionRoot.RegisterServiceDescriptor(
+            compositionRoot.Register(
                 new ServiceDescriptor(typeof(IDomainEventAggregator), sp => new DomainEventAggregator(sp),
                     ServiceLifetime.Scoped));
         }
@@ -87,38 +86,23 @@ namespace Backend.Fx.Patterns.DependencyInjection
                 Logger.LogDebug("Registering scoped service {ServiceType} with implementation {ImplementationType}",
                     serviceDescriptor.ServiceType.Name,
                     serviceDescriptor.ImplementationType.Name);
-                container.RegisterServiceDescriptor(serviceDescriptor);
+                container.Register(serviceDescriptor);
             }
         }
 
         /// <summary>
-        ///     Auto registering all aggregate authorization classes
+        ///     Auto registering an "allow all" authorization for each aggregate root type
         /// </summary>
-        private void RegisterAuthorization(ICompositionRoot compositionRoot)
+        private void RegisterPermissiveAuthorization(ICompositionRoot compositionRoot)
         {
-            Logger.LogDebug("Registering authorization services from {Assemblies}", _assembliesForLogging);
-            var aggregateRootAuthorizationTypes =
-                _assemblies.GetImplementingTypes(typeof(IAggregateAuthorization<>)).ToArray();
-
-            foreach (Type aggregateAuthorizationType in aggregateRootAuthorizationTypes)
+            var aggregateRootTypes = _assemblies.GetImplementingTypes(typeof(AggregateRoot)).ToArray();
+            foreach (var aggregateRootType in aggregateRootTypes)
             {
-                var serviceTypes = aggregateAuthorizationType
-                    .GetTypeInfo()
-                    .ImplementedInterfaces
-                    .Where(i => i.GetTypeInfo().IsGenericType
-                                && i.GenericTypeArguments.Length == 1
-                                && typeof(AggregateRoot).GetTypeInfo()
-                                    .IsAssignableFrom(i.GenericTypeArguments[0].GetTypeInfo()));
-
-                foreach (Type serviceType in serviceTypes)
-                {
-                    Logger.LogDebug(
-                        "Registering scoped authorization service {ServiceType} with implementation {ImplementationType}",
-                        serviceType.Name,
-                        aggregateAuthorizationType.Name);
-                    compositionRoot.RegisterServiceDescriptor(new ServiceDescriptor(serviceType,
-                        aggregateAuthorizationType, ServiceLifetime.Scoped));
-                }
+                compositionRoot.Register(
+                    new ServiceDescriptor(
+                        typeof(IAggregateAuthorization<>).MakeGenericType(aggregateRootType),
+                        typeof(AllowAll<>).MakeGenericType(aggregateRootType),
+                        ServiceLifetime.Singleton));
             }
         }
 
@@ -132,8 +116,8 @@ namespace Backend.Fx.Patterns.DependencyInjection
                     .GetImplementingTypes(handlerTypeForThisDomainEventType)
                     .Select(t => new ServiceDescriptor(handlerTypeForThisDomainEventType, t, ServiceLifetime.Scoped))
                     .ToArray();
-                
-                compositionRoot.RegisterServiceDescriptors(serviceDescriptors);
+
+                compositionRoot.RegisterCollection(serviceDescriptors);
             }
         }
     }

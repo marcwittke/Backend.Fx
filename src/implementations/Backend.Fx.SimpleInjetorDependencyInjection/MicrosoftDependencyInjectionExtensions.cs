@@ -2,7 +2,7 @@ using System;
 using Microsoft.Extensions.DependencyInjection;
 using SimpleInjector;
 
-namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
+namespace Backend.Fx.SimpleInjectorDependencyInjection
 {
     public static class MicrosoftDependencyInjectionExtensions
     {

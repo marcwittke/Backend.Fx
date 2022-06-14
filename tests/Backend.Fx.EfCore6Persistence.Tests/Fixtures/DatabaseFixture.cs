@@ -1,12 +1,12 @@
 using System.Data;
 using System.Security.Principal;
-using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
+using Backend.Fx.EfCore6Persistence.Tests.DummyImpl.Persistence;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.DateAndTime;
 using Backend.Fx.Environment.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace Backend.Fx.EfCorePersistence.Tests.Fixtures
+namespace Backend.Fx.EfCore6Persistence.Tests.Fixtures
 {
     public abstract class DatabaseFixture
     {

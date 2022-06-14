@@ -3,7 +3,6 @@ using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
 using Backend.Fx.EfCorePersistence.Tests.Fixtures;
 using Backend.Fx.Tests;
 using Microsoft.EntityFrameworkCore;
-using Serilog.Formatting.Display;
 using Xunit;
 using Xunit.Abstractions;
 

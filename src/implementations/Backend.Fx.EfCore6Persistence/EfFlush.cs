@@ -16,7 +16,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
-namespace Backend.Fx.EfCorePersistence
+namespace Backend.Fx.EfCore6Persistence
 {
     public class EfFlush : ICanFlush
     {
@@ -28,8 +28,7 @@ namespace Backend.Fx.EfCorePersistence
         public EfFlush(DbContext dbContext, ICurrentTHolder<IIdentity> identityHolder, IClock clock)
         {
             DbContext = dbContext;
-            Logger.LogInformation("Disabling auto detect changes on this DbContext. Changes will be detected explicitly when flushing");
-            DbContext.ChangeTracker.AutoDetectChangesEnabled = false;
+            DbContext.DisableChangeTracking();
             IdentityHolder = identityHolder;
             Clock = clock;
         }

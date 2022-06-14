@@ -24,7 +24,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
             // note tht there should be no reason to access the singleton message bus instance from the service provider
 
             // register the message bus scope
-            compositionRoot.RegisterServiceDescriptor(
+            compositionRoot.Register(
                 new ServiceDescriptor(
                     typeof(IMessageBusScope),
                     sp => new MessageBusScope(
@@ -39,19 +39,13 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
                 Type handlerServiceType = typeof(IIntegrationMessageHandler<>).MakeGenericType(integrationEventType);
                 foreach (var handlerImplementingType in _assemblies.GetImplementingTypes(handlerServiceType))
                 {
-                    compositionRoot.RegisterServiceDescriptor(
+                    compositionRoot.Register(
                         new ServiceDescriptor(
                             handlerServiceType,
                             handlerImplementingType,
                             ServiceLifetime.Scoped));
                 }
             }
-            
-            //todo refactoring decorate IOperation to raise integration events - sync AND async!
-            // var messageBusScope = serviceScope.ServiceProvider.GetRequiredService<IMessageBusScope>();
-            // AsyncHelper.RunSync(() => messageBusScope.RaiseEvents());
-            
-            // dynamic subscriptions should be registered as domain or application service
         }
     }
 }

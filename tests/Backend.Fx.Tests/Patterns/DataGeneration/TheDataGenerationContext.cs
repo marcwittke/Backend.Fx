@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
-using Backend.Fx.MicrosoftDependencyInjection;
 using Backend.Fx.Patterns.DataGeneration;
 using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.Tests.Patterns.DependencyInjection;
 using FakeItEasy;
 using Xunit;
 using Xunit.Abstractions;
@@ -13,32 +13,35 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
 {
     public class TheDataGenerationContext : TestWithLogging
     {
+        private readonly TenantId[] _demoTenants = { new TenantId(1), new TenantId(2) };
+        private readonly TenantId[] _prodTenants = { new TenantId(11), new TenantId(12) };
+        private readonly ITenantIdProvider _tenantIdProvider = A.Fake<ITenantIdProvider>();
         private readonly ITenantWideMutexManager _tenantWideMutexManager = A.Fake<ITenantWideMutexManager>();
 
         public TheDataGenerationContext(ITestOutputHelper output) : base(output)
         {
-            var tenantIdProvider = A.Fake<ITenantIdProvider>();
-            A.CallTo(() => tenantIdProvider.GetActiveDemonstrationTenantIds()).Returns(_demoTenants);
-            A.CallTo(() => tenantIdProvider.GetActiveProductionTenantIds()).Returns(_prodTenants);
+            A.CallTo(() => _tenantIdProvider.GetActiveDemonstrationTenantIds()).Returns(_demoTenants);
+            A.CallTo(() => _tenantIdProvider.GetActiveProductionTenantIds()).Returns(_prodTenants);
 
-            var backendFxApplication =
-                new BackendFxApplication(new MicrosoftCompositionRoot(), A.Fake<IExceptionLogger>(),
-                    GetType().Assembly);
-
-            _sut = new DataGeneratingApplication(tenantIdProvider, _tenantWideMutexManager, backendFxApplication);
             TestDataGenerator.Calls.Clear();
         }
 
-        private readonly DataGeneratingApplication _sut;
-
-        private readonly TenantId[] _demoTenants = {new TenantId(1), new TenantId(2)};
-        private readonly TenantId[] _prodTenants = {new TenantId(11), new TenantId(12)};
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public async Task CallsDataGeneratorWhenSeedingForSpecificTenant(bool isDemoTenant)
+        [InlineData(CompositionRootType.Microsoft, true)]
+        [InlineData(CompositionRootType.Microsoft, false)]
+        [InlineData(CompositionRootType.SimpleInjector, true)]
+        [InlineData(CompositionRootType.SimpleInjector, false)]
+        public async Task CallsDataGeneratorWhenSeedingForSpecificTenant(CompositionRootType compositionRootType, bool isDemoTenant)
         {
+            var backendFxApplication =
+                new BackendFxApplication(
+                    compositionRootType.Create(), 
+                    A.Fake<IExceptionLogger>(),
+                    GetType().Assembly);
+
+            using var sut = new DataGeneratingApplication(_tenantIdProvider, _tenantWideMutexManager, backendFxApplication);
+            
             ITenantWideMutex disposable = A.Fake<ITenantWideMutex>();
             ITenantWideMutex m;
             var tryAcquireCall = A.CallTo(() =>
@@ -51,8 +54,8 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
                 .Returns(true)
                 .AssignsOutAndRefParameters(disposable);
 
-            await _sut.BootAsync();
-            _sut.DataGenerationContext.SeedDataForTenant(new TenantId(123), isDemoTenant);
+            await sut.BootAsync();
+            sut.DataGenerationContext.SeedDataForTenant(new TenantId(123), isDemoTenant);
 
             Assert.Contains(nameof(ProdDataGenerator1), TestDataGenerator.Calls);
 
@@ -71,8 +74,10 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
             A.CallTo(() => disposable.Dispose()).MustHaveHappenedOnceExactly();
         }
 
-        [Fact]
-        public async Task DoesNothingWhenCannotAcquireTenantWideMutex()
+        [Theory]
+        [InlineData(CompositionRootType.SimpleInjector)]
+        [InlineData(CompositionRootType.Microsoft)]
+        public async Task DoesNothingWhenCannotAcquireTenantWideMutex(CompositionRootType compositionRootType)
         {
             ITenantWideMutex m;
             var tryAcquireCall = A.CallTo(() =>
@@ -83,8 +88,15 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
                     out m));
             tryAcquireCall.Returns(false);
 
-            await _sut.BootAsync();
-            _sut.DataGenerationContext.SeedDataForTenant(new TenantId(123), false);
+            var backendFxApplication =
+                new BackendFxApplication(
+                    compositionRootType.Create(),
+                    A.Fake<IExceptionLogger>(),
+                    GetType().Assembly);
+
+            using var sut = new DataGeneratingApplication(_tenantIdProvider, _tenantWideMutexManager, backendFxApplication);
+            await sut.BootAsync();
+            sut.DataGenerationContext.SeedDataForTenant(new TenantId(123), false);
 
             Assert.Empty(TestDataGenerator.Calls);
 

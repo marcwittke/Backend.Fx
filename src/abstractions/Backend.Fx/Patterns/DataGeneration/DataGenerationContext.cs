@@ -63,14 +63,15 @@ namespace Backend.Fx.Patterns.DataGeneration
                     .ServiceProvider
                     .GetServices<IDataGenerator>()
                     .OrderBy(dg => dg.Priority)
-                    .Select(dg => dg.GetType());
+                    .Select(dg => dg.GetType())
+                    .ToArray();
 
                 if (!includeDemoDataGenerators)
                 {
-                    dataGenerators = dataGenerators.Where(dg => !typeof(IDemoDataGenerator).IsAssignableFrom(dg));
+                    dataGenerators = dataGenerators.Where(dg => !typeof(IDemoDataGenerator).IsAssignableFrom(dg)).ToArray();
                 }
 
-                return dataGenerators.ToArray();
+                return dataGenerators;
             }
         }
     }

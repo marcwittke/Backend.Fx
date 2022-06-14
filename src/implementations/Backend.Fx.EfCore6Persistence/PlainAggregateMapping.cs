@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using Backend.Fx.BuildingBlocks;
 using Microsoft.EntityFrameworkCore;
 
-namespace Backend.Fx.EfCorePersistence
+namespace Backend.Fx.EfCore6Persistence
 {
     public class PlainAggregateMapping<TAggregateRoot> : AggregateMapping<TAggregateRoot>
         where TAggregateRoot : AggregateRoot

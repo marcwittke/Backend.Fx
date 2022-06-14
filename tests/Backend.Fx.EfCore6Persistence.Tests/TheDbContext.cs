@@ -1,13 +1,12 @@
 using System.Linq;
-using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
-using Backend.Fx.EfCorePersistence.Tests.Fixtures;
+using Backend.Fx.EfCore6Persistence.Tests.DummyImpl.Domain;
+using Backend.Fx.EfCore6Persistence.Tests.Fixtures;
 using Backend.Fx.Tests;
 using Microsoft.EntityFrameworkCore;
-using Serilog.Formatting.Display;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Backend.Fx.EfCorePersistence.Tests
+namespace Backend.Fx.EfCore6Persistence.Tests
 {
     public class TheDbContext: TestWithLogging
     {

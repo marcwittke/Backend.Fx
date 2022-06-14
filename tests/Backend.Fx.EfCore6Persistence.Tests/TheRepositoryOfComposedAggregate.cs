@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
-using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence;
-using Backend.Fx.EfCorePersistence.Tests.Fixtures;
+using Backend.Fx.EfCore6Persistence.Tests.DummyImpl.Domain;
+using Backend.Fx.EfCore6Persistence.Tests.DummyImpl.Persistence;
+using Backend.Fx.EfCore6Persistence.Tests.Fixtures;
 using Backend.Fx.Environment.DateAndTime;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Extensions;
@@ -15,7 +15,7 @@ using FakeItEasy;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Backend.Fx.EfCorePersistence.Tests
+namespace Backend.Fx.EfCore6Persistence.Tests
 {
     public class TheRepositoryOfComposedAggregate : TestWithLogging
     {

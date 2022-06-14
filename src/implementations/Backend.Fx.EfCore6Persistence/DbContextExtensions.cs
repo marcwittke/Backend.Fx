@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
-namespace Backend.Fx.EfCorePersistence
+namespace Backend.Fx.EfCore6Persistence
 {
     public static class DbContextExtensions
     {
@@ -20,7 +20,6 @@ namespace Backend.Fx.EfCorePersistence
         {
             Logger.LogDebug("Disabling change tracking on {DbContextTypeName} instance", dbContext.GetType().Name);
             dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
-            dbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
         public static void RegisterRowVersionProperty(this ModelBuilder modelBuilder)

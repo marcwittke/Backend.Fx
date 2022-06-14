@@ -19,9 +19,11 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
         void RegisterModules(params IModule[] modules);
 
-        void RegisterServiceDescriptor(ServiceDescriptor serviceDescriptor);
+        void Register(ServiceDescriptor serviceDescriptor);
 
-        void RegisterServiceDescriptors(IEnumerable<ServiceDescriptor> serviceDescriptors);
+        void RegisterDecorator(ServiceDescriptor serviceDescriptor);
+
+        void RegisterCollection(IEnumerable<ServiceDescriptor> serviceDescriptors);
 
         IServiceScope BeginScope();
 
@@ -49,9 +51,10 @@ namespace Backend.Fx.Patterns.DependencyInjection
             }
         }
 
-        public abstract void RegisterServiceDescriptor(ServiceDescriptor serviceDescriptor);
-        
-        public abstract void RegisterServiceDescriptors(IEnumerable<ServiceDescriptor> serviceDescriptors);
+        public abstract void Register(ServiceDescriptor serviceDescriptor);
+        public abstract void RegisterDecorator(ServiceDescriptor serviceDescriptor);
+
+        public abstract void RegisterCollection(IEnumerable<ServiceDescriptor> serviceDescriptors);
         
         public abstract IServiceScope BeginScope();
 

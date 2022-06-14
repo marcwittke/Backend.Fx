@@ -9,7 +9,7 @@ using ILogger = Microsoft.Extensions.Logging.ILogger;
 namespace Backend.Fx.AspNetCore.Mvc.Activators
 {
     /// <summary>
-    /// This controller activator relies on an <see cref="Patterns.DependencyInjection.IServiceProvider"/> set before in the
+    /// This controller activator relies on an <see cref="IServiceProvider"/> set before in the
     /// http context items dictionary. If non is to be found, the controller is activated
     /// using the default <see cref="System.Activator"/> (without providing any ctor arguments).
     /// </summary>

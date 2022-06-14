@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using Backend.Fx.EfCorePersistence.Tests.DummyImpl.Domain;
+using Backend.Fx.EfCore6Persistence.Tests.DummyImpl.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence
+namespace Backend.Fx.EfCore6Persistence.Tests.DummyImpl.Persistence
 {
     public class BlogMapping : AggregateMapping<Blog>
     {

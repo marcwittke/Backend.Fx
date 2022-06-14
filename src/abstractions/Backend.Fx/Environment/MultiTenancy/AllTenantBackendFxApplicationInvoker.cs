@@ -23,7 +23,7 @@ namespace Backend.Fx.Environment.MultiTenancy
         public void Invoke(Action<IServiceProvider> action)
         {
             var correlationId = Guid.NewGuid();
-            TenantId[] tenantIds = _tenantIdProvider.GetActiveDemonstrationTenantIds().Concat(_tenantIdProvider.GetActiveProductionTenantIds()).ToArray();
+            TenantId[] tenantIds = _tenantIdProvider.GetActiveTenantIds();
             Logger.LogDebug("Action will be called in tenants: {TenantIds}", string.Join(",", tenantIds.Select(t => t.ToString())));
             foreach (TenantId tenantId in tenantIds)
             {

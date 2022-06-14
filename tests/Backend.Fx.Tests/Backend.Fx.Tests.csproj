@@ -10,6 +10,7 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="FakeItEasy" Version="6.2.1" />
+        <PackageReference Include="FluentScheduler" Version="5.5.1" />
         <PackageReference Include="MarcWittke.Xunit.AssemblyFixture" Version="1.0.1" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.25" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3" />
@@ -25,6 +26,7 @@
         <ProjectReference Include="..\..\src\abstractions\Backend.Fx\Backend.Fx.csproj" />
         <ProjectReference Include="..\..\src\implementations\Backend.Fx.InMemoryPersistence\Backend.Fx.InMemoryPersistence.csproj" />
         <ProjectReference Include="..\..\src\implementations\Backend.Fx.MicrosoftDependencyInjection\Backend.Fx.MicrosoftDependencyInjection.csproj" />
+        <ProjectReference Include="..\..\src\implementations\Backend.Fx.SimpleInjetorDependencyInjection\Backend.Fx.SimpleInjectorDependencyInjection.csproj" />
     </ItemGroup>
 
     <ItemGroup>

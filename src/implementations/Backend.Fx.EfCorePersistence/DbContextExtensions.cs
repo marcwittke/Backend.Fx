@@ -20,7 +20,6 @@ namespace Backend.Fx.EfCorePersistence
         {
             Logger.LogDebug("Disabling change tracking on {DbContextTypeName} instance", dbContext.GetType().Name);
             dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
-            dbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
         public static void RegisterRowVersionProperty(this ModelBuilder modelBuilder)

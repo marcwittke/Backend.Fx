@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -59,6 +58,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// </summary>
         /// <param name="compositionRoot">The composition root of the dependency injection framework</param>
         /// <param name="exceptionLogger"></param>
+        /// <param name="assemblies"></param>
         public BackendFxApplication(ICompositionRoot compositionRoot, IExceptionLogger exceptionLogger, params Assembly[] assemblies)
         {
             var invoker = new BackendFxApplicationInvoker(compositionRoot);
@@ -67,7 +67,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
             CompositionRoot = compositionRoot;
             ExceptionLogger = exceptionLogger;
-            Assemblies = assemblies.Concat(new[] {typeof(BackendFxApplication).Assembly}).Distinct().ToArray();
+            Assemblies = assemblies;
             CompositionRoot.RegisterModules(new DomainModule(Assemblies));
         }
 
@@ -89,29 +89,15 @@ namespace Backend.Fx.Patterns.DependencyInjection
             return Task.CompletedTask;
         }
 
-        public TBackendFxApplication As<TBackendFxApplication>()
-            where TBackendFxApplication : class, IBackendFxApplication
-        {
-            return this as TBackendFxApplication;
-        }
-
         public bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue, CancellationToken cancellationToken = default)
         {
             return _isBooted.Wait(timeoutMilliSeconds, cancellationToken);
         }
 
-        protected void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Logger.LogInformation("Application shut down initialized");
-                CompositionRoot?.Dispose();
-            }
-        }
-
         public void Dispose()
         {
-            Dispose(true);
+            Logger.LogInformation("Application shut down initialized");
+            CompositionRoot?.Dispose();
             GC.SuppressFinalize(this);
         }
     }

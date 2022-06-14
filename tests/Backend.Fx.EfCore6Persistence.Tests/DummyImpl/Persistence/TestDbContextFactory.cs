@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
-namespace Backend.Fx.EfCorePersistence.Tests.DummyImpl.Persistence
+namespace Backend.Fx.EfCore6Persistence.Tests.DummyImpl.Persistence
 {
     [UsedImplicitly]
     [Obsolete("Only for migration support at design time")]

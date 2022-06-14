@@ -17,13 +17,13 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
         public Assembly[] Assemblies => _application.Assemblies;
         
-        public IBackendFxApplicationAsyncInvoker AsyncInvoker => _application.AsyncInvoker;
+        public virtual IBackendFxApplicationAsyncInvoker AsyncInvoker => _application.AsyncInvoker;
 
-        public ICompositionRoot CompositionRoot => _application.CompositionRoot;
+        public virtual ICompositionRoot CompositionRoot => _application.CompositionRoot;
 
-        public IExceptionLogger ExceptionLogger => _application.ExceptionLogger;
+        public virtual IExceptionLogger ExceptionLogger => _application.ExceptionLogger;
 
-        public IBackendFxApplicationInvoker Invoker => _application.Invoker;
+        public virtual IBackendFxApplicationInvoker Invoker => _application.Invoker;
 
         public virtual bool WaitForBoot(
             int timeoutMilliSeconds = int.MaxValue,

@@ -1,8 +1,9 @@
 using System.Threading.Tasks;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.InMemoryPersistence;
-using Backend.Fx.Patterns.EventAggregation.Integration;
-using FakeItEasy;
+using Backend.Fx.Logging;
+using Backend.Fx.MicrosoftDependencyInjection;
+using Backend.Fx.Patterns.DependencyInjection;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -12,11 +13,14 @@ namespace Backend.Fx.Tests.Environment.MultiTenancy
     {
         private readonly SingleTenantApplication _sut;
         private readonly ITenantRepository _tenantRepository = new InMemoryTenantRepository();
-        private readonly IMessageBus _messageBus = A.Fake<IMessageBus>();
 
         public TheSingleTenantApplication(ITestOutputHelper output) : base(output)
         {
-            _sut = new SingleTenantApplication(_messageBus, _tenantRepository, false);
+            _sut = new SingleTenantApplication(
+                _tenantRepository,
+                false,
+                new BackendFxApplication(new MicrosoftCompositionRoot(), new ExceptionLoggers(),
+                    typeof(TheSingleTenantApplication).Assembly));
         }
 
         [Fact]

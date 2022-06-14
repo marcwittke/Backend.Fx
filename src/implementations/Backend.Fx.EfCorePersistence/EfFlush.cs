@@ -28,8 +28,7 @@ namespace Backend.Fx.EfCorePersistence
         public EfFlush(DbContext dbContext, ICurrentTHolder<IIdentity> identityHolder, IClock clock)
         {
             DbContext = dbContext;
-            Logger.LogInformation("Disabling auto detect changes on this DbContext. Changes will be detected explicitly when flushing");
-            DbContext.ChangeTracker.AutoDetectChangesEnabled = false;
+            DbContext.DisableChangeTracking();
             IdentityHolder = identityHolder;
             Clock = clock;
         }

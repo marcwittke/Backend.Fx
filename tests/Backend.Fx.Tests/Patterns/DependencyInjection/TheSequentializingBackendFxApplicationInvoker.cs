@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.Patterns.EventAggregation.Integration;
 using Xunit;
 using Xunit.Abstractions;
 

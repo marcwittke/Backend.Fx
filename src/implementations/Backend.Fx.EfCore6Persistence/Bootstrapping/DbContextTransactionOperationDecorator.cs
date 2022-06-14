@@ -4,7 +4,7 @@ using Backend.Fx.Environment.Persistence;
 using Backend.Fx.Patterns.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 
-namespace Backend.Fx.EfCorePersistence.Bootstrapping
+namespace Backend.Fx.EfCore6Persistence.Bootstrapping
 {
     public class DbContextTransactionOperationDecorator : DbTransactionOperationDecorator
     {

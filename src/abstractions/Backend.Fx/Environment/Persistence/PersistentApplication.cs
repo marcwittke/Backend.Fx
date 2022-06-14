@@ -7,14 +7,14 @@ using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Environment.Persistence
 {
-    public class BackendFxDbApplication : BackendFxApplicationDecorator
+    public class PersistentApplication : BackendFxApplicationDecorator
     {
-        private static readonly ILogger Logger = Log.Create<BackendFxDbApplication>();
+        private static readonly ILogger Logger = Log.Create<PersistentApplication>();
 
         private readonly IDatabaseAvailabilityAwaiter _databaseAvailabilityAwaiter;
         private readonly IDatabaseBootstrapper _databaseBootstrapper;
 
-        public BackendFxDbApplication(IDatabaseBootstrapper databaseBootstrapper,
+        public PersistentApplication(IDatabaseBootstrapper databaseBootstrapper,
             IDatabaseAvailabilityAwaiter databaseAvailabilityAwaiter,
             IBackendFxApplication application) : base(application)
         {
