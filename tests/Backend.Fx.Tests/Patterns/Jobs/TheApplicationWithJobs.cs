@@ -50,8 +50,9 @@ namespace Backend.Fx.Tests.Patterns.Jobs
 
             sut.Dispose();
 
-            Assert.True(SayHelloJob.Invocations.Count > 35);
-            Assert.True(SayHelloJob.Invocations.Count < 45);
+            // now plus 3 x 300ms during a second, four tenants = 16 invocations
+            Assert.Equal(16, SayHelloJob.Invocations.Count);
+            
         }
 
         private class FluentSchedulerApplication : ApplicationWithJobs
@@ -84,7 +85,7 @@ namespace Backend.Fx.Tests.Patterns.Jobs
 
                 Schedule(() => _invoker.Invoke(sp => sp.GetRequiredService<SayHelloJob>().Run()))
                     .ToRunNow()
-                    .AndEvery(interval: 111)
+                    .AndEvery(interval: 300)
                     .Milliseconds();
             }
         }
