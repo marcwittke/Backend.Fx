@@ -31,3 +31,6 @@ _ReSharper*/
 # JetBrains Rider
 .idea/
 *.sln.iml
+
+#nuke.build
+.nuke/temp
