@@ -10,14 +10,14 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
     public class RaiseIntegrationEventsInvokerDecorator : IBackendFxApplicationInvoker
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ICompositionRoot _compositionRoot;
         private readonly IBackendFxApplicationInvoker _invoker;
 
         public RaiseIntegrationEventsInvokerDecorator(
-            IServiceProvider serviceProvider,
+            ICompositionRoot compositionRoot,
             IBackendFxApplicationInvoker invoker)
         {
-            _serviceProvider = serviceProvider;
+            _compositionRoot = compositionRoot;
             _invoker = invoker;
         }
 
@@ -28,20 +28,20 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
             Guid? correlationId = null)
         {
             _invoker.Invoke(action, identity, tenantId, correlationId);
-            AsyncHelper.RunSync(() => _serviceProvider.GetRequiredService<IMessageBusScope>().RaiseEvents());
+            AsyncHelper.RunSync(() => _compositionRoot.ServiceProvider.GetRequiredService<IMessageBusScope>().RaiseEvents());
         }
     }
 
     public class RaiseIntegrationEventsAsyncInvokerDecorator : IBackendFxApplicationAsyncInvoker
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ICompositionRoot _compositionRoot;
         private readonly IBackendFxApplicationAsyncInvoker _invoker;
 
         public RaiseIntegrationEventsAsyncInvokerDecorator(
-            IServiceProvider serviceProvider,
+            ICompositionRoot compositionRoot,
             IBackendFxApplicationAsyncInvoker invoker)
         {
-            _serviceProvider = serviceProvider;
+            _compositionRoot = compositionRoot;
             _invoker = invoker;
         }
 
@@ -52,7 +52,7 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
             Guid? correlationId = null)
         {
             await _invoker.InvokeAsync(awaitableAsyncAction, identity, tenantId, correlationId).ConfigureAwait(false);
-            await _serviceProvider.GetRequiredService<IMessageBusScope>().RaiseEvents().ConfigureAwait(false);
+            await _compositionRoot.ServiceProvider.GetRequiredService<IMessageBusScope>().RaiseEvents().ConfigureAwait(false);
         }
     }
 }

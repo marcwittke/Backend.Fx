@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Backend.Fx.Extensions;
 using Backend.Fx.Logging;
 using Microsoft.Extensions.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
@@ -45,6 +47,8 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// </summary>
         /// <returns></returns>
         Task BootAsync(CancellationToken cancellationToken = default);
+
+        TBackendFxApplicationDecorator As<TBackendFxApplicationDecorator>() where TBackendFxApplicationDecorator : BackendFxApplicationDecorator;
     }
 
 
@@ -61,6 +65,13 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// <param name="assemblies"></param>
         public BackendFxApplication(ICompositionRoot compositionRoot, IExceptionLogger exceptionLogger, params Assembly[] assemblies)
         {
+            assemblies = assemblies ?? Array.Empty<Assembly>();
+            
+            Logger.LogInformation(
+                "Initializing application with {CompositionRoot} providing services from [{Assemblies}]",
+                compositionRoot.GetType().GetDetailedTypeName(),
+                string.Join(", ", assemblies.Select(ass => ass.GetName().Name)));
+            
             var invoker = new BackendFxApplicationInvoker(compositionRoot);
             AsyncInvoker = new ExceptionLoggingAsyncInvoker(exceptionLogger, invoker);
             Invoker = new ExceptionLoggingInvoker(exceptionLogger, invoker);
@@ -87,6 +98,12 @@ namespace Backend.Fx.Patterns.DependencyInjection
             CompositionRoot.Verify();
             _isBooted.Set();
             return Task.CompletedTask;
+        }
+
+        public virtual TBackendFxApplicationDecorator As<TBackendFxApplicationDecorator>()
+            where TBackendFxApplicationDecorator : BackendFxApplicationDecorator
+        {
+            return null;
         }
 
         public bool WaitForBoot(int timeoutMilliSeconds = int.MaxValue, CancellationToken cancellationToken = default)

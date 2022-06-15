@@ -2,9 +2,13 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
+using Backend.Fx.Patterns.Authorization;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Domain;
+using Backend.Fx.Patterns.EventAggregation.Integration;
+using Backend.Fx.Tests.Patterns.Authorization;
 using FakeItEasy;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -20,6 +24,43 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         public TheBackendFxApplication(ITestOutputHelper output) : base(output)
         {
             _sut = new BackendFxApplication(_fakes.CompositionRoot, A.Fake<IExceptionLogger>());
+        }
+
+        [Fact]
+        public void ProvidesSpecificDecoratorWhenPresent()
+        {
+            var sut =
+                new SingleTenantApplication(
+                    A.Fake<ITenantRepository>(),
+                    true,
+                    new MessageBusApplication(
+                        A.Fake<IMessageBus>(),
+                        new AuthorizingApplication(
+                            new BackendFxApplication(
+                                CompositionRootType.Microsoft.Create(),
+                                new ExceptionLoggers(),
+                                typeof(TheAuthorizingApplication).Assembly))));
+
+            var authorizingApplication = sut.As<AuthorizingApplication>();
+            Assert.NotNull(authorizingApplication);
+        }
+
+        [Fact]
+        public void ProvidesNoDecoratorWhenNotPresent()
+        {
+            var sut =
+                new SingleTenantApplication(
+                    A.Fake<ITenantRepository>(),
+                    true,
+                    new MessageBusApplication(
+                        A.Fake<IMessageBus>(),
+                        new BackendFxApplication(
+                            CompositionRootType.Microsoft.Create(),
+                            new ExceptionLoggers(),
+                            typeof(TheAuthorizingApplication).Assembly)));
+
+            var authorizingApplication = sut.As<AuthorizingApplication>();
+            Assert.Null(authorizingApplication);
         }
 
         [Fact]

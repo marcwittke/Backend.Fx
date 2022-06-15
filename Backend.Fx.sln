@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C7885592
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.Tests", "tests\Backend.Fx.Tests\Backend.Fx.Tests.csproj", "{3706F748-43F6-41BD-8875-81FA679220C7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.EfCorePersistence.Tests", "tests\Backend.Fx.EfCorePersistence.Tests\Backend.Fx.EfCorePersistence.Tests.csproj", "{4BB72B85-61F2-4C7F-9079-EA43492FCD44}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.EfCore5Persistence.Tests", "tests\Backend.Fx.EfCore5Persistence.Tests\Backend.Fx.EfCore5Persistence.Tests.csproj", "{4BB72B85-61F2-4C7F-9079-EA43492FCD44}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "abstractions", "abstractions", "{A742F814-725A-44ED-95E6-98E142738E9D}"
 EndProject
@@ -25,7 +25,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "implementations", "implemen
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx", "src\abstractions\Backend.Fx\Backend.Fx.csproj", "{581DCC00-9246-4A2E-AE31-206742B2746A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.EfCorePersistence", "src\implementations\Backend.Fx.EfCorePersistence\Backend.Fx.EfCorePersistence.csproj", "{A60B7952-D92C-403D-9710-65BE13963C7E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.EfCore5Persistence", "src\implementations\Backend.Fx.EfCore5Persistence\Backend.Fx.EfCore5Persistence.csproj", "{A60B7952-D92C-403D-9710-65BE13963C7E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend.Fx.RabbitMq", "src\implementations\Backend.Fx.RabbitMq\Backend.Fx.RabbitMq.csproj", "{2C826FC0-443A-4874-B213-C35BFDEA200A}"
 EndProject

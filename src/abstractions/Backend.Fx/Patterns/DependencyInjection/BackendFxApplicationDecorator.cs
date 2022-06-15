@@ -2,16 +2,21 @@ using System;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Backend.Fx.Extensions;
 using Backend.Fx.Logging;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Patterns.DependencyInjection
 {
     public abstract class BackendFxApplicationDecorator : IBackendFxApplication
     {
+        private static readonly ILogger Logger = Log.Create<BackendFxApplicationDecorator>();
         private readonly IBackendFxApplication _application;
 
         protected BackendFxApplicationDecorator(IBackendFxApplication application)
         {
+            Logger.LogInformation("Decorating the application with {Decorator}", GetType().GetDetailedTypeName());
             _application = application;
         }
 
@@ -35,6 +40,16 @@ namespace Backend.Fx.Patterns.DependencyInjection
         public virtual Task BootAsync(CancellationToken cancellationToken = default)
         {
             return _application.BootAsync(cancellationToken);
+        }
+
+        public TBackendFxApplicationDecorator As<TBackendFxApplicationDecorator>() where TBackendFxApplicationDecorator : BackendFxApplicationDecorator
+        {
+            if (this is TBackendFxApplicationDecorator matchingDecorator)
+            {
+                return matchingDecorator;
+            }
+
+            return _application.As<TBackendFxApplicationDecorator>();
         }
 
         protected virtual void Dispose(bool disposing)

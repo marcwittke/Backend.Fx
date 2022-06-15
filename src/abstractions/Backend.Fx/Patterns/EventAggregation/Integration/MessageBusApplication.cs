@@ -14,8 +14,8 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
         {
             application.CompositionRoot.RegisterModules(new MessageBusModule(messageBus, application.Assemblies));
             _messageBus = messageBus;
-            Invoker = new RaiseIntegrationEventsInvokerDecorator(application.CompositionRoot.ServiceProvider, base.Invoker);
-            AsyncInvoker = new RaiseIntegrationEventsAsyncInvokerDecorator(application.CompositionRoot.ServiceProvider, base.AsyncInvoker);
+            Invoker = new RaiseIntegrationEventsInvokerDecorator(application.CompositionRoot, base.Invoker);
+            AsyncInvoker = new RaiseIntegrationEventsAsyncInvokerDecorator(application.CompositionRoot, base.AsyncInvoker);
         }
 
         public override async Task BootAsync(CancellationToken cancellationToken = default)
