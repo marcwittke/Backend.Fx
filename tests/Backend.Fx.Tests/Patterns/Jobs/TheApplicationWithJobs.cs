@@ -6,7 +6,6 @@ using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.Jobs;
-using Backend.Fx.Tests.Patterns.DependencyInjection;
 using Backend.Fx.TestUtil;
 using FakeItEasy;
 using FluentScheduler;

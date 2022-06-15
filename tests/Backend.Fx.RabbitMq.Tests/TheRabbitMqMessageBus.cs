@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Threading;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
-using Backend.Fx.Tests;
 using Backend.Fx.TestUtil;
 using FakeItEasy;
 using Microsoft.Extensions.DependencyInjection;
