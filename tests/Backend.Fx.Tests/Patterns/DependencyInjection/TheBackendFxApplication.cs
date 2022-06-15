@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.Authorization;
@@ -20,10 +21,11 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
     {
         private readonly IBackendFxApplication _sut;
         private readonly DiTestFakes _fakes = new DiTestFakes();
+        private readonly IExceptionLogger _exceptionLogger = A.Fake<IExceptionLogger>();
 
         public TheBackendFxApplication(ITestOutputHelper output) : base(output)
         {
-            _sut = new BackendFxApplication(_fakes.CompositionRoot, A.Fake<IExceptionLogger>());
+            _sut = new BackendFxApplication(_fakes.CompositionRoot, _exceptionLogger);
         }
 
         [Fact]
@@ -77,9 +79,9 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         }
 
         [Fact]
-        public void DisposesCompositionRootOnDispose()
+        public async Task DisposesCompositionRootOnDispose()
         {
-            _sut.BootAsync();
+            await _sut.BootAsync();
             _sut.Dispose();
             A.CallTo(() => _fakes.CompositionRoot.Dispose()).MustHaveHappenedOnceExactly();
         }
@@ -111,10 +113,36 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
 
 
         [Fact]
-        public void VerifiesCompositionRootOnBoot()
+        public async Task VerifiesCompositionRootOnBoot()
         {
-            _sut.BootAsync();
+            await _sut.BootAsync();
             A.CallTo(() => _fakes.CompositionRoot.Verify()).MustHaveHappenedOnceExactly();
+        }
+
+        [Fact]
+        public async Task LogsButDoesNotHandleExceptions()
+        {
+            var exception = new Exception();
+
+            await _sut.BootAsync();
+            Assert.Throws<Exception>(() =>
+                _sut.Invoker.Invoke(sp => throw exception, new AnonymousIdentity(), new TenantId(111)));
+
+            A.CallTo(() => _exceptionLogger.LogException(A<Exception>.That.IsEqualTo(exception)))
+                .MustHaveHappenedOnceExactly();
+        }
+
+        [Fact]
+        public async Task LogsButDoesNotHandleExceptionsAsync()
+        {
+            var exception = new Exception();
+
+            await _sut.BootAsync();
+            await Assert.ThrowsAsync<Exception>(() =>
+                _sut.AsyncInvoker.InvokeAsync(sp => throw exception, new AnonymousIdentity(), new TenantId(111)));
+
+            A.CallTo(() => _exceptionLogger.LogException(A<Exception>.That.IsEqualTo(exception)))
+                .MustHaveHappenedOnceExactly();
         }
     }
 }

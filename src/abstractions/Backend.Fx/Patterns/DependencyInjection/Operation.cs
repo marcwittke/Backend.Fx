@@ -43,7 +43,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
             Logger.LogInformation("Completing operation #{OperationId}", _instanceId);
             if (_isActive != true)
             {
-                throw new InvalidOperationException($"Cannot begin an operation that is {(_isActive == false ? "terminated" : "not active")}");
+                throw new InvalidOperationException($"Cannot complete an operation that is {(_isActive == false ? "terminated" : "not active")}");
             }
             
             _isActive = false;

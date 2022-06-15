@@ -5,9 +5,13 @@ using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Patterns.IdGeneration
 {
-    public class TheHiLoIdGenerator : TestWithLogging
+    public class TheSequenceIdGenerator : TestWithLogging
     {
-        private readonly HiLoIdGenerator _sut = new SequenceHiLoIdGenerator(new InMemorySequence(100));
+        private readonly IIdGenerator _sut = new SequenceIdGenerator(new InMemorySequence());
+
+        public TheSequenceIdGenerator(ITestOutputHelper output) : base(output)
+        {
+        }
 
         private class IdConsumer
         {
@@ -41,10 +45,6 @@ namespace Backend.Fx.Tests.Patterns.IdGeneration
         public void StartsWithInitialValueAndCountsUp()
         {
             for (var i = 1; i < 1000; i++) Assert.Equal(i, _sut.NextId());
-        }
-
-        public TheHiLoIdGenerator(ITestOutputHelper output) : base(output)
-        {
         }
     }
 }
