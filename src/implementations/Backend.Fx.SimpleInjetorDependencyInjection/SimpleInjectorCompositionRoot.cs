@@ -20,7 +20,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
     {
         private static readonly ILogger Logger = Log.Create<SimpleInjectorCompositionRoot>();
         private readonly Lazy<Container> _container;
-        private readonly ScopedLifestyle _scopedLifestyle;
         private readonly IList<ServiceDescriptor> _services = new List<ServiceDescriptor>();
         private readonly IList<ServiceDescriptor> _decorators = new List<ServiceDescriptor>();
         private readonly IList<ServiceDescriptor[]> _serviceCollections = new List<ServiceDescriptor[]>();
@@ -38,13 +37,13 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             ScopedLifestyle scopedLifestyle)
         {
             Logger.LogInformation("Initializing SimpleInjector");
-            _scopedLifestyle = scopedLifestyle;
+            ScopedLifestyle = scopedLifestyle;
             _container = new Lazy<Container>(() =>
             {
                 Logger.LogInformation("Building SimpleInjector Container");
                 var container = new Container();
                 container.Options.LifestyleSelectionBehavior = lifestyleBehavior;
-                container.Options.DefaultScopedLifestyle = _scopedLifestyle;
+                container.Options.DefaultScopedLifestyle = ScopedLifestyle;
                 
                 foreach (var serviceDescriptor in _services)
                 {
@@ -109,6 +108,9 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             });
         }
 
+        public ScopedLifestyle ScopedLifestyle { get; }
+        
+        public Container Container => _container.Value;
 
         #region ICompositionRoot implementation
 
@@ -175,12 +177,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             return _container.Value.CreateScope();
         }
 
-        public override IServiceProvider ServiceProvider => _container.Value;
-
-        public Scope GetCurrentScope()
-        {
-            return _scopedLifestyle.GetCurrentScope(_container.Value);
-        }
+        public override IServiceProvider ServiceProvider => Container;
 
         /// <summary>
         ///     A behavior that defaults to scoped life style for injected instances
