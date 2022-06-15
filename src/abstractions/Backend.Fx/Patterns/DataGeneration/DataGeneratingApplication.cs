@@ -10,7 +10,7 @@ namespace Backend.Fx.Patterns.DataGeneration
 {
     /// <summary>
     /// Enriches the <see cref="IBackendFxApplication"/> by calling all data generators for all tenants
-    /// on application start and when a tenant gets activated
+    /// on application start
     /// </summary>
     public class DataGeneratingApplication : BackendFxApplicationDecorator
     {
@@ -40,7 +40,6 @@ namespace Backend.Fx.Patterns.DataGeneration
         public override async Task BootAsync(CancellationToken cancellationToken = default)
         {
             _application.CompositionRoot.RegisterModules(new DataGenerationModule(_application.Assemblies));
-            //EnableDataGenerationForNewTenants();
             await base.BootAsync(cancellationToken).ConfigureAwait(false);
             SeedDataForAllActiveTenants();
         }
@@ -62,29 +61,5 @@ namespace Backend.Fx.Patterns.DataGeneration
                 }
             }
         }
-
-        // todo refactor
-        // private void EnableDataGenerationForNewTenants()
-        // {
-        //     _application..Subscribe(new DelegateIntegrationMessageHandler<TenantActivated>(tenantCreated =>
-        //     {
-        //         Logger.LogInformation(
-        //             "Seeding data for recently activated tenant (with demo data: {IsDemoTenant}) {TenantId}",
-        //             tenantCreated.IsDemoTenant,
-        //             tenantCreated.TenantId);
-        //         try
-        //         {
-        //             DataGenerationContext.SeedDataForTenant(new TenantId(tenantCreated.TenantId),
-        //                 tenantCreated.IsDemoTenant);
-        //         }
-        //         catch (Exception ex)
-        //         {
-        //             Logger.LogError(ex,
-        //                 "Seeding data for recently activated tenant (with demo data: {IsDemoTenant}) {TenantId} failed",
-        //                 tenantCreated.IsDemoTenant,
-        //                 tenantCreated.TenantId);
-        //         }
-        //     }));
-        // }
     }
 }
