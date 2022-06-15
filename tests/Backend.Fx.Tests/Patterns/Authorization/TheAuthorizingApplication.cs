@@ -10,6 +10,7 @@ using Backend.Fx.Patterns.EventAggregation.Integration;
 using Backend.Fx.Patterns.Jobs;
 using Backend.Fx.Tests.Patterns.DependencyInjection;
 using Backend.Fx.Tests.Patterns.Jobs;
+using Backend.Fx.TestUtil;
 using FakeItEasy;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;

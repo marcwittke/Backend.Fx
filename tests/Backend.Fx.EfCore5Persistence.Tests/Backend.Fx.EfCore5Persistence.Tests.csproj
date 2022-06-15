@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net5.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
@@ -28,7 +28,7 @@
         <ProjectReference Include="..\..\src\abstractions\Backend.Fx\Backend.Fx.csproj" />
         <ProjectReference Include="..\..\src\implementations\Backend.Fx.EfCore5Persistence\Backend.Fx.EfCore5Persistence.csproj" />
         <ProjectReference Include="..\..\src\implementations\Backend.Fx.SimpleInjetorDependencyInjection\Backend.Fx.SimpleInjectorDependencyInjection.csproj" />
-        <ProjectReference Include="..\Backend.Fx.Tests\Backend.Fx.Tests.csproj" />
+        <ProjectReference Include="..\Backend.Fx.TestUtil\Backend.Fx.TestUtil.csproj" />
     </ItemGroup>
 
     <ItemGroup>

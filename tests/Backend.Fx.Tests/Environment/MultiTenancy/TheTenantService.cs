@@ -3,6 +3,7 @@ using System.Linq;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.InMemoryPersistence;
 using Backend.Fx.Patterns.EventAggregation.Integration;
+using Backend.Fx.TestUtil;
 using FakeItEasy;
 using Xunit;
 using Xunit.Abstractions;

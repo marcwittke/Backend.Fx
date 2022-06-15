@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Backend.Fx.BuildingBlocks;
 using Backend.Fx.RandomData;
+using Backend.Fx.TestUtil;
 using JetBrains.Annotations;
 using Xunit;
 using Xunit.Abstractions;

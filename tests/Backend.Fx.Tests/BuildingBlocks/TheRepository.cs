@@ -4,6 +4,7 @@ using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Exceptions;
 using Backend.Fx.InMemoryPersistence;
 using Backend.Fx.Patterns.Authorization;
+using Backend.Fx.TestUtil;
 using FakeItEasy;
 using Xunit;
 using Xunit.Abstractions;

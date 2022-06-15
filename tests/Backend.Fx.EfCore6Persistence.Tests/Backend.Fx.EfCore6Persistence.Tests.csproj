@@ -29,6 +29,7 @@
         <ProjectReference Include="..\..\src\implementations\Backend.Fx.EfCore6Persistence\Backend.Fx.EfCore6Persistence.csproj" />
         <ProjectReference Include="..\..\src\implementations\Backend.Fx.SimpleInjetorDependencyInjection\Backend.Fx.SimpleInjectorDependencyInjection.csproj" />
         <ProjectReference Include="..\Backend.Fx.Tests\Backend.Fx.Tests.csproj" />
+        <ProjectReference Include="..\Backend.Fx.TestUtil\Backend.Fx.TestUtil.csproj" />
     </ItemGroup>
 
     <ItemGroup>

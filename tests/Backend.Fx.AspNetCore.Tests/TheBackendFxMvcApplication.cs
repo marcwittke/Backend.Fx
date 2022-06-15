@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Backend.Fx.AspNetCore.Tests.SampleApp.Domain;
 using Backend.Fx.Tests;
+using Backend.Fx.TestUtil;
 using Newtonsoft.Json;
 using Xunit;
 using Xunit.Abstractions;

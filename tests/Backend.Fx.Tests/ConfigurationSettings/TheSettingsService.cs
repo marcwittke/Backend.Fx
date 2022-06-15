@@ -6,6 +6,7 @@ using Backend.Fx.Hacking;
 using Backend.Fx.InMemoryPersistence;
 using Backend.Fx.Patterns.Authorization;
 using Backend.Fx.Patterns.IdGeneration;
+using Backend.Fx.TestUtil;
 using FakeItEasy;
 using Xunit;
 using Xunit.Abstractions;

@@ -2,6 +2,7 @@ using System.Linq;
 using Backend.Fx.EfCore6Persistence.Tests.DummyImpl.Domain;
 using Backend.Fx.EfCore6Persistence.Tests.Fixtures;
 using Backend.Fx.Tests;
+using Backend.Fx.TestUtil;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 using Xunit.Abstractions;

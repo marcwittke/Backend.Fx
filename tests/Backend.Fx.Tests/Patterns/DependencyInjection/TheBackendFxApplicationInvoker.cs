@@ -3,6 +3,7 @@ using System.Security.Principal;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.TestUtil;
 using FakeItEasy;
 using Xunit;
 using Xunit.Abstractions;

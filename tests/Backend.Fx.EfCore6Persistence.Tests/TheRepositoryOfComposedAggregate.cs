@@ -11,6 +11,7 @@ using Backend.Fx.Extensions;
 using Backend.Fx.Patterns.Authorization;
 using Backend.Fx.Patterns.IdGeneration;
 using Backend.Fx.Tests;
+using Backend.Fx.TestUtil;
 using FakeItEasy;
 using Xunit;
 using Xunit.Abstractions;

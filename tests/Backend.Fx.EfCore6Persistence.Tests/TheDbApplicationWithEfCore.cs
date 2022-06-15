@@ -15,6 +15,7 @@ using Backend.Fx.Patterns.EventAggregation.Domain;
 using Backend.Fx.Patterns.IdGeneration;
 using Backend.Fx.Tests;
 using Backend.Fx.Tests.Patterns.DependencyInjection;
+using Backend.Fx.TestUtil;
 using FakeItEasy;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;

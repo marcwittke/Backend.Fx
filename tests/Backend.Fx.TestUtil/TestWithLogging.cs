@@ -4,7 +4,7 @@ using Serilog.Extensions.Logging;
 using Xunit.Abstractions;
 using ILogger = Serilog.ILogger;
 
-namespace Backend.Fx.Tests
+namespace Backend.Fx.TestUtil
 {
     public abstract class TestWithLogging : IDisposable
     {

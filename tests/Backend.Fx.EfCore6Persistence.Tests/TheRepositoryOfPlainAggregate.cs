@@ -8,6 +8,7 @@ using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Extensions;
 using Backend.Fx.Patterns.Authorization;
 using Backend.Fx.Tests;
+using Backend.Fx.TestUtil;
 using Xunit;
 using Xunit.Abstractions;
 

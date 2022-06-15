@@ -7,6 +7,7 @@ using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
+using Backend.Fx.TestUtil;
 using Xunit;
 using Xunit.Abstractions;
 

@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Backend.Fx.Patterns.IdGeneration;
+using Backend.Fx.TestUtil;
 using Xunit;
 using Xunit.Abstractions;
 

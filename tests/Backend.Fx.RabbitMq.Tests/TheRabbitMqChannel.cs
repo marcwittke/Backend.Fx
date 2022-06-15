@@ -2,6 +2,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Backend.Fx.Tests;
+using Backend.Fx.TestUtil;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Xunit;
