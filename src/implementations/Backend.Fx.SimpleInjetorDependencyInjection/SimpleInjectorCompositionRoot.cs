@@ -12,7 +12,6 @@ using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.SimpleInjectorDependencyInjection
 {
-    
     /// <summary>
     ///     Provides a reusable composition root assuming Simple Injector as container
     /// </summary>
@@ -23,7 +22,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
         private readonly IList<ServiceDescriptor> _services = new List<ServiceDescriptor>();
         private readonly IList<ServiceDescriptor> _decorators = new List<ServiceDescriptor>();
         private readonly IList<ServiceDescriptor[]> _serviceCollections = new List<ServiceDescriptor[]>();
-        
+
         /// <summary>
         /// This constructor creates a composition root that prefers scoped lifestyle
         /// </summary>
@@ -44,11 +43,11 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
                 var container = new Container();
                 container.Options.LifestyleSelectionBehavior = lifestyleBehavior;
                 container.Options.DefaultScopedLifestyle = ScopedLifestyle;
-                
+
                 foreach (var serviceDescriptor in _services)
                 {
                     serviceDescriptor.LogDetails(Logger, "Adding");
-                    
+
                     if (serviceDescriptor.ImplementationType != null)
                     {
                         container.Register(
@@ -78,7 +77,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
                 foreach (var serviceDescriptor in _decorators)
                 {
                     serviceDescriptor.LogDetails(Logger, "Adding decorator");
-                    
+
                     container.RegisterDecorator(
                         serviceDescriptor.ServiceType,
                         serviceDescriptor.ImplementationType,
@@ -91,7 +90,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
                         serviceDescriptors[0].Lifetime.ToString(),
                         serviceDescriptors[0].ServiceType.Name,
                         $"[{string.Join(",", serviceDescriptors.Select(sd => sd.GetImplementationTypeDescription()))}]");
-                    
+
                     foreach (var serviceDescriptor in serviceDescriptors)
                     {
                         container.Collection.Append(
@@ -103,13 +102,13 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
 
                 // needed to support extension method IServiceProvider.CreateScope() 
                 container.RegisterInstance<IServiceScopeFactory>(new SimpleInjectorServiceScopeFactory(container));
-                
+
                 return container;
             });
         }
 
         public ScopedLifestyle ScopedLifestyle { get; }
-        
+
         public Container Container => _container.Value;
 
         #region ICompositionRoot implementation
@@ -120,12 +119,12 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             {
                 throw new InvalidOperationException("Container has been built and cannot be changed any more.");
             }
-            
+
             foreach (var descriptor in _services.Where(sd => sd.ServiceType == serviceDescriptor.ServiceType).ToArray())
             {
                 _services.Remove(descriptor);
             }
-            
+
             _services.Add(serviceDescriptor);
         }
 
@@ -135,7 +134,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             {
                 throw new InvalidOperationException("Container has been built and cannot be changed any more.");
             }
-            
+
             _decorators.Add(serviceDescriptor);
         }
 
@@ -145,8 +144,14 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             {
                 throw new InvalidOperationException("Container has been built and cannot be changed any more.");
             }
-            
+
             var serviceDescriptorArray = serviceDescriptors as ServiceDescriptor[] ?? serviceDescriptors.ToArray();
+
+            if (serviceDescriptorArray.Length == 0)
+            {
+                Logger.Warn("Skipping registration of empty collection");
+                return;
+            }
 
             if (serviceDescriptorArray.Select(sd => sd.ServiceType).Distinct().Count() > 1)
             {

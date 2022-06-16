@@ -63,7 +63,15 @@ namespace Backend.Fx.MicrosoftDependencyInjection
 
         public override void RegisterCollection(IEnumerable<ServiceDescriptor> serviceDescriptors)
         {
-            foreach (var serviceDescriptor in serviceDescriptors)
+            var serviceDescriptorArray = serviceDescriptors as ServiceDescriptor[] ?? serviceDescriptors.ToArray();
+
+            if (serviceDescriptorArray.Length == 0)
+            {
+                Logger.Warn("Skipping registration of empty collection");
+                return;
+            }
+            
+            foreach (var serviceDescriptor in serviceDescriptorArray)
             {
                 serviceDescriptor.LogDetails(Logger, "Adding");
                 _serviceCollection.Add(serviceDescriptor);
