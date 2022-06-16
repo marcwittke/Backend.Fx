@@ -40,8 +40,8 @@ namespace Backend.Fx.RandomData
         public static DateTime RandomDateTime(int rangeDays)
         {
             return rangeDays < 0
-                       ? DateTime.Now.AddDays(-Next(-rangeDays)).AddSeconds(-Next(100000))
-                       : DateTime.Now.AddDays(Next(rangeDays)).AddSeconds(-Next(100000));
+                       ? DateTime.UtcNow.AddDays(-Next(-rangeDays)).AddSeconds(-Next(100000))
+                       : DateTime.UtcNow.AddDays(Next(rangeDays)).AddSeconds(-Next(100000));
         }
 
         public static decimal RandomDecimal(int min = 0, int max = 999999)

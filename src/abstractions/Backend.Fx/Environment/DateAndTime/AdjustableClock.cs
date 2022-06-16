@@ -22,6 +22,11 @@ namespace Backend.Fx.Environment.DateAndTime
         public void OverrideUtcNow(DateTime utcNow)
         {
             Logger.LogTrace("Adjusting clock to {UtcNow}", utcNow);
+            if (utcNow.Kind != DateTimeKind.Utc)
+            {
+                utcNow = new DateTime(utcNow.Ticks, DateTimeKind.Utc);
+            }
+            
             _overriddenUtcNow = utcNow;
         }
 

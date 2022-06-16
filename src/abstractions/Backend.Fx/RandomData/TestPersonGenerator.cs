@@ -34,7 +34,7 @@ namespace Backend.Fx.RandomData
                     Names.Family.Random(),
                     _random.Next(100) < 20 ? "Dr." : "",
                     isFemale ? TestPerson.Genders.Female : TestPerson.Genders.Male,
-                    DateTime.Now.AddDays(-_random.Next(MinimumAgeInDays, MaximumAgeInDays)).Date);
+                    DateTime.UtcNow.AddDays(-_random.Next(MinimumAgeInDays, MaximumAgeInDays)).Date);
             } while (EnforceUniqueNames && _uniqueNames.Contains($"{generated.FirstName}{generated.LastName}"));
 
             if (EnforceUniqueNames)
