@@ -1,7 +1,9 @@
 ﻿using System;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.Extensions
 {
+    [PublicAPI]
     public class MultipleDisposable : IDisposable
     {
         private readonly IDisposable[] _disposables;

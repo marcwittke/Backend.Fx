@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Fx.EfCore5Persistence
 {
+    [PublicAPI]
     public class EntityQueryable<TEntity> : IQueryable<TEntity> where TEntity : Entity
     {
         [CanBeNull] private DbContext _dbContext;

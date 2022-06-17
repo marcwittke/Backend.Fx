@@ -1,7 +1,9 @@
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.RandomData
 {
+    [PublicAPI]
     public class LandLineGenerator : Generator<string>
     {
         public static string Generate()

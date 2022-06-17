@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Threading;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.Extensions
 {
+    [PublicAPI]
     public static class ReaderWriterLockSlimExtensions
     {
         private sealed class ReadLockToken : IDisposable

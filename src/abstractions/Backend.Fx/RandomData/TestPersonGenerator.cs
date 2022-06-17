@@ -1,16 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.RandomData
 {
+    [PublicAPI]
     public class TestPersonGenerator : Generator<TestPerson>
     {
         private const int Year = 365;
         private readonly Random _random = TestRandom.Instance;
         private readonly HashSet<string> _uniqueNames = new HashSet<string>();
 
-        public bool EnforceUniqueNames { get; set; } = false;
+        public bool EnforceUniqueNames { get; set; }
         public int FemalePercentage { get; set; } = 55;
         public int MaximumAgeInDays { get; set; } = 80 * Year;
         public int MinimumAgeInDays { get; set; } = 18 * Year;

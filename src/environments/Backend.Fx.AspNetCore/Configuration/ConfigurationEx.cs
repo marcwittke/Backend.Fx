@@ -1,8 +1,10 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using JetBrains.Annotations;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
 namespace Backend.Fx.AspNetCore.Configuration
 {
+    [PublicAPI]
     public static class ConfigurationEx
     {
         public static TOptions Load<TOptions>(this IConfiguration configuration) where TOptions : class, new()

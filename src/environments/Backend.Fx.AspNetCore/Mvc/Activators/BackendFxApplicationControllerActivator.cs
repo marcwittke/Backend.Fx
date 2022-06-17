@@ -1,5 +1,6 @@
 ﻿using System;
 using Backend.Fx.Logging;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +14,7 @@ namespace Backend.Fx.AspNetCore.Mvc.Activators
     /// http context items dictionary. If non is to be found, the controller is activated
     /// using the default <see cref="System.Activator"/> (without providing any ctor arguments).
     /// </summary>
+    [PublicAPI]
     public class BackendFxApplicationControllerActivator : IControllerActivator
     {
         private static readonly ILogger Logger = Log.Create<BackendFxApplicationControllerActivator>();

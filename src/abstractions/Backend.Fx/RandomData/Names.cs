@@ -1,5 +1,8 @@
-﻿namespace Backend.Fx.RandomData
+﻿using JetBrains.Annotations;
+
+namespace Backend.Fx.RandomData
 {
+    [PublicAPI]
     public static class Names
     {
         public static readonly string[] LegalEntityTypes =

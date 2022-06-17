@@ -20,7 +20,7 @@ namespace Backend.Fx.AspNetCore
         
         public static async Task WriteJsonAsync(this HttpResponse response, string json, string contentType = null)
         {
-            response.ContentType = (contentType ?? "application/json; charset=UTF-8");
+            response.ContentType = contentType ?? "application/json; charset=UTF-8";
             await response.WriteAsync(json);
             await response.Body.FlushAsync();
         }

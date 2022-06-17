@@ -5,9 +5,11 @@ using Backend.Fx.Extensions;
 using Backend.Fx.Patterns.Authorization;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.RandomData;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.InMemoryPersistence
 {
+    [PublicAPI]
     public class InMemoryRepository<T> : Repository<T> where T : AggregateRoot
     {
         public InMemoryRepository(IInMemoryStore<T> store, ICurrentTHolder<TenantId> currentTenantIdHolder, IAggregateAuthorization<T> aggregateAuthorization)

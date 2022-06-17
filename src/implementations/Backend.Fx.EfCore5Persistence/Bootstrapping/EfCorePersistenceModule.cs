@@ -11,6 +11,7 @@ using Backend.Fx.Patterns.IdGeneration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+// ReSharper disable RedundantTypeArgumentsOfMethod
 
 namespace Backend.Fx.EfCore5Persistence.Bootstrapping
 {

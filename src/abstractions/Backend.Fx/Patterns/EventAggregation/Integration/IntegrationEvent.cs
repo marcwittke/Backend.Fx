@@ -1,8 +1,10 @@
 ﻿using System;
 using Backend.Fx.Environment.MultiTenancy;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
+    [PublicAPI]
     public interface IIntegrationEvent
     {
         Guid Id { get; }

@@ -4,9 +4,11 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Reflection;
 using Backend.Fx.BuildingBlocks;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.RandomData
 {
+    [PublicAPI]
     public static class LinqExtensions
     {
         /// <summary>
@@ -25,9 +27,7 @@ namespace Backend.Fx.RandomData
             while (n > 1)
             {
                 var k = TestRandom.Instance.Next(n--);
-                T temp = sourceAsArray[n];
-                sourceAsArray[n] = sourceAsArray[k];
-                sourceAsArray[k] = temp;
+                (sourceAsArray[n], sourceAsArray[k]) = (sourceAsArray[k], sourceAsArray[n]);
             }
 
             return sourceAsArray;
@@ -83,7 +83,7 @@ namespace Backend.Fx.RandomData
                 count = sourceQueryable.Count();
                 if (count == 0)
                 {
-                    outQueryable = new T[0].AsQueryable();
+                    outQueryable = Array.Empty<T>().AsQueryable();
                     return true;
                 }
 

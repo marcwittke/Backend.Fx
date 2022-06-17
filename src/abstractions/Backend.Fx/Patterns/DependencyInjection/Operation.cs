@@ -1,5 +1,6 @@
 using System;
 using Backend.Fx.Logging;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -10,6 +11,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
     /// Decorate this interface to provide operation specific infrastructure services (like a database connection, a database transaction
     /// an entry-exit logging etc.)
     /// </summary>
+    [PublicAPI]
     public interface IOperation
     {
         void Begin();
@@ -27,7 +29,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
         private bool? _isActive;
         private IDisposable _lifetimeLogger;
 
-        public virtual void Begin()
+        public void Begin()
         {
             if (_isActive != null)
             {
@@ -38,7 +40,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
             _isActive = true;
         }
 
-        public virtual void Complete()
+        public void Complete()
         {
             Logger.LogInformation("Completing operation #{OperationId}", _instanceId);
             if (_isActive != true)

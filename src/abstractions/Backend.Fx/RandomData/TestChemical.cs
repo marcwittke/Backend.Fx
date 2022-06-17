@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.RandomData
 {
+    [PublicAPI]
     public class TestChemical
     {
         public TestChemical(string name, string description, string alternativeNames, string formula, decimal molecularWeight, string casRegistryNumber, string molFile)

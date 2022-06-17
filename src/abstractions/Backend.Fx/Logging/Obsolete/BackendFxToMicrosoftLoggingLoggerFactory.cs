@@ -1,5 +1,6 @@
 using System;
 
+// ReSharper disable CheckNamespace
 namespace Backend.Fx.Logging
 {
     [Obsolete]

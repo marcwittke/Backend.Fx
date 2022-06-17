@@ -2,6 +2,7 @@
 using System;
 using JetBrains.Annotations;
 
+// ReSharper disable CheckNamespace
 namespace Backend.Fx.Logging
 {
     [Obsolete]

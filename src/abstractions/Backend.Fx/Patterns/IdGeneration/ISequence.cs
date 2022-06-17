@@ -1,5 +1,8 @@
-﻿namespace Backend.Fx.Patterns.IdGeneration
+﻿using JetBrains.Annotations;
+
+namespace Backend.Fx.Patterns.IdGeneration
 {
+    [PublicAPI]
     public interface ISequence
     {
         void EnsureSequence();

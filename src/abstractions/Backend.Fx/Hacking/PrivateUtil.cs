@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.Hacking
 {
+    [PublicAPI]
     public static class PrivateUtil
     {
         public static T CreateInstanceFromPrivateDefaultConstructor<T>()

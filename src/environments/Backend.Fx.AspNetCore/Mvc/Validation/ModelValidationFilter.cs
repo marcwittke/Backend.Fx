@@ -17,7 +17,7 @@ namespace Backend.Fx.AspNetCore.Mvc.Validation
         public abstract void OnActionExecuting(ActionExecutingContext context);
         public abstract void OnActionExecuted(ActionExecutedContext context);
 
-        protected void LogErrors(FilterContext context, string controllerName, Errors errors)
+        protected static void LogErrors(FilterContext context, string controllerName, Errors errors)
         {
             ILogger logger = TryGetControllerType(controllerName, out Type controllerType)
                 ? Log.Create(controllerType)
@@ -28,16 +28,16 @@ namespace Backend.Fx.AspNetCore.Mvc.Validation
                 errors);
         }
 
-        protected bool AcceptsJson(FilterContext context)
+        protected static bool AcceptsJson(FilterContext context)
         {
             IList<MediaTypeHeaderValue> accept = context.HttpContext.Request.GetTypedHeaders().Accept;
-            return accept?.Any(mth => mth.Type == "application" && mth.SubType == "json") == true;
+            return accept.Any(mth => mth.Type == "application" && mth.SubType == "json") == true;
         }
 
-        protected bool AcceptsHtml(FilterContext context)
+        protected static bool AcceptsHtml(FilterContext context)
         {
             IList<MediaTypeHeaderValue> accept = context.HttpContext.Request.GetTypedHeaders().Accept;
-            return accept?.Any(mth => mth.Type == "text" && mth.SubType == "html") == true;
+            return accept.Any(mth => mth.Type == "text" && mth.SubType == "html") == true;
         }
 
         private static bool TryGetControllerType(string controllerName, out Type type)

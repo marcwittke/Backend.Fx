@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using Backend.Fx.Extensions;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -9,6 +10,7 @@ namespace Backend.Fx.Logging
     /// <summary>
     /// static class to keep an ILoggerFactory instance to use Microsoft.Extension.Logging without dependency injection
     /// </summary>
+    [PublicAPI]
     public static class Log
     {
         private static Microsoft.Extensions.Logging.ILoggerFactory _loggerFactory = new NullLoggerFactory();

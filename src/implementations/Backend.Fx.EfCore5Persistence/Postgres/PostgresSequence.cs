@@ -3,11 +3,13 @@ using System.Data;
 using Backend.Fx.EfCore5Persistence.Bootstrapping;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.IdGeneration;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.EfCore5Persistence.Postgres
 {
+    [PublicAPI]
     public abstract class PostgresSequence : ISequence
     {
         private static readonly ILogger Logger = Log.Create<PostgresSequence>();

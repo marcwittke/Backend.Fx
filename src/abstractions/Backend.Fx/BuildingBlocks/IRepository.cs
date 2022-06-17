@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.BuildingBlocks
 {
@@ -8,6 +9,7 @@ namespace Backend.Fx.BuildingBlocks
     /// See https://en.wikipedia.org/wiki/Domain-driven_design#Building_blocks
     /// </summary>
     /// <typeparam name="TAggregateRoot"></typeparam>
+    [PublicAPI]
     public interface IRepository<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
         TAggregateRoot Single(int id);

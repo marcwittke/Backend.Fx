@@ -1,6 +1,7 @@
 using System;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -8,6 +9,7 @@ using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.AspNetCore.Mvc.Activators
 {
+    [PublicAPI]
     public class BackendFxApplicationHubActivator<T> : IHubActivator<T> where T : Hub
     {
         private readonly IBackendFxApplication _backendFxApplication;

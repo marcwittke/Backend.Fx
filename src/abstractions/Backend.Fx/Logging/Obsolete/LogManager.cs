@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using Microsoft.Extensions.Logging.Abstractions;
+// ReSharper disable CheckNamespace
 
 namespace Backend.Fx.Logging
 {

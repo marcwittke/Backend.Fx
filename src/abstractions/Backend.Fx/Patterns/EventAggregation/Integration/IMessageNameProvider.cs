@@ -3,6 +3,7 @@ using JetBrains.Annotations;
 
 namespace Backend.Fx.Patterns.EventAggregation.Integration
 {
+    [PublicAPI]
     public interface IMessageNameProvider
     {
         [NotNull]

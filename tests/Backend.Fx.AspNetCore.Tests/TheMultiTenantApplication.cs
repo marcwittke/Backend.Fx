@@ -15,7 +15,7 @@ namespace Backend.Fx.AspNetCore.Tests
         
         public TheMultiTenantApplication(ITestOutputHelper output) : base(output)
         {
-            _factory = new SampleAppWebApplicationFactory(base.Logger);
+            _factory = new SampleAppWebApplicationFactory(Logger);
         }
         
         [Fact]

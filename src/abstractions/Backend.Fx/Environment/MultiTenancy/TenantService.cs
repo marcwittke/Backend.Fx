@@ -2,6 +2,7 @@
 using System.Linq;
 using Backend.Fx.Exceptions;
 using Backend.Fx.Logging;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -11,6 +12,7 @@ namespace Backend.Fx.Environment.MultiTenancy
     /// Encapsulates the management of tenants
     /// Note that this should not use repositories and other building blocks, but access the persistence layer directly
     /// </summary>
+    [PublicAPI]
     public interface ITenantService
     {
         /// <summary>

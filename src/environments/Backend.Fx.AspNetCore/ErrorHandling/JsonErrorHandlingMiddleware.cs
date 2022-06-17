@@ -5,6 +5,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Backend.Fx.Exceptions;
 using Backend.Fx.Logging;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
@@ -14,6 +15,7 @@ using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.AspNetCore.ErrorHandling
 {
+    [PublicAPI]
     public class JsonErrorHandlingMiddleware : ErrorHandlingMiddleware
     {
         private readonly bool _showInternalServerErrorDetails;
@@ -37,7 +39,7 @@ namespace Backend.Fx.AspNetCore.ErrorHandling
         {
             // this middleware only handles requests that accept json as response
             IList<MediaTypeHeaderValue> accept = context.Request.GetTypedHeaders().Accept;
-            return Task.FromResult(accept?.Any(mth => mth.Type == "application" && mth.SubType == "json") == true);
+            return Task.FromResult(accept.Any(mth => mth.Type == "application" && mth.SubType == "json"));
         }
 
         protected override async Task HandleClientError(HttpContext context, int httpStatusCode, string message, ClientException exception)
@@ -83,6 +85,7 @@ namespace Backend.Fx.AspNetCore.ErrorHandling
         }
     }
     
+    [PublicAPI]
     public class ErrorShape
     {
         public Dictionary<string,string[]> Errors { get; set; }

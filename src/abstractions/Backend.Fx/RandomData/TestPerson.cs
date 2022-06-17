@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using Backend.Fx.BuildingBlocks;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.RandomData
 {
+    [PublicAPI]
     public class TestPerson : ValueObject
     {
         public enum Genders

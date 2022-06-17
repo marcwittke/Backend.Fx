@@ -1,7 +1,9 @@
 ﻿using System.Text.RegularExpressions;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.Extensions
 {
+    [PublicAPI]
     public static class StringEx
     {
         public static string Cut(this string s, int length)

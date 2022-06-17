@@ -4,9 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Backend.Fx.BuildingBlocks;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.InMemoryPersistence
 {
+    [PublicAPI]
     public class InMemoryView<T> : IView<T>
     {
         private readonly IList<T> _list;

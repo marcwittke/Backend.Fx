@@ -1,7 +1,9 @@
 ﻿using System.Linq;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.RandomData
 {
+    [PublicAPI]
     public class TestAddressGenerator : Generator<TestAddress>
     {
         public static TestAddress Generate()

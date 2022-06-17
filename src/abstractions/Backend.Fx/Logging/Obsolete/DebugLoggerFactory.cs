@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
+// ReSharper disable CheckNamespace
 namespace Backend.Fx.Logging
 {
     [DebuggerStepThrough]

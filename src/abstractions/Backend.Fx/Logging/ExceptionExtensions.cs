@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.Logging
 {
+    [PublicAPI]
     [DebuggerStepThrough]
     public static class ExceptionExtensions
     {

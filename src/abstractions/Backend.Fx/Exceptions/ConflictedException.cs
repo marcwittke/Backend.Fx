@@ -1,7 +1,9 @@
 ﻿using System;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.Exceptions
 {
+    [PublicAPI]
     public class ConflictedException : ClientException
     {
         public ConflictedException()

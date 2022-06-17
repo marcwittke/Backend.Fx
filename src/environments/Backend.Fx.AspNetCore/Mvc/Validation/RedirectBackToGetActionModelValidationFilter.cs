@@ -1,4 +1,5 @@
 ﻿using Backend.Fx.Exceptions;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
 namespace Backend.Fx.AspNetCore.Mvc.Validation
 {
+    [PublicAPI]
     public class RedirectBackToGetActionModelValidationFilter : ModelValidationFilter
     {
         private readonly IModelMetadataProvider _modelMetadataProvider;

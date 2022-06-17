@@ -2,10 +2,11 @@ using System;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
+// ReSharper disable CheckNamespace
 namespace Backend.Fx.Logging
 {
     [Obsolete]
-    public class BackendFxToMicrosoftLoggingLogger : Backend.Fx.Logging.ILogger
+    public class BackendFxToMicrosoftLoggingLogger : ILogger
     {
         private readonly Microsoft.Extensions.Logging.ILogger _logger;
 

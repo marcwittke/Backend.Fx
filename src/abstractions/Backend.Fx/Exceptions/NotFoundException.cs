@@ -1,5 +1,8 @@
-﻿namespace Backend.Fx.Exceptions
+﻿using JetBrains.Annotations;
+
+namespace Backend.Fx.Exceptions
 {
+    [PublicAPI]
     public class NotFoundException : ClientException
     {
         public string EntityName { get; }

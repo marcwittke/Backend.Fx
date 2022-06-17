@@ -1,10 +1,12 @@
 using System.Linq;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
+using JetBrains.Annotations;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Environment.MultiTenancy
 {
+    [PublicAPI]
     public class SingleTenantApplication : BackendFxApplicationDecorator
     {
         private static readonly ILogger Logger = Log.Create<SingleTenantApplication>();

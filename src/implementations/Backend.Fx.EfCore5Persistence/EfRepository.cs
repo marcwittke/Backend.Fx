@@ -19,6 +19,7 @@ using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.EfCore5Persistence
 {
+    [PublicAPI]
     public class EfRepository<TAggregateRoot> : Repository<TAggregateRoot>, IAsyncRepository<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
         private static readonly ILogger Logger = Log.Create<EfRepository<TAggregateRoot>>();
@@ -27,7 +28,7 @@ namespace Backend.Fx.EfCore5Persistence
         private DbContext _dbContext;
 
         [SuppressMessage("ReSharper", "EF1001")]
-        public EfRepository([CanBeNull] DbContext dbContext, IAggregateMapping<TAggregateRoot> aggregateMapping,
+        public EfRepository(DbContext dbContext, IAggregateMapping<TAggregateRoot> aggregateMapping,
                             ICurrentTHolder<TenantId> currentTenantIdHolder, IAggregateAuthorization<TAggregateRoot> aggregateAuthorization)
             : base(currentTenantIdHolder, aggregateAuthorization)
         {
@@ -36,25 +37,14 @@ namespace Backend.Fx.EfCore5Persistence
             _aggregateAuthorization = aggregateAuthorization;
 
             // somewhat a hack: using the internal EF Core services against advice
-            var localViewListener = dbContext?.GetService<ILocalViewListener>();
-            localViewListener?.RegisterView(AuthorizeChanges);
+            var localViewListener = dbContext.GetService<ILocalViewListener>();
+            localViewListener.RegisterView(AuthorizeChanges);
         }
 
-        [SuppressMessage("ReSharper", "EF1001")]
-        public DbContext DbContext
-        {
-            get => _dbContext ?? throw new InvalidOperationException(
-                       "This EfRepository does not have a DbContext yet. You might either make sure a proper DbContext gets injected or the DbContext is initialized later using a derived class")
-            ;
-            protected set
-            {
-                if (_dbContext != null) throw new InvalidOperationException("This EfRepository has already a DbContext assigned. It is not allowed to change it later.");
-                _dbContext = value;
-                var localViewListener = _dbContext?.GetService<ILocalViewListener>();
-                localViewListener?.RegisterView(AuthorizeChanges);
-            }
-        }
-        
+        public DbContext DbContext =>
+            _dbContext ?? throw new InvalidOperationException(
+                "This EfRepository does not have a DbContext yet. You might either make sure a proper DbContext gets injected or the DbContext is initialized later using a derived class");
+
         public async Task<TAggregateRoot> SingleAsync(int id, CancellationToken cancellationToken = default)
         {
             return await AggregateQueryable.SingleAsync(agg => agg.Id == id, cancellationToken);

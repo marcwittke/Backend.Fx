@@ -5,6 +5,7 @@ using JetBrains.Annotations;
 
 namespace Backend.Fx.Exceptions
 {
+    [PublicAPI]
     public class ClientException : Exception
     {
         public ClientException()
@@ -25,6 +26,7 @@ namespace Backend.Fx.Exceptions
         /// to the client to not provide internal details to an attacker. Write the exception message with a developer in mind, since
         /// the application log will contain the message. To provide the user with functional feedback to correct their input, use
         /// the AddError(s) overloads.</param>
+        /// <param name="innerException"></param>
         public ClientException(string message, Exception innerException)
             : base(message, innerException)
         {
@@ -68,6 +70,7 @@ namespace Backend.Fx.Exceptions
         }
     }
 
+    [PublicAPI]
     public static class ClientExceptionEx
     {
         public static TEx AddError<TEx>(this TEx clientException, [LocalizationRequired] string errorMessage) where TEx : ClientException

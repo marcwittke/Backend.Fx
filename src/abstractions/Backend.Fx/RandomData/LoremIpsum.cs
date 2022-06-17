@@ -4,8 +4,7 @@ namespace Backend.Fx.RandomData
 {
     public class LoremIpsumGenerator : Generator<string>
     {
-        private static string[] _words = new[]
-        {
+        private static readonly string[] Words = {
             "lorem", "ipsum", "dolor", "sit", "amet", "consectetur", "adipiscing", "elit", "proin", "eget", "iaculis", "quam", "pellentesque", "elementum", "gravida", "nulla",
             "at", "tincidunt", "donec", "vulputate", "velit", "sapien", "a", "auctor", "justo", "id", "nunc", "et", "consequat", "magna", "in", "blandit", "ut", "eros",
             "tempus", "condimentum", "sem", "ac", "feugiat", "tellus", "curabitur", "aliquet", "ultrices", "arcu", "eu", "lacinia", "aliquam", "integer", "non", "venenatis",
@@ -20,10 +19,10 @@ namespace Backend.Fx.RandomData
 
         protected override string Next()
         {
-            return _words[TestRandom.Instance.Next(_words.Length)];
+            return Words[TestRandom.Instance.Next(Words.Length)];
         }
 
-        public static string Generate(int minWords, int maxWords, bool asSentence)
+        public static string Generate(int minWords, int maxWords, bool asSentence = true)
         {
             int wordCount = TestRandom.Next(minWords, maxWords);
             string loremIpsumText = string.Join(" ", new LoremIpsumGenerator().Take(wordCount));

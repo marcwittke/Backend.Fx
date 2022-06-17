@@ -1,5 +1,6 @@
 ﻿using System;
 using Backend.Fx.Exceptions;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,9 +8,10 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Backend.Fx.AspNetCore.Mvc.Throttling
 {
     /// <summary>
-    /// returns HTTP 429 "Too many requests" when the attributed action get's called from the same IP address in less than
+    /// returns HTTP 429 "Too many requests" when the attributed action gets called from the same IP address in less than
     /// the configured interval and an exception was thrown. Useful to prevent brute force attacks..
     /// </summary>
+    [PublicAPI]
     public class ExceptionThrottlingAttribute : ThrottlingBaseAttribute
     {
         public override void OnActionExecuted(ActionExecutedContext actionContext)

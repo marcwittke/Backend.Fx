@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Exceptions;
 using Backend.Fx.Logging;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -13,6 +14,7 @@ using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.AspNetCore.MultiTenancy
 {
+    [PublicAPI]
     public abstract class TenantAdminMiddlewareBase
     {
         private static readonly ILogger Logger = Log.Create<TenantAdminMiddlewareBase>();
@@ -69,8 +71,8 @@ namespace Backend.Fx.AspNetCore.MultiTenancy
 
                 if (HttpMethods.IsGet(context.Request.Method))
                 {
-                    var tenantIdStr = context.Request.Path.Value.Split('/').Last();
-                    if (int.TryParse(tenantIdStr, out int tenantId))
+                    var tenantIdStr = context.Request.Path.Value?.Split('/').Last();
+                    if (tenantIdStr != null && int.TryParse(tenantIdStr, out int tenantId))
                     {
                         Logger.LogInformation("Getting Tenant[{TenantId}]", tenantId);
 

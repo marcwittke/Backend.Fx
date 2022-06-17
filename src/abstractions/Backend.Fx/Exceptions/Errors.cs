@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.Exceptions
 {
+    [PublicAPI]
     public class Errors : IReadOnlyDictionary<string, string[]>
     {
         private const string GenericErrorKey = "";

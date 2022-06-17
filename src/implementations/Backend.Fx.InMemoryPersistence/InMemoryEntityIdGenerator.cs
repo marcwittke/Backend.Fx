@@ -1,14 +1,13 @@
 ﻿using Backend.Fx.Patterns.IdGeneration;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.InMemoryPersistence
 {
-    public class InMemoryEntityIdGenerator : IEntityIdGenerator
+    [PublicAPI]
+    public class InMemoryEntityIdGenerator : SequenceHiLoIdGenerator
     {
-        private int _nextId = 1;
-
-        public int NextId()
+        public InMemoryEntityIdGenerator() : base(new InMemorySequence())
         {
-            return _nextId++;
         }
     }
 }

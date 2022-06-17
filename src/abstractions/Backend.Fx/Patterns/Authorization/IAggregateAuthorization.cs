@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Linq.Expressions;
 using Backend.Fx.BuildingBlocks;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.Patterns.Authorization
 {
@@ -9,6 +10,7 @@ namespace Backend.Fx.Patterns.Authorization
     /// so that the repository never allows reading or writing of an aggregate without permissions. 
     /// </summary>
     /// <typeparam name="TAggregateRoot"></typeparam>
+    [PublicAPI]
     public interface IAggregateAuthorization<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
         /// <summary>

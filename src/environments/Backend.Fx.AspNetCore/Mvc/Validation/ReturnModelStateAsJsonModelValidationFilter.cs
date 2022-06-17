@@ -1,4 +1,5 @@
 ﻿using Backend.Fx.Exceptions;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -8,6 +9,7 @@ namespace Backend.Fx.AspNetCore.Mvc.Validation
     /// Returns HTTP 400 "Bad Request" when model validation failed. In addition, the bad model state is converted into an instance of
     /// <see cref="Errors"/> gets serialized to the body as JSON.
     /// </summary>
+    [PublicAPI]
     public class ReturnModelStateAsJsonModelValidationFilter : ModelValidationFilter
     {
         public override void OnActionExecuting(ActionExecutingContext context)

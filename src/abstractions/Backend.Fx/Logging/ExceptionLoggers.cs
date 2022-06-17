@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 namespace Backend.Fx.Logging
 {
+    [PublicAPI]
     public class ExceptionLoggers : ICollection<IExceptionLogger>, IExceptionLogger
     {
         private static readonly Microsoft.Extensions.Logging.ILogger Logger = Log.Create<ExceptionLoggers>();

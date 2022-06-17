@@ -1,5 +1,6 @@
 ﻿using System;
 using Backend.Fx.Logging;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc.ViewComponents;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -7,6 +8,7 @@ using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.AspNetCore.Mvc.Activators
 {
+    [PublicAPI]
     public class BackendFxApplicationViewComponentActivator : IViewComponentActivator
     {
         private static readonly ILogger Logger = Log.Create<BackendFxApplicationViewComponentActivator>();

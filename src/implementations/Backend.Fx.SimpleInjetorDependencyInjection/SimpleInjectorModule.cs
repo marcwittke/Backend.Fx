@@ -1,11 +1,13 @@
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using SimpleInjector;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.SimpleInjectorDependencyInjection
 {
+    [PublicAPI]
     public abstract class SimpleInjectorModule : IModule
     {
         private static readonly ILogger Logger = Log.Create<SimpleInjectorModule>();

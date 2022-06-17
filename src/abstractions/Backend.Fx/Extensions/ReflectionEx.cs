@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.Extensions
 {
+    [PublicAPI]
     public static class ReflectionEx
     {
         public static IEnumerable<Type> GetImplementingTypes<TService>(this IEnumerable<Assembly> assemblies)

@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.Extensions
 {
+    [PublicAPI]
     public static class AsyncHelper
     {
         /// <summary>
@@ -20,9 +22,10 @@ namespace Backend.Fx.Extensions
             SynchronizationContext oldContext = SynchronizationContext.Current;
             try
             {
-                var synch = new ExclusiveSynchronizationContext();
-                SynchronizationContext.SetSynchronizationContext(synch);
-                synch.Post(async _ =>
+                var exclusiveSynchronizationContext = new ExclusiveSynchronizationContext();
+                SynchronizationContext.SetSynchronizationContext(exclusiveSynchronizationContext);
+                // ReSharper disable once AsyncVoidLambda
+                exclusiveSynchronizationContext.Post(async _ =>
                 {
                     try
                     {
@@ -30,15 +33,15 @@ namespace Backend.Fx.Extensions
                     }
                     catch (Exception e)
                     {
-                        synch.InnerException = e;
+                        exclusiveSynchronizationContext.InnerException = e;
                         throw;
                     }
                     finally
                     {
-                        synch.EndMessageLoop();
+                        exclusiveSynchronizationContext.EndMessageLoop();
                     }
                 }, null);
-                synch.BeginMessageLoop();
+                exclusiveSynchronizationContext.BeginMessageLoop();
             }
             finally
             {
@@ -60,6 +63,7 @@ namespace Backend.Fx.Extensions
             {
                 var exclusiveSynchronizationContext = new ExclusiveSynchronizationContext();
                 SynchronizationContext.SetSynchronizationContext(exclusiveSynchronizationContext);
+                // ReSharper disable once AsyncVoidLambda
                 exclusiveSynchronizationContext.Post(async _ =>
                 {
                     try

@@ -3,13 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.BuildingBlocks
 {
+    [PublicAPI]
     public interface IView<out T> : IQueryable<T>
     {
     }
 
+    [PublicAPI]
     public abstract class View<T> : IView<T>
     {
         private readonly IQueryable<T> _viewImplementation;

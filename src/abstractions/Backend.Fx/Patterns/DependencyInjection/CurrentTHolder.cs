@@ -1,4 +1,5 @@
 ﻿using Backend.Fx.Logging;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -8,6 +9,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
     /// Holds a current instance of T that might be replaced during the scope
     /// </summary>
     /// <typeparam name="T"></typeparam>
+    [PublicAPI]
     public interface ICurrentTHolder<T> where T : class
     {
         T Current { get; }

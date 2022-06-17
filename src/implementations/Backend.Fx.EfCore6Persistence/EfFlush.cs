@@ -159,7 +159,7 @@ namespace Backend.Fx.EfCore6Persistence
 
                 if (navigation.CurrentValue == null)
                 {
-                    var navigationMetadata = ((INavigation)navigation.Metadata);
+                    var navigationMetadata = (INavigation)navigation.Metadata;
                     // orphaned entity, original value contains the foreign key value
                     if (navigationMetadata.ForeignKey.Properties.Count > 1) throw new InvalidOperationException("Foreign Keys with multiple properties are not supported.");
 

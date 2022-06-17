@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.Extensions
 {
+    [PublicAPI]
     public class TolerantDateTimeOffsetComparer : IEqualityComparer<DateTimeOffset?>
     {
         private readonly TimeSpan _epsilon;
@@ -27,6 +29,7 @@ namespace Backend.Fx.Extensions
         }
     }
 
+    [PublicAPI]
     public class TolerantDateTimeComparer : IEqualityComparer<DateTime?>
     {
         private readonly TimeSpan _epsilon;

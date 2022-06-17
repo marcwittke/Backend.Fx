@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using JetBrains.Annotations;
+using Microsoft.AspNetCore.Http;
 
 namespace Backend.Fx.AspNetCore
 {
+    [PublicAPI]
     public static class HttpRequestEx
     {
         /// <summary>

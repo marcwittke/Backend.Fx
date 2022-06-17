@@ -1,11 +1,13 @@
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Patterns.Jobs
 {
+    [PublicAPI]
     public class WithTenantWideMutex<TJob> : IJob where TJob : IJob
     {
         private static readonly ILogger Logger = Log.Create<WithTenantWideMutex<TJob>>();
