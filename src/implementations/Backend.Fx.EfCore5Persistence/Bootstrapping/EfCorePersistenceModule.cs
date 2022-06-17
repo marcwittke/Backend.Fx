@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Reflection;
 using Backend.Fx.BuildingBlocks;
+using Backend.Fx.ConfigurationSettings;
 using Backend.Fx.Environment.Persistence;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Domain;
@@ -21,6 +22,7 @@ namespace Backend.Fx.EfCore5Persistence.Bootstrapping
     {
         private readonly ILoggerFactory _loggerFactory;
         private readonly Action<DbContextOptionsBuilder<TDbContext>, IDbConnection> _configure;
+        private readonly bool _withPersistentSettings;
         private readonly IDbConnectionFactory _dbConnectionFactory;
         private readonly Type[] _aggregateRootTypes;
         private readonly Type[] _entityTypes;
@@ -30,11 +32,13 @@ namespace Backend.Fx.EfCore5Persistence.Bootstrapping
             IDbConnectionFactory dbConnectionFactory,
             ILoggerFactory loggerFactory,
             Action<DbContextOptionsBuilder<TDbContext>, IDbConnection> configure,
+            bool withPersistentSettings,
             params Assembly[] assemblies)
         {
             _dbConnectionFactory = dbConnectionFactory;
             _loggerFactory = loggerFactory;
             _configure = configure;
+            _withPersistentSettings = withPersistentSettings;
 
             _aggregateRootTypes = assemblies
                 .SelectMany(ass => ass
@@ -68,10 +72,10 @@ namespace Backend.Fx.EfCore5Persistence.Bootstrapping
         {
             // singleton id generator
             compositionRoot.Register(ServiceDescriptor.Singleton<IEntityIdGenerator, TIdGenerator>());
-            
+
             // at least the id generator implementation requires the IDbConnectionFactory
             compositionRoot.Register(ServiceDescriptor.Singleton<IDbConnectionFactory>(_dbConnectionFactory));
-
+            
             // by letting the container create the connection we can be sure, that only one connection per scope is used, and disposing is done accordingly
             compositionRoot.Register(ServiceDescriptor.Scoped<IDbConnection>(_ => _dbConnectionFactory.Create()));
 
@@ -92,6 +96,14 @@ namespace Backend.Fx.EfCore5Persistence.Bootstrapping
                         return dbContextOptionsBuilder.UseLoggerFactory(_loggerFactory).Options;
                     }));
 
+            if (_withPersistentSettings)
+            {
+                compositionRoot.Register(
+                    ServiceDescriptor.Scoped<IRepository<Setting>, EfRepository<Setting>>());                
+                compositionRoot.Register(
+                    ServiceDescriptor.Scoped<IAggregateMapping<Setting>, PlainAggregateMapping<Setting>>());
+            }
+            
             // loop through aggregate root types to...
             foreach (var aggregateRootType in _aggregateRootTypes)
             {

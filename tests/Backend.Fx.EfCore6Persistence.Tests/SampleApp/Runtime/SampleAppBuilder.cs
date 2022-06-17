@@ -33,6 +33,7 @@ namespace Backend.Fx.EfCore6Persistence.Tests.SampleApp.Runtime
                     dbConnectionFactory,
                     A.Fake<ILoggerFactory>(),
                     (builder, connection) => builder.UseSqlite((DbConnection)connection),
+                    false,
                     application.Assemblies
                 ),
                 application);

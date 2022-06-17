@@ -14,7 +14,8 @@ namespace Backend.Fx.Environment.Persistence
         private readonly IDatabaseAvailabilityAwaiter _databaseAvailabilityAwaiter;
         private readonly IDatabaseBootstrapper _databaseBootstrapper;
 
-        public PersistentApplication(IDatabaseBootstrapper databaseBootstrapper,
+        public PersistentApplication(
+            IDatabaseBootstrapper databaseBootstrapper,
             IDatabaseAvailabilityAwaiter databaseAvailabilityAwaiter,
             IModule persistenceModule,
             IBackendFxApplication application) : base(application)
