@@ -47,22 +47,12 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
         private static void RegisterDomainInfrastructureServices(ICompositionRoot compositionRoot)
         {
-            compositionRoot.Register(
-                new ServiceDescriptor(typeof(IClock), _ => new WallClock(), ServiceLifetime.Scoped));
-            compositionRoot.Register(
-                new ServiceDescriptor(typeof(IOperation), _ => new Operation(), ServiceLifetime.Scoped));
-            compositionRoot.Register(
-                new ServiceDescriptor(typeof(ICurrentTHolder<Correlation>), _ => new CurrentCorrelationHolder(),
-                    ServiceLifetime.Scoped));
-            compositionRoot.Register(
-                new ServiceDescriptor(typeof(ICurrentTHolder<IIdentity>), _ => new CurrentIdentityHolder(),
-                    ServiceLifetime.Scoped));
-            compositionRoot.Register(
-                new ServiceDescriptor(typeof(ICurrentTHolder<TenantId>), _ => new CurrentTenantIdHolder(),
-                    ServiceLifetime.Scoped));
-            compositionRoot.Register(
-                new ServiceDescriptor(typeof(IDomainEventAggregator), sp => new DomainEventAggregator(sp),
-                    ServiceLifetime.Scoped));
+            compositionRoot.Register(ServiceDescriptor.Scoped<IClock,WallClock>());
+            compositionRoot.Register(ServiceDescriptor.Scoped<IOperation,Operation>());
+            compositionRoot.Register(ServiceDescriptor.Scoped<ICurrentTHolder<Correlation>,CurrentCorrelationHolder>());
+            compositionRoot.Register(ServiceDescriptor.Scoped<ICurrentTHolder<IIdentity>,CurrentIdentityHolder>());
+            compositionRoot.Register(ServiceDescriptor.Scoped<ICurrentTHolder<TenantId>,CurrentTenantIdHolder>());
+            compositionRoot.Register(ServiceDescriptor.Scoped<IDomainEventAggregator>(sp => new DomainEventAggregator(sp)));
         }
 
         private void RegisterDomainAndApplicationServices(ICompositionRoot container)

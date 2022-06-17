@@ -25,13 +25,11 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
 
             // register the message bus scope
             compositionRoot.Register(
-                new ServiceDescriptor(
-                    typeof(IMessageBusScope),
+                ServiceDescriptor.Scoped<IMessageBusScope>(
                     sp => new MessageBusScope(
                         _messageBus,
                         sp.GetRequiredService<ICurrentTHolder<Correlation>>(),
-                        sp.GetRequiredService<ICurrentTHolder<TenantId>>()),
-                    ServiceLifetime.Scoped));
+                        sp.GetRequiredService<ICurrentTHolder<TenantId>>())));
 
             // register typed handlers
             foreach (Type integrationEventType in _assemblies.GetImplementingTypes(typeof(IIntegrationEvent)))

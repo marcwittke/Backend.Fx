@@ -16,7 +16,7 @@ namespace Backend.Fx.EfCore5Persistence.Bootstrapping
 {
     public class EfCorePersistenceModule<TDbContext, TIdGenerator> : IModule
         where TDbContext : DbContext
-        where TIdGenerator : IEntityIdGenerator
+        where TIdGenerator : class, IEntityIdGenerator
     {
         private readonly ILoggerFactory _loggerFactory;
         private readonly Action<DbContextOptionsBuilder<TDbContext>, IDbConnection> _configure;
@@ -66,44 +66,27 @@ namespace Backend.Fx.EfCore5Persistence.Bootstrapping
         public void Register(ICompositionRoot compositionRoot)
         {
             // singleton id generator
-            compositionRoot.Register(
-                new ServiceDescriptor(
-                    typeof(IEntityIdGenerator),
-                    typeof(TIdGenerator),
-                    ServiceLifetime.Singleton));
+            compositionRoot.Register(ServiceDescriptor.Singleton<IEntityIdGenerator, TIdGenerator>());
 
             // by letting the container create the connection we can be sure, that only one connection per scope is used, and disposing is done accordingly
-            compositionRoot.Register(
-                new ServiceDescriptor(
-                    typeof(IDbConnection),
-                    _ => _dbConnectionFactory.Create(),
-                    ServiceLifetime.Scoped));
+            compositionRoot.Register(ServiceDescriptor.Scoped<IDbConnection>(_ => _dbConnectionFactory.Create()));
 
             // EF core requires us to flush frequently, because of a missing identity map
-            compositionRoot.Register(
-                new ServiceDescriptor(
-                    typeof(ICanFlush),
-                    typeof(EfFlush),
-                    ServiceLifetime.Scoped));
+            compositionRoot.Register(ServiceDescriptor.Scoped<ICanFlush, EfFlush>());
 
             // DbContext is injected into repositories (not TDbContext!)
-            compositionRoot.Register(
-                new ServiceDescriptor(
-                    typeof(DbContext),
-                    typeof(TDbContext),
-                    ServiceLifetime.Scoped));
+            compositionRoot.Register(ServiceDescriptor.Scoped<DbContext, TDbContext>());
 
             // TDbContext ctor requires DbContextOptions<TDbContext>, which is configured to use a container managed db connection
             compositionRoot.Register(
-                new ServiceDescriptor(typeof(DbContextOptions<TDbContext>),
+                ServiceDescriptor.Scoped<DbContextOptions<TDbContext>>(
                     sp =>
                     {
                         var dbContextOptionsBuilder = new DbContextOptionsBuilder<TDbContext>();
                         var dbConnection = sp.GetRequiredService<IDbConnection>();
                         _configure.Invoke(dbContextOptionsBuilder, dbConnection);
-
                         return dbContextOptionsBuilder.UseLoggerFactory(_loggerFactory).Options;
-                    }, ServiceLifetime.Scoped));
+                    }));
 
             // loop through aggregate root types to...
             foreach (var aggregateRootType in _aggregateRootTypes)
@@ -147,28 +130,13 @@ namespace Backend.Fx.EfCore5Persistence.Bootstrapping
             //                                                      flush
             //                                                        |
             // end invoke <- connection.close <- transaction.commit <-+ 
-            compositionRoot.RegisterDecorator(
-                new ServiceDescriptor(
-                    typeof(IOperation),
-                    typeof(FlushOperationDecorator),
-                    ServiceLifetime.Scoped));
-            compositionRoot.RegisterDecorator(
-                new ServiceDescriptor(
-                    typeof(IOperation),
-                    typeof(DbContextTransactionOperationDecorator),
-                    ServiceLifetime.Scoped));
-            compositionRoot.RegisterDecorator(
-                new ServiceDescriptor(
-                    typeof(IOperation),
-                    typeof(DbConnectionOperationDecorator),
-                    ServiceLifetime.Scoped));
-
+            compositionRoot.RegisterDecorator(ServiceDescriptor.Scoped<IOperation, FlushOperationDecorator>());
+            compositionRoot.RegisterDecorator(ServiceDescriptor.Scoped<IOperation, DbContextTransactionOperationDecorator>());
+            compositionRoot.RegisterDecorator(ServiceDescriptor.Scoped<IOperation, DbConnectionOperationDecorator>());
+            
             // ensure everything dirty is flushed to the db before handling domain events  
-            compositionRoot.RegisterDecorator(
-                new ServiceDescriptor(
-                    typeof(IDomainEventAggregator),
-                    typeof(FlushDomainEventAggregatorDecorator),
-                    ServiceLifetime.Scoped));
+            compositionRoot.RegisterDecorator(ServiceDescriptor
+                .Scoped<IDomainEventAggregator, FlushDomainEventAggregatorDecorator>());
         }
     }
 }
