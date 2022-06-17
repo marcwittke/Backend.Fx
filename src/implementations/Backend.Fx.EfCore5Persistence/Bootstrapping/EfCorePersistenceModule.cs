@@ -6,6 +6,7 @@ using System.Reflection;
 using Backend.Fx.BuildingBlocks;
 using Backend.Fx.ConfigurationSettings;
 using Backend.Fx.Environment.Persistence;
+using Backend.Fx.Patterns.Authorization;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Domain;
 using Backend.Fx.Patterns.IdGeneration;
@@ -102,6 +103,8 @@ namespace Backend.Fx.EfCore5Persistence.Bootstrapping
                     ServiceDescriptor.Scoped<IRepository<Setting>, EfRepository<Setting>>());                
                 compositionRoot.Register(
                     ServiceDescriptor.Scoped<IAggregateMapping<Setting>, PlainAggregateMapping<Setting>>());
+                compositionRoot.Register(
+                    ServiceDescriptor.Scoped<IAggregateAuthorization<Setting>, AllowAll<Setting>>());
             }
             
             // loop through aggregate root types to...
