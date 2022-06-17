@@ -69,6 +69,9 @@ namespace Backend.Fx.EfCore6Persistence.Bootstrapping
             // singleton id generator
             compositionRoot.Register(ServiceDescriptor.Singleton<IEntityIdGenerator, TIdGenerator>());
 
+            // at least the id generator implementation requires the IDbConnectionFactory
+            compositionRoot.Register(ServiceDescriptor.Singleton<IDbConnectionFactory>(_dbConnectionFactory));
+            
             // by letting the container create the connection we can be sure, that only one connection per scope is used, and disposing is done accordingly
             compositionRoot.Register(ServiceDescriptor.Scoped<IDbConnection>(_ => _dbConnectionFactory.Create()));
 
