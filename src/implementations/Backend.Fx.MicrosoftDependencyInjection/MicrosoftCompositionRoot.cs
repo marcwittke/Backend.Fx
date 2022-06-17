@@ -13,7 +13,6 @@ namespace Backend.Fx.MicrosoftDependencyInjection
     public class MicrosoftCompositionRoot : CompositionRoot
     {
         private static readonly ILogger Logger = Log.Create<MicrosoftCompositionRoot>();
-        private readonly IServiceCollection _serviceCollection = new ServiceCollection();
         private readonly Lazy<IServiceProvider> _serviceProvider;
 
         public MicrosoftCompositionRoot()
@@ -21,15 +20,22 @@ namespace Backend.Fx.MicrosoftDependencyInjection
             _serviceProvider = new Lazy<IServiceProvider>(() =>
             {
                 Logger.LogInformation("Building Microsoft ServiceProvider");
-                return _serviceCollection.BuildServiceProvider();
+                return ServiceCollection.BuildServiceProvider(
+                    new ServiceProviderOptions
+                    {
+                        ValidateScopes = true,
+                        ValidateOnBuild = true
+                    });
             });
         }
+
+        public IServiceCollection ServiceCollection { get; } = new ServiceCollection();
 
         public override IServiceProvider ServiceProvider => _serviceProvider.Value;
 
         public override void Verify()
         {
-            // ensure creation of lazy service provider
+            // ensure creation of lazy service provider, this will trigger the validation
             var unused = _serviceProvider.Value;
         }
 
@@ -40,25 +46,25 @@ namespace Backend.Fx.MicrosoftDependencyInjection
                 throw new InvalidOperationException("Service provider has been built and cannot be changed any more.");
             }
 
-            var existingRegistration = _serviceCollection
+            var existingRegistration = ServiceCollection
                 .SingleOrDefault(sd => sd.ServiceType == serviceDescriptor.ServiceType);
-            
+
             if (existingRegistration == null)
             {
                 serviceDescriptor.LogDetails(Logger, "Adding");
-                _serviceCollection.Add(serviceDescriptor);
+                ServiceCollection.Add(serviceDescriptor);
             }
             else
             {
                 serviceDescriptor.LogDetails(Logger, "Replacing");
-                _serviceCollection.Replace(serviceDescriptor);
+                ServiceCollection.Replace(serviceDescriptor);
             }
         }
 
         public override void RegisterDecorator(ServiceDescriptor serviceDescriptor)
         {
             serviceDescriptor.LogDetails(Logger, "Adding decorator");
-            _serviceCollection.Decorate(serviceDescriptor.ServiceType, serviceDescriptor.ImplementationType);
+            ServiceCollection.Decorate(serviceDescriptor.ServiceType, serviceDescriptor.ImplementationType);
         }
 
         public override void RegisterCollection(IEnumerable<ServiceDescriptor> serviceDescriptors)
@@ -70,11 +76,11 @@ namespace Backend.Fx.MicrosoftDependencyInjection
                 Logger.Warn("Skipping registration of empty collection");
                 return;
             }
-            
+
             foreach (var serviceDescriptor in serviceDescriptorArray)
             {
                 serviceDescriptor.LogDetails(Logger, "Adding");
-                _serviceCollection.Add(serviceDescriptor);
+                ServiceCollection.Add(serviceDescriptor);
             }
         }
 

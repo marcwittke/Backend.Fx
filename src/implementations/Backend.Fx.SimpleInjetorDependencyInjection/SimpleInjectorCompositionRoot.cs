@@ -18,7 +18,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
     public class SimpleInjectorCompositionRoot : CompositionRoot
     {
         private static readonly ILogger Logger = Log.Create<SimpleInjectorCompositionRoot>();
-        private readonly Lazy<Container> _container;
         private readonly IList<ServiceDescriptor> _services = new List<ServiceDescriptor>();
         private readonly IList<ServiceDescriptor> _decorators = new List<ServiceDescriptor>();
         private readonly IList<ServiceDescriptor[]> _serviceCollections = new List<ServiceDescriptor[]>();
@@ -37,85 +36,23 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
         {
             Logger.LogInformation("Initializing SimpleInjector");
             ScopedLifestyle = scopedLifestyle;
-            _container = new Lazy<Container>(() =>
-            {
-                Logger.LogInformation("Building SimpleInjector Container");
-                var container = new Container();
-                container.Options.LifestyleSelectionBehavior = lifestyleBehavior;
-                container.Options.DefaultScopedLifestyle = ScopedLifestyle;
 
-                foreach (var serviceDescriptor in _services)
-                {
-                    serviceDescriptor.LogDetails(Logger, "Adding");
+            Container.Options.LifestyleSelectionBehavior = lifestyleBehavior;
+            Container.Options.DefaultScopedLifestyle = scopedLifestyle;
 
-                    if (serviceDescriptor.ImplementationType != null)
-                    {
-                        container.Register(
-                            serviceDescriptor.ServiceType,
-                            serviceDescriptor.ImplementationType,
-                            serviceDescriptor.Lifetime.Translate());
-                    }
-                    else if (serviceDescriptor.ImplementationFactory != null)
-                    {
-                        container.Register(
-                            serviceDescriptor.ServiceType,
-                            () => serviceDescriptor.ImplementationFactory(container),
-                            serviceDescriptor.Lifetime.Translate());
-                    }
-                    else if (serviceDescriptor.ImplementationInstance != null &&
-                             serviceDescriptor.Lifetime == ServiceLifetime.Singleton)
-                    {
-                        container.RegisterInstance(serviceDescriptor.ServiceType,
-                            serviceDescriptor.ImplementationInstance);
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException("Bad service descriptor");
-                    }
-                }
-
-                foreach (var serviceDescriptor in _decorators)
-                {
-                    serviceDescriptor.LogDetails(Logger, "Adding decorator");
-
-                    container.RegisterDecorator(
-                        serviceDescriptor.ServiceType,
-                        serviceDescriptor.ImplementationType,
-                        serviceDescriptor.Lifetime.Translate());
-                }
-
-                foreach (var serviceDescriptors in _serviceCollections)
-                {
-                    Logger.Debug("Adding {Lifetime} collection registration: {ServiceType}: {ImplementationType}",
-                        serviceDescriptors[0].Lifetime.ToString(),
-                        serviceDescriptors[0].ServiceType.Name,
-                        $"[{string.Join(",", serviceDescriptors.Select(sd => sd.GetImplementationTypeDescription()))}]");
-
-                    foreach (var serviceDescriptor in serviceDescriptors)
-                    {
-                        container.Collection.Append(
-                            serviceDescriptor.ServiceType,
-                            serviceDescriptor.ImplementationType,
-                            serviceDescriptor.Lifetime.Translate());
-                    }
-                }
-
-                // needed to support extension method IServiceProvider.CreateScope() 
-                container.RegisterInstance<IServiceScopeFactory>(new SimpleInjectorServiceScopeFactory(container));
-
-                return container;
-            });
+            // required to support extension method IServiceProvider.CreateScope() 
+            Container.RegisterInstance<IServiceScopeFactory>(new SimpleInjectorServiceScopeFactory(Container));
         }
 
         public ScopedLifestyle ScopedLifestyle { get; }
 
-        public Container Container => _container.Value;
+        public Container Container { get; } = new Container();
 
         #region ICompositionRoot implementation
 
         public override void Register(ServiceDescriptor serviceDescriptor)
         {
-            if (_container.IsValueCreated)
+            if (Container.IsLocked)
             {
                 throw new InvalidOperationException("Container has been built and cannot be changed any more.");
             }
@@ -130,7 +67,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
 
         public override void RegisterDecorator(ServiceDescriptor serviceDescriptor)
         {
-            if (_container.IsValueCreated)
+            if (Container.IsLocked)
             {
                 throw new InvalidOperationException("Container has been built and cannot be changed any more.");
             }
@@ -140,7 +77,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
 
         public override void RegisterCollection(IEnumerable<ServiceDescriptor> serviceDescriptors)
         {
-            if (_container.IsValueCreated)
+            if (Container.IsLocked)
             {
                 throw new InvalidOperationException("Container has been built and cannot be changed any more.");
             }
@@ -164,22 +101,16 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
 
         public override void Verify()
         {
-            Logger.LogInformation("container is being verified");
-            try
-            {
-                _container.Value.Verify(VerificationOption.VerifyAndDiagnose);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogWarning(ex, "container configuration invalid");
-                throw;
-            }
+            FillContainer();
+
+            Logger.LogInformation("Verifying container");
+            Container.Verify(VerificationOption.VerifyAndDiagnose);
         }
 
         /// <inheritdoc />
         public override IServiceScope BeginScope()
         {
-            return _container.Value.CreateScope();
+            return Container.CreateScope();
         }
 
         public override IServiceProvider ServiceProvider => Container;
@@ -195,15 +126,75 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             }
         }
 
+        private void FillContainer()
+        {
+            Logger.LogInformation("Registering services with container");
+            foreach (var serviceDescriptor in _services)
+            {
+                serviceDescriptor.LogDetails(Logger, "Adding");
+
+                if (serviceDescriptor.ImplementationType != null)
+                {
+                    Container.Register(
+                        serviceDescriptor.ServiceType,
+                        serviceDescriptor.ImplementationType,
+                        serviceDescriptor.Lifetime.Translate());
+                }
+                else if (serviceDescriptor.ImplementationFactory != null)
+                {
+                    Container.Register(
+                        serviceDescriptor.ServiceType,
+                        () => serviceDescriptor.ImplementationFactory(Container),
+                        serviceDescriptor.Lifetime.Translate());
+                }
+                else if (serviceDescriptor.ImplementationInstance != null &&
+                         serviceDescriptor.Lifetime == ServiceLifetime.Singleton)
+                {
+                    Container.RegisterInstance(serviceDescriptor.ServiceType,
+                        serviceDescriptor.ImplementationInstance);
+                }
+                else
+                {
+                    throw new InvalidOperationException("Bad service descriptor");
+                }
+            }
+
+            foreach (var serviceDescriptor in _decorators)
+            {
+                serviceDescriptor.LogDetails(Logger, "Adding decorator");
+
+                Container.RegisterDecorator(
+                    serviceDescriptor.ServiceType,
+                    serviceDescriptor.ImplementationType,
+                    serviceDescriptor.Lifetime.Translate());
+            }
+
+            foreach (var serviceDescriptors in _serviceCollections)
+            {
+                Logger.Debug("Adding {Lifetime} collection registration: {ServiceType}: {ImplementationType}",
+                    serviceDescriptors[0].Lifetime.ToString(),
+                    serviceDescriptors[0].ServiceType.Name,
+                    $"[{string.Join(",", serviceDescriptors.Select(sd => sd.GetImplementationTypeDescription()))}]");
+
+                foreach (var serviceDescriptor in serviceDescriptors)
+                {
+                    Container.Collection.Append(
+                        serviceDescriptor.ServiceType,
+                        serviceDescriptor.ImplementationType,
+                        serviceDescriptor.Lifetime.Translate());
+                }
+            }
+        }
+
         #endregion
 
         #region IDisposable implementation
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && _container.IsValueCreated)
+            if (disposing)
             {
-                _container.Value.Dispose();
+                Container.Dispose();
             }
         }
 

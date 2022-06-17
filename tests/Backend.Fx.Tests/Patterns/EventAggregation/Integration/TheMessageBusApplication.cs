@@ -10,10 +10,12 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
 {
     public class TheMessageBusApplication
     {
-        [Fact]
-        public async Task Boots()
+        [Theory]
+        [InlineData(CompositionRootType.Microsoft)]
+        [InlineData(CompositionRootType.SimpleInjector)]
+        public async Task Boots(CompositionRootType compositionRootType)
         {
-            var app = new MessageBusTestApplication(CompositionRootType.Microsoft);
+            var app = new MessageBusTestApplication(compositionRootType);
             await app.BootAsync();
         }
     }
@@ -25,8 +27,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
                 new InMemoryMessageBus(),
                 new BackendFxApplication(
                     compositionRootType.Create(),
-                    A.Fake<IExceptionLogger>(),
-                    typeof(MessageBusTestApplication).Assembly))
+                    A.Fake<IExceptionLogger>()))
         {
         }
     }
