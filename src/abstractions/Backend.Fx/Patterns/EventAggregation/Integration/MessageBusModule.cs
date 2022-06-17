@@ -44,6 +44,10 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
                             ServiceLifetime.Scoped));
                 }
             }
+            
+            // make sure all integration events are raised after completing an operation, but before ending the scope
+            compositionRoot.RegisterDecorator(
+                ServiceDescriptor.Scoped<IOperation, RaiseIntegrationEventsOperationDecorator>());
         }
     }
 }
