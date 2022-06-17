@@ -22,11 +22,17 @@ namespace Backend.Fx.Environment.DateAndTime
         public void OverrideUtcNow(DateTime utcNow)
         {
             Logger.LogTrace("Adjusting clock to {UtcNow}", utcNow);
-            if (utcNow.Kind != DateTimeKind.Utc)
+            if (utcNow.Kind == DateTimeKind.Unspecified)
             {
+                Logger.LogWarning("Overriding UtcNow with a date time value of unspecified kind. Assuming kind:Utc");
                 utcNow = new DateTime(utcNow.Ticks, DateTimeKind.Utc);
             }
-            
+
+            if (utcNow.Kind == DateTimeKind.Local)
+            {
+                throw new ArgumentException("When overriding the UtcNow value you have to provide a DateTime value of kind Utc");
+            }
+
             _overriddenUtcNow = utcNow;
         }
 
