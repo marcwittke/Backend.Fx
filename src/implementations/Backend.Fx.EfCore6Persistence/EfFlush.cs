@@ -37,7 +37,7 @@ namespace Backend.Fx.EfCore6Persistence
         {
             DetectChanges();
             UpdateTrackingProperties();
-            DbContext.TraceChangeTrackerState();
+            if (Logger.IsEnabled(LogLevel.Trace)) Logger.LogTrace("Change tracker state: {@ChangeTrackerState}", DbContext.ChangeTracker.DebugView.LongView);
             CheckForMissingTenantIds();
             SaveChanges();
         }
@@ -186,7 +186,7 @@ namespace Backend.Fx.EfCore6Persistence
                 Logger.LogDebug("Recursing...");
                 return GetAggregateRootEntry(changeTracker, navigationTargetEntry);
             }
-
+            
             throw new InvalidOperationException($"Could not find aggregate root of {entry.Entity.GetType().Name}[{(entry.Entity as Identified)?.Id}]");
         }
     }

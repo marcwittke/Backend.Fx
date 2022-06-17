@@ -68,8 +68,8 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
 
             public TestInvoker()
             {
-                A.CallTo(() => TypedHandler.Handle(A<TestIntegrationEvent>._)).Invokes((TestIntegrationEvent e) => IntegrationEvent.TypedProcessed.Set());
-                A.CallTo(() => DynamicHandler.Handle(new object())).WithAnyArguments().Invokes((object e) => IntegrationEvent.DynamicProcessed.Set());
+                A.CallTo(() => TypedHandler.Handle(A<TestIntegrationEvent>._)).Invokes((TestIntegrationEvent _) => IntegrationEvent.TypedProcessed.Set());
+                A.CallTo(() => DynamicHandler.Handle(new object())).WithAnyArguments().Invokes((object _) => IntegrationEvent.DynamicProcessed.Set());
 
                 A.CallTo(() => FakeServiceProvider.GetService(A<Type>.That.IsEqualTo(typeof(TypedMessageHandler))))
                  .Returns(new TypedMessageHandler(TypedHandler));
@@ -165,7 +165,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         public async void DoesNotCallUnsubscribedDelegateEventHandler()
         {
             var handled = new ManualResetEvent(false);
-            var handler = new DelegateIntegrationMessageHandler<TestIntegrationEvent>(ev => handled.Set());
+            var handler = new DelegateIntegrationMessageHandler<TestIntegrationEvent>(_ => handled.Set());
             Sut.Subscribe(handler);
             Sut.Unsubscribe(handler);
             await Sut.Publish(Invoker.IntegrationEvent);
@@ -182,7 +182,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         public async void DelegateIntegrationMessageHandler()
         {
             var handled = new ManualResetEvent(false);
-            var handler = new DelegateIntegrationMessageHandler<TestIntegrationEvent>(ev => handled.Set());
+            var handler = new DelegateIntegrationMessageHandler<TestIntegrationEvent>(_ => handled.Set());
             Sut.Subscribe(handler);
             await Sut.Publish(Invoker.IntegrationEvent);
             Assert.True(handled.WaitOne(Debugger.IsAttached ? int.MaxValue : 10000));

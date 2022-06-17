@@ -1,13 +1,13 @@
 using System;
 using System.Threading.Tasks;
-using Backend.Fx.EfCore5Persistence.Tests.DummyImpl.Domain;
-using Backend.Fx.EfCore5Persistence.Tests.DummyImpl.Persistence;
 using Backend.Fx.EfCore5Persistence.Tests.Fixtures;
+using Backend.Fx.EfCore5Persistence.Tests.SampleApp.Persistence;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Extensions;
 using Backend.Fx.Patterns.Authorization;
 using Backend.Fx.TestUtil;
+using SampleApp.Domain;
 using Xunit;
 using Xunit.Abstractions;
 

@@ -1,44 +1,35 @@
 using System;
 using System.Data;
-using System.Data.Common;
 using System.IO;
 using System.Threading.Tasks;
 using Backend.Fx.BuildingBlocks;
-using Backend.Fx.EfCore6Persistence.Bootstrapping;
+using Backend.Fx.EfCore6Persistence.Tests.SampleApp.Persistence;
+using Backend.Fx.EfCore6Persistence.Tests.SampleApp.Runtime;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Environment.Persistence;
-using Backend.Fx.Logging;
-using Backend.Fx.Patterns.Authorization;
-using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Domain;
 using Backend.Fx.Patterns.IdGeneration;
 using Backend.Fx.TestUtil;
-using FakeItEasy;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using SampleApp.Domain;
 using Xunit;
-using Xunit.Abstractions;
-using ILoggerFactory = Microsoft.Extensions.Logging.ILoggerFactory;
 
 namespace Backend.Fx.EfCore6Persistence.Tests
 {
-    public class TheDbApplicationWithEfCore : TestWithLogging
+    public class TheDbApplicationWithEfCore
     {
-        public TheDbApplicationWithEfCore(ITestOutputHelper output) : base(output)
-        {
-        }
-        
         [Theory]
         [InlineData(CompositionRootType.Microsoft)]
         [InlineData(CompositionRootType.SimpleInjector)]
         public async Task CanResolveIdGenerator(CompositionRootType compositionRootType)
         {
-            using var sut = new EfCoreTestApplication(compositionRootType, "Data Source=" + Path.GetTempFileName());
+            var sut = SampleAppBuilder.Build(compositionRootType, "Data Source=" + Path.GetTempFileName());
             await sut.BootAsync();
             var entityIdGenerator = sut.CompositionRoot.ServiceProvider.GetRequiredService<IEntityIdGenerator>();
-            Assert.StrictEqual(sut.EntityIdGenerator, entityIdGenerator);
+            Assert.IsType<SampleAppIdGenerator>(entityIdGenerator);
         }
 
         [Theory]
@@ -46,7 +37,7 @@ namespace Backend.Fx.EfCore6Persistence.Tests
         [InlineData(CompositionRootType.SimpleInjector)]
         public async Task CanResolveDbConnection(CompositionRootType compositionRootType)
         {
-            using var sut = new EfCoreTestApplication(compositionRootType, "Data Source=" + Path.GetTempFileName());
+            var sut = SampleAppBuilder.Build(compositionRootType, "Data Source=" + Path.GetTempFileName());
             await sut.BootAsync();
 
             sut.Invoker.Invoke(
@@ -64,7 +55,7 @@ namespace Backend.Fx.EfCore6Persistence.Tests
         [InlineData(CompositionRootType.SimpleInjector)]
         public async Task CanResolveICanFlush(CompositionRootType compositionRootType)
         {
-            using var sut = new EfCoreTestApplication(compositionRootType, "Data Source=" + Path.GetTempFileName());
+            var sut = SampleAppBuilder.Build(compositionRootType, "Data Source=" + Path.GetTempFileName());
             await sut.BootAsync();
 
             sut.Invoker.Invoke(
@@ -83,14 +74,14 @@ namespace Backend.Fx.EfCore6Persistence.Tests
         [InlineData(CompositionRootType.SimpleInjector)]
         public async Task CanResolveDbContext(CompositionRootType compositionRootType)
         {
-            using var sut = new EfCoreTestApplication(compositionRootType, "Data Source=" + Path.GetTempFileName());
+            var sut = SampleAppBuilder.Build(compositionRootType, "Data Source=" + Path.GetTempFileName());
             await sut.BootAsync();
 
             sut.Invoker.Invoke(
                 sp =>
                 {
                     var dbContext = sp.GetRequiredService<DbContext>();
-                    Assert.IsType<EfCoreTestDbContext>(dbContext);
+                    Assert.IsType<SampleAppDbContext>(dbContext);
                 },
                 new SystemIdentity(),
                 new TenantId(333));
@@ -101,14 +92,14 @@ namespace Backend.Fx.EfCore6Persistence.Tests
         [InlineData(CompositionRootType.SimpleInjector)]
         public async Task CanResolveAggregateMapping(CompositionRootType compositionRootType)
         {
-            using var sut = new EfCoreTestApplication(compositionRootType, "Data Source=" + Path.GetTempFileName());
+            var sut = SampleAppBuilder.Build(compositionRootType, "Data Source=" + Path.GetTempFileName());
             await sut.BootAsync();
 
             sut.Invoker.Invoke(
                 sp =>
                 {
-                    var aggregateMapping = sp.GetRequiredService<IAggregateMapping<Order>>();
-                    Assert.IsType<OrderMapping>(aggregateMapping);
+                    var aggregateMapping = sp.GetRequiredService<IAggregateMapping<Blog>>();
+                    Assert.IsType<BlogMapping>(aggregateMapping);
                 },
                 new SystemIdentity(),
                 new TenantId(333));
@@ -119,14 +110,14 @@ namespace Backend.Fx.EfCore6Persistence.Tests
         [InlineData(CompositionRootType.SimpleInjector)]
         public async Task CanResolveEfRepositoryForAggregateRoot(CompositionRootType compositionRootType)
         {
-            using var sut = new EfCoreTestApplication(compositionRootType, "Data Source=" + Path.GetTempFileName());
+            var sut = SampleAppBuilder.Build(compositionRootType, "Data Source=" + Path.GetTempFileName());
             await sut.BootAsync();
 
             sut.Invoker.Invoke(
                 sp =>
                 {
-                    var repo = sp.GetRequiredService<IRepository<Order>>();
-                    Assert.IsType<EfRepository<Order>>(repo);
+                    var repo = sp.GetRequiredService<IRepository<Blog>>();
+                    Assert.IsType<EfRepository<Blog>>(repo);
                 },
                 new SystemIdentity(),
                 new TenantId(333));
@@ -137,17 +128,18 @@ namespace Backend.Fx.EfCore6Persistence.Tests
         [InlineData(CompositionRootType.SimpleInjector)]
         public async Task AutoCommitsChangesOnCompletingInvocation(CompositionRootType compositionRootType)
         {
-            using var sut = new EfCoreTestApplication(compositionRootType, "Data Source=" + Path.GetTempFileName());
+            var sut = SampleAppBuilder.Build(compositionRootType, "Data Source=" + Path.GetTempFileName());
             await sut.BootAsync();
 
             sut.Invoker.Invoke(
                 sp =>
                 {
-                    var repo = sp.GetRequiredService<IRepository<Order>>();
-                    repo.Add(new Order(sut.EntityIdGenerator.NextId(), "me1"));
-                    repo.Add(new Order(sut.EntityIdGenerator.NextId(), "me2"));
-                    repo.Add(new Order(sut.EntityIdGenerator.NextId(), "me3"));
-                    repo.Add(new Order(sut.EntityIdGenerator.NextId(), "me4"));
+                    var repo = sp.GetRequiredService<IRepository<Blog>>();
+                    var idGen = sp.GetRequiredService<IEntityIdGenerator>();
+                    repo.Add(new Blog(idGen.NextId(), "me1"));
+                    repo.Add(new Blog(idGen.NextId(), "me2"));
+                    repo.Add(new Blog(idGen.NextId(), "me3"));
+                    repo.Add(new Blog(idGen.NextId(), "me4"));
                 },
                 new SystemIdentity(),
                 new TenantId(333));
@@ -155,7 +147,7 @@ namespace Backend.Fx.EfCore6Persistence.Tests
             sut.Invoker.Invoke(
                 sp =>
                 {
-                    var repo = sp.GetRequiredService<IRepository<Order>>();
+                    var repo = sp.GetRequiredService<IRepository<Blog>>();
                     Assert.Equal(4, repo.GetAll().Length);
                 },
                 new SystemIdentity(),
@@ -167,18 +159,19 @@ namespace Backend.Fx.EfCore6Persistence.Tests
         [InlineData(CompositionRootType.SimpleInjector)]
         public async Task DoesNotCommitChangesOnException(CompositionRootType compositionRootType)
         {
-            using var sut = new EfCoreTestApplication(compositionRootType, "Data Source=" + Path.GetTempFileName());
+            var sut = SampleAppBuilder.Build(compositionRootType, "Data Source=" + Path.GetTempFileName());
             await sut.BootAsync();
 
             Assert.Throws<Exception>(
                 () => sut.Invoker.Invoke(
                     sp =>
                     {
-                        var repo = sp.GetRequiredService<IRepository<Order>>();
-                        repo.Add(new Order(sut.EntityIdGenerator.NextId(), "me1"));
-                        repo.Add(new Order(sut.EntityIdGenerator.NextId(), "me2"));
-                        repo.Add(new Order(sut.EntityIdGenerator.NextId(), "me3"));
-                        repo.Add(new Order(sut.EntityIdGenerator.NextId(), "me4"));
+                        var repo = sp.GetRequiredService<IRepository<Blog>>();
+                        var idGen = sp.GetRequiredService<IEntityIdGenerator>();
+                        repo.Add(new Blog(idGen.NextId(), "me1"));
+                        repo.Add(new Blog(idGen.NextId(), "me2"));
+                        repo.Add(new Blog(idGen.NextId(), "me3"));
+                        repo.Add(new Blog(idGen.NextId(), "me4"));
                         throw new Exception("intentionally thrown for a test case");
                     },
                     new SystemIdentity(),
@@ -187,7 +180,7 @@ namespace Backend.Fx.EfCore6Persistence.Tests
             sut.Invoker.Invoke(
                 sp =>
                 {
-                    var repo = sp.GetRequiredService<IRepository<Order>>();
+                    var repo = sp.GetRequiredService<IRepository<Blog>>();
                     Assert.Empty(repo.GetAll());
                 },
                 new SystemIdentity(),
@@ -199,120 +192,23 @@ namespace Backend.Fx.EfCore6Persistence.Tests
         [InlineData(CompositionRootType.SimpleInjector)]
         public async Task DoesFlushBeforeRaisingDomainEvents(CompositionRootType compositionRootType)
         {
-            using var sut = new EfCoreTestApplication(compositionRootType, "Data Source=" + Path.GetTempFileName());
+            var sut = SampleAppBuilder.Build(compositionRootType, "Data Source=" + Path.GetTempFileName());
             await sut.BootAsync();
 
             sut.Invoker.Invoke(
                 sp =>
                 {
-                    var repo = sp.GetRequiredService<IRepository<Order>>();
-                    var order = new Order(sut.EntityIdGenerator.NextId(), "domain event test");
+                    var repo = sp.GetRequiredService<IRepository<Blog>>();
+                    var idGen = sp.GetRequiredService<IEntityIdGenerator>();
+                    var order = new Blog(idGen.NextId(), "domain event test");
                     repo.Add(order);
-                    sp.GetRequiredService<IDomainEventAggregator>().PublishDomainEvent(new OrderCreated(order.Id));
-                    OrderCreatedHandler.ExpectedInvocationCount++;
+                    sp.GetRequiredService<IDomainEventAggregator>().PublishDomainEvent(new BlogCreated(order.Id));
+                    BlogCreatedHandler.ExpectedInvocationCount++;
                 },
                 new SystemIdentity(),
                 new TenantId(333));
 
-            Assert.Equal(OrderCreatedHandler.ExpectedInvocationCount, OrderCreatedHandler.InvocationCount);
-        }
-
-
-        private class EfCoreTestApplication : PersistentApplication
-        {
-            private int _nextId = 1;
-            private static readonly IDatabaseBootstrapper DbBootstrapper = A.Fake<IDatabaseBootstrapper>();
-            public readonly IEntityIdGenerator EntityIdGenerator = A.Fake<IEntityIdGenerator>();
-
-            public EfCoreTestApplication(CompositionRootType compositionRootType, string connectionString)
-                : base(
-                    DbBootstrapper,
-                    A.Fake<IDatabaseAvailabilityAwaiter>(),
-                    new BackendFxApplication(
-                        compositionRootType.Create(),
-                        A.Fake<IExceptionLogger>(),
-                        typeof(TheDbApplicationWithEfCore).Assembly))
-            {
-                A.CallTo(() => DbBootstrapper.EnsureDatabaseExistence()).Invokes(() =>
-                {
-                    var dbContext = new EfCoreTestDbContext(new DbContextOptionsBuilder<EfCoreTestDbContext>()
-                        .UseSqlite(connectionString).Options);
-                    dbContext.Database.EnsureCreated();
-                });
-
-                var dbConnectionFactory = A.Fake<IDbConnectionFactory>();
-                A.CallTo(() => dbConnectionFactory.Create()).Returns(new SqliteConnection(connectionString));
-
-                A.CallTo(() => EntityIdGenerator.NextId())
-                    .ReturnsLazily(() => _nextId++);
-
-                var loggerFactory = A.Fake<ILoggerFactory>();
-
-                CompositionRoot.RegisterModules(
-                    new EfCorePersistenceModule<EfCoreTestDbContext>(
-                        dbConnectionFactory,
-                        EntityIdGenerator,
-                        loggerFactory,
-                        (builder, connection) => builder.UseSqlite((DbConnection)connection),
-                        Assemblies
-                    ));
-            }
-        }
-    }
-
-    public class EfCoreTestDbContext : DbContext
-    {
-        public EfCoreTestDbContext(DbContextOptions<EfCoreTestDbContext> options)
-            : base(options)
-        {
-        }
-
-        public DbSet<Order> Orders { get; set; }
-    }
-
-    public class Order : AggregateRoot
-    {
-        public string Recipient { get; private set; }
-
-        public Order(int id, string recipient) : base(id)
-        {
-            Recipient = recipient;
-        }
-    }
-
-    public class OrderMapping : PlainAggregateMapping<Order>
-    {
-    }
-
-    public class OrderAuthorization : AllowAll<Order>
-    {
-    }
-
-    public class OrderCreated : IDomainEvent
-    {
-        public int OrderId { get; }
-
-        public OrderCreated(int orderId)
-        {
-            OrderId = orderId;
-        }
-    }
-
-    public class OrderCreatedHandler : IDomainEventHandler<OrderCreated>
-    {
-        private readonly DbContext _dbContext;
-        public static int InvocationCount = 0;
-        public static int ExpectedInvocationCount = 0;
-
-        public OrderCreatedHandler(DbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
-
-        public void Handle(OrderCreated domainEvent)
-        {
-            InvocationCount++;
-            Assert.NotNull(_dbContext.Set<Order>().Find(domainEvent.OrderId));
+            Assert.Equal(BlogCreatedHandler.ExpectedInvocationCount, BlogCreatedHandler.InvocationCount);
         }
     }
 }

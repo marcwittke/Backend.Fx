@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using Backend.Fx.EfCore5Persistence.Tests.DummyImpl.Domain;
-using Backend.Fx.EfCore5Persistence.Tests.DummyImpl.Persistence;
 using Backend.Fx.EfCore5Persistence.Tests.Fixtures;
+using Backend.Fx.EfCore5Persistence.Tests.SampleApp.Persistence;
 using Backend.Fx.Environment.DateAndTime;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Extensions;
@@ -12,6 +11,7 @@ using Backend.Fx.Patterns.Authorization;
 using Backend.Fx.Patterns.IdGeneration;
 using Backend.Fx.TestUtil;
 using FakeItEasy;
+using SampleApp.Domain;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -54,37 +54,43 @@ namespace Backend.Fx.EfCore5Persistence.Tests
             }
         }
 
-        //FAILING!!!!
-        // this shows, that ValueObjects treated as OwnedTypes are not supported very well
-        //[Fact]
-        //public void CanUpdateDependantValueObject()
-        //{
-        //    using (DbSession dbs = _fixture.UseDbSession())
-        //    {
-        //        int id = CreateBlogWithPost(dbSession.DbConnection, 10);
-        //        Post post;
-
-        //        using (var uow = dbs.UseUnitOfWork(_clock))
-        //        {
-        //            var sut = new EfRepository<Blog>(uow.DbContext, new BlogMapping(), CurrentTenantIdHolder.Create(_tenantId),
-        //                new AllowAll<Blog>());
-        //            var blog = sut.Single(id);
-        //            post = blog.Posts.First();
-        //            post.TargetAudience = new TargetAudience{Culture = "es-AR", IsPublic = false};
-        //            uow.Complete();
-        //        }
-
-        //        
-        //        {
-        //            string culture = dbSession.DbConnection.ExecuteScalar<string>($"SELECT TargetAudience_Culture ame FROM Posts where id = {post.Id}");
-        //            Assert.Equal("es-AR", culture);
-
-        //            string strChangedOn = dbSession.DbConnection.ExecuteScalar<string>($"SELECT ChangedOn FROM Posts where id = {post.Id}");
-        //            DateTime changedOn = DateTime.Parse(strChangedOn);
-        //            Assert.Equal(_clock.UtcNow, changedOn, new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(500)));
-        //        }
-        //    }
-        //}
+        // //FAILING!!!!
+        // // this shows, that ValueObjects treated as OwnedTypes are not supported very well
+        // [Fact]
+        // public void CanUpdateDependentValueObject()
+        // {
+        //     Post post;
+        //
+        //     var clock = new AdjustableClock(new WallClock());
+        //     clock.OverrideUtcNow(new DateTime(2000, 1, 2, 3, 4, 5));
+        //
+        //     using (TestDbSession dbSession = _fixture.CreateTestDbSession(clock: clock))
+        //     {
+        //         int id = CreateBlogWithPost(dbSession.DbConnection, 10);
+        //
+        //         var sut = new EfRepository<Blog>(
+        //             dbSession.DbContext,
+        //             new BlogMapping(),
+        //             CurrentTenantIdHolder.Create(_tenantId),
+        //             new AllowAll<Blog>());
+        //         var blog = sut.Single(id);
+        //         post = blog.Posts.First();
+        //         post.TargetAudience = new TargetAudience { Culture = "es-AR", IsPublic = false };
+        //     }
+        //
+        //     using (TestDbSession dbSession = _fixture.CreateTestDbSession())
+        //     {
+        //         string culture =
+        //             dbSession.DbConnection.ExecuteScalar<string>(
+        //                 $"SELECT TargetAudience_Culture FROM Posts where id = {post.Id}");
+        //         Assert.Equal("es-AR", culture);
+        //
+        //         string strChangedOn =
+        //             dbSession.DbConnection.ExecuteScalar<string>($"SELECT ChangedOn FROM Posts where id = {post.Id}");
+        //         DateTime changedOn = DateTime.Parse(strChangedOn);
+        //         Assert.Equal(clock.UtcNow, changedOn, new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(100)));
+        //     }
+        // }
 
         [Fact]
         public void CanAddDependent()

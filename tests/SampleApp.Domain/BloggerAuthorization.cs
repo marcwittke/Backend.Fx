@@ -1,7 +1,7 @@
 using Backend.Fx.Patterns.Authorization;
 using JetBrains.Annotations;
 
-namespace Backend.Fx.EfCore5Persistence.Tests.DummyImpl.Domain
+namespace SampleApp.Domain
 {
     [UsedImplicitly]
     public class BloggerAuthorization : AllowAll<Blogger>

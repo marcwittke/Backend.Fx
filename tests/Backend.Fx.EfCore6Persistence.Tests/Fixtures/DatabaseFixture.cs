@@ -1,6 +1,6 @@
 using System.Data;
 using System.Security.Principal;
-using Backend.Fx.EfCore6Persistence.Tests.DummyImpl.Persistence;
+using Backend.Fx.EfCore6Persistence.Tests.SampleApp.Persistence;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.DateAndTime;
 using Backend.Fx.Environment.Persistence;
@@ -12,15 +12,15 @@ namespace Backend.Fx.EfCore6Persistence.Tests.Fixtures
     {
         public void CreateDatabase()
         {
-            using (var dbContext = new TestDbContext(GetDbContextOptionsForDbCreation()))
+            using (var dbContext = new SampleAppDbContext(GetDbContextOptionsForDbCreation()))
             {
                 dbContext.Database.EnsureCreated();
             }
         }
 
-        protected abstract DbContextOptions<TestDbContext> GetDbContextOptionsForDbCreation();
+        protected abstract DbContextOptions<SampleAppDbContext> GetDbContextOptionsForDbCreation();
 
-        public abstract DbContextOptionsBuilder<TestDbContext> GetDbContextOptionsBuilder(IDbConnection connection);
+        public abstract DbContextOptionsBuilder<SampleAppDbContext> GetDbContextOptionsBuilder(IDbConnection connection);
 
         public abstract DbConnectionOperationDecorator UseOperation();
 

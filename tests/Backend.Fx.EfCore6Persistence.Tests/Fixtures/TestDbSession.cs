@@ -1,7 +1,7 @@
 using System;
 using System.Data;
 using System.Security.Principal;
-using Backend.Fx.EfCore6Persistence.Tests.DummyImpl.Persistence;
+using Backend.Fx.EfCore6Persistence.Tests.SampleApp.Persistence;
 using Backend.Fx.Environment.DateAndTime;
 using Backend.Fx.Environment.Persistence;
 using Backend.Fx.Patterns.DependencyInjection;
@@ -16,13 +16,13 @@ namespace Backend.Fx.EfCore6Persistence.Tests.Fixtures
         public TestDbSession(DatabaseFixture fixture, DbConnectionOperationDecorator operation, ICurrentTHolder<IIdentity> identityHolder, IClock clock)
         {
             _operation = operation;
-            DbContext = new TestDbContext(fixture.GetDbContextOptionsBuilder(operation.DbConnection).Options);
+            DbContext = new SampleAppDbContext(fixture.GetDbContextOptionsBuilder(operation.DbConnection).Options);
             _efFlush = new EfFlush(DbContext, identityHolder, clock);
             DbConnection = operation.DbConnection;
         }
 
 
-        public TestDbContext DbContext { get; }
+        public SampleAppDbContext DbContext { get; }
         public IDbConnection DbConnection { get; }
 
         public void Flush()

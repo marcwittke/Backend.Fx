@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Extensions;
 using Backend.Fx.Logging;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -53,34 +51,6 @@ namespace Backend.Fx.EfCore6Persistence
                 var aggregateMapping = (IAggregateMapping) Activator.CreateInstance(typeInfo.AsType());
                 aggregateMapping.ApplyEfMapping(modelBuilder);
             }
-        }
-
-        
-
-        public static void TraceChangeTrackerState(this DbContext dbContext)
-        {
-            if (Logger.IsEnabled(LogLevel.Trace))
-                try
-                {
-                    var changeTrackerState = new
-                    {
-                        added = dbContext.ChangeTracker.Entries().Where(entry => entry.State == EntityState.Added).ToArray(),
-                        modified = dbContext.ChangeTracker.Entries().Where(entry => entry.State == EntityState.Modified).ToArray(),
-                        deleted = dbContext.ChangeTracker.Entries().Where(entry => entry.State == EntityState.Deleted).ToArray(),
-                        unchanged = dbContext.ChangeTracker.Entries().Where(entry => entry.State == EntityState.Unchanged).ToArray()
-                    };
-
-                    Logger.LogTrace("Change tracker state: {@ChangeTrackerState}", changeTrackerState);
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogWarning(ex, "Change tracker state could not be dumped");
-                }
-        }
-
-        private static string GetPrimaryKeyValue(EntityEntry entry)
-        {
-            return (entry.Entity as Entity)?.Id.ToString(CultureInfo.InvariantCulture) ?? "?";
         }
     }
 }

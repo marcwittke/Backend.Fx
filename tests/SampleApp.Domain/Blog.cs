@@ -3,7 +3,7 @@ using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Patterns.IdGeneration;
 using JetBrains.Annotations;
 
-namespace Backend.Fx.EfCore5Persistence.Tests.DummyImpl.Domain
+namespace SampleApp.Domain
 {
     public class Blog : AggregateRoot
     {

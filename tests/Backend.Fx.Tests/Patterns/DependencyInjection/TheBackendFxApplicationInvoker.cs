@@ -24,11 +24,11 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         [Fact]
         public void BeginsNewScopeForEveryInvocation()
         {
-            _sut.Invoke(sp => { }, new AnonymousIdentity(), new TenantId(111));
+            _sut.Invoke(_ => { }, new AnonymousIdentity(), new TenantId(111));
             A.CallTo(() => _fakes.CompositionRoot.BeginScope()).MustHaveHappenedOnceExactly();
             A.CallTo(() => _fakes.ServiceScope.Dispose()).MustHaveHappenedOnceExactly();
 
-            _sut.Invoke(sp => { }, new AnonymousIdentity(), new TenantId(111));
+            _sut.Invoke(_ => { }, new AnonymousIdentity(), new TenantId(111));
             A.CallTo(() => _fakes.CompositionRoot.BeginScope()).MustHaveHappenedTwiceExactly();
             A.CallTo(() => _fakes.ServiceScope.Dispose()).MustHaveHappenedTwiceExactly();
         }
@@ -36,11 +36,11 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         [Fact]
         public void BeginsNewOperationForEveryInvocation()
         {
-            _sut.Invoke(sp => { }, new AnonymousIdentity(), new TenantId(111));
+            _sut.Invoke(_ => { }, new AnonymousIdentity(), new TenantId(111));
             A.CallTo(() => _fakes.Operation.Begin()).MustHaveHappenedOnceExactly();
             A.CallTo(() => _fakes.Operation.Complete()).MustHaveHappenedOnceExactly();
 
-            _sut.Invoke(sp => { }, new AnonymousIdentity(), new TenantId(111));
+            _sut.Invoke(_ => { }, new AnonymousIdentity(), new TenantId(111));
             A.CallTo(() => _fakes.Operation.Begin()).MustHaveHappenedTwiceExactly();
             A.CallTo(() => _fakes.Operation.Complete()).MustHaveHappenedTwiceExactly();
         }
@@ -49,7 +49,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         public void DoesNotCatchFrameworkExceptions()
         {
             A.CallTo(() => _fakes.CompositionRoot.BeginScope()).Throws<SimulatedException>();
-            Assert.Throws<SimulatedException>(() => _sut.Invoke(sp => { }, new AnonymousIdentity(), new TenantId(111)));
+            Assert.Throws<SimulatedException>(() => _sut.Invoke(_ => { }, new AnonymousIdentity(), new TenantId(111)));
             A.CallTo(() => _fakes.Operation.Begin()).MustNotHaveHappened();
             A.CallTo(() => _fakes.Operation.Complete()).MustNotHaveHappened();
         }
@@ -57,7 +57,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         [Fact]
         public void DoesNotCatchOperationExceptions()
         {
-            Assert.Throws<SimulatedException>(() => _sut.Invoke(sp => throw new SimulatedException(), new AnonymousIdentity(), new TenantId(111)));
+            Assert.Throws<SimulatedException>(() => _sut.Invoke(_ => throw new SimulatedException(), new AnonymousIdentity(), new TenantId(111)));
             A.CallTo(() => _fakes.Operation.Begin()).MustHaveHappenedOnceExactly();
             A.CallTo(() => _fakes.Operation.Complete()).MustNotHaveHappened();
         }
@@ -66,7 +66,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         public void MaintainsCorrelationIdOnInvocation()
         {
             var correlationId = Guid.NewGuid();
-            _sut.Invoke(sp => { }, new AnonymousIdentity(), new TenantId(123), correlationId);
+            _sut.Invoke(_ => { }, new AnonymousIdentity(), new TenantId(123), correlationId);
             Assert.Equal(correlationId, _fakes.CurrentCorrelationHolder.Current.Id);
         }
 
@@ -74,7 +74,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         public void MaintainsIdentityOnInvocation()
         {
             var identity = new GenericIdentity("me");
-            _sut.Invoke(sp => { }, identity, new TenantId(123));
+            _sut.Invoke(_ => { }, identity, new TenantId(123));
             A.CallTo(() => _fakes.IdentityHolder.ReplaceCurrent(A<IIdentity>.That.IsEqualTo(identity))).MustHaveHappenedOnceExactly();
         }
 
@@ -82,7 +82,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         public void MaintainsTenantIdOnInvocation()
         {
             var tenantId = new TenantId(123);
-            _sut.Invoke(sp => { }, new AnonymousIdentity(), tenantId);
+            _sut.Invoke(_ => { }, new AnonymousIdentity(), tenantId);
             A.CallTo(() => _fakes.TenantIdHolder.ReplaceCurrent(A<TenantId>.That.IsEqualTo(tenantId))).MustHaveHappenedOnceExactly();
         }
 

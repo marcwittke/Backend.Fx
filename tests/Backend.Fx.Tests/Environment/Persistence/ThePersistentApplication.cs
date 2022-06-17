@@ -1,20 +1,26 @@
 using System.Threading;
+using System.Threading.Tasks;
 using Backend.Fx.Environment.Persistence;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.Tests.Patterns.DependencyInjection;
 using Backend.Fx.TestUtil;
 using FakeItEasy;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Backend.Fx.Tests.Patterns.DependencyInjection
+namespace Backend.Fx.Tests.Environment.Persistence
 {
-    public class TheBackendFxDbApplication : TestWithLogging
+    public class ThePersistentApplication : TestWithLogging
     {
-        public TheBackendFxDbApplication(ITestOutputHelper output): base(output)
+        public ThePersistentApplication(ITestOutputHelper output): base(output)
         {
             IBackendFxApplication application = new BackendFxApplication(_fakes.CompositionRoot, A.Fake<IExceptionLogger>());
-            _sut = new PersistentApplication(_databaseBootstrapper, _databaseAvailabilityAwaiter, application);
+            _sut = new PersistentApplication(
+                _databaseBootstrapper,
+                _databaseAvailabilityAwaiter,
+                A.Fake<IModule>(),
+                application);
         }
 
         private readonly DiTestFakes _fakes = new DiTestFakes();
@@ -33,26 +39,26 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         }
 
         [Fact]
-        public void DelegatesAllCalls()
+        public async Task DelegatesAllCalls()
         {
             var application =A.Fake<IBackendFxApplication>();
             var sut = new PersistentApplication(A.Fake<IDatabaseBootstrapper>(),
-                                                 A.Fake<IDatabaseAvailabilityAwaiter>(),
-                                                 application);
+                A.Fake<IDatabaseAvailabilityAwaiter>(),
+                A.Fake<IModule>(),
+                application);
             
-            // ReSharper disable once UnusedVariable
-            IBackendFxApplicationAsyncInvoker ai = sut.AsyncInvoker;
+            Fake.ClearRecordedCalls(application);
+
+            object unused1 = sut.AsyncInvoker;
             A.CallTo(() => application.AsyncInvoker).MustHaveHappenedOnceExactly();
 
-            // ReSharper disable once UnusedVariable
-            ICompositionRoot cr = sut.CompositionRoot;
+            object unused2 = sut.CompositionRoot;
             A.CallTo(() => application.CompositionRoot).MustHaveHappenedOnceExactly();
 
-            // ReSharper disable once UnusedVariable
-            IBackendFxApplicationInvoker i = sut.Invoker;
+            object unused3 = sut.Invoker;
             A.CallTo(() => application.Invoker).MustHaveHappenedOnceExactly();
 
-            sut.BootAsync();
+            await sut.BootAsync();
             A.CallTo(() => application.BootAsync(A<CancellationToken>._)).MustHaveHappenedOnceExactly();
 
             sut.Dispose();

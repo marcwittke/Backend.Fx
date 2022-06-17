@@ -30,7 +30,7 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp.Domain
         {
             return new TokenValidationParameters
             {
-                NameClaimTypeRetriever = (token, s) => ClaimTypes.Name,
+                NameClaimTypeRetriever = (_, _) => ClaimTypes.Name,
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = SigningCredentials.Key,
                 ValidateIssuer = true,

@@ -96,7 +96,7 @@ namespace Backend.Fx.RabbitMq.Tests
                 _testOutputHelper.WriteLine(" [*] Waiting for messages.");
 
                 var consumer = new EventingBasicConsumer(_channel);
-                consumer.Received += (model, ea) =>
+                consumer.Received += (_, ea) =>
                 {
                     var body = ea.Body.ToArray();
                     var message = Encoding.UTF8.GetString(body);

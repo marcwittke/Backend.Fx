@@ -1,7 +1,7 @@
 ﻿using Backend.Fx.BuildingBlocks;
 using JetBrains.Annotations;
 
-namespace Backend.Fx.EfCore5Persistence.Tests.DummyImpl.Domain
+namespace SampleApp.Domain
 {
     public class Blogger : AggregateRoot
     {

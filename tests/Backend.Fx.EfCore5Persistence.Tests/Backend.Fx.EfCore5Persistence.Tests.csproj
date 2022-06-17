@@ -30,8 +30,10 @@
     <ItemGroup>
         <ProjectReference Include="..\..\src\abstractions\Backend.Fx\Backend.Fx.csproj" />
         <ProjectReference Include="..\..\src\implementations\Backend.Fx.EfCore5Persistence\Backend.Fx.EfCore5Persistence.csproj" />
+        <ProjectReference Include="..\..\src\implementations\Backend.Fx.InMemoryPersistence\Backend.Fx.InMemoryPersistence.csproj" />
         <ProjectReference Include="..\..\src\implementations\Backend.Fx.SimpleInjetorDependencyInjection\Backend.Fx.SimpleInjectorDependencyInjection.csproj" />
         <ProjectReference Include="..\Backend.Fx.TestUtil\Backend.Fx.TestUtil.csproj" />
+        <ProjectReference Include="..\SampleApp.Domain\SampleApp.Domain.csproj" />
     </ItemGroup>
 
     <ItemGroup>

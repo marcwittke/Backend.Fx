@@ -2,7 +2,7 @@
 using Backend.Fx.BuildingBlocks;
 using JetBrains.Annotations;
 
-namespace Backend.Fx.EfCore6Persistence.Tests.DummyImpl.Domain
+namespace SampleApp.Domain
 {
     public class Post : Entity
     {

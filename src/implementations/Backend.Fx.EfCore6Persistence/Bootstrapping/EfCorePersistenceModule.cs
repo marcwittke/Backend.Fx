@@ -6,6 +6,7 @@ using System.Reflection;
 using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Environment.Persistence;
 using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.Patterns.EventAggregation.Domain;
 using Backend.Fx.Patterns.IdGeneration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,26 +14,24 @@ using Microsoft.Extensions.Logging;
 
 namespace Backend.Fx.EfCore6Persistence.Bootstrapping
 {
-    public class EfCorePersistenceModule<TDbContext> : IModule
+    public class EfCorePersistenceModule<TDbContext, TIdGenerator> : IModule
         where TDbContext : DbContext
+        where TIdGenerator : IEntityIdGenerator
     {
         private readonly ILoggerFactory _loggerFactory;
         private readonly Action<DbContextOptionsBuilder<TDbContext>, IDbConnection> _configure;
         private readonly IDbConnectionFactory _dbConnectionFactory;
-        private readonly IEntityIdGenerator _entityIdGenerator;
         private readonly Type[] _aggregateRootTypes;
         private readonly Type[] _entityTypes;
         private readonly Dictionary<Type, Type> _aggregateMappingTypes;
 
         public EfCorePersistenceModule(
             IDbConnectionFactory dbConnectionFactory,
-            IEntityIdGenerator entityIdGenerator,
             ILoggerFactory loggerFactory,
             Action<DbContextOptionsBuilder<TDbContext>, IDbConnection> configure,
             params Assembly[] assemblies)
         {
             _dbConnectionFactory = dbConnectionFactory;
-            _entityIdGenerator = entityIdGenerator;
             _loggerFactory = loggerFactory;
             _configure = configure;
 
@@ -70,13 +69,14 @@ namespace Backend.Fx.EfCore6Persistence.Bootstrapping
             compositionRoot.Register(
                 new ServiceDescriptor(
                     typeof(IEntityIdGenerator),
-                    _entityIdGenerator));
+                    typeof(TIdGenerator),
+                    ServiceLifetime.Singleton));
 
             // by letting the container create the connection we can be sure, that only one connection per scope is used, and disposing is done accordingly
             compositionRoot.Register(
                 new ServiceDescriptor(
                     typeof(IDbConnection),
-                    sp => _dbConnectionFactory.Create(),
+                    _ => _dbConnectionFactory.Create(),
                     ServiceLifetime.Scoped));
 
             // EF core requires us to flush frequently, because of a missing identity map
@@ -163,12 +163,12 @@ namespace Backend.Fx.EfCore6Persistence.Bootstrapping
                     typeof(DbConnectionOperationDecorator),
                     ServiceLifetime.Scoped));
 
-            // // ensure everything dirty is flushed to the db before handling domain events  
-            // compositionRoot.Register(
-            //     new ServiceDescriptor(
-            //         typeof(IDomainEventAggregator),
-            //         typeof(FlushDomainEventAggregatorDecorator),
-            //         ServiceLifetime.Scoped));
+            // ensure everything dirty is flushed to the db before handling domain events  
+            compositionRoot.RegisterDecorator(
+                new ServiceDescriptor(
+                    typeof(IDomainEventAggregator),
+                    typeof(FlushDomainEventAggregatorDecorator),
+                    ServiceLifetime.Scoped));
         }
     }
 }

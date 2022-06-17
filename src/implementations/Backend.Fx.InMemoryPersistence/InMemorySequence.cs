@@ -1,6 +1,6 @@
 using Backend.Fx.Patterns.IdGeneration;
 
-namespace Backend.Fx.Tests.Patterns.IdGeneration
+namespace Backend.Fx.InMemoryPersistence
 {
     public class InMemorySequence : ISequence
     {

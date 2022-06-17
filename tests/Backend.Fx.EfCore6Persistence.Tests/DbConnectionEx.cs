@@ -22,6 +22,7 @@ namespace Backend.Fx.EfCore6Persistence.Tests
             {
                 command.CommandText = cmd;
                 object scalarResult = command.ExecuteScalar();
+                if (scalarResult is DBNull) return default;
                 if (typeof(T) == typeof(int)) return (T) (object) Convert.ToInt32(scalarResult);
                 return (T) scalarResult;
             }

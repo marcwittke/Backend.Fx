@@ -1,6 +1,6 @@
 using System.Data;
 using System.IO;
-using Backend.Fx.EfCore5Persistence.Tests.DummyImpl.Persistence;
+using Backend.Fx.EfCore5Persistence.Tests.SampleApp.Persistence;
 using Backend.Fx.Environment.Persistence;
 using Backend.Fx.Patterns.DependencyInjection;
 using Microsoft.Data.Sqlite;
@@ -12,14 +12,14 @@ namespace Backend.Fx.EfCore5Persistence.Tests.Fixtures
     {
         private readonly string _connectionString = "Data Source=" + Path.GetTempFileName();
 
-        protected override DbContextOptions<TestDbContext> GetDbContextOptionsForDbCreation()
+        protected override DbContextOptions<SampleAppDbContext> GetDbContextOptionsForDbCreation()
         {
-            return new DbContextOptionsBuilder<TestDbContext>().UseSqlite(_connectionString).Options;
+            return new DbContextOptionsBuilder<SampleAppDbContext>().UseSqlite(_connectionString).Options;
         }
 
-        public override DbContextOptionsBuilder<TestDbContext> GetDbContextOptionsBuilder(IDbConnection connection)
+        public override DbContextOptionsBuilder<SampleAppDbContext> GetDbContextOptionsBuilder(IDbConnection connection)
         {
-            return new DbContextOptionsBuilder<TestDbContext>().UseSqlite((SqliteConnection) connection);
+            return new DbContextOptionsBuilder<SampleAppDbContext>().UseSqlite((SqliteConnection) connection);
         }
 
         public override DbConnectionOperationDecorator UseOperation()

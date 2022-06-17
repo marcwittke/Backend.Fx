@@ -38,13 +38,13 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             var eventHandled = false;
             messageBus.Connect();
             messageBus.ProvideInvoker(new TheMessageBus.TestInvoker());
-            messageBus.Subscribe(new DelegateIntegrationMessageHandler<TestIntegrationEvent>(ev => eventHandled = true));
+            messageBus.Subscribe(new DelegateIntegrationMessageHandler<TestIntegrationEvent>(_ => eventHandled = true));
             
             var anotherMessageBus = new InMemoryMessageBus(channel);
             var anotherEventHandled = false;
             anotherMessageBus.Connect();
             anotherMessageBus.ProvideInvoker(new TheMessageBus.TestInvoker());
-            messageBus.Subscribe(new DelegateIntegrationMessageHandler<TestIntegrationEvent>(ev => anotherEventHandled = true));
+            messageBus.Subscribe(new DelegateIntegrationMessageHandler<TestIntegrationEvent>(_ => anotherEventHandled = true));
 
             await messageBus.Publish(new TestIntegrationEvent(0, string.Empty));
             await channel.FinishHandlingAllMessagesAsync();

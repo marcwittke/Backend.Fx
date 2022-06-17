@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Backend.Fx.InMemoryPersistence;
 using Backend.Fx.Patterns.IdGeneration;
 using Backend.Fx.TestUtil;
 using Xunit;

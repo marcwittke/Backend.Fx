@@ -16,10 +16,12 @@ namespace Backend.Fx.Environment.Persistence
 
         public PersistentApplication(IDatabaseBootstrapper databaseBootstrapper,
             IDatabaseAvailabilityAwaiter databaseAvailabilityAwaiter,
+            IModule persistenceModule,
             IBackendFxApplication application) : base(application)
         {
             _databaseBootstrapper = databaseBootstrapper;
             _databaseAvailabilityAwaiter = databaseAvailabilityAwaiter;
+            application.CompositionRoot.RegisterModules(persistenceModule);
         }
 
 

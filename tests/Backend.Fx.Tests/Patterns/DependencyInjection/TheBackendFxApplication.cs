@@ -127,7 +127,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
 
             await _sut.BootAsync();
             Assert.Throws<Exception>(() =>
-                _sut.Invoker.Invoke(sp => throw exception, new AnonymousIdentity(), new TenantId(111)));
+                _sut.Invoker.Invoke(_ => throw exception, new AnonymousIdentity(), new TenantId(111)));
 
             A.CallTo(() => _exceptionLogger.LogException(A<Exception>.That.IsEqualTo(exception)))
                 .MustHaveHappenedOnceExactly();
@@ -140,7 +140,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
 
             await _sut.BootAsync();
             await Assert.ThrowsAsync<Exception>(() =>
-                _sut.AsyncInvoker.InvokeAsync(sp => throw exception, new AnonymousIdentity(), new TenantId(111)));
+                _sut.AsyncInvoker.InvokeAsync(_ => throw exception, new AnonymousIdentity(), new TenantId(111)));
 
             A.CallTo(() => _exceptionLogger.LogException(A<Exception>.That.IsEqualTo(exception)))
                 .MustHaveHappenedOnceExactly();

@@ -37,7 +37,7 @@ namespace Backend.Fx.EfCore5Persistence
         {
             DetectChanges();
             UpdateTrackingProperties();
-            DbContext.TraceChangeTrackerState();
+            if (Logger.IsEnabled(LogLevel.Trace)) Logger.LogTrace("Change tracker state: {@ChangeTrackerState}", DbContext.ChangeTracker.DebugView.LongView);
             CheckForMissingTenantIds();
             SaveChanges();
         }

@@ -33,7 +33,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         {
             var tasks = Enumerable
                         .Range(0, count)
-                        .Select(i => Task.Run(() => invoker.Invoke(DoTheAction, new AnonymousIdentity(), new TenantId(1))))
+                        .Select(_ => Task.Run(() => invoker.Invoke(DoTheAction, new AnonymousIdentity(), new TenantId(1))))
                         .ToArray();
 
             await Task.WhenAll(tasks);

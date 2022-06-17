@@ -24,7 +24,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             A.CallTo(() => CompositionRoot.BeginScope()).Returns(ServiceScope);
         
             A.CallTo(() => Invoker.Invoke(A<Action<IServiceProvider>>._, A<IIdentity>._, A<TenantId>._, A<Guid?>._))
-             .Invokes((Action<IServiceProvider> a, IIdentity i, TenantId t, Guid? g) => a.Invoke(ServiceProvider));
+             .Invokes((Action<IServiceProvider> a, IIdentity _, TenantId _, Guid? _) => a.Invoke(ServiceProvider));
         }
 
         public ICurrentTHolder<TenantId> TenantIdHolder { get; } = A.Fake<ICurrentTHolder<TenantId>>();

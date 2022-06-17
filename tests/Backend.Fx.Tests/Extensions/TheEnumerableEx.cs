@@ -17,7 +17,7 @@ namespace Backend.Fx.Tests.Extensions
         [Fact]
         public void ExecutesActionForAll()
         {
-            IEnumerable<Item> enumerable = Enumerable.Range(0, 100).Select(i => new Item()).ToArray();
+            IEnumerable<Item> enumerable = Enumerable.Range(0, 100).Select(_ => new Item()).ToArray();
             enumerable.ForAll(itm => itm.Touched = true);
 
             Assert.All(enumerable, itm => Assert.True(itm.Touched));

@@ -1,13 +1,13 @@
-﻿using Backend.Fx.EfCore6Persistence.Tests.DummyImpl.Domain;
-using Backend.Fx.Environment.MultiTenancy;
+﻿using Backend.Fx.Environment.MultiTenancy;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using SampleApp.Domain;
 
-namespace Backend.Fx.EfCore6Persistence.Tests.DummyImpl.Persistence
+namespace Backend.Fx.EfCore5Persistence.Tests.SampleApp.Persistence
 {
-    public sealed class TestDbContext : DbContext
+    public sealed class SampleAppDbContext : DbContext
     {
-        public TestDbContext([NotNull] DbContextOptions<TestDbContext> options) : base(options)
+        public SampleAppDbContext([NotNull] DbContextOptions<SampleAppDbContext> options) : base(options)
         {
             Database.AutoTransactionsEnabled = false;
         }
