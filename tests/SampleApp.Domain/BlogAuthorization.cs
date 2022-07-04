@@ -1,4 +1,4 @@
-﻿using Backend.Fx.Patterns.Authorization;
+﻿using Backend.Fx.Features.Authorization;
 using JetBrains.Annotations;
 
 namespace SampleApp.Domain

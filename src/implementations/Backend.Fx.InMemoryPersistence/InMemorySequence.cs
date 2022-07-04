@@ -1,4 +1,4 @@
-using Backend.Fx.Patterns.IdGeneration;
+using Backend.Fx.Features.Persistence;
 
 namespace Backend.Fx.InMemoryPersistence
 {

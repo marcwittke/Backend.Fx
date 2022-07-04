@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
+using Backend.Fx.Features.MessageBus;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.EventAggregation.Integration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Polly;

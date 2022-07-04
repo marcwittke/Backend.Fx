@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Backend.Fx.Patterns.EventAggregation.Integration;
+using Backend.Fx.Features.MessageBus;
 using Backend.Fx.TestUtil;
 using Xunit;
 using Xunit.Abstractions;

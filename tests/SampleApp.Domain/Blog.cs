@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Backend.Fx.BuildingBlocks;
-using Backend.Fx.Patterns.IdGeneration;
+using Backend.Fx.Features.Persistence;
 using JetBrains.Annotations;
 
 namespace SampleApp.Domain

@@ -1,5 +1,5 @@
-﻿using Backend.Fx.InMemoryPersistence;
-using Backend.Fx.Patterns.IdGeneration;
+﻿using Backend.Fx.Features.Persistence;
+using Backend.Fx.InMemoryPersistence;
 
 namespace Backend.Fx.EfCore5Persistence.Tests.SampleApp.Persistence
 {

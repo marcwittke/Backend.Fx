@@ -1,5 +1,5 @@
 using Backend.Fx.BuildingBlocks;
-using Backend.Fx.Patterns.EventAggregation.Domain;
+using Backend.Fx.Features.DomainEvents;
 using Xunit;
 
 namespace SampleApp.Domain

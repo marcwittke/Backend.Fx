@@ -1,6 +1,6 @@
 using System.Linq;
 using Backend.Fx.BuildingBlocks;
-using Backend.Fx.Patterns.IdGeneration;
+using Backend.Fx.Features.Persistence;
 
 namespace Backend.Fx.ConfigurationSettings
 {

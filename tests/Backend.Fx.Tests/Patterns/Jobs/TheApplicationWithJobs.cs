@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Features.Jobs;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
-using Backend.Fx.Patterns.Jobs;
 using Backend.Fx.TestUtil;
 using FakeItEasy;
 using FluentScheduler;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Xunit.Abstractions;
-using IJob = Backend.Fx.Patterns.Jobs.IJob;
+using IJob = Backend.Fx.Features.Jobs.IJob;
 
 namespace Backend.Fx.Tests.Patterns.Jobs
 {
@@ -89,7 +89,7 @@ namespace Backend.Fx.Tests.Patterns.Jobs
         }
     }
 
-    public class SayHelloJob : IJob
+    public class SayHelloJob : Features.Jobs.IJob
     {
         private readonly ICurrentTHolder<TenantId> _tenantIdHolder;
         public static List<string> Invocations = new List<string>();

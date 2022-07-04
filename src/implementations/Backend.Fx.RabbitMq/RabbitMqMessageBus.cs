@@ -2,8 +2,8 @@
 using System.Text;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Features.MessageBus;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.EventAggregation.Integration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;

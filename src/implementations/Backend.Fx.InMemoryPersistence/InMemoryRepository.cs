@@ -2,7 +2,7 @@
 using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Extensions;
-using Backend.Fx.Patterns.Authorization;
+using Backend.Fx.Features.Authorization;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.RandomData;
 using JetBrains.Annotations;

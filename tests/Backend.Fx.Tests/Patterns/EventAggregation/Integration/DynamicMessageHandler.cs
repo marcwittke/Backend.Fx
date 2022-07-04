@@ -1,4 +1,4 @@
-﻿using Backend.Fx.Patterns.EventAggregation.Integration;
+﻿using Backend.Fx.Features.MessageBus;
 
 namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
 {

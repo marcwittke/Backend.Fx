@@ -1,8 +1,8 @@
 using System;
 using System.Security.Principal;
 using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Features.DomainEvents;
 using Backend.Fx.Patterns.DependencyInjection;
-using Backend.Fx.Patterns.EventAggregation.Domain;
 using FakeItEasy;
 using Microsoft.Extensions.DependencyInjection;
 

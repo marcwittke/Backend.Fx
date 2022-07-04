@@ -1,4 +1,4 @@
-﻿using Backend.Fx.Patterns.EventAggregation.Integration;
+﻿using Backend.Fx.Features.MessageBus;
 using JetBrains.Annotations;
 
 namespace Backend.Fx.Tests.Patterns.EventAggregation.Domain

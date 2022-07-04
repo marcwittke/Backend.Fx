@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Threading;
-using Backend.Fx.Patterns.EventAggregation.Integration;
+using Backend.Fx.Features.MessageBus;
 using Xunit;
 
 namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration

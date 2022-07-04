@@ -2,10 +2,10 @@
 using Backend.Fx.BuildingBlocks;
 using Backend.Fx.ConfigurationSettings;
 using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Features.Authorization;
+using Backend.Fx.Features.Persistence;
 using Backend.Fx.Hacking;
 using Backend.Fx.InMemoryPersistence;
-using Backend.Fx.Patterns.Authorization;
-using Backend.Fx.Patterns.IdGeneration;
 using Backend.Fx.TestUtil;
 using FakeItEasy;
 using Xunit;

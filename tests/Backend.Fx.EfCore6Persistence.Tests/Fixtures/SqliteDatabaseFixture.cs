@@ -1,7 +1,7 @@
 using System.Data;
 using System.IO;
 using Backend.Fx.EfCore6Persistence.Tests.SampleApp.Persistence;
-using Backend.Fx.Environment.Persistence;
+using Backend.Fx.Features.Persistence;
 using Backend.Fx.Patterns.DependencyInjection;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;

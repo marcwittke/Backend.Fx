@@ -3,10 +3,9 @@ using System.Linq;
 using System.Reflection;
 using Backend.Fx.BuildingBlocks;
 using Backend.Fx.ConfigurationSettings;
-using Backend.Fx.Environment.Persistence;
-using Backend.Fx.Patterns.Authorization;
+using Backend.Fx.Features.Authorization;
+using Backend.Fx.Features.Persistence;
 using Backend.Fx.Patterns.DependencyInjection;
-using Backend.Fx.Patterns.IdGeneration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Backend.Fx.InMemoryPersistence

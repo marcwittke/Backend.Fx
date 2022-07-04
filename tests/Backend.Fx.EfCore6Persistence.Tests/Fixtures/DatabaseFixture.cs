@@ -3,7 +3,7 @@ using System.Security.Principal;
 using Backend.Fx.EfCore6Persistence.Tests.SampleApp.Persistence;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.DateAndTime;
-using Backend.Fx.Environment.Persistence;
+using Backend.Fx.Features.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Fx.EfCore6Persistence.Tests.Fixtures

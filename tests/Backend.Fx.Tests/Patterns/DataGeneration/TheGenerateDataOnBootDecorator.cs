@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.Features.DataGeneration;
 using Backend.Fx.Hacking;
-using Backend.Fx.Patterns.DataGeneration;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.TestUtil;
 using FakeItEasy;

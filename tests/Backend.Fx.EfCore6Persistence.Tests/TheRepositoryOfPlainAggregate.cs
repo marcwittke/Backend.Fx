@@ -5,7 +5,7 @@ using Backend.Fx.EfCore6Persistence.Tests.SampleApp.Persistence;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Extensions;
-using Backend.Fx.Patterns.Authorization;
+using Backend.Fx.Features.Authorization;
 using Backend.Fx.TestUtil;
 using SampleApp.Domain;
 using Xunit;

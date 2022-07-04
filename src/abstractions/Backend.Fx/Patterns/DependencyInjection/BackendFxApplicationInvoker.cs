@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.EventAggregation.Domain;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
@@ -54,7 +53,6 @@ namespace Backend.Fx.Patterns.DependencyInjection
                     {
                         operation.Begin();
                         action.Invoke(serviceScope.ServiceProvider);
-                        serviceScope.ServiceProvider.GetRequiredService<IDomainEventAggregator>().RaiseEvents();
                         operation.Complete();
                     }
                     catch
@@ -78,7 +76,6 @@ namespace Backend.Fx.Patterns.DependencyInjection
                     {
                         operation.Begin();
                         await awaitableAsyncAction.Invoke(serviceScope.ServiceProvider).ConfigureAwait(false);
-                        serviceScope.ServiceProvider.GetRequiredService<IDomainEventAggregator>().RaiseEvents();
                         operation.Complete();
                     }
                     catch

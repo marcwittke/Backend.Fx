@@ -1,4 +1,4 @@
-using Backend.Fx.Patterns.EventAggregation.Domain;
+using Backend.Fx.Features.DomainEvents;
 
 namespace SampleApp.Domain
 {

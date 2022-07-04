@@ -1,7 +1,7 @@
 ﻿using System;
 using Backend.Fx.BuildingBlocks;
 using Backend.Fx.ConfigurationSettings;
-using Backend.Fx.Patterns.IdGeneration;
+using Backend.Fx.Features.Persistence;
 using Backend.Fx.TestUtil;
 using JetBrains.Annotations;
 using Xunit;

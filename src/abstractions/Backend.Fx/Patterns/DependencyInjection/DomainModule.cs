@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Reflection;
 using System.Security.Principal;
@@ -7,9 +6,9 @@ using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.DateAndTime;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Extensions;
+using Backend.Fx.Features.Authorization;
+using Backend.Fx.Features.DomainEvents;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.Authorization;
-using Backend.Fx.Patterns.EventAggregation.Domain;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
@@ -41,8 +40,6 @@ namespace Backend.Fx.Patterns.DependencyInjection
             RegisterDomainAndApplicationServices(compositionRoot);
 
             RegisterPermissiveAuthorization(compositionRoot);
-
-            RegisterDomainEventHandlers(compositionRoot);
         }
 
         private static void RegisterDomainInfrastructureServices(ICompositionRoot compositionRoot)
@@ -52,7 +49,6 @@ namespace Backend.Fx.Patterns.DependencyInjection
             compositionRoot.Register(ServiceDescriptor.Scoped<ICurrentTHolder<Correlation>,CurrentCorrelationHolder>());
             compositionRoot.Register(ServiceDescriptor.Scoped<ICurrentTHolder<IIdentity>,CurrentIdentityHolder>());
             compositionRoot.Register(ServiceDescriptor.Scoped<ICurrentTHolder<TenantId>,CurrentTenantIdHolder>());
-            compositionRoot.Register(ServiceDescriptor.Scoped<IDomainEventAggregator>(sp => new DomainEventAggregator(sp)));
         }
 
         private void RegisterDomainAndApplicationServices(ICompositionRoot container)
@@ -93,21 +89,6 @@ namespace Backend.Fx.Patterns.DependencyInjection
                         typeof(IAggregateAuthorization<>).MakeGenericType(aggregateRootType),
                         typeof(AllowAll<>).MakeGenericType(aggregateRootType),
                         ServiceLifetime.Singleton));
-            }
-        }
-
-        private void RegisterDomainEventHandlers(ICompositionRoot compositionRoot)
-        {
-            foreach (Type domainEventType in _assemblies.GetImplementingTypes(typeof(IDomainEvent)))
-            {
-                Type handlerTypeForThisDomainEventType = typeof(IDomainEventHandler<>).MakeGenericType(domainEventType);
-
-                var serviceDescriptors = _assemblies
-                    .GetImplementingTypes(handlerTypeForThisDomainEventType)
-                    .Select(t => new ServiceDescriptor(handlerTypeForThisDomainEventType, t, ServiceLifetime.Scoped))
-                    .ToArray();
-
-                compositionRoot.RegisterCollection(serviceDescriptors);
             }
         }
     }

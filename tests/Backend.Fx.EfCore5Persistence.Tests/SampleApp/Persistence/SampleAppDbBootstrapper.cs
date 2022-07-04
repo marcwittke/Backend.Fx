@@ -1,4 +1,4 @@
-using Backend.Fx.Environment.Persistence;
+using Backend.Fx.Features.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Fx.EfCore5Persistence.Tests.SampleApp.Persistence

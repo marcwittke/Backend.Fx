@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Backend.Fx.Patterns.EventAggregation.Domain;
+using Backend.Fx.Features.DomainEvents;
 
 namespace Backend.Fx.Tests.Patterns.EventAggregation.Domain
 {

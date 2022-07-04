@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.Patterns.EventAggregation.Integration;
+using Backend.Fx.Features.MessageBus;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 

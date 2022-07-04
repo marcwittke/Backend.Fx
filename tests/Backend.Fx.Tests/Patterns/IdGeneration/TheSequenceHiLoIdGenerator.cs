@@ -1,4 +1,4 @@
-using Backend.Fx.Patterns.IdGeneration;
+using Backend.Fx.Features.Persistence;
 using Backend.Fx.TestUtil;
 using FakeItEasy;
 using Xunit;

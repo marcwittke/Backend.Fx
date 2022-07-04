@@ -1,6 +1,6 @@
 using System;
 using System.Data;
-using Backend.Fx.Environment.Persistence;
+using Backend.Fx.Features.Persistence;
 using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.TestUtil;
 using FakeItEasy;

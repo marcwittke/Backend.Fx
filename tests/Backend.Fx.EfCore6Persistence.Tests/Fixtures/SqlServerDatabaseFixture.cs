@@ -2,7 +2,7 @@ using System;
 using System.Data;
 using System.Data.SqlClient;
 using Backend.Fx.EfCore6Persistence.Tests.SampleApp.Persistence;
-using Backend.Fx.Environment.Persistence;
+using Backend.Fx.Features.Persistence;
 using Backend.Fx.Patterns.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 

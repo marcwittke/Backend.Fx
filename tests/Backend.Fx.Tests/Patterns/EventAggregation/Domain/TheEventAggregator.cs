@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Backend.Fx.Patterns.EventAggregation.Domain;
+using Backend.Fx.Features.DomainEvents;
 using Backend.Fx.TestUtil;
 using FakeItEasy;
 using Xunit;

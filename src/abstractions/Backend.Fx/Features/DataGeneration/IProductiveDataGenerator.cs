@@ -1,0 +1,9 @@
+﻿namespace Backend.Fx.Features.DataGeneration
+{
+    /// <summary>
+    /// Marks an <see cref="DataGenerator"/> as active in all environments
+    /// </summary>
+    public interface IProductiveDataGenerator : IDataGenerator
+    {
+    }
+}

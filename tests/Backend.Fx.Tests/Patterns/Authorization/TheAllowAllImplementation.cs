@@ -1,5 +1,5 @@
 using System.Linq;
-using Backend.Fx.Patterns.Authorization;
+using Backend.Fx.Features.Authorization;
 using Backend.Fx.Tests.BuildingBlocks;
 using Backend.Fx.TestUtil;
 using Xunit;

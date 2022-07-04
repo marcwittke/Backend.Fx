@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Data;
 using Backend.Fx.EfCore5Persistence.Bootstrapping;
+using Backend.Fx.Features.Persistence;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.IdGeneration;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
