@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Dynamic.Core;
+using System.Linq.Expressions;
 using System.Reflection;
 using Backend.Fx.BuildingBlocks;
 using JetBrains.Annotations;
@@ -88,13 +88,23 @@ namespace Backend.Fx.RandomData
                 }
 
                 PropertyInfo idProperty = typeof(T).GetProperty(nameof(Identified.Id), BindingFlags.Instance | BindingFlags.Public);
-                if (idProperty != null) sourceQueryable = sourceQueryable.OrderBy(nameof(Identified.Id));
+                if (idProperty != null)
+                {
+                    sourceQueryable = sourceQueryable.OrderBy(GetPropertyExpression<T>(idProperty.Name));
+                }
 
                 outQueryable = sourceQueryable;
                 return true;
             }
 
             return false;
+        }
+        
+        private static Expression<Func<T, object>> GetPropertyExpression<T>(string propertyName)
+        {
+            var param = Expression.Parameter(typeof(T), "t");
+            Expression conversion = Expression.Convert(Expression.Property(param, propertyName), typeof(object));
+            return Expression.Lambda<Func<T, object>>(conversion, param);
         }
     }
 }
