@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Backend.Fx.DependencyInjection;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.DependencyInjection;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SimpleInjector;
@@ -15,6 +16,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
     /// <summary>
     ///     Provides a reusable composition root assuming Simple Injector as container
     /// </summary>
+    [PublicAPI]
     public class SimpleInjectorCompositionRoot : CompositionRoot
     {
         private static readonly ILogger Logger = Log.Create<SimpleInjectorCompositionRoot>();
@@ -86,7 +88,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
 
             if (serviceDescriptorArray.Length == 0)
             {
-                Logger.Warn("Skipping registration of empty collection");
+                Logger.LogWarning("Skipping registration of empty collection");
                 return;
             }
 
@@ -97,6 +99,11 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             }
 
             _serviceCollections.Add(serviceDescriptorArray);
+        }
+
+        public override bool HasRegistration<T>()
+        {
+            return _services.Any(sd => sd.ServiceType is T);
         }
 
         public override void Verify()
@@ -131,21 +138,21 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             Logger.LogInformation("Registering services with container");
             foreach (var serviceDescriptor in _services)
             {
-                serviceDescriptor.LogDetails(Logger, "Adding");
+                LogAddRegistration(serviceDescriptor);
 
                 if (serviceDescriptor.ImplementationType != null)
                 {
                     Container.Register(
                         serviceDescriptor.ServiceType,
                         serviceDescriptor.ImplementationType,
-                        serviceDescriptor.Lifetime.Translate());
+                        serviceDescriptor.Lifetime.MapLifestyle());
                 }
                 else if (serviceDescriptor.ImplementationFactory != null)
                 {
                     Container.Register(
                         serviceDescriptor.ServiceType,
                         () => serviceDescriptor.ImplementationFactory(Container),
-                        serviceDescriptor.Lifetime.Translate());
+                        serviceDescriptor.Lifetime.MapLifestyle());
                 }
                 else if (serviceDescriptor.ImplementationInstance != null &&
                          serviceDescriptor.Lifetime == ServiceLifetime.Singleton)
@@ -161,17 +168,17 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
 
             foreach (var serviceDescriptor in _decorators)
             {
-                serviceDescriptor.LogDetails(Logger, "Adding decorator");
+                LogAddDecoratorRegistration(serviceDescriptor);
 
                 Container.RegisterDecorator(
                     serviceDescriptor.ServiceType,
                     serviceDescriptor.ImplementationType,
-                    serviceDescriptor.Lifetime.Translate());
+                    serviceDescriptor.Lifetime.MapLifestyle());
             }
 
             foreach (var serviceDescriptors in _serviceCollections)
             {
-                Logger.Debug("Adding {Lifetime} collection registration: {ServiceType}: {ImplementationType}",
+                Logger.LogDebug("Adding {Lifetime} collection registration: {ServiceType}: {ImplementationType}",
                     serviceDescriptors[0].Lifetime.ToString(),
                     serviceDescriptors[0].ServiceType.Name,
                     $"[{string.Join(",", serviceDescriptors.Select(sd => sd.GetImplementationTypeDescription()))}]");
@@ -181,7 +188,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
                     Container.Collection.Append(
                         serviceDescriptor.ServiceType,
                         serviceDescriptor.ImplementationType,
-                        serviceDescriptor.Lifetime.Translate());
+                        serviceDescriptor.Lifetime.MapLifestyle());
                 }
             }
         }

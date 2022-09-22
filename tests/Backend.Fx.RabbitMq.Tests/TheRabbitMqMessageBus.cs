@@ -1,8 +1,8 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
-using Backend.Fx.Features.MessageBus;
-using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.ExecutionPipeline;
+using Backend.Fx.Extensions.MessageBus;
 using Backend.Fx.TestUtil;
 using FakeItEasy;
 using Microsoft.Extensions.DependencyInjection;
@@ -57,11 +57,11 @@ namespace Backend.Fx.RabbitMq.Tests
             receiver.Connect();
             receiver.Subscribe<TestIntegrationEventHandler, TestIntegrationEvent>();
 
-            sender.Publish(new TestIntegrationEvent(1));
+            sender.PublishAsync(new TestIntegrationEvent(1));
             Assert.True(_received.WaitOne(Debugger.IsAttached ? int.MaxValue : 5000));
         }
 
-        public class TestIntegrationEventHandler : IIntegrationMessageHandler<TestIntegrationEvent>
+        public class TestIntegrationEventHandler : IIntegrationEventHandler<TestIntegrationEvent>
         {
             private readonly ManualResetEvent _received;
 

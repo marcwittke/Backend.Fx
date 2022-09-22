@@ -2,7 +2,6 @@ using Backend.Fx.AspNetCore.Bootstrapping;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.InMemoryPersistence;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.SimpleInjectorDependencyInjection;
 
 namespace Backend.Fx.AspNetCore.Tests.SampleApp

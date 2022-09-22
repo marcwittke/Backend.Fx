@@ -9,7 +9,7 @@ namespace Backend.Fx.Tests.Patterns.Authorization
 {
     public class TheAllowAllImplementation : TestWithLogging
     {
-        private readonly IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot> _sut = new AllowAll<TheAggregateRoot.TestAggregateRoot>();
+        private readonly IAuthorizationPolicy<TheAggregateRoot.TestAggregateRoot> _sut = new AllowAll<TheAggregateRoot.TestAggregateRoot>();
         private readonly TheAggregateRoot.TestAggregateRoot _testAggregateRoot = new TheAggregateRoot.TestAggregateRoot(1,"e");
 
         [Fact]

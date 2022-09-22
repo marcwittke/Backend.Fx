@@ -1,11 +1,11 @@
 using System;
 using System.Linq;
 using System.Reflection;
-using Backend.Fx.BuildingBlocks;
-using Backend.Fx.ConfigurationSettings;
+using Backend.Fx.DependencyInjection;
+using Backend.Fx.Domain;
+using Backend.Fx.Extensions.Persistence;
 using Backend.Fx.Features.Authorization;
-using Backend.Fx.Features.Persistence;
-using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.Features.ConfigurationSettings;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Backend.Fx.InMemoryPersistence
@@ -34,7 +34,7 @@ namespace Backend.Fx.InMemoryPersistence
                 compositionRoot.Register(
                     ServiceDescriptor.Scoped<IRepository<Setting>, InMemoryRepository<Setting>>());                
                 compositionRoot.Register(
-                    ServiceDescriptor.Scoped<IAggregateAuthorization<Setting>, AllowAll<Setting>>());
+                    ServiceDescriptor.Scoped<IAuthorizationPolicy<Setting>, AllowAll<Setting>>());
                 compositionRoot.Register(
                     ServiceDescriptor.Singleton<IInMemoryStore<Setting>, InMemoryStore<Setting>>());
             }

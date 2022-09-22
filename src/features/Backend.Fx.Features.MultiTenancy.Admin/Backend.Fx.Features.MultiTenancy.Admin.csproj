@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <RootNamespace>Backend.Fx.Features.TenantsAdmin</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\abstractions\Backend.Fx\Backend.Fx.csproj" />
+    </ItemGroup>
+    
+</Project>

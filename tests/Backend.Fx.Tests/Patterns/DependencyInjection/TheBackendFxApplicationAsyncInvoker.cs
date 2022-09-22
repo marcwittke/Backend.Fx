@@ -1,9 +1,7 @@
 using System;
 using System.Security.Principal;
 using System.Threading.Tasks;
-using Backend.Fx.Environment.Authentication;
-using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.TestUtil;
 using FakeItEasy;
 using Xunit;
@@ -19,17 +17,17 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             _sut = new BackendFxApplicationInvoker(_fakes.CompositionRoot);
         }
 
-        private readonly IBackendFxApplicationAsyncInvoker _sut;
+        private readonly IBackendFxApplicationInvoker _sut;
         private readonly DiTestFakes _fakes;
 
         [Fact]
         public async Task BeginsNewScopeForEveryInvocation()
         {
-            await _sut.InvokeAsync(_ => Task.CompletedTask, new AnonymousIdentity(), new TenantId(111));
+            await _sut.InvokeAsync(_ => Task.CompletedTask, new AnonymousIdentity());
             A.CallTo(() => _fakes.CompositionRoot.BeginScope()).MustHaveHappenedOnceExactly();
             A.CallTo(() => _fakes.ServiceScope.Dispose()).MustHaveHappenedOnceExactly();
 
-            await _sut.InvokeAsync(_ => Task.CompletedTask, new AnonymousIdentity(), new TenantId(111));
+            await _sut.InvokeAsync(_ => Task.CompletedTask, new AnonymousIdentity());
             A.CallTo(() => _fakes.CompositionRoot.BeginScope()).MustHaveHappenedTwiceExactly();
             A.CallTo(() => _fakes.ServiceScope.Dispose()).MustHaveHappenedTwiceExactly();
         }
@@ -37,11 +35,11 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         [Fact]
         public async Task BeginsNewOperationForEveryInvocation()
         {
-            await _sut.InvokeAsync(_ => Task.CompletedTask, new AnonymousIdentity(), new TenantId(111));
+            await _sut.InvokeAsync(_ => Task.CompletedTask, new AnonymousIdentity());
             A.CallTo(() => _fakes.Operation.Begin()).MustHaveHappenedOnceExactly();
             A.CallTo(() => _fakes.Operation.Complete()).MustHaveHappenedOnceExactly();
 
-            await _sut.InvokeAsync(_ => Task.CompletedTask, new AnonymousIdentity(), new TenantId(111));
+            await _sut.InvokeAsync(_ => Task.CompletedTask, new AnonymousIdentity());
             A.CallTo(() => _fakes.Operation.Begin()).MustHaveHappenedTwiceExactly();
             A.CallTo(() => _fakes.Operation.Complete()).MustHaveHappenedTwiceExactly();
         }
@@ -50,7 +48,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         public async Task DoesNotCatchFrameworkExceptions()
         {
             A.CallTo(() => _fakes.CompositionRoot.BeginScope()).Throws<SimulatedException>();
-            await Assert.ThrowsAsync<SimulatedException>(async () => await _sut.InvokeAsync(_ => Task.CompletedTask, new AnonymousIdentity(), new TenantId(111)));
+            await Assert.ThrowsAsync<SimulatedException>(async () => await _sut.InvokeAsync(_ => Task.CompletedTask, new AnonymousIdentity()));
             A.CallTo(() => _fakes.Operation.Begin()).MustNotHaveHappened();
             A.CallTo(() => _fakes.Operation.Complete()).MustNotHaveHappened();
         }
@@ -58,7 +56,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         [Fact]
         public async Task DoesNotCatchOperationExceptions()
         {
-            await Assert.ThrowsAsync<SimulatedException>(async () => await _sut.InvokeAsync(_ => throw new SimulatedException(), new AnonymousIdentity(), new TenantId(111)));
+            await Assert.ThrowsAsync<SimulatedException>(async () => await _sut.InvokeAsync(_ => throw new SimulatedException(), new AnonymousIdentity()));
             A.CallTo(() => _fakes.Operation.Begin()).MustHaveHappenedOnceExactly();
             A.CallTo(() => _fakes.Operation.Complete()).MustNotHaveHappened();
         }
@@ -67,7 +65,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         public async Task MaintainsCorrelationIdOnInvocation()
         {
             var correlationId = Guid.NewGuid();
-            await _sut.InvokeAsync(_ => Task.CompletedTask, new AnonymousIdentity(), new TenantId(123), correlationId);
+            await _sut.InvokeAsync(_ => Task.CompletedTask, new AnonymousIdentity(), correlationId);
             Assert.Equal(correlationId, _fakes.CurrentCorrelationHolder.Current.Id);
         }
 
@@ -75,7 +73,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         public async Task MaintainsIdentityOnInvocation()
         {
             var identity = new GenericIdentity("me");
-            await _sut.InvokeAsync(_ => Task.CompletedTask, identity, new TenantId(123));
+            await _sut.InvokeAsync(_ => Task.CompletedTask, identity);
             A.CallTo(() => _fakes.IdentityHolder.ReplaceCurrent(A<IIdentity>.That.IsEqualTo(identity))).MustHaveHappenedOnceExactly();
         }
 
@@ -83,7 +81,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
         public async Task MaintainsTenantIdOnInvocation()
         {
             var tenantId = new TenantId(123);
-            await _sut.InvokeAsync(_ => Task.CompletedTask, new AnonymousIdentity(), tenantId);
+            await _sut.InvokeAsync(_ => Task.CompletedTask, new AnonymousIdentity());
             A.CallTo(() => _fakes.TenantIdHolder.ReplaceCurrent(A<TenantId>.That.IsEqualTo(tenantId))).MustHaveHappenedOnceExactly();
         }
 
@@ -95,7 +93,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             {
                 provided = sp;
                 return Task.CompletedTask;
-            }, new AnonymousIdentity(), new TenantId(111));
+            }, new AnonymousIdentity());
             Assert.StrictEqual(_fakes.ServiceProvider, provided);
         }
     }

@@ -1,10 +1,10 @@
 using System.Data;
 using System.Security.Principal;
 using Backend.Fx.EfCore5Persistence.Tests.SampleApp.Persistence;
-using Backend.Fx.Environment.Authentication;
-using Backend.Fx.Environment.DateAndTime;
-using Backend.Fx.Features.Persistence;
+using Backend.Fx.ExecutionPipeline;
+using Backend.Fx.Extensions.Persistence;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
 
 namespace Backend.Fx.EfCore5Persistence.Tests.Fixtures
 {
@@ -33,7 +33,7 @@ namespace Backend.Fx.EfCore5Persistence.Tests.Fixtures
                 return cih;
             }
 
-            clock ??= new WallClock();
+            clock ??= SystemClock.Instance;
             operation ??= UseOperation();
             
             operation.Begin();

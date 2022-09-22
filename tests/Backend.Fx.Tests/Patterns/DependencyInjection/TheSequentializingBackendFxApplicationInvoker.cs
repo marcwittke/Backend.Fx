@@ -3,10 +3,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.Features.MessageBus;
-using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.ExecutionPipeline;
+using Backend.Fx.Extensions.MessageBus;
 using Backend.Fx.TestUtil;
 using Xunit;
 using Xunit.Abstractions;
@@ -22,7 +21,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             _output = output;
             var fakes = new DiTestFakes();
             _invoker = new BackendFxApplicationInvoker(fakes.CompositionRoot);
-            _decoratedInvoker = new SequentializingBackendFxApplicationInvoker(_invoker);
+            _decoratedInvoker = new IntegrationEventHandlingInvoker(_invoker);
         }
 
         private readonly int _actionDuration = 100;

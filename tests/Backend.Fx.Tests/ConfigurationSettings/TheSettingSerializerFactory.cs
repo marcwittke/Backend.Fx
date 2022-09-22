@@ -1,5 +1,5 @@
 ﻿using System;
-using Backend.Fx.ConfigurationSettings;
+using Backend.Fx.Features.ConfigurationSettings;
 using Backend.Fx.TestUtil;
 using Xunit;
 using Xunit.Abstractions;

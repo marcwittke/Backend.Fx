@@ -1,6 +1,6 @@
 ﻿using System;
-using Backend.Fx.Extensions;
 using Backend.Fx.TestUtil;
+using Backend.Fx.Util;
 using Xunit;
 using Xunit.Abstractions;
 

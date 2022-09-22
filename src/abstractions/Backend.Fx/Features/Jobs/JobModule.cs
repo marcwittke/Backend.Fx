@@ -1,12 +1,12 @@
 using System;
 using System.Reflection;
-using Backend.Fx.Extensions;
-using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.DependencyInjection;
+using Backend.Fx.Util;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Backend.Fx.Features.Jobs
 {
-    public class JobModule : IModule
+    internal class JobModule : IModule
     {
         private readonly Assembly[] _assemblies;
 

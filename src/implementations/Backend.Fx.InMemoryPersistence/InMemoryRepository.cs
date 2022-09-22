@@ -1,10 +1,9 @@
 ﻿using System.Linq;
-using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.Extensions;
+using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.Features.Authorization;
-using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.RandomData;
+using Backend.Fx.Util;
 using JetBrains.Annotations;
 
 namespace Backend.Fx.InMemoryPersistence
@@ -12,8 +11,8 @@ namespace Backend.Fx.InMemoryPersistence
     [PublicAPI]
     public class InMemoryRepository<T> : Repository<T> where T : AggregateRoot
     {
-        public InMemoryRepository(IInMemoryStore<T> store, ICurrentTHolder<TenantId> currentTenantIdHolder, IAggregateAuthorization<T> aggregateAuthorization)
-            : base(currentTenantIdHolder, aggregateAuthorization)
+        public InMemoryRepository(IInMemoryStore<T> store, ICurrentTHolder<TenantId> currentTenantIdHolder, IAuthorizationPolicy<T> authorizationPolicy)
+            : base(currentTenantIdHolder, authorizationPolicy)
         {
             Store = store;
         }

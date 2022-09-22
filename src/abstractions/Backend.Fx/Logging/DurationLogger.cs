@@ -51,32 +51,32 @@ namespace Backend.Fx.Logging
 
     public static class DurationLoggerEx
     {
-        public static IDisposable LogInformationDuration(this Microsoft.Extensions.Logging.ILogger logger, string activity)
+        public static IDisposable LogInformationDuration(this ILogger logger, string activity)
         {
             return new DurationLogger(s => logger.LogInformation(s), activity);
         }
 
-        public static IDisposable LogInformationDuration(this Microsoft.Extensions.Logging.ILogger logger, string beginMessage, string endMessage)
+        public static IDisposable LogInformationDuration(this ILogger logger, string beginMessage, string endMessage)
         {
             return new DurationLogger(s => logger.LogInformation(s), beginMessage, endMessage);
         }
         
-        public static IDisposable LogDebugDuration(this Microsoft.Extensions.Logging.ILogger logger, string activity)
+        public static IDisposable LogDebugDuration(this ILogger logger, string activity)
         {
             return new DurationLogger(s => logger.LogDebug(s), activity);
         }
 
-        public static IDisposable LogDebugDuration(this Microsoft.Extensions.Logging.ILogger logger, string beginMessage, string endMessage)
+        public static IDisposable LogDebugDuration(this ILogger logger, string beginMessage, string endMessage)
         {
             return new DurationLogger(s => logger.LogDebug(s), beginMessage, endMessage);
         }
         
-        public static IDisposable LogTraceDuration(this Microsoft.Extensions.Logging.ILogger logger, string activity)
+        public static IDisposable LogTraceDuration(this ILogger logger, string activity)
         {
             return new DurationLogger(s => logger.LogTrace(s), activity);
         }
 
-        public static IDisposable LogTraceDuration(this Microsoft.Extensions.Logging.ILogger logger, string beginMessage, string endMessage)
+        public static IDisposable LogTraceDuration(this ILogger logger, string beginMessage, string endMessage)
         {
             return new DurationLogger(s => logger.LogTrace(s), beginMessage, endMessage);
         }

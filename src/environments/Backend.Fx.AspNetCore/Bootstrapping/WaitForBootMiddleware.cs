@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.DependencyInjection;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;

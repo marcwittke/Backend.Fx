@@ -7,7 +7,7 @@ namespace Backend.Fx.Exceptions
     public class ForbiddenException : ClientException
     {
         public ForbiddenException()
-            : base("Unauthorized")
+            : base("Forbidden")
         {
         }
 

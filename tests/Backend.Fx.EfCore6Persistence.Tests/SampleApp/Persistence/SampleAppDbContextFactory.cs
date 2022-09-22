@@ -11,7 +11,7 @@ namespace Backend.Fx.EfCore6Persistence.Tests.SampleApp.Persistence
     {
         public SampleAppDbContext CreateDbContext(string[] args)
         {
-            return new SampleAppDbContext(new DbContextOptionsBuilder<SampleAppDbContext>().UseSqlite("DataSource=:memory:").Options);
+            return new SampleAppDbContext(new DbContextOptionsBuilder<SampleAppDbContext>().UseSqlite("DataSource=:memory:", opt => opt.UseNodaTime()).Options);
         }
     }
 }

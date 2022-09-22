@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
-using Backend.Fx.Features.MessageBus;
+using Backend.Fx.Extensions.MessageBus;
+using Backend.Fx.Extensions.MessageBus.InProc;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.TestUtil;
 using FakeItEasy;
 using Xunit;
@@ -15,16 +15,16 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         [InlineData(CompositionRootType.SimpleInjector)]
         public async Task Boots(CompositionRootType compositionRootType)
         {
-            var app = new MessageBusTestApplication(compositionRootType);
+            var app = new MessageBusTestExtension(compositionRootType);
             await app.BootAsync();
         }
     }
 
-    public class MessageBusTestApplication : MessageBusApplication
+    public class MessageBusTestExtension : MessageBusExtension
     {
-        public MessageBusTestApplication(CompositionRootType compositionRootType)
+        public MessageBusTestExtension(CompositionRootType compositionRootType)
             : base(
-                new InMemoryMessageBus(),
+                new InProcMessageBus(),
                 new BackendFxApplication(
                     compositionRootType.Create(),
                     A.Fake<IExceptionLogger>()))

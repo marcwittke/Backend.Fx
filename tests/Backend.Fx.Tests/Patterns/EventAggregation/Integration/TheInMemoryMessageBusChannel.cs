@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Backend.Fx.Features.MessageBus;
+using Backend.Fx.Extensions.MessageBus;
+using Backend.Fx.Extensions.MessageBus.InProc;
 using Backend.Fx.TestUtil;
 using Xunit;
 using Xunit.Abstractions;
@@ -12,15 +13,15 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         [Fact]
         public async Task HandlesEventsAsynchronously()
         {
-            var channel = new InMemoryMessageBusChannel();
-            var messageBus = new InMemoryMessageBus(channel);
+            var channel = new InProcMessageBusChannel();
+            var messageBus = new InProcMessageBus(channel);
             messageBus.Connect();
             messageBus.ProvideInvoker(new TheMessageBus.TestInvoker());
 
             var handled = new ManualResetEvent(false);
-            messageBus.Subscribe(new BlockingMessageHandler(handled));
+            messageBus.Subscribe(new BlockingEventHandler(handled));
 
-            await messageBus.Publish(new TestIntegrationEvent(0, string.Empty));
+            await messageBus.PublishAsync(new TestIntegrationEvent(0, string.Empty));
 
             var finishHandleTask = channel.FinishHandlingAllMessagesAsync();
             Assert.Contains(finishHandleTask.Status, new[] {TaskStatus.WaitingForActivation, TaskStatus.Running});
@@ -32,21 +33,21 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         [Fact]
         public async Task InvokesAllApplicationHandlers()
         {
-            var channel = new InMemoryMessageBusChannel();
+            var channel = new InProcMessageBusChannel();
             
-            var messageBus = new InMemoryMessageBus(channel);
+            var messageBus = new InProcMessageBus(channel);
             var eventHandled = false;
             messageBus.Connect();
             messageBus.ProvideInvoker(new TheMessageBus.TestInvoker());
-            messageBus.Subscribe(new DelegateIntegrationMessageHandler<TestIntegrationEvent>(_ => eventHandled = true));
+            messageBus.Subscribe(new DelegateIntegrationEventHandler<TestIntegrationEvent>(_ => eventHandled = true));
             
-            var anotherMessageBus = new InMemoryMessageBus(channel);
+            var anotherMessageBus = new InProcMessageBus(channel);
             var anotherEventHandled = false;
             anotherMessageBus.Connect();
             anotherMessageBus.ProvideInvoker(new TheMessageBus.TestInvoker());
-            messageBus.Subscribe(new DelegateIntegrationMessageHandler<TestIntegrationEvent>(_ => anotherEventHandled = true));
+            messageBus.Subscribe(new DelegateIntegrationEventHandler<TestIntegrationEvent>(_ => anotherEventHandled = true));
 
-            await messageBus.Publish(new TestIntegrationEvent(0, string.Empty));
+            await messageBus.PublishAsync(new TestIntegrationEvent(0, string.Empty));
             await channel.FinishHandlingAllMessagesAsync();
 
             Assert.True(eventHandled);
@@ -55,7 +56,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             eventHandled = false;
             anotherEventHandled = false;
             
-            await anotherMessageBus.Publish(new TestIntegrationEvent(0, string.Empty));
+            await anotherMessageBus.PublishAsync(new TestIntegrationEvent(0, string.Empty));
             await channel.FinishHandlingAllMessagesAsync();
             
             Assert.True(eventHandled);
@@ -65,22 +66,22 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         [Fact]
         public async Task DoesAwaitAllPendingMessages()
         {
-            var channel = new InMemoryMessageBusChannel();
-            var messageBus = new InMemoryMessageBus(channel);
+            var channel = new InProcMessageBusChannel();
+            var messageBus = new InProcMessageBus(channel);
             messageBus.Connect();
             messageBus.ProvideInvoker(new TheMessageBus.TestInvoker());
 
             var allMessagesAreHandled = false;
             
-            messageBus.Subscribe(new DelegateIntegrationMessageHandler<TestIntegrationEvent>(x =>
+            messageBus.Subscribe(new DelegateIntegrationEventHandler<TestIntegrationEvent>(x =>
             {
                 if (x.StringParam == "first message")
                 {
-                    messageBus.Publish(new TestIntegrationEvent(0, "second message"));
+                    messageBus.PublishAsync(new TestIntegrationEvent(0, "second message"));
                 }
                 else if (x.StringParam == "second message")
                 {
-                    messageBus.Publish(new TestIntegrationEvent(0, "third message"));
+                    messageBus.PublishAsync(new TestIntegrationEvent(0, "third message"));
                 }
                 else if (x.StringParam == "third message")
                 {
@@ -90,7 +91,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
 
             // Publish the first message and await the result.
             // This should block until all three messages are processed not only the first one was.
-            await messageBus.Publish(new TestIntegrationEvent(0, "first message"));
+            await messageBus.PublishAsync(new TestIntegrationEvent(0, "first message"));
             await channel.FinishHandlingAllMessagesAsync();
             
             Assert.True(allMessagesAreHandled);

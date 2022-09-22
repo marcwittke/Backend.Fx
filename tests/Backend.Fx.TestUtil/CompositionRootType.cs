@@ -1,6 +1,6 @@
 using System;
+using Backend.Fx.DependencyInjection;
 using Backend.Fx.MicrosoftDependencyInjection;
-using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.SimpleInjectorDependencyInjection;
 
 namespace Backend.Fx.TestUtil

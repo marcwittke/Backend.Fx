@@ -2,8 +2,8 @@ using System;
 using System.Data;
 using System.Data.SqlClient;
 using Backend.Fx.EfCore6Persistence.Tests.SampleApp.Persistence;
-using Backend.Fx.Features.Persistence;
-using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.ExecutionPipeline;
+using Backend.Fx.Extensions.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Fx.EfCore6Persistence.Tests.Fixtures

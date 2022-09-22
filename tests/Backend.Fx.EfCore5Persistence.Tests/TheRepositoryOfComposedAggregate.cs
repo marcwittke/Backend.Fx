@@ -2,15 +2,16 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using Backend.Fx.Domain;
 using Backend.Fx.EfCore5Persistence.Tests.Fixtures;
 using Backend.Fx.EfCore5Persistence.Tests.SampleApp.Persistence;
-using Backend.Fx.Environment.DateAndTime;
 using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.Extensions;
 using Backend.Fx.Features.Authorization;
-using Backend.Fx.Features.Persistence;
+using Backend.Fx.Hacking;
 using Backend.Fx.TestUtil;
+using Backend.Fx.Util;
 using FakeItEasy;
+using NodaTime;
 using SampleApp.Domain;
 using Xunit;
 using Xunit.Abstractions;
@@ -31,8 +32,7 @@ namespace Backend.Fx.EfCore5Persistence.Tests
         private static int _nextId = 1;
         private readonly int _tenantId = _nextTenantId++;
 
-        private readonly IEqualityComparer<DateTime?> _tolerantDateTimeComparer =
-            new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(5000));
+        private readonly IEqualityComparer<Instant?> _tolerantDateTimeComparer = new TolerantInstantComparer(Duration.FromMilliseconds(5000));
 
         private readonly IEntityIdGenerator _idGenerator = A.Fake<IEntityIdGenerator>();
         private readonly DatabaseFixture _fixture;
@@ -88,7 +88,7 @@ namespace Backend.Fx.EfCore5Persistence.Tests
         //         string strChangedOn =
         //             dbSession.DbConnection.ExecuteScalar<string>($"SELECT ChangedOn FROM Posts where id = {post.Id}");
         //         DateTime changedOn = DateTime.Parse(strChangedOn);
-        //         Assert.Equal(clock.UtcNow, changedOn, new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(100)));
+        //         Assert.Equal(clock.GetCurrentInstant(), changedOn, new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(100)));
         //     }
         // }
 
@@ -291,8 +291,8 @@ namespace Backend.Fx.EfCore5Persistence.Tests
         [Fact]
         public void CanUpdateDependant()
         {
-            var clock = new AdjustableClock(new WallClock());
-            clock.OverrideUtcNow(new DateTime(2020, 01, 20, 20, 30, 40));
+            var clock = new AdjustableClock(SystemClock.Instance);
+            clock.OverrideUtcNow(Instant.FromUtc(2020, 01, 20, 20, 30, 40));
 
             int id;
             using (TestDbSession dbSession = _fixture.CreateTestDbSession(clock: clock))
@@ -320,15 +320,15 @@ namespace Backend.Fx.EfCore5Persistence.Tests
 
                 var strChangedOn = dbSession.DbConnection.ExecuteScalar<string>($"SELECT changedon FROM Posts where id = {post.Id}");
                 DateTime changedOn = DateTime.Parse(strChangedOn);
-                Assert.Equal(clock.UtcNow, changedOn, new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(500)));
+                Assert.Equal(clock.GetCurrentInstant(), Instant.FromDateTimeUtc(changedOn), new TolerantInstantComparer(Duration.FromMilliseconds(500)));
             }
         }
 
         [Fact]
         public void UpdatesAggregateTrackingPropertiesOnDeleteOfDependant()
         {
-            var clock = new AdjustableClock(new WallClock());
-            clock.OverrideUtcNow(new DateTime(2020, 01, 20, 20, 30, 40));
+            var clock = new AdjustableClock(SystemClock.Instance);
+            clock.OverrideUtcNow(Instant.FromUtc(2020, 01, 20, 20, 30, 40));
 
             int id;
             using (TestDbSession dbSession = _fixture.CreateTestDbSession(clock: clock))
@@ -336,7 +336,7 @@ namespace Backend.Fx.EfCore5Persistence.Tests
                 id = CreateBlogWithPost(dbSession.DbConnection, 10);
             }
 
-            DateTime expectedModifiedOn = clock.Advance(TimeSpan.FromHours(1));
+            Instant expectedModifiedOn = clock.Advance(Duration.FromHours(1));
 
             using (TestDbSession dbSession = _fixture.CreateTestDbSession(clock: clock))
             {

@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
-using Backend.Fx.BuildingBlocks;
-using Backend.Fx.ConfigurationSettings;
+using Backend.Fx.DependencyInjection;
+using Backend.Fx.Domain;
+using Backend.Fx.ExecutionPipeline;
+using Backend.Fx.Extensions.Persistence;
 using Backend.Fx.Features.Authorization;
+using Backend.Fx.Features.ConfigurationSettings;
 using Backend.Fx.Features.DomainEvents;
-using Backend.Fx.Features.Persistence;
-using Backend.Fx.Patterns.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -103,7 +104,7 @@ namespace Backend.Fx.EfCore6Persistence.Bootstrapping
                 compositionRoot.Register(
                     ServiceDescriptor.Scoped<IAggregateMapping<Setting>, PlainAggregateMapping<Setting>>());
                 compositionRoot.Register(
-                    ServiceDescriptor.Scoped<IAggregateAuthorization<Setting>, AllowAll<Setting>>());
+                    ServiceDescriptor.Scoped<IAuthorizationPolicy<Setting>, AllowAll<Setting>>());
             }
             
             // loop through aggregate root types to...

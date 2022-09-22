@@ -1,8 +1,8 @@
-using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.Extensions;
 
 namespace Backend.Fx.AspNetCore.Bootstrapping
 {
-    public class AspNetCoreApplication : BackendFxApplicationDecorator
+    public class AspNetCoreApplication : BackendFxApplicationExtension
     {
         public AspNetCoreApplication(IBackendFxApplication application) : base(application)
         {

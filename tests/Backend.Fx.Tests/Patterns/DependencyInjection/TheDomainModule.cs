@@ -1,16 +1,16 @@
 using System.Security.Principal;
 using System.Threading.Tasks;
-using Backend.Fx.BuildingBlocks;
-using Backend.Fx.Environment.Authentication;
-using Backend.Fx.Environment.DateAndTime;
 using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.ExecutionPipeline;
+using Backend.Fx.Extensions.MessageBus;
 using Backend.Fx.Features.Authorization;
 using Backend.Fx.Features.DomainEvents;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.TestUtil;
+using Backend.Fx.Util;
 using FakeItEasy;
 using Microsoft.Extensions.DependencyInjection;
+using NodaTime;
 using Xunit;
 
 namespace Backend.Fx.Tests.Patterns.DependencyInjection
@@ -32,7 +32,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
                 sp =>
                 {
                     var clock = sp.GetRequiredService<IClock>();
-                    Assert.IsType<WallClock>(clock);
+                    Assert.IsType<FrozenClock>(clock);
                     
                     var correlationHolder = sp.GetRequiredService<ICurrentTHolder<Correlation>>();
                     Assert.IsType<CurrentCorrelationHolder>(correlationHolder);
@@ -63,7 +63,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
             sut.Invoker.Invoke(
                 sp =>
                 {
-                    var authorization = sp.GetRequiredService<IAggregateAuthorization<BackendFxAggregate>>();
+                    var authorization = sp.GetRequiredService<IAuthorizationPolicy<BackendFxAggregate>>();
                     Assert.IsType<AllowAll<BackendFxAggregate>>(authorization);
                 },
                 new SystemIdentity(),

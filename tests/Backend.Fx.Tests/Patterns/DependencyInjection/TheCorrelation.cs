@@ -1,5 +1,6 @@
 using System;
-using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.ExecutionPipeline;
+using Backend.Fx.Extensions.MessageBus;
 using Backend.Fx.TestUtil;
 using Xunit;
 using Xunit.Abstractions;

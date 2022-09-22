@@ -1,10 +1,10 @@
 using System.Data.Common;
 using Backend.Fx.EfCore6Persistence.Bootstrapping;
 using Backend.Fx.EfCore6Persistence.Tests.SampleApp.Persistence;
-using Backend.Fx.Features.Persistence;
+using Backend.Fx.Extensions.Persistence;
+using Backend.Fx.Features.DomainEvents;
 using Backend.Fx.InMemoryPersistence;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.TestUtil;
 using FakeItEasy;
 using Microsoft.Data.Sqlite;
@@ -27,13 +27,15 @@ namespace Backend.Fx.EfCore6Persistence.Tests.SampleApp.Runtime
                 typeof(BlogMapping).Assembly,
                 typeof(Blog).Assembly);
 
+            application = new DomainEventsApplication(application);
+
             application = new PersistentApplication(
                 new SampleAppDbBootstrapper(connectionString),
                 A.Fake<IDatabaseAvailabilityAwaiter>(),
                 new EfCorePersistenceModule<SampleAppDbContext, SampleAppIdGenerator>(
                     dbConnectionFactory,
                     A.Fake<ILoggerFactory>(),
-                    (builder, connection) => builder.UseSqlite((DbConnection)connection),
+                    (builder, connection) => builder.UseSqlite((DbConnection)connection, opt => opt.UseNodaTime()),
                     false,
                     application.Assemblies
                 ),

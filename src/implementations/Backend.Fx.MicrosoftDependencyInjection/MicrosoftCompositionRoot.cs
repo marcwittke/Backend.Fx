@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Backend.Fx.DependencyInjection;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -33,6 +33,11 @@ namespace Backend.Fx.MicrosoftDependencyInjection
 
         public override IServiceProvider ServiceProvider => _serviceProvider.Value;
 
+        public override bool HasRegistration<T>()
+        {
+            return ServiceCollection.Any(sd => sd.ServiceType is T);
+        }
+
         public override void Verify()
         {
             // ensure creation of lazy service provider, this will trigger the validation
@@ -51,19 +56,19 @@ namespace Backend.Fx.MicrosoftDependencyInjection
 
             if (existingRegistration == null)
             {
-                serviceDescriptor.LogDetails(Logger, "Adding");
+                LogAddRegistration(serviceDescriptor);
                 ServiceCollection.Add(serviceDescriptor);
             }
             else
             {
-                serviceDescriptor.LogDetails(Logger, "Replacing");
+                LogReplaceRegistration(serviceDescriptor);
                 ServiceCollection.Replace(serviceDescriptor);
             }
         }
 
         public override void RegisterDecorator(ServiceDescriptor serviceDescriptor)
         {
-            serviceDescriptor.LogDetails(Logger, "Adding decorator");
+            LogAddDecoratorRegistration(serviceDescriptor);
             ServiceCollection.Decorate(serviceDescriptor.ServiceType, serviceDescriptor.ImplementationType);
         }
 
@@ -73,13 +78,13 @@ namespace Backend.Fx.MicrosoftDependencyInjection
 
             if (serviceDescriptorArray.Length == 0)
             {
-                Logger.Warn("Skipping registration of empty collection");
+                Logger.LogWarning("Skipping registration of empty collection");
                 return;
             }
 
             foreach (var serviceDescriptor in serviceDescriptorArray)
             {
-                serviceDescriptor.LogDetails(Logger, "Adding");
+                LogAddRegistration(serviceDescriptor);
                 ServiceCollection.Add(serviceDescriptor);
             }
         }

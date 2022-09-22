@@ -3,7 +3,6 @@ using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.InMemoryPersistence;
 using Backend.Fx.Logging;
 using Backend.Fx.MicrosoftDependencyInjection;
-using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.TestUtil;
 using Xunit;
 using Xunit.Abstractions;

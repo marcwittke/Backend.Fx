@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using Backend.Fx.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.Features.DomainEvents
 {

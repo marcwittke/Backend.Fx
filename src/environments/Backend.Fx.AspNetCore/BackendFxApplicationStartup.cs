@@ -2,7 +2,6 @@ using System.Security.Principal;
 using Backend.Fx.AspNetCore.MultiTenancy;
 using Backend.Fx.AspNetCore.Mvc;
 using Backend.Fx.AspNetCore.Mvc.Activators;
-using Backend.Fx.Patterns.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.Extensions.DependencyInjection;

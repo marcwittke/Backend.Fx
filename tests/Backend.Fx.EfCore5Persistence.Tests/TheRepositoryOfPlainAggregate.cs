@@ -2,11 +2,12 @@ using System;
 using System.Threading.Tasks;
 using Backend.Fx.EfCore5Persistence.Tests.Fixtures;
 using Backend.Fx.EfCore5Persistence.Tests.SampleApp.Persistence;
-using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.Extensions;
+using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.Features.Authorization;
 using Backend.Fx.TestUtil;
+using Backend.Fx.Util;
+using NodaTime;
 using SampleApp.Domain;
 using Xunit;
 using Xunit.Abstractions;
@@ -94,7 +95,7 @@ namespace Backend.Fx.EfCore5Persistence.Tests
                     Blogger bratislavMetulsky = repo.Single(444);
                     Assert.Equal(_tenantId, bratislavMetulsky.TenantId);
                     Assert.Equal("the test", bratislavMetulsky.CreatedBy);
-                    Assert.Equal(new DateTime(2012, 05, 12, 23, 12, 09), bratislavMetulsky.CreatedOn);
+                    Assert.Equal(Instant.FromUtc(2012, 05, 12, 23, 12, 09), bratislavMetulsky.CreatedOn);
                     Assert.Equal("Bratislav", bratislavMetulsky.FirstName);
                     Assert.Equal("Metulsky", bratislavMetulsky.LastName);
                     Assert.Equal("whatever", bratislavMetulsky.Bio);
@@ -103,7 +104,7 @@ namespace Backend.Fx.EfCore5Persistence.Tests
                     Assert.NotNull(bratislavMetulsky);
                     Assert.Equal(_tenantId, bratislavMetulsky.TenantId);
                     Assert.Equal("the test", bratislavMetulsky.CreatedBy);
-                    Assert.Equal(new DateTime(2012, 05, 12, 23, 12, 09), bratislavMetulsky.CreatedOn);
+                    Assert.Equal(Instant.FromUtc(2012, 05, 12, 23, 12, 09), bratislavMetulsky.CreatedOn);
                     Assert.Equal("Bratislav", bratislavMetulsky.FirstName);
                     Assert.Equal("Metulsky", bratislavMetulsky.LastName);
                     Assert.Equal("whatever", bratislavMetulsky.Bio);
@@ -133,7 +134,7 @@ namespace Backend.Fx.EfCore5Persistence.Tests
                     Blogger bratislavMetulsky = await repo.SingleAsync(555);
                     Assert.Equal(_tenantId, bratislavMetulsky.TenantId);
                     Assert.Equal("the test", bratislavMetulsky.CreatedBy);
-                    Assert.Equal(new DateTime(2012, 05, 12, 23, 12, 09), bratislavMetulsky.CreatedOn);
+                    Assert.Equal(Instant.FromUtc(2012, 05, 12, 23, 12, 09), bratislavMetulsky.CreatedOn);
                     Assert.Equal("Bratislav", bratislavMetulsky.FirstName);
                     Assert.Equal("Metulsky", bratislavMetulsky.LastName);
                     Assert.Equal("whatever", bratislavMetulsky.Bio);
@@ -142,7 +143,7 @@ namespace Backend.Fx.EfCore5Persistence.Tests
                     Assert.NotNull(bratislavMetulsky);
                     Assert.Equal(_tenantId, bratislavMetulsky.TenantId);
                     Assert.Equal("the test", bratislavMetulsky.CreatedBy);
-                    Assert.Equal(new DateTime(2012, 05, 12, 23, 12, 09), bratislavMetulsky.CreatedOn);
+                    Assert.Equal(Instant.FromUtc(2012, 05, 12, 23, 12, 09), bratislavMetulsky.CreatedOn);
                     Assert.Equal("Bratislav", bratislavMetulsky.FirstName);
                     Assert.Equal("Metulsky", bratislavMetulsky.LastName);
                     Assert.Equal("whatever", bratislavMetulsky.Bio);
@@ -181,7 +182,7 @@ namespace Backend.Fx.EfCore5Persistence.Tests
             {
                 var repo = new EfRepository<Blogger>(dbSession.DbContext, new BloggerMapping(), CurrentTenantIdHolder.Create(_tenantId), new AllowAll<Blogger>());
                 Blogger johnnyFlash = repo.Single(456);
-                Assert.Equal(DateTime.UtcNow, johnnyFlash.ChangedOn, new TolerantDateTimeComparer(TimeSpan.FromMilliseconds(5000)));
+                Assert.Equal(SystemClock.Instance.GetCurrentInstant(), johnnyFlash.ChangedOn, new TolerantInstantComparer(Duration.FromMilliseconds(5000)));
                 Assert.Equal(new SystemIdentity().Name, johnnyFlash.ChangedBy);
                 Assert.Equal("Johnny", johnnyFlash.FirstName);
                 Assert.Equal("Flash", johnnyFlash.LastName);

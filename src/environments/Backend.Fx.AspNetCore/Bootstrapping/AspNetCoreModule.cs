@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Reflection;
-using Backend.Fx.Extensions;
-using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.DependencyInjection;
+using Backend.Fx.Util;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;

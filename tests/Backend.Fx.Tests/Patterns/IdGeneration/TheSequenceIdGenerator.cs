@@ -1,5 +1,6 @@
 ﻿using System.Linq;
-using Backend.Fx.Features.Persistence;
+using Backend.Fx.Domain;
+using Backend.Fx.Extensions.Persistence;
 using Backend.Fx.InMemoryPersistence;
 using Backend.Fx.TestUtil;
 using Xunit;

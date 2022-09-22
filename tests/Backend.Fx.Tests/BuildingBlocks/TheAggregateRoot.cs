@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using Backend.Fx.BuildingBlocks;
 using Backend.Fx.RandomData;
 using Backend.Fx.TestUtil;
 using JetBrains.Annotations;
+using NodaTime;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -44,7 +44,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void ChangedByPropertyIsChoppedAt100Chars()
         {
-            DateTime now = DateTime.UtcNow;
+            Instant now = SystemClock.Instance.GetCurrentInstant();
             var sut = new TestAggregateRoot(_nextId++, "gaga");
             var moreThanHundred = Letters.RandomLowerCase(110);
             sut.SetModifiedProperties(moreThanHundred, now);
@@ -54,7 +54,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void ChangedByPropertyIsStoredCorrectly()
         {
-            DateTime now = DateTime.UtcNow;
+            Instant now = SystemClock.Instance.GetCurrentInstant();
             var sut = new TestAggregateRoot(_nextId++, "gaga");
             sut.SetModifiedProperties("me", now);
             Assert.Equal("me", sut.ChangedBy);
@@ -64,7 +64,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void ChangedOnPropertyIsStoredCorrectly()
         {
-            DateTime now = DateTime.UtcNow;
+            Instant now = SystemClock.Instance.GetCurrentInstant();
             var sut = new TestAggregateRoot(_nextId++, "gaga");
             sut.SetModifiedProperties("me", now);
             Assert.Equal(now, sut.ChangedOn);
@@ -74,7 +74,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void CreatedByPropertyIsChoppedAt100Chars()
         {
-            DateTime now = DateTime.UtcNow;
+            Instant now = SystemClock.Instance.GetCurrentInstant();
             var sut = new TestAggregateRoot(_nextId++, "gaga");
             var moreThanHundred = Letters.RandomLowerCase(110);
             sut.SetCreatedProperties(moreThanHundred, now);
@@ -84,7 +84,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void CreatedByPropertyIsStoredCorrectly()
         {
-            DateTime now = DateTime.UtcNow;
+            Instant now = SystemClock.Instance.GetCurrentInstant();
             var sut = new TestAggregateRoot(_nextId++, "gaga");
             sut.SetCreatedProperties("me", now);
             Assert.Equal("me", sut.CreatedBy);
@@ -94,7 +94,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void CreatedOnPropertyIsStoredCorrectly()
         {
-            DateTime now = DateTime.UtcNow;
+            Instant now = SystemClock.Instance.GetCurrentInstant();
             var sut = new TestAggregateRoot(_nextId++, "gaga");
             sut.SetCreatedProperties("me", now);
             Assert.Equal(now, sut.CreatedOn);
@@ -106,7 +106,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         {
             var sut = new TestAggregateRoot(_nextId++, "gaga");
             // ReSharper disable once AssignNullToNotNullAttribute
-            Assert.Throws<ArgumentException>(() => sut.SetModifiedProperties("", DateTime.UtcNow));
+            Assert.Throws<ArgumentException>(() => sut.SetModifiedProperties("", SystemClock.Instance.GetCurrentInstant()));
         }
 
         [Fact]
@@ -114,7 +114,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         {
             var sut = new TestAggregateRoot(_nextId++, "gaga");
             // ReSharper disable once AssignNullToNotNullAttribute
-            Assert.Throws<ArgumentException>(() => sut.SetCreatedProperties("", DateTime.UtcNow));
+            Assert.Throws<ArgumentException>(() => sut.SetCreatedProperties("", SystemClock.Instance.GetCurrentInstant()));
         }
 
         [Fact]
@@ -122,7 +122,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         {
             var sut = new TestAggregateRoot(_nextId++, "gaga");
             // ReSharper disable once AssignNullToNotNullAttribute
-            Assert.Throws<ArgumentNullException>(() => sut.SetModifiedProperties(null, DateTime.UtcNow));
+            Assert.Throws<ArgumentNullException>(() => sut.SetModifiedProperties(null, SystemClock.Instance.GetCurrentInstant()));
         }
 
         [Fact]
@@ -130,7 +130,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         {
             var sut = new TestAggregateRoot(_nextId++, "gaga");
             // ReSharper disable once AssignNullToNotNullAttribute
-            Assert.Throws<ArgumentNullException>(() => sut.SetCreatedProperties(null, DateTime.UtcNow));
+            Assert.Throws<ArgumentNullException>(() => sut.SetCreatedProperties(null, SystemClock.Instance.GetCurrentInstant()));
         }
 
         public TheAggregateRoot(ITestOutputHelper output) : base(output)

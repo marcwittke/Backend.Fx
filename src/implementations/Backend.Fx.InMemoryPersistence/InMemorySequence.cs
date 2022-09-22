@@ -1,4 +1,4 @@
-using Backend.Fx.Features.Persistence;
+using Backend.Fx.Extensions.Persistence;
 
 namespace Backend.Fx.InMemoryPersistence
 {

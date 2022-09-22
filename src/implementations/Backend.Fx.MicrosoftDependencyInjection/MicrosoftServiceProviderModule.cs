@@ -1,5 +1,5 @@
+using Backend.Fx.DependencyInjection;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.DependencyInjection;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

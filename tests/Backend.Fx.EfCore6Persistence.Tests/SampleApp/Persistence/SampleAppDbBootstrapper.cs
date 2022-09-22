@@ -1,4 +1,4 @@
-using Backend.Fx.Features.Persistence;
+using Backend.Fx.Extensions.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Fx.EfCore6Persistence.Tests.SampleApp.Persistence
@@ -17,7 +17,7 @@ namespace Backend.Fx.EfCore6Persistence.Tests.SampleApp.Persistence
         public void EnsureDatabaseExistence()
         {
             var dbContext = new SampleAppDbContext(
-                new DbContextOptionsBuilder<SampleAppDbContext>().UseSqlite(_connectionString).Options);
+                new DbContextOptionsBuilder<SampleAppDbContext>().UseSqlite(_connectionString, opt => opt.UseNodaTime()).Options);
             dbContext.Database.EnsureCreated();
         }
     }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data;
 using Backend.Fx.EfCore5Persistence.Bootstrapping;
-using Backend.Fx.Features.Persistence;
+using Backend.Fx.Extensions.Persistence;
 using Backend.Fx.Logging;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;

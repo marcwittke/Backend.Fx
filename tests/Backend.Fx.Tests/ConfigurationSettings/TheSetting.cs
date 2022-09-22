@@ -1,7 +1,6 @@
 ﻿using System;
-using Backend.Fx.BuildingBlocks;
-using Backend.Fx.ConfigurationSettings;
-using Backend.Fx.Features.Persistence;
+using Backend.Fx.Domain;
+using Backend.Fx.Features.ConfigurationSettings;
 using Backend.Fx.TestUtil;
 using JetBrains.Annotations;
 using Xunit;
@@ -12,9 +11,9 @@ namespace Backend.Fx.Tests.ConfigurationSettings
     public class TheSetting : TestWithLogging
     {
         [UsedImplicitly]
-        public class TestSettingsService : SettingsService
+        public class TestSettingsCategory : SettingsCategory
         {
-            public TestSettingsService(IEntityIdGenerator idGenerator, IRepository<Setting> settingRepository)
+            public TestSettingsCategory(IEntityIdGenerator idGenerator, IRepository<Setting> settingRepository)
                 : base("Test", idGenerator, settingRepository, new SettingSerializerFactory())
             {
             }

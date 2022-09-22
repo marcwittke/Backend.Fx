@@ -1,4 +1,5 @@
-﻿using Backend.Fx.Features.Persistence;
+﻿using Backend.Fx.Domain;
+using Backend.Fx.Extensions.Persistence;
 using JetBrains.Annotations;
 
 namespace Backend.Fx.InMemoryPersistence

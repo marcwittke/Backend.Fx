@@ -1,7 +1,8 @@
 using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.Features.MessageBus;
-using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.ExecutionPipeline;
+using Backend.Fx.Extensions.MessageBus;
 using Backend.Fx.TestUtil;
+using Backend.Fx.Util;
 using FakeItEasy;
 using Xunit;
 using Xunit.Abstractions;
@@ -42,7 +43,7 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
         {
             var testIntegrationEvent = new Domain.TestIntegrationEvent(44);
             _sut.Publish(testIntegrationEvent);
-            A.CallTo(()=>_messageBus.Publish(A<IIntegrationEvent>._)).MustNotHaveHappened();
+            A.CallTo(()=>_messageBus.PublishAsync(A<IIntegrationEvent>._)).MustNotHaveHappened();
         }
         
         [Fact]
@@ -56,11 +57,11 @@ namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
             _sut.Publish(ev2);
             _sut.Publish(ev3);
             _sut.Publish(ev4);
-            _sut.RaiseEvents();
-            A.CallTo(()=>_messageBus.Publish(A<IIntegrationEvent>.That.IsEqualTo(ev1))).MustHaveHappenedOnceExactly();
-            A.CallTo(()=>_messageBus.Publish(A<IIntegrationEvent>.That.IsEqualTo(ev2))).MustHaveHappenedOnceExactly();
-            A.CallTo(()=>_messageBus.Publish(A<IIntegrationEvent>.That.IsEqualTo(ev3))).MustHaveHappenedOnceExactly();
-            A.CallTo(()=>_messageBus.Publish(A<IIntegrationEvent>.That.IsEqualTo(ev4))).MustHaveHappenedOnceExactly();
+            _sut.RaiseEventsAsync();
+            A.CallTo(()=>_messageBus.PublishAsync(A<IIntegrationEvent>.That.IsEqualTo(ev1))).MustHaveHappenedOnceExactly();
+            A.CallTo(()=>_messageBus.PublishAsync(A<IIntegrationEvent>.That.IsEqualTo(ev2))).MustHaveHappenedOnceExactly();
+            A.CallTo(()=>_messageBus.PublishAsync(A<IIntegrationEvent>.That.IsEqualTo(ev3))).MustHaveHappenedOnceExactly();
+            A.CallTo(()=>_messageBus.PublishAsync(A<IIntegrationEvent>.That.IsEqualTo(ev4))).MustHaveHappenedOnceExactly();
         }
     }
 }

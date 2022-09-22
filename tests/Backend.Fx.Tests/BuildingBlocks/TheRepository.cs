@@ -20,7 +20,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void AcceptsNullArrayToResolve()
         {
-            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAuthorizationPolicy<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
             A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._))
              .ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
@@ -35,7 +35,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void CanResolveListOfIds()
         {
-            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAuthorizationPolicy<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
             A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._))
              .ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
@@ -84,7 +84,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void DeletesItemFromMyTenant()
         {
-            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAuthorizationPolicy<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
             A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._))
              .ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
@@ -106,7 +106,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void DoesNotReturnItemsFromOtherTenants()
         {
-            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAuthorizationPolicy<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
             A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._))
              .ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
@@ -127,7 +127,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void MaintainsTenantIdOnAdd()
         {
-            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAuthorizationPolicy<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
             A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._))
              .ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
@@ -145,7 +145,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void ProvidesCorrectAny()
         {
-            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAuthorizationPolicy<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
             A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._))
              .ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
@@ -172,7 +172,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void ReturnsAll()
         {
-            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAuthorizationPolicy<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
             A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._))
              .ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
@@ -198,7 +198,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void ReturnsByIdOnSingle()
         {
-            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAuthorizationPolicy<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
             A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._))
              .ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
@@ -227,7 +227,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void ReturnsByIdOnSingleOrDefault()
         {
-            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAuthorizationPolicy<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
             A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._))
              .ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
@@ -256,7 +256,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void ReturnsEmptyWhenTenantIdHolderIsEmpty()
         {
-            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAuthorizationPolicy<TheAggregateRoot.TestAggregateRoot>>();
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(),
                 CurrentTenantIdHolder.Create(null),
                 authorization);
@@ -271,7 +271,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void ReturnsOnlyAuthorizedRecords()
         {
-            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAuthorizationPolicy<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
             A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._))
              .ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q.Where(agg => agg.Id == 25 || agg.Id == 26));
@@ -301,7 +301,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void ReturnsOnlyItemsFromMyTenant()
         {
-            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAuthorizationPolicy<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
             A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._))
              .ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
@@ -338,7 +338,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void ThrowsOnAddWhenTenantIdIsEmpty()
         {
-            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAuthorizationPolicy<TheAggregateRoot.TestAggregateRoot>>();
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(),
                 CurrentTenantIdHolder.Create(null),
                 authorization);
@@ -358,7 +358,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void ThrowsOnAddRangeWhenTenantIdIsEmpty()
         {
-            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAuthorizationPolicy<TheAggregateRoot.TestAggregateRoot>>();
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(),
                 CurrentTenantIdHolder.Create(null),
                 authorization);
@@ -378,7 +378,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void ThrowsOnAddWhenUnauthorized()
         {
-            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAuthorizationPolicy<TheAggregateRoot.TestAggregateRoot>>();
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(),
                 CurrentTenantIdHolder.Create(234),
                 authorization);
@@ -393,7 +393,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void ThrowsOnAddRangeWhenUnauthorized()
         {
-            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAuthorizationPolicy<TheAggregateRoot.TestAggregateRoot>>();
             var sut = new InMemoryRepository<TheAggregateRoot.TestAggregateRoot>(new InMemoryStore<TheAggregateRoot.TestAggregateRoot>(),
                 CurrentTenantIdHolder.Create(234),
                 authorization);
@@ -408,7 +408,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void ThrowsOnDeleteWhenTenantDoesNotMatch()
         {
-            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAuthorizationPolicy<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
             A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._))
              .ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
@@ -433,7 +433,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void ThrowsOnDeleteWhenTenantIdHolderIsEmpty()
         {
-            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAuthorizationPolicy<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
             A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._))
              .ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
@@ -452,7 +452,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void ThrowsOnDeleteWhenUnauthorized()
         {
-            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAuthorizationPolicy<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
             A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._))
              .ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);
@@ -472,7 +472,7 @@ namespace Backend.Fx.Tests.BuildingBlocks
         [Fact]
         public void ThrowsOnResolveWhenTenantDoesNotMatch()
         {
-            var authorization = A.Fake<IAggregateAuthorization<TheAggregateRoot.TestAggregateRoot>>();
+            var authorization = A.Fake<IAuthorizationPolicy<TheAggregateRoot.TestAggregateRoot>>();
             A.CallTo(() => authorization.HasAccessExpression).Returns(agg => true);
             A.CallTo(() => authorization.Filter(A<IQueryable<TheAggregateRoot.TestAggregateRoot>>._))
              .ReturnsLazily((IQueryable<TheAggregateRoot.TestAggregateRoot> q) => q);

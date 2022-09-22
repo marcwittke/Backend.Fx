@@ -1,6 +1,5 @@
 using System;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.DependencyInjection;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;

@@ -1,9 +1,8 @@
 ﻿using System.Linq;
-using Backend.Fx.BuildingBlocks;
-using Backend.Fx.ConfigurationSettings;
+using Backend.Fx.Domain;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Features.Authorization;
-using Backend.Fx.Features.Persistence;
+using Backend.Fx.Features.ConfigurationSettings;
 using Backend.Fx.Hacking;
 using Backend.Fx.InMemoryPersistence;
 using Backend.Fx.TestUtil;
@@ -17,7 +16,7 @@ namespace Backend.Fx.Tests.ConfigurationSettings
     {
         public TheSettingsService(ITestOutputHelper output): base(output)
         {
-            var settingAuthorization = A.Fake<IAggregateAuthorization<Setting>>();
+            var settingAuthorization = A.Fake<IAuthorizationPolicy<Setting>>();
             A.CallTo(() => settingAuthorization.HasAccessExpression).Returns(setting => true);
             A.CallTo(() => settingAuthorization.Filter(A<IQueryable<Setting>>._)).ReturnsLazily((IQueryable<Setting> q) => q);
             A.CallTo(() => settingAuthorization.CanCreate(A<Setting>._)).Returns(true);
@@ -28,9 +27,9 @@ namespace Backend.Fx.Tests.ConfigurationSettings
             _settingRepository = new InMemoryRepository<Setting>(new InMemoryStore<Setting>(), CurrentTenantIdHolder.Create(999), settingAuthorization);
         }
 
-        public class MySettingsService : SettingsService
+        public class MySettingsCategory : SettingsCategory
         {
-            public MySettingsService(IEntityIdGenerator idGenerator, IRepository<Setting> repo)
+            public MySettingsCategory(IEntityIdGenerator idGenerator, IRepository<Setting> repo)
                 : base("My", idGenerator, repo, new SettingSerializerFactory())
             {
             }
@@ -54,7 +53,7 @@ namespace Backend.Fx.Tests.ConfigurationSettings
         [Fact]
         public void ReadsNonExistingSettingAsDefaultFromRepository()
         {
-            var sut = new MySettingsService(_idGenerator, _settingRepository);
+            var sut = new MySettingsCategory(_idGenerator, _settingRepository);
             Assert.Null(sut.SmtpHost);
         }
 
@@ -66,7 +65,7 @@ namespace Backend.Fx.Tests.ConfigurationSettings
 
             _settingRepository.Add(setting);
 
-            var sut = new MySettingsService(_idGenerator, _settingRepository);
+            var sut = new MySettingsCategory(_idGenerator, _settingRepository);
             Assert.Null(sut.SmtpHost);
         }
 
@@ -78,14 +77,14 @@ namespace Backend.Fx.Tests.ConfigurationSettings
 
             _settingRepository.Add(setting);
 
-            var sut = new MySettingsService(_idGenerator, _settingRepository);
+            var sut = new MySettingsCategory(_idGenerator, _settingRepository);
             Assert.Equal(333, sut.SmtpPort);
         }
 
         [Fact]
         public void StoresSettingsInRepository()
         {
-            var sut = new MySettingsService(_idGenerator, _settingRepository) {SmtpPort = 333};
+            var sut = new MySettingsCategory(_idGenerator, _settingRepository) {SmtpPort = 333};
             Assert.Equal(333, sut.SmtpPort);
 
             var settings = _settingRepository.GetAll();

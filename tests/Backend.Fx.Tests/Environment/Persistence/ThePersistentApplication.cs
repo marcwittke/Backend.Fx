@@ -1,8 +1,8 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Backend.Fx.Features.Persistence;
+using Backend.Fx.DependencyInjection;
+using Backend.Fx.Extensions.Persistence;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Tests.Patterns.DependencyInjection;
 using Backend.Fx.TestUtil;
 using FakeItEasy;

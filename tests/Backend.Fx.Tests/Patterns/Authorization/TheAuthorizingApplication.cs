@@ -1,11 +1,10 @@
 using System;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.Features.Authorization;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Tests.Patterns.DependencyInjection;
 using Backend.Fx.TestUtil;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,7 +34,7 @@ namespace Backend.Fx.Tests.Patterns.Authorization
 
             sut.Invoker.Invoke(sp =>
                 {
-                    var auth = sp.GetRequiredService<IAggregateAuthorization<BackendFxAggregate>>();
+                    var auth = sp.GetRequiredService<IAuthorizationPolicy<BackendFxAggregate>>();
                     Assert.IsType<Auth>(auth);
                 },
                 new SystemIdentity(),

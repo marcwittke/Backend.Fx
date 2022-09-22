@@ -1,5 +1,6 @@
-using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.ExecutionPipeline;
 using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Backend.Fx.Features.DomainEvents
 {
@@ -17,9 +18,9 @@ namespace Backend.Fx.Features.DomainEvents
             _operation = operation;
         }
 
-        public void Begin()
+        public void Begin(IServiceScope serviceScope)
         {
-            _operation.Begin();
+            _operation.Begin(serviceScope);
         }
 
         public void Complete()

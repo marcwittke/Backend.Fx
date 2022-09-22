@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
-using Backend.Fx.BuildingBlocks;
-using Backend.Fx.Features.Persistence;
+using Backend.Fx.Domain;
 using JetBrains.Annotations;
 
 namespace SampleApp.Domain

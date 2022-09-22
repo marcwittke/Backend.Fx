@@ -1,5 +1,4 @@
-﻿using Backend.Fx.BuildingBlocks;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 
 namespace SampleApp.Domain
 {

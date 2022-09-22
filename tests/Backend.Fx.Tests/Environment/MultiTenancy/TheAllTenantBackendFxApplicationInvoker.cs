@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Security.Principal;
 using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.TestUtil;
 using FakeItEasy;
 using Xunit;

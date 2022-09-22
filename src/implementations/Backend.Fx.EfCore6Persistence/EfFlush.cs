@@ -3,17 +3,16 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Security.Principal;
-using Backend.Fx.BuildingBlocks;
-using Backend.Fx.Environment.DateAndTime;
 using Backend.Fx.Exceptions;
-using Backend.Fx.Extensions;
-using Backend.Fx.Features.Persistence;
+using Backend.Fx.ExecutionPipeline;
+using Backend.Fx.Extensions.Persistence;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.Util;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
+using NodaTime;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.EfCore6Persistence
@@ -54,7 +53,7 @@ namespace Backend.Fx.EfCore6Persistence
         {
             using (Logger.LogDebugDuration("Updating tracking properties of created and modified entities"))
             {
-                UpdateTrackingProperties(IdentityHolder.Current.Name, Clock.UtcNow);
+                UpdateTrackingProperties(IdentityHolder.Current.Name, Clock.GetCurrentInstant());
             }
         }
 
@@ -93,7 +92,7 @@ namespace Backend.Fx.EfCore6Persistence
             }
         }
         
-        private void UpdateTrackingProperties(string identity, DateTime utcNow)
+        private void UpdateTrackingProperties(string identity, Instant instant)
         {
             identity ??= "anonymous";
             var isTraceEnabled = Logger.IsEnabled(LogLevel.Trace);
@@ -123,13 +122,13 @@ namespace Backend.Fx.EfCore6Persistence
 
                              if (entry.State == EntityState.Added)
                              {
-                                 if (isTraceEnabled) Logger.LogTrace("tracking that {EntityTypeName}[{Id}] was created by {Identity} at {UtcNow}", entity.GetType().Name, entity.Id, identity, utcNow);
-                                 entity.SetCreatedProperties(identity, utcNow);
+                                 if (isTraceEnabled) Logger.LogTrace("tracking that {EntityTypeName}[{Id}] was created by {Identity} at {UtcNow}", entity.GetType().Name, entity.Id, identity, instant);
+                                 entity.SetCreatedProperties(identity, instant);
                              }
                              else if (entry.State == EntityState.Modified)
                              {
-                                 if (isTraceEnabled) Logger.LogTrace("tracking that {EntityTypeName}[{Id}] was modified by {Identity} at {UtcNow}", entity.GetType().Name, entity.Id, identity, utcNow);
-                                 entity.SetModifiedProperties(identity, utcNow);
+                                 if (isTraceEnabled) Logger.LogTrace("tracking that {EntityTypeName}[{Id}] was modified by {Identity} at {UtcNow}", entity.GetType().Name, entity.Id, identity, instant);
+                                 entity.SetModifiedProperties(identity, instant);
 
                                  // this line causes the recent changes of tracking properties to be detected before flushing
                                  entry.State = EntityState.Modified;
@@ -141,7 +140,7 @@ namespace Backend.Fx.EfCore6Persistence
                              throw;
                          }
                      });
-            if (count > 0) Logger.LogDebug("Tracked {EntityCount} entities as created/changed on {UtcNow} by {Identity}", count, utcNow, identity);
+            if (count > 0) Logger.LogDebug("Tracked {EntityCount} entities as created/changed on {UtcNow} by {Identity}", count, instant, identity);
         }
         
         /// <summary>

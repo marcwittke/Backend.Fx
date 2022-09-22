@@ -1,14 +1,17 @@
-using System;
 using System.Linq;
 using System.Reflection;
-using Backend.Fx.Extensions;
-using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.DependencyInjection;
+using Backend.Fx.ExecutionPipeline;
+using Backend.Fx.Logging;
+using Backend.Fx.Util;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Backend.Fx.Features.DomainEvents
 {
-    public class DomainEventsModule : IModule
+    internal class DomainEventsModule : IModule
     {
+        private static readonly ILogger Logger = Log.Create<DomainEventsModule>();
         private readonly Assembly[] _assemblies;
         
         public DomainEventsModule(params Assembly[] assemblies)
@@ -25,16 +28,23 @@ namespace Backend.Fx.Features.DomainEvents
         
         private void RegisterDomainEventHandlers(ICompositionRoot compositionRoot)
         {
-            foreach (Type domainEventType in _assemblies.GetImplementingTypes(typeof(IDomainEvent)))
+            foreach (var domainEventType in _assemblies.GetImplementingTypes(typeof(IDomainEvent)))
             {
-                Type handlerTypeForThisDomainEventType = typeof(IDomainEventHandler<>).MakeGenericType(domainEventType);
+                var handlerTypeForThisDomainEventType = typeof(IDomainEventHandler<>).MakeGenericType(domainEventType);
 
                 var serviceDescriptors = _assemblies
                     .GetImplementingTypes(handlerTypeForThisDomainEventType)
                     .Select(t => new ServiceDescriptor(handlerTypeForThisDomainEventType, t, ServiceLifetime.Scoped))
                     .ToArray();
 
-                compositionRoot.RegisterCollection(serviceDescriptors);
+                if (serviceDescriptors.Any())
+                {
+                    compositionRoot.RegisterCollection(serviceDescriptors);
+                }
+                else
+                {
+                    Logger.LogInformation("No handlers for {DomainEventType} found", domainEventType);
+                }
             }
         }
     }

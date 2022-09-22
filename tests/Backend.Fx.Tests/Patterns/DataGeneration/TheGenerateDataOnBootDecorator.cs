@@ -1,8 +1,8 @@
 using System.Threading.Tasks;
+using Backend.Fx.DependencyInjection;
 using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.Features.DataGeneration;
+using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.Hacking;
-using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.TestUtil;
 using FakeItEasy;
 using Xunit;
@@ -40,7 +40,7 @@ namespace Backend.Fx.Tests.Patterns.DataGeneration
                 app);
 
             // ReSharper disable UnusedVariable
-            IBackendFxApplicationAsyncInvoker ai = sut.AsyncInvoker;
+            IBackendFxApplicationInvoker ai = sut.AsyncInvoker;
             A.CallTo(() => app.AsyncInvoker).MustHaveHappenedOnceExactly();
 
             ICompositionRoot cr = sut.CompositionRoot;

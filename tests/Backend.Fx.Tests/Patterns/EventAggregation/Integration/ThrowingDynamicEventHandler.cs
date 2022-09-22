@@ -1,14 +1,14 @@
 ﻿using System;
-using Backend.Fx.Features.MessageBus;
+using Backend.Fx.Extensions.MessageBus;
 
 namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
 {
-    public class ThrowingDynamicMessageHandler : IIntegrationMessageHandler
+    public class ThrowingDynamicEventHandler : IIntegrationEventHandler<>
     {
         public const string ExceptionMessage = "From ThrowingDynamicEventHandler";
-        private readonly IIntegrationMessageHandler _handler;
+        private readonly IIntegrationEventHandler<> _handler;
 
-        public ThrowingDynamicMessageHandler(IIntegrationMessageHandler handler)
+        public ThrowingDynamicEventHandler(IIntegrationEventHandler<> handler)
         {
             _handler = handler;
         }

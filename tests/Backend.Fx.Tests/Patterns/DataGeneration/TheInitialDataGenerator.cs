@@ -1,4 +1,4 @@
-﻿using Backend.Fx.Features.DataGeneration;
+﻿using Backend.Fx.Extensions.DataGeneration;
 using Backend.Fx.TestUtil;
 using Xunit;
 using Xunit.Abstractions;

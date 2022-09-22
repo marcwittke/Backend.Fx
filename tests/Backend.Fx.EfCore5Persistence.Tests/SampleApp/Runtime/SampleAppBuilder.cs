@@ -1,9 +1,8 @@
 using System.Data.Common;
 using Backend.Fx.EfCore5Persistence.Bootstrapping;
 using Backend.Fx.EfCore5Persistence.Tests.SampleApp.Persistence;
-using Backend.Fx.Features.Persistence;
+using Backend.Fx.Extensions.Persistence;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.TestUtil;
 using FakeItEasy;
 using Microsoft.Data.Sqlite;

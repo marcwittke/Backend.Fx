@@ -2,13 +2,12 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using Backend.Fx.Environment.Authentication;
 using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.ExecutionPipeline;
+using Backend.Fx.Extensions.MessageBus;
 using Backend.Fx.Features.Authorization;
 using Backend.Fx.Features.DomainEvents;
-using Backend.Fx.Features.MessageBus;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Tests.Patterns.Authorization;
 using Backend.Fx.TestUtil;
 using FakeItEasy;
@@ -36,7 +35,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
                 new SingleTenantApplication(
                     A.Fake<ITenantRepository>(),
                     true,
-                    new MessageBusApplication(
+                    new MessageBusExtension(
                         A.Fake<IMessageBus>(),
                         new AuthorizingApplication(
                             new BackendFxApplication(
@@ -55,7 +54,7 @@ namespace Backend.Fx.Tests.Patterns.DependencyInjection
                 new SingleTenantApplication(
                     A.Fake<ITenantRepository>(),
                     true,
-                    new MessageBusApplication(
+                    new MessageBusExtension(
                         A.Fake<IMessageBus>(),
                         new BackendFxApplication(
                             CompositionRootType.Microsoft.Create(),

@@ -1,4 +1,5 @@
-﻿using Backend.Fx.Features.Persistence;
+﻿using Backend.Fx.Domain;
+using Backend.Fx.Extensions.Persistence;
 using Backend.Fx.InMemoryPersistence;
 
 namespace Backend.Fx.EfCore5Persistence.Tests.SampleApp.Persistence

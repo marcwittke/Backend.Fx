@@ -9,7 +9,7 @@ namespace Backend.Fx.Logging
     [PublicAPI]
     public class ExceptionLoggers : ICollection<IExceptionLogger>, IExceptionLogger
     {
-        private static readonly Microsoft.Extensions.Logging.ILogger Logger = Log.Create<ExceptionLoggers>();
+        private static readonly ILogger Logger = Log.Create<ExceptionLoggers>();
         private readonly ICollection<IExceptionLogger> _collectionImplementation = new List<IExceptionLogger>();
 
         public ExceptionLoggers()

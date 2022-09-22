@@ -4,12 +4,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Exceptions;
+using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.Features.Authorization;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.Util;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
@@ -23,18 +23,18 @@ namespace Backend.Fx.EfCore5Persistence
     public class EfRepository<TAggregateRoot> : Repository<TAggregateRoot>, IAsyncRepository<TAggregateRoot> where TAggregateRoot : AggregateRoot
     {
         private static readonly ILogger Logger = Log.Create<EfRepository<TAggregateRoot>>();
-        private readonly IAggregateAuthorization<TAggregateRoot> _aggregateAuthorization;
+        private readonly IAuthorizationPolicy<TAggregateRoot> _authorizationPolicy;
         private readonly IAggregateMapping<TAggregateRoot> _aggregateMapping;
         private DbContext _dbContext;
 
         [SuppressMessage("ReSharper", "EF1001")]
         public EfRepository(DbContext dbContext, IAggregateMapping<TAggregateRoot> aggregateMapping,
-                            ICurrentTHolder<TenantId> currentTenantIdHolder, IAggregateAuthorization<TAggregateRoot> aggregateAuthorization)
-            : base(currentTenantIdHolder, aggregateAuthorization)
+                            ICurrentTHolder<TenantId> currentTenantIdHolder, IAuthorizationPolicy<TAggregateRoot> authorizationPolicy)
+            : base(currentTenantIdHolder, authorizationPolicy)
         {
             _dbContext = dbContext;
             _aggregateMapping = aggregateMapping;
-            _aggregateAuthorization = aggregateAuthorization;
+            _authorizationPolicy = authorizationPolicy;
 
             // somewhat a hack: using the internal EF Core services against advice
             var localViewListener = dbContext.GetService<ILocalViewListener>();
@@ -109,7 +109,7 @@ namespace Backend.Fx.EfCore5Persistence
             if (previousState == EntityState.Unchanged && entry.EntityState == EntityState.Modified && entry.EntityType.ClrType == typeof(TAggregateRoot))
             {
                 var aggregateRoot = (TAggregateRoot) entry.Entity;
-                if (!_aggregateAuthorization.CanModify(aggregateRoot)) throw new ForbiddenException("Unauthorized attempt to modify {AggregateTypeName}[{aggregateRoot.Id}]")
+                if (!_authorizationPolicy.CanModify(aggregateRoot)) throw new ForbiddenException("Unauthorized attempt to modify {AggregateTypeName}[{aggregateRoot.Id}]")
                     .AddError($"You are not allowed to modify {AggregateTypeName}[{aggregateRoot.Id}]");
             }
         }

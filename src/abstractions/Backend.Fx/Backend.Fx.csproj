@@ -8,6 +8,7 @@
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+    <LangVersion>8</LangVersion>
   </PropertyGroup>
   
   <PropertyGroup>
@@ -37,9 +38,19 @@
     <PackageReference Include="NodaTime" Version="3.0.0" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
     <PackageReference Include="System.Data.Common" Version="4.1.0" />
+    <PackageReference Include="System.Linq.Async.Queryable" Version="6.0.1" />
     <PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
     <PackageReference Include="System.Security.Principal" Version="4.3.0" />
 	<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Memory">
+      <HintPath>..\..\..\..\..\.nuget\packages\system.memory\4.5.4\lib\netstandard2.0\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Text.Json">
+      <HintPath>..\..\..\..\..\.nuget\packages\system.text.json\4.7.2\lib\netstandard2.0\System.Text.Json.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

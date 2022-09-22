@@ -1,5 +1,5 @@
 ﻿using System.Threading;
-using Backend.Fx.Features.MessageBus;
+using Backend.Fx.Extensions.MessageBus;
 
 namespace Backend.Fx.Tests.Patterns.EventAggregation.Integration
 {

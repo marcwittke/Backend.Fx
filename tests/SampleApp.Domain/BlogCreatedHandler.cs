@@ -1,4 +1,3 @@
-using Backend.Fx.BuildingBlocks;
 using Backend.Fx.Features.DomainEvents;
 using Xunit;
 

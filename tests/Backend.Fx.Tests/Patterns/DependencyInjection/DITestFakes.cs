@@ -1,8 +1,11 @@
 using System;
 using System.Security.Principal;
+using Backend.Fx.DependencyInjection;
 using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.ExecutionPipeline;
+using Backend.Fx.Extensions.MessageBus;
 using Backend.Fx.Features.DomainEvents;
-using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.Util;
 using FakeItEasy;
 using Microsoft.Extensions.DependencyInjection;
 
