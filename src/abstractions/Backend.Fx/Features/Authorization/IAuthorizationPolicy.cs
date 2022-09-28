@@ -9,9 +9,10 @@ namespace Backend.Fx.Features.Authorization
     /// Implements permissions on aggregate level. The respective instance is applied when creating an <see cref="IRepository{T}"/>,
     /// so that the repository never allows reading or writing of an aggregate without permissions. 
     /// </summary>
-    /// <typeparam name="TAggregateRoot"></typeparam>
     [PublicAPI]
-    public interface IAuthorizationPolicy<TAggregateRoot> where TAggregateRoot : AggregateRoot
+    public interface IAuthorizationPolicy<TAggregateRoot, TId> 
+        where TAggregateRoot : IAggregateRoot<TId>
+        where TId : struct, IEquatable<TId>
     {
         /// <summary>
         /// Express a filter for repository queryable

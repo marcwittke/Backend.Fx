@@ -9,7 +9,7 @@ namespace Backend.Fx.Util
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [PublicAPI]
-    public interface ICurrentTHolder<T> where T : class
+    public interface ICurrentTHolder<T>
     {
         T Current { get; }
 
@@ -19,7 +19,7 @@ namespace Backend.Fx.Util
     }
 
     [PublicAPI]
-    public abstract class CurrentTHolder<T> : ICurrentTHolder<T> where T : class
+    public abstract class CurrentTHolder<T> : ICurrentTHolder<T>
     {
         private static readonly ILogger Logger = Log.Create<CurrentTHolder<T>>();
         private T _current;

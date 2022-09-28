@@ -86,12 +86,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
 
             var serviceDescriptorArray = serviceDescriptors as ServiceDescriptor[] ?? serviceDescriptors.ToArray();
 
-            if (serviceDescriptorArray.Length == 0)
-            {
-                Logger.LogWarning("Skipping registration of empty collection");
-                return;
-            }
-
             if (serviceDescriptorArray.Select(sd => sd.ServiceType).Distinct().Count() > 1)
             {
                 throw new InvalidOperationException(
@@ -99,11 +93,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             }
 
             _serviceCollections.Add(serviceDescriptorArray);
-        }
-
-        public override bool HasRegistration<T>()
-        {
-            return _services.Any(sd => sd.ServiceType is T);
         }
 
         public override void Verify()
@@ -138,8 +127,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             Logger.LogInformation("Registering services with container");
             foreach (var serviceDescriptor in _services)
             {
-                LogAddRegistration(serviceDescriptor);
-
                 if (serviceDescriptor.ImplementationType != null)
                 {
                     Container.Register(
@@ -168,8 +155,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
 
             foreach (var serviceDescriptor in _decorators)
             {
-                LogAddDecoratorRegistration(serviceDescriptor);
-
                 Container.RegisterDecorator(
                     serviceDescriptor.ServiceType,
                     serviceDescriptor.ImplementationType,
@@ -178,11 +163,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
 
             foreach (var serviceDescriptors in _serviceCollections)
             {
-                Logger.LogDebug("Adding {Lifetime} collection registration: {ServiceType}: {ImplementationType}",
-                    serviceDescriptors[0].Lifetime.ToString(),
-                    serviceDescriptors[0].ServiceType.Name,
-                    $"[{string.Join(",", serviceDescriptors.Select(sd => sd.GetImplementationTypeDescription()))}]");
-
                 foreach (var serviceDescriptor in serviceDescriptors)
                 {
                     Container.Collection.Append(

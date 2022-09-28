@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
-using Backend.Fx.Extensions.MessageBus;
+using Backend.Fx.Features.MessageBus;
 using Backend.Fx.Logging;
 using Microsoft.Extensions.Logging;
 using Polly;

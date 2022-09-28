@@ -21,7 +21,9 @@ namespace Backend.Fx.Features.DomainEvents
         
         public void Register(ICompositionRoot compositionRoot)
         {
-            compositionRoot.Register(ServiceDescriptor.Scoped<IDomainEventAggregator>(sp => new DomainEventAggregator(sp)));
+            compositionRoot.Register(ServiceDescriptor.Scoped(sp => new DomainEventAggregator(sp)));
+            compositionRoot.Register(ServiceDescriptor.Scoped<IDomainEventAggregator>(sp => sp.GetRequiredService<DomainEventAggregator>()));
+            compositionRoot.Register(ServiceDescriptor.Scoped<IDomainEventAggregatorScope>(sp => sp.GetRequiredService<DomainEventAggregator>()));
             compositionRoot.RegisterDecorator(ServiceDescriptor.Scoped<IOperation, RaiseDomainEventsOperationDecorator>());
             RegisterDomainEventHandlers(compositionRoot);
         }

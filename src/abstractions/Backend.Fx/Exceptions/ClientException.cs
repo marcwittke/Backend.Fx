@@ -32,7 +32,7 @@ namespace Backend.Fx.Exceptions
         {
         }
 
-        public Errors Errors { get; } = new Errors();
+        public Errors Errors { get; } = new();
 
         public bool HasErrors()
         {

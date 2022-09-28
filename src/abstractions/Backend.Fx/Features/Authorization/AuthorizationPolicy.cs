@@ -6,9 +6,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Backend.Fx.Features.Authorization
 {
-    public abstract class AuthorizationPolicy<TAggregateRoot> : IAuthorizationPolicy<TAggregateRoot> where TAggregateRoot : AggregateRoot
+    public abstract class AuthorizationPolicy<TAggregateRoot, TId> : IAuthorizationPolicy<TAggregateRoot, TId>
+        where TAggregateRoot : IAggregateRoot<TId> where TId : struct, IEquatable<TId>
     {
-        private static readonly ILogger Logger = Log.Create<AuthorizationPolicy<TAggregateRoot>>();
+        private static readonly ILogger Logger = Log.Create<AuthorizationPolicy<TAggregateRoot, TId>>();
         
         /// <inheritdoc />>
         public abstract Expression<Func<TAggregateRoot, bool>> HasAccessExpression { get; }
@@ -19,12 +20,12 @@ namespace Backend.Fx.Features.Authorization
         /// <summary>
         /// Implement a guard that might disallow modifying an existing aggregate.
         /// This overload is called directly before saving modification of an instance, so that you can use the instance's state for deciding.
-        /// This default implementation forwards to <see cref="AuthorizationPolicy{TAggregateRoot}.CanCreate"/>
+        /// This default implementation forwards to <see cref="AuthorizationPolicy{TAggregateRoot, TId}.CanCreate"/>
         /// </summary>
         public virtual bool CanModify(TAggregateRoot t)
         {
             var canCreate = CanCreate(t);
-            Logger.LogTrace("CanCreate({AggregateRootTypeName}): {CanCreate}", t.DebuggerDisplay, canCreate);
+            Logger.LogTrace("CanCreate({AggregateRootTypeName}[{Id}]): {CanCreate}", t.GetType().Name, t.Id, canCreate);
             return canCreate;
         }
 
@@ -32,7 +33,7 @@ namespace Backend.Fx.Features.Authorization
         public virtual bool CanDelete(TAggregateRoot t)
         {
             var canModify = CanModify(t);
-            Logger.LogTrace("CanModify({AggregateRootTypeName}): {CanCreate}", t.DebuggerDisplay, canModify);
+            Logger.LogTrace("CanModify({AggregateRootTypeName}[{Id}]): {CanCreate}", t.GetType().Name, t.Id, canModify);
             return canModify;
         }
     }

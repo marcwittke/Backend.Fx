@@ -15,8 +15,7 @@ namespace Backend.Fx.Logging
     {
         private static ILoggerFactory _loggerFactory = new NullLoggerFactory();
 
-        private static readonly AsyncLocal<ILoggerFactory> AsyncLocalLoggerFactory =
-            new AsyncLocal<ILoggerFactory>();
+        private static readonly AsyncLocal<ILoggerFactory> AsyncLocalLoggerFactory = new();
 
         public static void Initialize(ILoggerFactory loggerFactory)
         {
@@ -65,6 +64,7 @@ namespace Backend.Fx.Logging
 
             public void AddProvider(ILoggerProvider provider)
             {
+                (AsyncLocalLoggerFactory.Value ?? _loggerFactory).AddProvider(provider);
             }
         }
     }

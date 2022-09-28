@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Backend.Fx.Logging;
-using Backend.Fx.Util;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -42,8 +41,6 @@ namespace Backend.Fx.DependencyInjection
         
         public abstract IServiceProvider ServiceProvider { get; }
         
-        public abstract bool HasRegistration<T>();
-
         public abstract void Verify();
 
         public virtual void RegisterModules(params IModule[] modules)
@@ -65,24 +62,6 @@ namespace Backend.Fx.DependencyInjection
 
         protected abstract void Dispose(bool disposing);
 
-        protected static void LogAddRegistration(ServiceDescriptor serviceDescriptor)
-            => LogDetails("Adding", serviceDescriptor);
-        
-        protected static void LogReplaceRegistration(ServiceDescriptor serviceDescriptor)
-            => LogDetails("Replacing", serviceDescriptor);
-        
-        protected static void LogAddDecoratorRegistration(ServiceDescriptor serviceDescriptor)
-            => LogDetails("Adding decorator", serviceDescriptor);
-        
-        private static void LogDetails(string prefix, ServiceDescriptor serviceDescriptor)
-        {
-            Logger.LogDebug("{Prefix} {Lifetime} registration for {ServiceType}: {ImplementationType}",
-                prefix,
-                serviceDescriptor.Lifetime.ToString(),
-                serviceDescriptor.ServiceType.GetDetailedTypeName(),
-                serviceDescriptor.GetImplementationTypeDescription());
-        }
-        
         public void Dispose()
         {
             Dispose(true);

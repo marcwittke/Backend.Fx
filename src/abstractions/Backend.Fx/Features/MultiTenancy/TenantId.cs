@@ -4,7 +4,7 @@ using System.Diagnostics;
 namespace Backend.Fx.Features.MultiTenancy
 {
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
-    public class TenantId
+    public readonly struct TenantId
     {
         private readonly int? _id;
 
@@ -31,7 +31,7 @@ namespace Backend.Fx.Features.MultiTenancy
 
         public bool HasValue => _id.HasValue;
 
-        protected string DebuggerDisplay
+        public string DebuggerDisplay
         {
             get
             {
@@ -40,7 +40,7 @@ namespace Backend.Fx.Features.MultiTenancy
                     return $"TenantId: {Value}";
                 }
 
-                return "TenantId: null";
+                return "TenantId: NULL";
             }
         }
 
@@ -51,18 +51,50 @@ namespace Backend.Fx.Features.MultiTenancy
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(this, obj)) return true;
             if (ReferenceEquals(null, obj)) return false;
             if (GetType() != obj.GetType()) return false;
-            return Equals(Value, (obj as TenantId)?.Value);
+            if (obj is TenantId tenantId)
+            {
+                if (!HasValue && !tenantId.HasValue)
+                {
+                    return true;
+                }
+            
+                if (HasValue && tenantId.HasValue)
+                {
+                    return Equals(Value, tenantId.Value);
+                }
+            }
+            
+            return false;
         }
 
         public override int GetHashCode()
         {
-            return HasValue ? Value.GetHashCode() : 17.GetHashCode();
+            return HasValue ? Value.GetHashCode() : 487623523.GetHashCode();
         }
         
         public static explicit operator int(TenantId tid) => tid.Value;
-        public static explicit operator TenantId(int id) => new TenantId(id);
+        public static explicit operator TenantId(int id) => new(id);
+        
+        public static bool operator ==(TenantId left, TenantId right)
+        {
+            if (!left.HasValue && !right.HasValue)
+            {
+                return true;
+            }
+            
+            if (left.HasValue && right.HasValue)
+            {
+                return Equals(left.Value, right.Value);
+            }
+            
+            return false;
+        }
+
+        public static bool operator !=(TenantId left, TenantId right)
+        {
+            return !(left == right);
+        }
     }
 }

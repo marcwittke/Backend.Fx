@@ -1,4 +1,3 @@
-using System.Linq;
 using Backend.Fx.DependencyInjection;
 using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.Util;
@@ -6,36 +5,34 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Backend.Fx.Features.MultiTenancy
 {
-    public class MultiTenancyModule<TCurrentTenantIdSelector> : IModule 
+    internal class MultiTenancyModule<TCurrentTenantIdSelector> : IModule
         where TCurrentTenantIdSelector : class, ICurrentTenantIdSelector
-    
     {
-        private readonly bool _isPersistentApplication;
+        private readonly ITenantEnumerator _tenantEnumerator;
+        private readonly ITenantWideMutexManager _tenantWideMutexManager;
 
-        public MultiTenancyModule(bool isPersistentApplication)
+        public MultiTenancyModule(ITenantEnumerator tenantEnumerator, ITenantWideMutexManager tenantWideMutexManager)
         {
-            _isPersistentApplication = isPersistentApplication;
+            _tenantEnumerator = tenantEnumerator;
+            _tenantWideMutexManager = tenantWideMutexManager;
         }
 
         public void Register(ICompositionRoot compositionRoot)
         {
             compositionRoot.Register(
-                ServiceDescriptor.Scoped<ICurrentTenantIdSelector, TCurrentTenantIdSelector>());
-            
-            compositionRoot.RegisterDecorator(
-                ServiceDescriptor.Scoped<IOperation, TenantOperationDecorator>());
+                ServiceDescriptor.Singleton(_tenantEnumerator));
             
             compositionRoot.Register(
-                ServiceDescriptor.Scoped<ICurrentTHolder<TenantId>, CurrentTenantIdHolder>());
+                ServiceDescriptor.Singleton(_tenantWideMutexManager));
+            
+            compositionRoot.Register(
+                ServiceDescriptor.Scoped<ICurrentTenantIdSelector, TCurrentTenantIdSelector>());
 
-            if (_isPersistentApplication)
-            {
-                compositionRoot.RegisterDecorator(
-                    ServiceDescriptor.Scoped(typeof(IQueryable<>), typeof(TenantFilteredQueryable<>)));
-                
-                // compositionRoot.Register(
-                //     ServiceDescriptor.Scoped(typeof(ITenantFilterExpressionFactory<>),typeof(TTenantFilterExpressionFactory<>)));
-            }
+            compositionRoot.RegisterDecorator(
+                ServiceDescriptor.Scoped<IOperation, TenantOperationDecorator>());
+
+            compositionRoot.Register(
+                ServiceDescriptor.Scoped<ICurrentTHolder<TenantId>, CurrentTenantIdHolder>());
         }
     }
 }

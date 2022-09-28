@@ -1,18 +1,33 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using JetBrains.Annotations;
 
 namespace Backend.Fx.Domain
 {
+    [PublicAPI]
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
-    public abstract class Identified : IEquatable<Identified>
+    public abstract class Identified<TId> : IEquatable<Identified<TId>>
+        where TId : struct
     {
-        [Key] public int Id { get; set; }
+        public abstract TId Id { get; protected set; }
+
+        /// <summary>
+        /// DON'T USE!
+        /// This ctor is only here to allow O/R-Mappers to materialize an object coming from a persistent
+        /// store using reflection.
+        /// </summary>
+        protected Identified()
+        {
+        }
+
+        protected Identified(TId id)
+        {
+            Id = id;
+        }
 
         [UsedImplicitly] public string DebuggerDisplay => $"{GetType().Name}[{Id}]";
 
-        public bool Equals(Identified other)
+        public bool Equals(Identified<TId> other)
         {
             if (other == null || other.GetType() != GetType())
             {
@@ -24,34 +39,21 @@ namespace Backend.Fx.Domain
 
         public override bool Equals(object obj)
         {
-            var other = obj as Identified;
-            if (other == null)
-            {
-                return false;
-            }
-
-            return Equals(other);
+            var other = obj as Identified<TId>;
+            return other != null && Equals(other);
         }
 
         public override int GetHashCode()
         {
-            // ReSharper disable NonReadonlyMemberInGetHashCode
-            if (Id != 0)
-            {
-                return Id.GetHashCode();
-            }
-            // ReSharper enable NonReadonlyMemberInGetHashCode
-
-            // ReSharper disable once BaseObjectGetHashCodeCallInGetHashCode
-            return base.GetHashCode();
+            return Id.GetHashCode();
         }
 
-        public static bool operator ==(Identified x, Identified y)
+        public static bool operator ==(Identified<TId> x, Identified<TId> y)
         {
-            return Equals(x, y);
+            return Equals(x?.Id, y?.Id);
         }
 
-        public static bool operator !=(Identified x, Identified y)
+        public static bool operator !=(Identified<TId> x, Identified<TId> y)
         {
             return !(x == y);
         }

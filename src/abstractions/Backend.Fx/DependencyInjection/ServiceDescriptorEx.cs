@@ -1,7 +1,6 @@
 using Backend.Fx.Util;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace Backend.Fx.DependencyInjection
 {

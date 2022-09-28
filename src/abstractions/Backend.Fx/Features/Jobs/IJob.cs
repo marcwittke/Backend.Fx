@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 
 namespace Backend.Fx.Features.Jobs
 {
@@ -7,6 +8,6 @@ namespace Backend.Fx.Features.Jobs
     /// </summary>
     public interface IJob
     {
-        Task RunAsync();
+        Task RunAsync(CancellationToken cancellationToken = default);
     }
 }

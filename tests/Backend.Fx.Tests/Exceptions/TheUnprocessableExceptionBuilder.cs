@@ -1,6 +1,6 @@
-﻿using Backend.Fx.Exceptions;
-using Backend.Fx.Tests.BuildingBlocks;
-using Backend.Fx.TestUtil;
+﻿using Backend.Fx.Domain;
+using Backend.Fx.Exceptions;
+using JetBrains.Annotations;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -12,7 +12,7 @@ namespace Backend.Fx.Tests.Exceptions
         public void AddsExceptionWhenAggregateIsNull()
         {
             IExceptionBuilder sut = UnprocessableException.UseBuilder();
-            sut.AddNotFoundWhenNull<TheAggregateRoot.TestAggregateRoot>(1111, null);
+            sut.AddNotFoundWhenNull<SomeEntity>(1111, null);
             Assert.Throws<UnprocessableException>(() => sut.Dispose());
         }
 
@@ -20,7 +20,7 @@ namespace Backend.Fx.Tests.Exceptions
         public void AddsNoExceptionWhenAggregateIsNotNull()
         {
             IExceptionBuilder sut = UnprocessableException.UseBuilder();
-            sut.AddNotFoundWhenNull(1111, new TheAggregateRoot.TestAggregateRoot(12345, "gaga"));
+            sut.AddNotFoundWhenNull(1111, new SomeEntity());
             sut.Dispose();
         }
 
@@ -39,6 +39,14 @@ namespace Backend.Fx.Tests.Exceptions
             sut.AddIf(true, "something is broken");
             Assert.Throws<UnprocessableException>(() => sut.Dispose());
         }
+        
+        [Fact]
+        public void ThrowsExceptionWhenAddingConditionalKeyedError()
+        {
+            IExceptionBuilder sut = UnprocessableException.UseBuilder();
+            sut.AddIf("the key", true, "something is broken");
+            Assert.Throws<UnprocessableException>(() => sut.Dispose());
+        }
 
         [Fact]
         public void ThrowsExceptionWhenAddingError()
@@ -47,9 +55,23 @@ namespace Backend.Fx.Tests.Exceptions
             sut.Add("something is broken");
             Assert.Throws<UnprocessableException>(() => sut.Dispose());
         }
+        
+        [Fact]
+        public void ThrowsExceptionWhenAddingKeyedError()
+        {
+            IExceptionBuilder sut = UnprocessableException.UseBuilder();
+            sut.Add("theKey", "something is broken");
+            Assert.Throws<UnprocessableException>(() => sut.Dispose());
+        }
 
         public TheUnprocessableExceptionBuilder(ITestOutputHelper output) : base(output)
         {
+        }
+        
+        [UsedImplicitly]
+        private class SomeEntity : IAggregateRoot<int>
+        {
+            public int Id { get; }
         }
     }
 }

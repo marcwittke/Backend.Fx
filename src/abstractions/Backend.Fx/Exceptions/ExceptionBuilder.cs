@@ -16,7 +16,7 @@ namespace Backend.Fx.Exceptions
     [PublicAPI]
     public class ExceptionBuilder<TEx> : IExceptionBuilder where TEx : ClientException, new()
     {
-        private readonly TEx _clientException = new TEx();
+        private readonly TEx _clientException = new();
 
         public void Add(string error)
         {

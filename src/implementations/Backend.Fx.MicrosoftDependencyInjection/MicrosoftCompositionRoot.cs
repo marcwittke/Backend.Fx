@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Backend.Fx.DependencyInjection;
 using Backend.Fx.Logging;
+using Backend.Fx.Util;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -33,11 +34,6 @@ namespace Backend.Fx.MicrosoftDependencyInjection
 
         public override IServiceProvider ServiceProvider => _serviceProvider.Value;
 
-        public override bool HasRegistration<T>()
-        {
-            return ServiceCollection.Any(sd => sd.ServiceType is T);
-        }
-
         public override void Verify()
         {
             // ensure creation of lazy service provider, this will trigger the validation
@@ -56,19 +52,27 @@ namespace Backend.Fx.MicrosoftDependencyInjection
 
             if (existingRegistration == null)
             {
-                LogAddRegistration(serviceDescriptor);
                 ServiceCollection.Add(serviceDescriptor);
             }
             else
             {
-                LogReplaceRegistration(serviceDescriptor);
+                Logger.LogDebug("{Verb} {Lifetime} {RegistrationType} for {ServiceType}: {ImplementationType}",
+                    "Replacing",
+                    serviceDescriptor.Lifetime.ToString().ToLowerInvariant(),
+                    "registration",
+                    serviceDescriptor.ServiceType.GetDetailedTypeName(),
+                    serviceDescriptor.GetImplementationTypeDescription());
                 ServiceCollection.Replace(serviceDescriptor);
             }
         }
 
         public override void RegisterDecorator(ServiceDescriptor serviceDescriptor)
         {
-            LogAddDecoratorRegistration(serviceDescriptor);
+            if (serviceDescriptor.ServiceType.IsOpenGeneric() && serviceDescriptor.ImplementationType.IsOpenGeneric())
+            {
+                throw new NotSupportedException("Microsoft's DI does not support decoration of open generic types. See https://github.com/khellang/Scrutor/issues/39 for more info");
+            }
+            
             ServiceCollection.Decorate(serviceDescriptor.ServiceType, serviceDescriptor.ImplementationType);
         }
 
@@ -84,7 +88,6 @@ namespace Backend.Fx.MicrosoftDependencyInjection
 
             foreach (var serviceDescriptor in serviceDescriptorArray)
             {
-                LogAddRegistration(serviceDescriptor);
                 ServiceCollection.Add(serviceDescriptor);
             }
         }

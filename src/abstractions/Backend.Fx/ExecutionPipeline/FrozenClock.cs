@@ -7,7 +7,7 @@ namespace Backend.Fx.ExecutionPipeline
     /// <summary>
     /// Best practice for web (service) applications: time does not advance during an invocation
     /// </summary>
-    internal class FrozenClock : IClock
+    public class FrozenClock : IClock
     {
         private static readonly ILogger Logger = Log.Create<FrozenClock>();
         private readonly Instant _frozenInstant;

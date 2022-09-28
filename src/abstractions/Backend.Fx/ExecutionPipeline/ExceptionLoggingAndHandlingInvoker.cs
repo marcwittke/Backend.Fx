@@ -5,7 +5,7 @@ using Backend.Fx.Logging;
 
 namespace Backend.Fx.ExecutionPipeline
 {
-    internal class ExceptionLoggingAndHandlingInvoker : IBackendFxApplicationInvoker
+    public class ExceptionLoggingAndHandlingInvoker : IBackendFxApplicationInvoker
     {
         private readonly IExceptionLogger _exceptionLogger;
         private readonly IBackendFxApplicationInvoker _invoker;

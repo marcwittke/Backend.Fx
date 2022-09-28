@@ -1,10 +1,11 @@
-﻿using Backend.Fx.ExecutionPipeline;
-using Backend.Fx.Util;
+﻿using Backend.Fx.Util;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.Features.MultiTenancy
 {
     public class CurrentTenantIdHolder : CurrentTHolder<TenantId>
     {
+        [UsedImplicitly]
         public CurrentTenantIdHolder()
         { }
 
@@ -30,17 +31,7 @@ namespace Backend.Fx.Features.MultiTenancy
 
         protected override string Describe(TenantId instance)
         {
-            if (instance == null)
-            {
-                return "<NULL>";
-            }
-
-            if (instance.HasValue)
-            {
-                return $"TenantId: {instance.Value}";
-            }
-
-            return "TenantId: null";
+            return instance.HasValue ? $"TenantId: {instance.Value}" : "TenantId: null";
         }
     }
 }

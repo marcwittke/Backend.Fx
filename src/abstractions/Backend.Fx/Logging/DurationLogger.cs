@@ -12,7 +12,7 @@ namespace Backend.Fx.Logging
         private readonly string _endMessage;
         private readonly Action<string> _logAction;
 
-        private readonly Stopwatch _stopwatch = new Stopwatch();
+        private readonly Stopwatch _stopwatch = new();
 
         public DurationLogger(Action<string> logAction, string activity)
             : this(logAction, activity, activity)

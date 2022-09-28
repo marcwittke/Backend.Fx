@@ -1,35 +1,38 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Domain;
 using Backend.Fx.Exceptions;
+using Backend.Fx.Features.Persistence;
 
 namespace Backend.Fx.Features.Authorization
 {
     /// <summary>
     /// Checks the authorization policy for write operations
     /// </summary>
-    /// <typeparam name="TAggregateRoot"></typeparam>
-    internal class AuthorizingRepository<TAggregateRoot> : IRepository<TAggregateRoot> where TAggregateRoot : AggregateRoot
+    internal class AuthorizingRepository<TAggregateRoot, TId> : IRepository<TAggregateRoot, TId>
+        where TAggregateRoot : IAggregateRoot<TId> 
+        where TId : struct, IEquatable<TId>
     {
-        private readonly IAuthorizationPolicy<TAggregateRoot> _authorizationPolicy;
-        private readonly IRepository<TAggregateRoot> _repository;
+        private readonly IAuthorizationPolicy<TAggregateRoot, TId> _authorizationPolicy;
+        private readonly IRepository<TAggregateRoot, TId> _repository;
 
-        public AuthorizingRepository(IAuthorizationPolicy<TAggregateRoot> authorizationPolicy, IRepository<TAggregateRoot> repository)
+        public AuthorizingRepository(IAuthorizationPolicy<TAggregateRoot, TId> authorizationPolicy, IRepository<TAggregateRoot, TId> repository)
         {
             _authorizationPolicy = authorizationPolicy;
             _repository = repository;
         }
 
-        public Task<TAggregateRoot> SingleAsync(int id, CancellationToken cancellationToken = default)
+        public Task<TAggregateRoot> GetAsync(TId id, CancellationToken cancellationToken = default)
         {
-            return _repository.SingleAsync(id, cancellationToken);
+            return _repository.GetAsync(id, cancellationToken);
         }
 
-        public Task<TAggregateRoot> SingleOrDefaultAsync(int id, CancellationToken cancellationToken = default)
+        public Task<TAggregateRoot> FindAsync(TId id, CancellationToken cancellationToken = default)
         {
-            return _repository.SingleOrDefaultAsync(id, cancellationToken);
+            return _repository.FindAsync(id, cancellationToken);
         }
 
         public Task<TAggregateRoot[]> GetAllAsync(CancellationToken cancellationToken = default)
@@ -42,7 +45,7 @@ namespace Backend.Fx.Features.Authorization
             return _repository.AnyAsync(cancellationToken);
         }
 
-        public Task<TAggregateRoot[]> ResolveAsync(IEnumerable<int> ids, CancellationToken cancellationToken = default)
+        public Task<TAggregateRoot[]> ResolveAsync(IEnumerable<TId> ids, CancellationToken cancellationToken = default)
         {
             return _repository.ResolveAsync(ids, cancellationToken);
         }

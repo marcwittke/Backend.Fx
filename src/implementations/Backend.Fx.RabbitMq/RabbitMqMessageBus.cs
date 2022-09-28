@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Backend.Fx.Extensions.MessageBus;
+using Backend.Fx.Features.MessageBus;
 using Backend.Fx.Logging;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;

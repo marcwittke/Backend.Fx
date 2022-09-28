@@ -1,4 +1,3 @@
-using Backend.Fx.Extensions.MessageBus;
 using Backend.Fx.Util;
 using JetBrains.Annotations;
 

@@ -8,13 +8,21 @@ namespace Backend.Fx.Domain
     ///     An object that contains attributes but has no conceptual identity.
     ///     https://en.wikipedia.org/wiki/Domain-driven_design#Building_blocks
     /// </summary>
-    public abstract class ValueObject
+    public abstract class ValueObject : IEquatable<ValueObject>
     {
         /// <summary>
         ///     When overriden in a derived class, returns all components of a value objects which constitute its identity.
         /// </summary>
         /// <returns>An ordered list of equality components.</returns>
         protected abstract IEnumerable<object> GetEqualityComponents();
+
+        public bool Equals(ValueObject other)
+        {
+            if (ReferenceEquals(this, other)) return true;
+            if (ReferenceEquals(null, other)) return false;
+            
+            return GetEqualityComponents().SequenceEqual(other.GetEqualityComponents());
+        }
 
         public override bool Equals(object obj)
         {
@@ -74,35 +82,33 @@ namespace Backend.Fx.Domain
             {
                 return 1;
             }
-            
-            using (var thisComponents = GetComparableComponents().GetEnumerator())
-            using (var otherComponents = other.GetComparableComponents().GetEnumerator())
-            {
-                while (true)
-                {
-                    var x = thisComponents.MoveNext();
-                    var y = otherComponents.MoveNext();
-                    if (x != y)
-                    {
-                        throw new InvalidOperationException();
-                    }
 
-                    if (x)
-                    {
-                        var c = thisComponents.Current?.CompareTo(otherComponents.Current) ?? 0;
-                        if (c != 0)
-                        {
-                            return c;
-                        }
-                    }
-                    else
-                    {
-                        break;
-                    }
+            using var thisComponents = GetComparableComponents().GetEnumerator();
+            using var otherComponents = other.GetComparableComponents().GetEnumerator();
+            while (true)
+            {
+                var x = thisComponents.MoveNext();
+                var y = otherComponents.MoveNext();
+                if (x != y)
+                {
+                    throw new InvalidOperationException();
                 }
 
-                return 0;
+                if (x)
+                {
+                    var c = thisComponents.Current?.CompareTo(otherComponents.Current) ?? 0;
+                    if (c != 0)
+                    {
+                        return c;
+                    }
+                }
+                else
+                {
+                    break;
+                }
             }
+
+            return 0;
         }
     }
 

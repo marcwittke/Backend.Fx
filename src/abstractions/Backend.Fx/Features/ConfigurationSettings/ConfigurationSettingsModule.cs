@@ -1,4 +1,6 @@
+using System.Reflection;
 using Backend.Fx.DependencyInjection;
+using Backend.Fx.Util;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Backend.Fx.Features.ConfigurationSettings
@@ -7,10 +9,12 @@ namespace Backend.Fx.Features.ConfigurationSettings
         where TSettingRepository : class, ISettingRepository
     {
         private readonly SettingSerializerFactory _settingSerializerFactory;
+        private readonly Assembly[] _assemblies;
 
-        public ConfigurationSettingsModule(SettingSerializerFactory settingSerializerFactory)
+        public ConfigurationSettingsModule(SettingSerializerFactory settingSerializerFactory, Assembly[] assemblies)
         {
             _settingSerializerFactory = settingSerializerFactory;
+            _assemblies = assemblies;
         }
 
         public void Register(ICompositionRoot compositionRoot)
@@ -20,6 +24,12 @@ namespace Backend.Fx.Features.ConfigurationSettings
 
             compositionRoot.Register(
                 ServiceDescriptor.Scoped<ISettingRepository, TSettingRepository>());
+
+            foreach (var settingsCategoryType in _assemblies.GetImplementingTypes<SettingsCategory>())
+            {
+                compositionRoot.Register(ServiceDescriptor.Scoped(settingsCategoryType, settingsCategoryType));    
+            }
+            
         }
     }
 }

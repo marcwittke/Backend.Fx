@@ -1,4 +1,0 @@
-namespace Backend.Fx.Tests
-{
-    
-}

@@ -2,7 +2,6 @@ using System;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using Backend.Fx.DependencyInjection;
-using Backend.Fx.Extensions.MessageBus;
 using Backend.Fx.Logging;
 using Backend.Fx.Util;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,7 +13,7 @@ namespace Backend.Fx.ExecutionPipeline
     {
         /// <param name="awaitableAsyncAction">The async action to be invoked by the application</param>
         /// <param name="identity">The acting identity</param>
-        Task InvokeAsync(Func<IServiceProvider, Task> awaitableAsyncAction, IIdentity identity);
+        Task InvokeAsync(Func<IServiceProvider, Task> awaitableAsyncAction, IIdentity identity = null);
     }
 
 
@@ -28,27 +27,23 @@ namespace Backend.Fx.ExecutionPipeline
             _compositionRoot = compositionRoot;
         }
 
-
-        public async Task InvokeAsync(Func<IServiceProvider, Task> awaitableAsyncAction, IIdentity identity)
+        public async Task InvokeAsync(Func<IServiceProvider, Task> awaitableAsyncAction, IIdentity identity = null)
         {
-            Logger.LogInformation("Invoking asynchronous action as {@Identity}", identity);
-            using (IServiceScope serviceScope = BeginScope(identity))
+            identity ??= new AnonymousIdentity();
+            Logger.LogInformation("Invoking action as {@Identity}", identity);
+            using IServiceScope serviceScope = BeginScope(identity);
+            using IDisposable durationLogger = UseDurationLogger(serviceScope);
+            var operation = serviceScope.ServiceProvider.GetRequiredService<IOperation>();
+            try
             {
-                using (UseDurationLogger(serviceScope))
-                {
-                    var operation = serviceScope.ServiceProvider.GetRequiredService<IOperation>();
-                    try
-                    {
-                        operation.Begin(serviceScope);
-                        await awaitableAsyncAction.Invoke(serviceScope.ServiceProvider).ConfigureAwait(false);
-                        operation.Complete();
-                    }
-                    catch
-                    {
-                        operation.Cancel();
-                        throw;
-                    }
-                }
+                operation.Begin(serviceScope);
+                await awaitableAsyncAction.Invoke(serviceScope.ServiceProvider).ConfigureAwait(false);
+                operation.Complete();
+            }
+            catch
+            {
+                operation.Cancel();
+                throw;
             }
         }
 
@@ -57,10 +52,8 @@ namespace Backend.Fx.ExecutionPipeline
         {
             IServiceScope serviceScope = _compositionRoot.BeginScope();
 
-            identity = identity ?? new AnonymousIdentity();
+            identity ??= new AnonymousIdentity();
             serviceScope.ServiceProvider.GetRequiredService<ICurrentTHolder<IIdentity>>().ReplaceCurrent(identity);
-
-            
 
             return serviceScope;
         }
@@ -71,8 +64,8 @@ namespace Backend.Fx.ExecutionPipeline
             IIdentity identity = serviceScope.ServiceProvider.GetRequiredService<ICurrentTHolder<IIdentity>>().Current;
             Correlation correlation = serviceScope.ServiceProvider.GetRequiredService<ICurrentTHolder<Correlation>>().Current;
             return Logger.LogInformationDuration(
-                $"Starting scope (correlation [{correlation.Id}]) for {identity.Name}",
-                $"Ended scope (correlation [{correlation.Id}]) for {identity.Name}");
+                $"Starting invocation (correlation [{correlation.Id}]) for {identity.Name}",
+                $"Ended invocation (correlation [{correlation.Id}]) for {identity.Name}");
         }
     }
 }

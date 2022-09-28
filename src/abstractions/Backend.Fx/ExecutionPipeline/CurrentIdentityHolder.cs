@@ -20,13 +20,10 @@ namespace Backend.Fx.ExecutionPipeline
 
         protected override string Describe(IIdentity instance)
         {
-            if (instance == null)
-            {
-                return "<NULL>";
-            }
-
-            string auth = instance.IsAuthenticated ? $"authenticated via {instance.AuthenticationType}" : "not authenticated";
-            return $"Identity: {instance.Name}, {auth}";
+            var auth = instance?.IsAuthenticated == true 
+                ? $"authenticated via {instance.AuthenticationType}" 
+                : "not authenticated";
+            return $"Identity: {instance?.Name ?? "<NULL>"}, {auth}";
         }
 
         public static ICurrentTHolder<IIdentity> CreateSystem()

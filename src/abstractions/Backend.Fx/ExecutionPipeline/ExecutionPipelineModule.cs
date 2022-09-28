@@ -1,6 +1,5 @@
 using System.Security.Principal;
 using Backend.Fx.DependencyInjection;
-using Backend.Fx.Extensions.MessageBus;
 using Backend.Fx.Util;
 using Microsoft.Extensions.DependencyInjection;
 using NodaTime;

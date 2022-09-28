@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace Backend.Fx.ExecutionPipeline
 {
     /// <summary>
-    /// The basic interface of an operation invoked by the <see cref="IBackendFxApplicationInvoker"/> (or its async counterpart).
+    /// The basic interface of an operation invoked by the <see cref="IBackendFxApplicationInvoker"/>.
     /// Decorate this interface to provide operation specific infrastructure services (like a database connection, a database transaction
     /// an entry-exit logging etc.)
     /// </summary>
@@ -21,6 +21,7 @@ namespace Backend.Fx.ExecutionPipeline
         void Cancel();
     }
 
+    [UsedImplicitly]
     internal sealed class Operation : IOperation
     {
         private static readonly ILogger Logger = Log.Create<Operation>();
@@ -56,10 +57,6 @@ namespace Backend.Fx.ExecutionPipeline
         public void Cancel()
         {
             Logger.LogInformation("Canceling operation #{OperationId}", _instanceId);
-            if (_isActive != true)
-            {
-                throw new InvalidOperationException($"Cannot cancel an operation that is {(_isActive == false ? "terminated" : "not active")}");
-            }
             _isActive = false;
             _lifetimeLogger?.Dispose();
             _lifetimeLogger = null;

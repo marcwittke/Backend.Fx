@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Backend.Fx.Features.DomainEvents
 {
-    public class DomainEventAggregator : IDomainEventAggregator
+    public class DomainEventAggregator : IDomainEventAggregator, IDomainEventAggregatorScope
     {
         private class HandleAction
         {
@@ -24,7 +24,7 @@ namespace Backend.Fx.Features.DomainEvents
 
         private static readonly ILogger Logger = Log.Create<DomainEventAggregator>();
         private readonly IServiceProvider _serviceProvider;
-        private readonly ConcurrentQueue<HandleAction> _handleActions = new ConcurrentQueue<HandleAction>();
+        private readonly ConcurrentQueue<HandleAction> _handleActions = new();
 
         public DomainEventAggregator(IServiceProvider serviceProvider)
         {
