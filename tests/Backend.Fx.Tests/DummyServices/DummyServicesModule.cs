@@ -6,6 +6,7 @@ using Backend.Fx.Features;
 using Backend.Fx.Features.IdGeneration;
 using Backend.Fx.Features.Persistence;
 using Backend.Fx.Tests.ExecutionPipeline;
+using Backend.Fx.Tests.Features.MessageBus;
 using FakeItEasy;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -38,7 +39,9 @@ public class DummyServicesModule : IModule
     public IDummyDomainEventHandlerSpy DummyDomainEventHandlerSpy { get; } = A.Fake<IDummyDomainEventHandlerSpy>();
     public IDummyJobSpy DummyJobSpy { get; } = A.Fake<IDummyJobSpy>();
     public IOperationSpy OperationSpy { get; } = A.Fake<IOperationSpy>();
-    
+
+    public IDummyIntegrationEventHandlerSpy DummyIntegrationEventHandlerSpy { get; } =
+        A.Fake<IDummyIntegrationEventHandlerSpy>();   
     public IEntityIdGenerator EntityIdGenerator { get; } = A.Fake<IEntityIdGenerator>();
 
 
@@ -50,6 +53,7 @@ public class DummyServicesModule : IModule
         compositionRoot.Register(ServiceDescriptor.Singleton(DummyJobSpy));
         compositionRoot.Register(ServiceDescriptor.Singleton(DummyAuthorizationPolicySpy));
         compositionRoot.Register(ServiceDescriptor.Singleton(OperationSpy));
+        compositionRoot.Register(ServiceDescriptor.Singleton(DummyIntegrationEventHandlerSpy));
         compositionRoot.RegisterDecorator(ServiceDescriptor.Scoped<IOperation, OperationSpy>());
     }
 
@@ -59,5 +63,6 @@ public class DummyServicesModule : IModule
         Fake.ClearRecordedCalls(DummyDomainEventHandlerSpy);
         Fake.ClearRecordedCalls(DummyJobSpy);
         Fake.ClearRecordedCalls(OperationSpy);
+        Fake.ClearRecordedCalls(DummyIntegrationEventHandlerSpy);
     }
 }

@@ -1,5 +1,8 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text;
 using System.Threading.Tasks;
 using Backend.Fx.DependencyInjection;
 using Backend.Fx.ExecutionPipeline;
@@ -12,26 +15,35 @@ using Microsoft.Extensions.Logging;
 namespace Backend.Fx.Features.MessageBus
 {
     [PublicAPI]
-    public abstract class MessageBus
+    public interface IMessageBus : IDisposable
+    {
+        void Connect();
+
+        Task PublishAsync<TIntegrationEvent>(TIntegrationEvent integrationEvent)
+            where TIntegrationEvent : IIntegrationEvent;
+
+        void Subscribe(Type eventType);
+        void Integrate(IBackendFxApplication application);
+    }
+
+    public abstract class MessageBus : IMessageBus
     {
         private static readonly ILogger Logger = Log.Create<MessageBus>();
+        private static readonly ILogger MessageLogger = Log.Create(typeof(MessageBus).FullName + ".Messages");
 
-        public IBackendFxApplicationInvoker Invoker { get; internal set; }
+        private IBackendFxApplicationInvoker _invoker;
 
-        public ICompositionRoot CompositionRoot { get; internal set; }
+        private ICompositionRoot _compositionRoot;
 
         public abstract void Connect();
 
-        public async Task PublishAsync(IIntegrationEvent integrationEvent)
+        public async Task PublishAsync<TIntegrationEvent>(TIntegrationEvent integrationEvent)
+            where TIntegrationEvent : IIntegrationEvent
         {
-            var serializer = CompositionRoot.ServiceProvider.GetRequiredService<IIntegrationEventSerializer>();
-            SerializedMessage serializedMessage = await serializer.SerializeAsync(integrationEvent).ConfigureAwait(false);
+            var serializer = _compositionRoot.ServiceProvider.GetRequiredService<IIntegrationEventMessageSerializer>();
+            SerializedMessage serializedMessage =
+                await serializer.SerializeAsync(integrationEvent).ConfigureAwait(false);
             await PublishMessageAsync(serializedMessage).ConfigureAwait(false);
-        }
-
-        public void Subscribe<TEvent>() where TEvent : IIntegrationEvent
-        {
-            SubscribeToEventMessage(typeof(TEvent).Name);
         }
 
         public void Subscribe(Type eventType)
@@ -39,34 +51,59 @@ namespace Backend.Fx.Features.MessageBus
             SubscribeToEventMessage(eventType.Name);
         }
 
+        public void Integrate(IBackendFxApplication application)
+        {
+            _compositionRoot = application.CompositionRoot;
+            _invoker = new IntegrationEventHandlingInvoker(application.ExceptionLogger, application.Invoker);
+        }
+
         protected async Task ProcessAsync(SerializedMessage serializedMessage)
         {
             Logger.LogInformation("Processing a {EventTypeName} message", serializedMessage.EventTypeName);
 
-            await Invoker.InvokeAsync(async sp =>
+            if (MessageLogger.IsEnabled(LogLevel.Debug))
             {
-                var serializer = sp.GetRequiredService<IIntegrationEventSerializer>();
+                MessageLogger.LogDebug("{EventTypeName} payload: {Payload}", serializedMessage.EventTypeName, Encoding.UTF8.GetString(serializedMessage.MessagePayload));
+            }
+
+            await _invoker.InvokeAsync(async sp =>
+            {
+                var serializer = sp.GetRequiredService<IIntegrationEventMessageSerializer>();
                 var integrationEvent = await serializer.DeserializeAsync(serializedMessage).ConfigureAwait(false);
                 var handlerType = typeof(IIntegrationEventHandler<>).MakeGenericType(integrationEvent.GetType());
-                var handler = sp.GetRequiredService(handlerType);
-                const string methodName = nameof(IIntegrationEventHandler<IIntegrationEvent>.HandleAsync);
-                var handleAsyncMethod = handlerType.GetMethod(methodName, new[] { integrationEvent.GetType() });
-                Debug.Assert(handleAsyncMethod != null, nameof(handleAsyncMethod) + " != null");
-                sp.GetRequiredService<ICurrentTHolder<Correlation>>().Current.Resume(integrationEvent.CorrelationId);
-                await ((Task)handleAsyncMethod
-                        .Invoke(handler, new object[] { integrationEvent }))
-                    .ConfigureAwait(false);
+                var handlerTypeCollectionType = typeof(IEnumerable<>).MakeGenericType(handlerType);
+                var handlers = (IEnumerable)sp.GetRequiredService(handlerTypeCollectionType);
+                foreach (var handler in handlers)
+                {
+                    const string methodName = nameof(IIntegrationEventHandler<IIntegrationEvent>.HandleAsync);
+                    var handleAsyncMethod = handlerType.GetMethod(methodName, new[] { integrationEvent.GetType() });
+                    Debug.Assert(handleAsyncMethod != null, nameof(handleAsyncMethod) + " != null");
+                    sp.GetRequiredService<ICurrentTHolder<Correlation>>().Current.Resume(integrationEvent.CorrelationId);
+
+                    try
+                    {
+                        object task = handleAsyncMethod.Invoke(handler, new object[] { integrationEvent });
+                        await ((Task)task).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogError(ex, "what");
+                    }
+
+                        
+                }
+                
             }, new SystemIdentity()).ConfigureAwait(false);
         }
 
-        
 
         protected abstract void SubscribeToEventMessage(string eventTypeName);
 
         protected abstract Task PublishMessageAsync(SerializedMessage serializedMessage);
 
         protected virtual void Dispose(bool disposing)
-        { }
+        {
+        }
 
         public void Dispose()
         {

@@ -13,17 +13,14 @@ namespace Backend.Fx.Features.MessageBus
     internal class MessageBusModule : IModule
     {
         private static readonly ILogger Logger = Log.Create<MessageBusModule>();
-        private readonly MessageBus _messageBus;
+        private readonly IMessageBus _messageBus;
         private readonly IBackendFxApplication _application;
         private readonly List<Type> _eventTypesToSubscribe = new();
 
-        public MessageBusModule(MessageBus messageBus, IBackendFxApplication application)
+        public MessageBusModule(IMessageBus messageBus, IBackendFxApplication application)
         {
             _messageBus = messageBus;
             _application = application;
-            _messageBus.Invoker = new IntegrationEventHandlingInvoker(application.ExceptionLogger, application.Invoker);
-            _messageBus.CompositionRoot = application.CompositionRoot;
-            
         }
 
         public void Register(ICompositionRoot compositionRoot)
@@ -37,8 +34,6 @@ namespace Backend.Fx.Features.MessageBus
                         _messageBus,
                         sp.GetRequiredService<ICurrentTHolder<Correlation>>())));
 
-            compositionRoot.Register(ServiceDescriptor.Scoped<IntegrationEventSerializer, IntegrationEventSerializer>());
-            
             // make sure all integration events are raised after completing an operation, but before ending the scope
             compositionRoot.RegisterDecorator(
                 ServiceDescriptor.Scoped<IOperation, RaiseIntegrationEventsWhenOperationCompleted>());
@@ -47,6 +42,9 @@ namespace Backend.Fx.Features.MessageBus
                 ServiceDescriptor.Scoped<ICurrentTHolder<Correlation>, CurrentCorrelationHolder>());
 
             RegisterIntegrationEventHandlers(compositionRoot);
+            
+            compositionRoot.Register(
+                ServiceDescriptor.Singleton<IIntegrationEventMessageSerializer>(new IntegrationEventMessageMessageSerializer(_eventTypesToSubscribe)));
         }
 
         public void SubscribeToAllEvents()
@@ -72,14 +70,16 @@ namespace Backend.Fx.Features.MessageBus
 
                 if (serviceDescriptors.Any())
                 {
+                    Logger.LogInformation("Registering {Count} handlers for {IntegrationEventType}", 
+                        serviceDescriptors.Length,
+                        integrationEventType);
                     compositionRoot.RegisterCollection(serviceDescriptors);
+                    _eventTypesToSubscribe.Add(integrationEventType);
                 }
                 else
                 {
                     Logger.LogInformation("No handlers for {IntegrationEventType} found", integrationEventType);
                 }
-
-                _eventTypesToSubscribe.Add(integrationEventType);
             }
         }
     }
@@ -90,7 +90,7 @@ namespace Backend.Fx.Features.MessageBus
         {
             // enrich the integration event with a TenantId property
             compositionRoot.RegisterDecorator(
-                ServiceDescriptor.Scoped<IIntegrationEventSerializer, MultiTenantIntegrationEventSerializer>());
+                ServiceDescriptor.Scoped<IIntegrationEventMessageSerializer, MultiTenancyIntegrationEventMessageSerializer>());
         }
     }
 }

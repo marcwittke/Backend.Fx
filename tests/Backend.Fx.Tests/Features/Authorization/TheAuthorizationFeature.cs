@@ -19,12 +19,12 @@ public class TheAuthorizationFeature : TestWithLogging
 {
     private readonly IBackendFxApplication _sut;
     private readonly IExceptionLogger _exceptionLogger = A.Fake<IExceptionLogger>();
-    private readonly DummyServicesFeature _dummyServicesesFeature = new ();
+    private readonly DummyServicesFeature _dummyServicesFeature = new ();
 
     public TheAuthorizationFeature(ITestOutputHelper output) : base(output)
     {
         _sut = new BackendFxApplication(new SimpleInjectorCompositionRoot(), _exceptionLogger, GetType().Assembly);
-        _sut.EnableFeature(_dummyServicesesFeature);
+        _sut.EnableFeature(_dummyServicesFeature);
     }
 
     [Fact]
@@ -40,7 +40,7 @@ public class TheAuthorizationFeature : TestWithLogging
 
         FillStore();
 
-        A.CallTo(() => _dummyServicesesFeature.Spies.DummyAuthorizationPolicySpy.HasAccessExpression)
+        A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.HasAccessExpression)
             .Returns(agg => true);
 
         await _sut.Invoker.InvokeAsync(async sp =>
@@ -75,7 +75,7 @@ public class TheAuthorizationFeature : TestWithLogging
 
         FillStore();
 
-        A.CallTo(() => _dummyServicesesFeature.Spies.DummyAuthorizationPolicySpy.HasAccessExpression)
+        A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.HasAccessExpression)
             .Returns(agg => false);
 
         await _sut.Invoker.InvokeAsync(async sp =>
@@ -108,8 +108,8 @@ public class TheAuthorizationFeature : TestWithLogging
 
         FillStore();
 
-        A.CallTo(() => _dummyServicesesFeature.Spies.DummyAuthorizationPolicySpy.HasAccessExpression).Returns(agg => true);
-        A.CallTo(() => _dummyServicesesFeature.Spies.DummyAuthorizationPolicySpy.CanCreate(A<DummyAggregate>._)).Returns(true);
+        A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.HasAccessExpression).Returns(agg => true);
+        A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.CanCreate(A<DummyAggregate>._)).Returns(true);
 
         await _sut.Invoker.InvokeAsync(async sp =>
         {
@@ -138,9 +138,9 @@ public class TheAuthorizationFeature : TestWithLogging
 
         FillStore();
 
-        A.CallTo(() => _dummyServicesesFeature.Spies.DummyAuthorizationPolicySpy.HasAccessExpression).Returns(agg => true);
-        A.CallTo(() => _dummyServicesesFeature.Spies.DummyAuthorizationPolicySpy.CanCreate(A<DummyAggregate>._)).Returns(true);
-        A.CallTo(() => _dummyServicesesFeature.Spies.DummyAuthorizationPolicySpy.CanDelete(A<DummyAggregate>._)).Returns(true);
+        A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.HasAccessExpression).Returns(agg => true);
+        A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.CanCreate(A<DummyAggregate>._)).Returns(true);
+        A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.CanDelete(A<DummyAggregate>._)).Returns(true);
 
         await _sut.Invoker.InvokeAsync(async sp =>
         {
@@ -170,8 +170,8 @@ public class TheAuthorizationFeature : TestWithLogging
 
         FillStore();
 
-        A.CallTo(() => _dummyServicesesFeature.Spies.DummyAuthorizationPolicySpy.HasAccessExpression).Returns(agg => true);
-        A.CallTo(() => _dummyServicesesFeature.Spies.DummyAuthorizationPolicySpy.CanCreate(A<DummyAggregate>._)).Returns(false);
+        A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.HasAccessExpression).Returns(agg => true);
+        A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.CanCreate(A<DummyAggregate>._)).Returns(false);
 
         await _sut.Invoker.InvokeAsync(async sp =>
         {
@@ -195,9 +195,9 @@ public class TheAuthorizationFeature : TestWithLogging
 
         FillStore();
 
-        A.CallTo(() => _dummyServicesesFeature.Spies.DummyAuthorizationPolicySpy.HasAccessExpression).Returns(agg => true);
-        A.CallTo(() => _dummyServicesesFeature.Spies.DummyAuthorizationPolicySpy.CanCreate(A<DummyAggregate>._)).Returns(true);
-        A.CallTo(() => _dummyServicesesFeature.Spies.DummyAuthorizationPolicySpy.CanDelete(A<DummyAggregate>._)).Returns(false);
+        A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.HasAccessExpression).Returns(agg => true);
+        A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.CanCreate(A<DummyAggregate>._)).Returns(true);
+        A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.CanDelete(A<DummyAggregate>._)).Returns(false);
 
         await _sut.Invoker.InvokeAsync(async sp =>
         {

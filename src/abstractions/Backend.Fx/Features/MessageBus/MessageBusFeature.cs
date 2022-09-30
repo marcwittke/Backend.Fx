@@ -10,26 +10,17 @@ namespace Backend.Fx.Features.MessageBus
     /// </summary>
     public class MessageBusFeature : Feature, IBootableFeature, IMultiTenancyFeature
     {
-        private readonly MessageBus _messageBus;
+        private readonly IMessageBus _messageBus;
         private MessageBusModule _messageBusModule;
 
-        public MessageBusFeature(MessageBus messageBus)
+        public MessageBusFeature(IMessageBus messageBus)
         {
             _messageBus = messageBus;
         }
 
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                _messageBus.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-
         public override void Enable(IBackendFxApplication application)
         {
+            _messageBus.Integrate(application);
             _messageBusModule = new MessageBusModule(_messageBus, application);
             application.CompositionRoot.RegisterModules(_messageBusModule);
         }
@@ -44,6 +35,15 @@ namespace Backend.Fx.Features.MessageBus
         public void EnableMultiTenancyServices(IBackendFxApplication application)
         {
             application.CompositionRoot.RegisterModules(new MultiTenancyMessageBusModule());
+        }
+        
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _messageBus.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 }

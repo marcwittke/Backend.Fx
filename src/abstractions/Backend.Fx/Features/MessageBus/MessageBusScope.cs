@@ -20,11 +20,11 @@ namespace Backend.Fx.Features.MessageBus
     internal class MessageBusScope : IMessageBusScope
     {
         private readonly ConcurrentQueue<IIntegrationEvent> _integrationEvents = new();
-        private readonly MessageBus _messageBus;
+        private readonly IMessageBus _messageBus;
         private readonly ICurrentTHolder<Correlation> _correlationHolder;
         
         public MessageBusScope(
-            MessageBus messageBus,
+            IMessageBus messageBus,
             ICurrentTHolder<Correlation> correlationHolder)
         {
             _messageBus = messageBus;

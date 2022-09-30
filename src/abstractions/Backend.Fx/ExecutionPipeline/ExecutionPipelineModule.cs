@@ -27,6 +27,9 @@ namespace Backend.Fx.ExecutionPipeline
             }
 
             compositionRoot.Register(
+                ServiceDescriptor.Singleton<OperationCounter, OperationCounter>());
+            
+            compositionRoot.Register(
                 ServiceDescriptor.Scoped<IOperation, Operation>());
 
             compositionRoot.Register(

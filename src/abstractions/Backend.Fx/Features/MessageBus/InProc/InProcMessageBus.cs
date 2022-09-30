@@ -8,9 +8,9 @@ namespace Backend.Fx.Features.MessageBus.InProc
         private readonly InProcMessageBusChannel _channel;
         private readonly HashSet<string> _subscribedEventTypeNames = new();
         
-        public InProcMessageBus()
+        public InProcMessageBus(InProcMessageBusChannel channel)
         {
-            _channel = new InProcMessageBusChannel();
+            _channel = channel;
         }
 
         public override void Connect()

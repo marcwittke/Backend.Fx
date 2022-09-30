@@ -155,10 +155,17 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
 
             foreach (var serviceDescriptor in _decorators)
             {
-                Container.RegisterDecorator(
-                    serviceDescriptor.ServiceType,
-                    serviceDescriptor.ImplementationType,
-                    serviceDescriptor.Lifetime.MapLifestyle());
+                if (serviceDescriptor.ImplementationType != null)
+                {
+                    Container.RegisterDecorator(
+                        serviceDescriptor.ServiceType,
+                        serviceDescriptor.ImplementationType,
+                        serviceDescriptor.Lifetime.MapLifestyle());
+                }
+                else
+                {
+                    throw new InvalidOperationException("Can only register decorators by type");
+                }
             }
 
             foreach (var serviceDescriptors in _serviceCollections)

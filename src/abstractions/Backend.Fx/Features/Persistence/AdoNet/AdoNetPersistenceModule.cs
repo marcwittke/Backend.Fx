@@ -1,6 +1,5 @@
 using Backend.Fx.DependencyInjection;
 using Backend.Fx.ExecutionPipeline;
-using Backend.Fx.Features.DomainEvents;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Backend.Fx.Features.Persistence.AdoNet

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Backend.Fx.Features.MessageBus.InProc
 {
-    public class InProcMessageBusChannel
+    public class InProcMessageBusChannel : IAsyncDisposable
     {
         private readonly ConcurrentBag<Task> _messageHandlingTasks = new();
         
@@ -27,6 +27,11 @@ namespace Backend.Fx.Features.MessageBus.InProc
         internal class MessageReceivedEventArgs
         {
             public SerializedMessage SerializedMessage { get; set; }
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            await FinishHandlingAllMessagesAsync().ConfigureAwait(false);
         }
     }
 }

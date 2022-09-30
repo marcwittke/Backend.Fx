@@ -6,28 +6,28 @@ using Backend.Fx.Util;
 
 namespace Backend.Fx.Features.MessageBus
 {
-    public class MultiTenantIntegrationEventSerializer : IIntegrationEventSerializer
+    public class MultiTenancyIntegrationEventMessageSerializer : IIntegrationEventMessageSerializer
     {
         private const string TenantIdPropertyKey = nameof(TenantId);
         private readonly ICurrentTHolder<TenantId> _tenantIdHolder;
-        private readonly IIntegrationEventSerializer _serializer;
+        private readonly IIntegrationEventMessageSerializer _messageSerializer;
 
-        public MultiTenantIntegrationEventSerializer(IIntegrationEventSerializer serializer, ICurrentTHolder<TenantId> tenantIdHolder)
+        public MultiTenancyIntegrationEventMessageSerializer(IIntegrationEventMessageSerializer messageSerializer, ICurrentTHolder<TenantId> tenantIdHolder)
         {
-            _serializer = serializer;
+            _messageSerializer = messageSerializer;
             _tenantIdHolder = tenantIdHolder;
         }
 
-        public Task<SerializedMessage> SerializeAsync<T>(T integrationEvent) where T : IIntegrationEvent
+        public Task<SerializedMessage> SerializeAsync(IIntegrationEvent integrationEvent)
         {
             integrationEvent.Properties[TenantIdPropertyKey] =
                 _tenantIdHolder.Current.Value.ToString(CultureInfo.InvariantCulture);
-            return _serializer.SerializeAsync(integrationEvent);
+            return _messageSerializer.SerializeAsync(integrationEvent);
         }
 
         public async Task<IIntegrationEvent> DeserializeAsync(SerializedMessage serializedMessage)
         {
-            var integrationEvent = await _serializer.DeserializeAsync(serializedMessage).ConfigureAwait(false);
+            var integrationEvent = await _messageSerializer.DeserializeAsync(serializedMessage).ConfigureAwait(false);
             
             if (!integrationEvent.Properties.TryGetValue(TenantIdPropertyKey, out var tenantIdString))
             {

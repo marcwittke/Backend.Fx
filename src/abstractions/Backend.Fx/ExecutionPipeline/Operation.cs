@@ -21,15 +21,20 @@ namespace Backend.Fx.ExecutionPipeline
         void Cancel();
     }
 
+    
     [UsedImplicitly]
     internal sealed class Operation : IOperation
     {
         private static readonly ILogger Logger = Log.Create<Operation>();
-        private static int _index;
-        private readonly int _instanceId = _index++;
+        private readonly int _instanceId;
         private bool? _isActive;
         private IDisposable _lifetimeLogger;
 
+        public Operation(OperationCounter operationCounter)
+        {
+            _instanceId = operationCounter.Count();
+        }
+        
         public void Begin(IServiceScope serviceScope)
         {
             if (_isActive != null)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 using JetBrains.Annotations;
 using NodaTime;
 
@@ -21,13 +22,16 @@ namespace Backend.Fx.Features.MessageBus
     /// </summary>
     public abstract class IntegrationEvent : IIntegrationEvent
     {
-        public Guid Id { get; } = Guid.NewGuid();
+        [JsonInclude]
+        public Guid Id { get; private set; } = Guid.NewGuid();
 
-        
-        public Instant CreationDate { get; } = SystemClock.Instance.GetCurrentInstant();
+        [JsonInclude]
+        public Instant CreationDate { get; private set; } = SystemClock.Instance.GetCurrentInstant();
 
+        [JsonInclude]
         public Guid CorrelationId { get; internal set; }
 
-        public Dictionary<string, string> Properties { get; } = new();
+        [JsonInclude]
+        public Dictionary<string, string> Properties { get; private set; } = new();
     }
 }

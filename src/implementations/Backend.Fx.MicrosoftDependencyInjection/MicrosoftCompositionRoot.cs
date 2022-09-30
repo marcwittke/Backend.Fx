@@ -7,7 +7,6 @@ using Backend.Fx.Util;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.MicrosoftDependencyInjection
 {
@@ -68,12 +67,22 @@ namespace Backend.Fx.MicrosoftDependencyInjection
 
         public override void RegisterDecorator(ServiceDescriptor serviceDescriptor)
         {
-            if (serviceDescriptor.ServiceType.IsOpenGeneric() && serviceDescriptor.ImplementationType.IsOpenGeneric())
+            if (serviceDescriptor.ServiceType.IsOpenGeneric())
             {
-                throw new NotSupportedException("Microsoft's DI does not support decoration of open generic types. See https://github.com/khellang/Scrutor/issues/39 for more info");
+                throw new NotSupportedException("Microsoft's DI does not support decoration of open generic types. " +
+                                                "See https://github.com/khellang/Scrutor/issues/39 for more info");
             }
-            
-            ServiceCollection.Decorate(serviceDescriptor.ServiceType, serviceDescriptor.ImplementationType);
+
+            if (ServiceCollection.Any(sd => sd.ServiceType == serviceDescriptor.ServiceType))
+            {
+                ServiceCollection.Decorate(serviceDescriptor.ServiceType, serviceDescriptor.ImplementationType);
+            }
+            else
+            {
+                Logger.LogWarning("Skipping registration of decorator {DecoratorTypeName} because the service type to decorate ({ServiceType}) is not registered",
+                    serviceDescriptor.GetImplementationTypeDescription(),
+                    serviceDescriptor.ServiceType.Name);
+            }
         }
 
         public override void RegisterCollection(IEnumerable<ServiceDescriptor> serviceDescriptors)
