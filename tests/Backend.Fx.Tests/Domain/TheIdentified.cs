@@ -105,8 +105,6 @@ public class TheIdentified
             Name = name;
         }
         
-        public override EntityId Id { get; protected set; }
-        
         public string Name { get; }
     }
 }

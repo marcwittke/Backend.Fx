@@ -36,8 +36,7 @@ namespace Backend.Fx.Features.DomainServices
                         .ImplementedInterfaces
                         .Where(i => typeof(IDomainService) != i
                                     && typeof(IApplicationService) != i
-                                    && (i.Namespace != null && i.Namespace.StartsWith("Backend")
-                                        || _assemblies.Contains(i.GetTypeInfo().Assembly)))
+                                    && _assemblies.Contains(i.GetTypeInfo().Assembly))
                         .Select(service => new ServiceDescriptor(service, type, ServiceLifetime.Scoped)));
 
 

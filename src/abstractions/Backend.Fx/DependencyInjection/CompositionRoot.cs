@@ -47,7 +47,7 @@ namespace Backend.Fx.DependencyInjection
         {
             foreach (var module in modules)
             {
-                Logger.LogInformation("Registering {Module}", module.GetType().Name);
+                Logger.LogInformation("Registering {@Module}", module);
                 module.Register(this);
             }
         }

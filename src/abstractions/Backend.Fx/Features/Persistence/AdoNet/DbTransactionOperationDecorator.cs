@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.Logging;
+using Backend.Fx.Util;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -17,15 +18,17 @@ namespace Backend.Fx.Features.Persistence.AdoNet
     {
         private static readonly ILogger Logger = Log.Create<DbTransactionOperationDecorator>();
         private readonly IDbConnection _dbConnection;
+        private readonly ICurrentTHolder<IDbTransaction> _currentTransactionHolder;
         private readonly IOperation _operation;
         private bool _shouldHandleConnectionState;
         private IsolationLevel _isolationLevel = IsolationLevel.Unspecified;
         private IDisposable _transactionLifetimeLogger;
         private TxState _state = TxState.NotStarted;
         
-        public DbTransactionOperationDecorator(IDbConnection dbConnection, IOperation operation)
+        public DbTransactionOperationDecorator(IDbConnection dbConnection, ICurrentTHolder<IDbTransaction> currentTransactionHolder, IOperation operation)
         {
             _dbConnection = dbConnection;
+            _currentTransactionHolder = currentTransactionHolder;
             _operation = operation;
         }
 
@@ -45,27 +48,25 @@ namespace Backend.Fx.Features.Persistence.AdoNet
             }
 
             Logger.LogDebug("Beginning transaction");
-            CurrentTransaction = _dbConnection.BeginTransaction(_isolationLevel);
+            _currentTransactionHolder.ReplaceCurrent(_dbConnection.BeginTransaction(_isolationLevel));
             _transactionLifetimeLogger = Logger.LogDebugDuration("Transaction open", "Transaction terminated");
             _state = TxState.Active;
             _operation.Begin(serviceScope);
         }
 
-        public IDbTransaction CurrentTransaction { get; private set; }
-
         public void Complete()
         {
+            _operation.Complete();
+
             if (_state != TxState.Active)
             {
                 throw new InvalidOperationException($"A transaction cannot be committed when it is {_state}.");
             }
 
-            _operation.Complete();
-
             Logger.LogDebug("Committing transaction");
-            CurrentTransaction.Commit();
-            CurrentTransaction.Dispose();
-            CurrentTransaction = null;
+            _currentTransactionHolder.Current.Commit();
+            _currentTransactionHolder.Current.Dispose();
+            _currentTransactionHolder.ReplaceCurrent(null);
             _transactionLifetimeLogger?.Dispose();
             _transactionLifetimeLogger = null;
             if (_shouldHandleConnectionState)
@@ -87,9 +88,9 @@ namespace Backend.Fx.Features.Persistence.AdoNet
             
             _operation.Cancel();
 
-            CurrentTransaction.Rollback();
-            CurrentTransaction.Dispose();
-            CurrentTransaction = null;
+            _currentTransactionHolder.Current.Rollback();
+            _currentTransactionHolder.Current.Dispose();
+            _currentTransactionHolder.ReplaceCurrent(null);
 
             _transactionLifetimeLogger?.Dispose();
             _transactionLifetimeLogger = null;

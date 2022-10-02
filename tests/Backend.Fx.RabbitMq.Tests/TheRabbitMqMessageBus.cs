@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using Backend.Fx.ExecutionPipeline;
-using Backend.Fx.Extensions.MessageBus;
+using Backend.Fx.Features.MessageBus;
 using Backend.Fx.TestUtil;
 using FakeItEasy;
 using Microsoft.Extensions.DependencyInjection;

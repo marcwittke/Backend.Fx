@@ -9,7 +9,7 @@ namespace Backend.Fx.Domain
     public abstract class Identified<TId> : IEquatable<Identified<TId>>
         where TId : struct
     {
-        public abstract TId Id { get; protected set; }
+        public TId Id { get; init; }
 
         /// <summary>
         /// DON'T USE!

@@ -2,8 +2,6 @@ using Backend.Fx.Features.DomainEvents;
 
 namespace Backend.Fx.Tests.DummyServices;
 
-public class DummyDomainEvent : IDomainEvent {}
-
 public class DummyDomainEventHandler : IDomainEventHandler<DummyDomainEvent>
 {
     private readonly IDummyDomainEventHandlerSpy _spy;

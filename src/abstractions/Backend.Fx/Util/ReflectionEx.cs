@@ -24,6 +24,13 @@ namespace Backend.Fx.Util
                 .Where(serviceType.IsAssignableFrom);
         }
         
+        public static IEnumerable<Type> GetImplementingTypes(this Assembly assembly, Type serviceType)
+        {
+            return assembly.GetTypes()
+                .Where(t => t.IsClass && !t.IsAbstract)
+                .Where(serviceType.IsAssignableFrom);
+        }
+        
         public static bool IsImplementationOfOpenGenericInterface(this Type t, Type openGenericInterface)
         {
             return t.GetInterfaces().Any(x => x.GetTypeInfo().IsGenericType && x.GetGenericTypeDefinition() == openGenericInterface);

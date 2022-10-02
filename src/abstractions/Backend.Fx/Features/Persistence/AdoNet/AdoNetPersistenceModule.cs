@@ -1,5 +1,7 @@
+using System.Data;
 using Backend.Fx.DependencyInjection;
 using Backend.Fx.ExecutionPipeline;
+using Backend.Fx.Util;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Backend.Fx.Features.Persistence.AdoNet
@@ -21,6 +23,7 @@ namespace Backend.Fx.Features.Persistence.AdoNet
             // by letting the container create the connection we can be sure, that only one connection per scope is used, and disposing is done accordingly
             compositionRoot.Register(ServiceDescriptor.Scoped(_ => _dbConnectionFactory.Create()));
 
+            compositionRoot.Register(ServiceDescriptor.Scoped<ICurrentTHolder<IDbTransaction>, CurrentDbTransactionHolder>());
             // wrapping the operation:
             //   invoke   -> connection.open  -> transaction.begin ---+
             //                                                        |
