@@ -15,6 +15,7 @@ using Backend.Fx.Logging;
 using Backend.Fx.MicrosoftDependencyInjection;
 using Backend.Fx.SimpleInjectorDependencyInjection;
 using Backend.Fx.Tests.DummyServices;
+using Backend.Fx.TestUtil;
 using Backend.Fx.Util;
 using FakeItEasy;
 using JetBrains.Annotations;

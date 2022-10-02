@@ -8,6 +8,7 @@ using Backend.Fx.Features.MultiTenancyAdmin.InMem;
 using Backend.Fx.Logging;
 using Backend.Fx.MicrosoftDependencyInjection;
 using Backend.Fx.Tests.DummyServices;
+using Backend.Fx.TestUtil;
 using FakeItEasy;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;

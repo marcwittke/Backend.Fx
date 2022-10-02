@@ -29,6 +29,7 @@
         <ProjectReference Include="..\..\src\abstractions\Backend.Fx\Backend.Fx.csproj" />
         <ProjectReference Include="..\..\src\implementations\Backend.Fx.MicrosoftDependencyInjection\Backend.Fx.MicrosoftDependencyInjection.csproj" />
         <ProjectReference Include="..\..\src\implementations\Backend.Fx.SimpleInjetorDependencyInjection\Backend.Fx.SimpleInjectorDependencyInjection.csproj" />
+        <ProjectReference Include="..\Backend.Fx.TestUtil\Backend.Fx.TestUtil.csproj" />
     </ItemGroup>
 
 </Project>

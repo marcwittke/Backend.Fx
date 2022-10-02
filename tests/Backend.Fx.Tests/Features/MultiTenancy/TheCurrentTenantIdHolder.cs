@@ -1,4 +1,5 @@
 using Backend.Fx.Features.MultiTenancy;
+using Backend.Fx.TestUtil;
 using Xunit;
 using Xunit.Abstractions;
 

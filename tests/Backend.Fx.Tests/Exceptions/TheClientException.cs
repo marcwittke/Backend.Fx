@@ -1,11 +1,12 @@
 using System;
 using Backend.Fx.Exceptions;
+using Backend.Fx.TestUtil;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Exceptions;
 
-public class TheClientException :TestWithLogging
+public class TheClientException : TestWithLogging
 {
     private readonly ITestOutputHelper _output;
 

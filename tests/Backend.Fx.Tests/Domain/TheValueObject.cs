@@ -1,6 +1,8 @@
+#pragma warning disable CS1718, CS0252, CS0253, CS8618, CS8625
 using System;
 using System.Collections.Generic;
 using Backend.Fx.Domain;
+using Backend.Fx.TestUtil;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -132,3 +134,4 @@ namespace Backend.Fx.Tests.Domain
         }
     }
 }
+#pragma warning restore CS1718, CS0252, CS0253, CS8618, CS8625

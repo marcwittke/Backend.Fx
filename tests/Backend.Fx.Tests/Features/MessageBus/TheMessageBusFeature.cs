@@ -8,6 +8,7 @@ using Backend.Fx.Features.MessageBus.InProc;
 using Backend.Fx.Logging;
 using Backend.Fx.SimpleInjectorDependencyInjection;
 using Backend.Fx.Tests.DummyServices;
+using Backend.Fx.TestUtil;
 using Backend.Fx.Util;
 using FakeItEasy;
 using Microsoft.Extensions.DependencyInjection;

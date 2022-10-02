@@ -1,5 +1,6 @@
 ﻿using Backend.Fx.Domain;
 using Backend.Fx.Exceptions;
+using Backend.Fx.TestUtil;
 using JetBrains.Annotations;
 using Xunit;
 using Xunit.Abstractions;
@@ -12,7 +13,7 @@ namespace Backend.Fx.Tests.Exceptions
         public void AddsExceptionWhenAggregateIsNull()
         {
             IExceptionBuilder sut = UnprocessableException.UseBuilder();
-            sut.AddNotFoundWhenNull<SomeEntity>(1111, null);
+            sut.AddNotFoundWhenNull<SomeEntity>(1111, null!);
             Assert.Throws<UnprocessableException>(() => sut.Dispose());
         }
 
@@ -71,6 +72,7 @@ namespace Backend.Fx.Tests.Exceptions
         [UsedImplicitly]
         private class SomeEntity : IAggregateRoot<int>
         {
+            [UsedImplicitly]
             public int Id { get; }
         }
     }

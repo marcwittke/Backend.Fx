@@ -1,4 +1,7 @@
+#pragma warning disable CS1718, CS0252, CS0253, CS8618, CS8625
+
 using Backend.Fx.Domain;
+using JetBrains.Annotations;
 using Xunit;
 
 namespace Backend.Fx.Tests.Domain;
@@ -18,8 +21,11 @@ public class TheIdentified
         var someEntity = new SomeEntity(new EntityId(1), "Entity 1");
 
         Assert.True(someEntity.Equals(someEntity));
+        // ReSharper disable once EqualExpressionComparison
         Assert.True(someEntity == someEntity);
+        // ReSharper disable once EqualExpressionComparison
         Assert.False(someEntity != someEntity);
+        // ReSharper disable once EqualExpressionComparison
         Assert.True(Equals(someEntity, someEntity));
         Assert.StrictEqual(someEntity, someEntity);
         Assert.Equal(someEntity, someEntity);
@@ -90,6 +96,7 @@ public class TheIdentified
             Value = value;
         }
 
+        [UsedImplicitly]
         public int Value { get; }
 
         public override string ToString()
@@ -105,6 +112,8 @@ public class TheIdentified
             Name = name;
         }
         
-        public string Name { get; }
+        [UsedImplicitly]
+        public string Name { get; init; }
     }
 }
+#pragma warning restore CS1718, CS0252, CS0253, CS8618, CS8625

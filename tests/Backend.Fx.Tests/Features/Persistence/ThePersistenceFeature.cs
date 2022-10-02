@@ -7,6 +7,7 @@ using Backend.Fx.Features.Persistence.InMem;
 using Backend.Fx.Logging;
 using Backend.Fx.MicrosoftDependencyInjection;
 using Backend.Fx.Tests.DummyServices;
+using Backend.Fx.TestUtil;
 using FakeItEasy;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;

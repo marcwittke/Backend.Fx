@@ -1,6 +1,8 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Backend.Fx.Features.IdGeneration;
 using Backend.Fx.Features.IdGeneration.InMem;
+using Backend.Fx.TestUtil;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -16,7 +18,7 @@ namespace Backend.Fx.Tests.Features.IdGeneration
 
         private class IdConsumer
         {
-            public int[] Ids { get; private set; }
+            public int[] Ids { get; private set; } = Array.Empty<int>();
 
             public void GetIds(int count, IIdGenerator idGenerator)
             {

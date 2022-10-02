@@ -10,6 +10,7 @@ using Backend.Fx.Features.MultiTenancyAdmin.InMem;
 using Backend.Fx.Logging;
 using Backend.Fx.SimpleInjectorDependencyInjection;
 using Backend.Fx.Tests.DummyServices;
+using Backend.Fx.TestUtil;
 using Backend.Fx.Util;
 using FakeItEasy;
 using JetBrains.Annotations;
@@ -77,7 +78,7 @@ public class TheMessageBusFeatureWithMultiTenancy : TestWithLogging
 
         Assert.True(dummyIntegrationEvent.Properties.ContainsKey("TenantId"));
         Assert.NotNull(sendingTenantId);
-        Assert.Equal(sendingTenantId.Value.ToString(), dummyIntegrationEvent.Properties["TenantId"]);
+        Assert.Equal(sendingTenantId!.Value.ToString(), dummyIntegrationEvent.Properties["TenantId"]);
         
         // wait that the async processing finishes
         await _inProcMessageBusChannel.FinishHandlingAllMessagesAsync();

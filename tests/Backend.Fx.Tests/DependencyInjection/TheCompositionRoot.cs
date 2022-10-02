@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Backend.Fx.DependencyInjection;
+using Backend.Fx.TestUtil;
 using FakeItEasy;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;

@@ -7,6 +7,7 @@ using Backend.Fx.Features.ConfigurationSettings;
 using Backend.Fx.Features.ConfigurationSettings.InMem;
 using Backend.Fx.Logging;
 using Backend.Fx.MicrosoftDependencyInjection;
+using Backend.Fx.TestUtil;
 using FakeItEasy;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;

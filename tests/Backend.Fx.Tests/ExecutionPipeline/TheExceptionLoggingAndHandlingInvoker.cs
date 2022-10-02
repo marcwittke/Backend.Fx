@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.Logging;
 using Backend.Fx.SimpleInjectorDependencyInjection;
+using Backend.Fx.TestUtil;
 using FakeItEasy;
 using Xunit;
 using Xunit.Abstractions;
