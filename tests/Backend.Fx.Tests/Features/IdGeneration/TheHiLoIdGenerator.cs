@@ -10,13 +10,13 @@ namespace Backend.Fx.Tests.Features.IdGeneration
 {
     public class TheHiLoIdGenerator : TestWithLogging
     {
-        private readonly HiLoIdGenerator _sut = new SequenceHiLoIdGenerator(new InMemorySequence(100));
+        private readonly HiLoIdGenerator<int> _sut = new SequenceHiLoIntIdGenerator(new InMemorySequence(100));
 
         private class IdConsumer
         {
             public int[] Ids { get; private set; } = Array.Empty<int>();
 
-            public void GetIds(int count, IIdGenerator idGenerator)
+            public void GetIds(int count, IIdGenerator<int> idGenerator)
             {
                 Ids = new int[count];
                 for (var i = 0; i < count; i++) Ids[i] = idGenerator.NextId();

@@ -25,7 +25,7 @@ public sealed class Supplier : Identified<int>, IAggregateRoot<int>
 
     public Address PostalAddress { get; [UsedImplicitly] init; }
     
-    public static Supplier CreateNewSupplier(IEntityIdGenerator entityIdGenerator)
+    public static Supplier CreateNewSupplier(IEntityIdGenerator<int> entityIdGenerator)
     {
         var faker = new Faker();
 

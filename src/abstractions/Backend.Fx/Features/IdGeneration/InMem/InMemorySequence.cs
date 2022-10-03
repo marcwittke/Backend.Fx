@@ -1,6 +1,6 @@
 namespace Backend.Fx.Features.IdGeneration.InMem
 {
-    public class InMemorySequence : ISequence
+    public class InMemorySequence : ISequence<int>
     {
         private int _currentValue = 1;
 

@@ -1,15 +1,15 @@
 namespace Backend.Fx.Features.IdGeneration
 {
-    public class SequenceIdGenerator : IIdGenerator
+    public class SequenceIdGenerator<TId> : IIdGenerator<TId> where TId : struct
     {
-        private readonly ISequence _sequence;
+        private readonly ISequence<TId> _sequence;
 
-        public SequenceIdGenerator(ISequence sequence)
+        public SequenceIdGenerator(ISequence<TId> sequence)
         {
             _sequence = sequence;
         }
 
-        public int NextId()
+        public TId NextId()
         {
             return _sequence.GetNextValue();
         }

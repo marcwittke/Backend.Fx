@@ -19,7 +19,7 @@ public sealed class Article2 : Identified<int>, IAggregateRoot<int>
     private Article2()
     { }
     
-    public Article2(IEntityIdGenerator idGen, string sku, string name, IEnumerable<ArticleVariant2> variants)
+    public Article2(IEntityIdGenerator<int> idGen, string sku, string name, IEnumerable<ArticleVariant2> variants)
         : base(idGen.NextId())
     {
         Sku = sku;
@@ -37,7 +37,7 @@ public sealed class Article2 : Identified<int>, IAggregateRoot<int>
 
     public IEnumerable<ArticleVariant2> Variants => _variants;
     
-    public static Article2 CreateNewArticle(IEntityIdGenerator entityIdGenerator)
+    public static Article2 CreateNewArticle(IEntityIdGenerator<int> entityIdGenerator)
     {
         var random = new Random();
         var article = new Article2(
@@ -54,14 +54,14 @@ public sealed class Article2 : Identified<int>, IAggregateRoot<int>
         return article;
     }
 
-    public void ReplaceVariants(IEntityIdGenerator idGen, ArticleVariant2[] variants)
+    public void ReplaceVariants(IEntityIdGenerator<int> idGen, ArticleVariant2[] variants)
     {
         _variants.Clear();
         AddVariants(idGen, variants);
         
     }
 
-    public void AddVariants(IEntityIdGenerator idGen, ArticleVariant2[] variants)
+    public void AddVariants(IEntityIdGenerator<int> idGen, ArticleVariant2[] variants)
     {
         foreach (ArticleVariant2 variant in variants)
         {

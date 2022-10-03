@@ -4,9 +4,7 @@ using Backend.Fx.DependencyInjection;
 using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.Features;
 using Backend.Fx.Features.IdGeneration;
-using Backend.Fx.Features.Persistence;
 using Backend.Fx.Tests.ExecutionPipeline;
-using Backend.Fx.Tests.Features.MessageBus;
 using FakeItEasy;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -42,7 +40,7 @@ public class DummyServicesModule : IModule
 
     public IDummyIntegrationEventHandlerSpy DummyIntegrationEventHandlerSpy { get; } =
         A.Fake<IDummyIntegrationEventHandlerSpy>();   
-    public IEntityIdGenerator EntityIdGenerator { get; } = A.Fake<IEntityIdGenerator>();
+    public IEntityIdGenerator<int> EntityIdGenerator { get; } = A.Fake<IEntityIdGenerator<int>>();
 
 
     public void Register(ICompositionRoot compositionRoot)

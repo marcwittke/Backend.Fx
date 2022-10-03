@@ -8,9 +8,9 @@ using Microsoft.Extensions.Logging;
 namespace Backend.Fx.Features.Persistence.AdoNet
 {
     [PublicAPI]
-    public abstract class OracleSequence : ISequence
+    public abstract class OracleSequence<TId> : ISequence<TId> where TId : struct
     {
-        private static readonly ILogger Logger = Log.Create<OracleSequence>();
+        private static readonly ILogger Logger = Log.Create<OracleSequence<TId>>();
         private readonly IDbConnectionFactory _dbConnectionFactory;
         private readonly int _startWith;
 
@@ -62,15 +62,15 @@ namespace Backend.Fx.Features.Persistence.AdoNet
             }
         }
 
-        public int GetNextValue()
+        public TId GetNextValue()
         {
             using IDbConnection dbConnection = _dbConnectionFactory.Create();
             dbConnection.Open();
 
-            int nextValue;
+            TId nextValue;
             using IDbCommand command = dbConnection.CreateCommand();
             command.CommandText = $"SELECT {SchemaPrefix}{SequenceName}.NEXTVAL FROM dual";
-            nextValue = Convert.ToInt32(command.ExecuteScalar());
+            nextValue = ConvertNextValueFromSequence(command.ExecuteScalar());
             Logger.LogDebug("Oracle sequence {SchemaPrefix}.{SequenceName} served {NextValue} as next value",
                 SchemaPrefix,
                 SequenceName,
@@ -79,6 +79,34 @@ namespace Backend.Fx.Features.Persistence.AdoNet
             return nextValue;
         }
 
-        public abstract int Increment { get; }
+        public abstract TId Increment { get; }
+        
+        protected abstract TId ConvertNextValueFromSequence(object valueFromSequence);
+    }
+    
+    public abstract class OracleIntSequence : OracleSequence<int>
+    {
+        protected OracleIntSequence(IDbConnectionFactory dbConnectionFactory, int startWith = 1) 
+            : base(dbConnectionFactory, startWith)
+        {
+        }
+
+        protected override int ConvertNextValueFromSequence(object valueFromSequence)
+        {
+            return Convert.ToInt32(valueFromSequence);
+        }
+    }
+    
+    public abstract class OracleLongSequence : OracleSequence<long>
+    {
+        protected OracleLongSequence(IDbConnectionFactory dbConnectionFactory, int startWith = 1) 
+            : base(dbConnectionFactory, startWith)
+        {
+        }
+
+        protected override long ConvertNextValueFromSequence(object valueFromSequence)
+        {
+            return Convert.ToInt64(valueFromSequence);
+        }
     }
 }

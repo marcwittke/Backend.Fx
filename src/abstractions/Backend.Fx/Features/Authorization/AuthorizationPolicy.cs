@@ -24,17 +24,17 @@ namespace Backend.Fx.Features.Authorization
         /// </summary>
         public virtual bool CanModify(TAggregateRoot t)
         {
-            var canCreate = CanCreate(t);
-            Logger.LogTrace("CanCreate({AggregateRootTypeName}[{Id}]): {CanCreate}", t.GetType().Name, t.Id, canCreate);
-            return canCreate;
+            var canModify = CanCreate(t);
+            Logger.LogTrace("CanModify({AggregateRootTypeName}[{Id}]): {CanModify}", t.GetType().Name, t.Id, canModify);
+            return canModify;
         }
 
         /// <inheritdoc />>
         public virtual bool CanDelete(TAggregateRoot t)
         {
-            var canModify = CanModify(t);
-            Logger.LogTrace("CanModify({AggregateRootTypeName}[{Id}]): {CanCreate}", t.GetType().Name, t.Id, canModify);
-            return canModify;
+            var canDelete = CanModify(t);
+            Logger.LogTrace("CanDelete({AggregateRootTypeName}[{Id}]): {CanDelete}", t.GetType().Name, t.Id, canDelete);
+            return canDelete;
         }
     }
 }

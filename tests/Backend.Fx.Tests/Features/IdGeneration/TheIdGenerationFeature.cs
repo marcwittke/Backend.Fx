@@ -22,19 +22,19 @@ public class TheIdGenerationFeature : TestWithLogging
     {
         _sut = new BackendFxApplication(new SimpleInjectorCompositionRoot(), _exceptionLogger, GetType().Assembly);
         _sut.EnableFeature(_dummyServicesFeature);
-        _sut.EnableFeature(new IdGenerationFeature(_dummyServicesFeature.Spies.EntityIdGenerator));
+        _sut.EnableFeature(new IdGenerationFeature<int>(_dummyServicesFeature.Spies.EntityIdGenerator));
     }
 
     [Fact]
     public async Task InjectsTheSingletonEntityIdGenerator()
     {
         await _sut.BootAsync();
-        var entityIdGenerator = _sut.CompositionRoot.ServiceProvider.GetRequiredService<IEntityIdGenerator>();
+        var entityIdGenerator = _sut.CompositionRoot.ServiceProvider.GetRequiredService<IEntityIdGenerator<int>>();
         Assert.StrictEqual(_dummyServicesFeature.Spies.EntityIdGenerator, entityIdGenerator);
 
         await _sut.Invoker.InvokeAsync(sp =>
         {
-            entityIdGenerator = sp.GetRequiredService<IEntityIdGenerator>();
+            entityIdGenerator = sp.GetRequiredService<IEntityIdGenerator<int>>();
             Assert.StrictEqual(_dummyServicesFeature.Spies.EntityIdGenerator, entityIdGenerator);
             return Task.CompletedTask;
         }, new AnonymousIdentity());

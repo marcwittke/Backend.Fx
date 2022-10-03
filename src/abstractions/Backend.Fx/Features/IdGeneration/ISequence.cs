@@ -3,10 +3,10 @@
 namespace Backend.Fx.Features.IdGeneration
 {
     [PublicAPI]
-    public interface ISequence
+    public interface ISequence<out TId> where TId : struct
     {
         void EnsureSequence();
-        int GetNextValue();
-        int Increment { get; }
+        TId GetNextValue();
+        TId Increment { get; }
     }
 }

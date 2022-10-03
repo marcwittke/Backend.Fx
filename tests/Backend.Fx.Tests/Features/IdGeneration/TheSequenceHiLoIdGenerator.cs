@@ -14,12 +14,12 @@ namespace Backend.Fx.Tests.Features.IdGeneration
             _sut = new TestIdGenerator(_sequence);
         }
 
-        private readonly ISequence _sequence = A.Fake<ISequence>();
-        private readonly SequenceHiLoIdGenerator _sut;
+        private readonly ISequence<int> _sequence = A.Fake<ISequence<int>>();
+        private readonly SequenceHiLoIntIdGenerator _sut;
 
-        private class TestIdGenerator : SequenceHiLoIdGenerator
+        private class TestIdGenerator : SequenceHiLoIntIdGenerator
         {
-            public TestIdGenerator(ISequence sequence) : base(sequence)
+            public TestIdGenerator(ISequence<int> sequence) : base(sequence)
             {
             }
         }

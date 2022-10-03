@@ -8,9 +8,9 @@ using Microsoft.Extensions.Logging;
 namespace Backend.Fx.Features.Persistence.AdoNet
 {
     [PublicAPI]
-    public abstract class MsSqlSequence : ISequence
+    public abstract class MsSqlSequence<TId> : ISequence<TId> where TId : struct
     {
-        private static readonly ILogger Logger = Log.Create<MsSqlSequence>();
+        private static readonly ILogger Logger = Log.Create<MsSqlSequence<TId>>();
         private readonly IDbConnectionFactory _dbConnectionFactory;
         private readonly int _startWith;
 
@@ -49,18 +49,46 @@ namespace Backend.Fx.Features.Persistence.AdoNet
             }
         }
 
-        public int GetNextValue()
+        public TId GetNextValue()
         {
             using IDbConnection dbConnection = _dbConnectionFactory.Create();
             dbConnection.Open();
             using IDbCommand selectNextValCommand = dbConnection.CreateCommand();
             selectNextValCommand.CommandText = $"SELECT next value FOR {SchemaName}.{SequenceName}";
-            var nextValue = Convert.ToInt32(selectNextValCommand.ExecuteScalar());
+            TId nextValue = ConvertNextValueFromSequence(selectNextValCommand.ExecuteScalar());
             Logger.LogDebug("{SchemaName}.{SequenceName} served {NextValue} as next value", SchemaName, SequenceName, nextValue);
 
             return nextValue;
         }
 
-        public abstract int Increment { get; }
+        public abstract TId Increment { get; }
+
+        protected abstract TId ConvertNextValueFromSequence(object valueFromSequence);
+    }
+    
+    public abstract class MsSqlIntSequence : MsSqlSequence<int>
+    {
+        protected MsSqlIntSequence(IDbConnectionFactory dbConnectionFactory, int startWith = 1) 
+            : base(dbConnectionFactory, startWith)
+        {
+        }
+
+        protected override int ConvertNextValueFromSequence(object valueFromSequence)
+        {
+            return Convert.ToInt32(valueFromSequence);
+        }
+    }
+    
+    public abstract class MsSqlLongSequence : MsSqlSequence<long>
+    {
+        protected MsSqlLongSequence(IDbConnectionFactory dbConnectionFactory, int startWith = 1) 
+            : base(dbConnectionFactory, startWith)
+        {
+        }
+
+        protected override long ConvertNextValueFromSequence(object valueFromSequence)
+        {
+            return Convert.ToInt64(valueFromSequence);
+        }
     }
 }

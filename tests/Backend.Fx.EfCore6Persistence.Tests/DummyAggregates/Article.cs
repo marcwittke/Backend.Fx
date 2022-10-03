@@ -17,7 +17,7 @@ public sealed class Article : Identified<int>, IAggregateRoot<int>
     private Article()
     { }
     
-    public Article(IIdGenerator idGen, string sku, string name, IEnumerable<ArticleVariant> variants)
+    public Article(IIdGenerator<int> idGen, string sku, string name, IEnumerable<ArticleVariant> variants)
     : base(idGen.NextId())
     {
         Sku = sku;
@@ -35,7 +35,7 @@ public sealed class Article : Identified<int>, IAggregateRoot<int>
 
     public IEnumerable<ArticleVariant> Variants => _variants;
     
-    public static Article CreateNewArticle(IEntityIdGenerator entityIdGenerator)
+    public static Article CreateNewArticle(IEntityIdGenerator<int> entityIdGenerator)
     {
         var random = new Random();
         var article = new Article(

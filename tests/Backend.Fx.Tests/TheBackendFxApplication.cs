@@ -30,7 +30,7 @@ public abstract class TheBackendFxApplication : TestWithLogging
 {
     private readonly IBackendFxApplication _sut;
     private readonly IExceptionLogger _exceptionLogger = A.Fake<IExceptionLogger>();
-    private readonly IEntityIdGenerator _entityIdGenerator = A.Fake<IEntityIdGenerator>();
+    private readonly IEntityIdGenerator<int> _entityIdGenerator = A.Fake<IEntityIdGenerator<int>>();
     private readonly DummyServicesFeature _dummyServicesFeature = new();
 
     protected TheBackendFxApplication(ICompositionRoot compositionRoot, ITestOutputHelper output) : base(output)
@@ -40,7 +40,7 @@ public abstract class TheBackendFxApplication : TestWithLogging
         _sut.EnableFeature(new DataGenerationFeature());
         _sut.EnableFeature(new DomainEventsFeature());
         _sut.EnableFeature(new DomainServicesFeature());
-        _sut.EnableFeature(new IdGenerationFeature(_entityIdGenerator));
+        _sut.EnableFeature(new IdGenerationFeature<int>(_entityIdGenerator));
         _sut.EnableFeature(_dummyServicesFeature);
     }
 

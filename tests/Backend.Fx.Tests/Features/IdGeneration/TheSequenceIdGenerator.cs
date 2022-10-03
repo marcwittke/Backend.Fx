@@ -10,7 +10,7 @@ namespace Backend.Fx.Tests.Features.IdGeneration
 {
     public class TheSequenceIdGenerator : TestWithLogging
     {
-        private readonly IIdGenerator _sut = new SequenceIdGenerator(new InMemorySequence());
+        private readonly IIdGenerator<int> _sut = new SequenceIdGenerator<int>(new InMemorySequence());
 
         public TheSequenceIdGenerator(ITestOutputHelper output) : base(output)
         {
@@ -20,7 +20,7 @@ namespace Backend.Fx.Tests.Features.IdGeneration
         {
             public int[] Ids { get; private set; } = Array.Empty<int>();
 
-            public void GetIds(int count, IIdGenerator idGenerator)
+            public void GetIds(int count, IIdGenerator<int> idGenerator)
             {
                 Ids = new int[count];
                 for (var i = 0; i < count; i++) Ids[i] = idGenerator.NextId();

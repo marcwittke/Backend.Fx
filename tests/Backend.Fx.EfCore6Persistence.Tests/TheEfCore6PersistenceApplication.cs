@@ -24,15 +24,15 @@ public class TheEfCore6PersistenceApplication : TestWithLogging
     private readonly IBackendFxApplication _sut;
     private readonly IExceptionLogger _exceptionLogger = A.Fake<IExceptionLogger>();
 
-    private readonly IEntityIdGenerator _entityIdGenerator =
-        new EntityIdGenerator(new SequenceHiLoIdGenerator(new InMemorySequence(1000)));
+    private readonly IEntityIdGenerator<int> _entityIdGenerator =
+        new EntityIdGenerator<int>(new SequenceHiLoIntIdGenerator(new InMemorySequence(1000)));
 
     private readonly DummyDbContextOptionsFactory _dummyDbContextOptionsFactory;
 
     public TheEfCore6PersistenceApplication(ITestOutputHelper output) : base(output)
     {
         _sut = new BackendFxApplication(new SimpleInjectorCompositionRoot(), _exceptionLogger, GetType().Assembly);
-        _sut.EnableFeature(new IdGenerationFeature(_entityIdGenerator));
+        _sut.EnableFeature(new IdGenerationFeature<int>(_entityIdGenerator));
 
         _dummyDbContextOptionsFactory = new DummyDbContextOptionsFactory();
         _sut.EnableFeature(new PersistenceFeature(

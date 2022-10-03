@@ -1,7 +1,7 @@
 ﻿namespace Backend.Fx.Features.IdGeneration
 {
-    public interface IIdGenerator
+    public interface IIdGenerator<out TId> where TId : struct
     {
-        int NextId();
+        TId NextId();
     }
 }

@@ -8,9 +8,9 @@ using Microsoft.Extensions.Logging;
 namespace Backend.Fx.Features.Persistence.AdoNet
 {
     [PublicAPI]
-    public abstract class PostgresSequence : ISequence
+    public abstract class PostgresSequence<TId> : ISequence<TId> where TId : struct
     {
-        private static readonly ILogger Logger = Log.Create<PostgresSequence>();
+        private static readonly ILogger Logger = Log.Create<PostgresSequence<TId>>();
         private readonly IDbConnectionFactory _dbConnectionFactory;
         private readonly int _startWith;
 
@@ -53,20 +53,48 @@ namespace Backend.Fx.Features.Persistence.AdoNet
             }
         }
 
-        public int GetNextValue()
+        public TId GetNextValue()
         {
             using IDbConnection dbConnection = _dbConnectionFactory.Create();
             dbConnection.Open();
 
-            int nextValue;
+            TId nextValue;
             using IDbCommand command = dbConnection.CreateCommand();
             command.CommandText = $"SELECT nextval('{SchemaName}.{SequenceName}');";
-            nextValue = Convert.ToInt32(command.ExecuteScalar());
+            nextValue = ConvertNextValueFromSequence(command.ExecuteScalar());
             Logger.LogDebug("{SchemaName}.{SequenceName} served {2} as next value", SchemaName, SequenceName, nextValue);
 
             return nextValue;
         }
 
-        public abstract int Increment { get; }
+        public abstract TId Increment { get; }
+        
+        protected abstract TId ConvertNextValueFromSequence(object valueFromSequence);
+    }
+    
+    public abstract class PostgresIntSequence : PostgresSequence<int>
+    {
+        protected PostgresIntSequence(IDbConnectionFactory dbConnectionFactory, int startWith = 1) 
+            : base(dbConnectionFactory, startWith)
+        {
+        }
+
+        protected override int ConvertNextValueFromSequence(object valueFromSequence)
+        {
+            return Convert.ToInt32(valueFromSequence);
+        }
+    }
+    
+    public abstract class PostgresLongSequence : PostgresSequence<long>
+    {
+        protected PostgresLongSequence(IDbConnectionFactory dbConnectionFactory, int startWith = 1) 
+            : base(dbConnectionFactory, startWith)
+        {
+        }
+
+        protected override long ConvertNextValueFromSequence(object valueFromSequence)
+        {
+            return Convert.ToInt64(valueFromSequence);
+        }
     }
 }
