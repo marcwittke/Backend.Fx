@@ -1,7 +1,7 @@
 using System.Globalization;
 using JetBrains.Annotations;
 
-namespace Backend.Fx.Features.ConfigurationSettings
+namespace Backend.Fx.Features.ConfigurationSettings.Serializers
 {
     [UsedImplicitly]
     public class DoubleSerializer : ISettingSerializer<double?>
@@ -13,7 +13,7 @@ namespace Backend.Fx.Features.ConfigurationSettings
 
         public double? Deserialize(string value)
         {
-            return string.IsNullOrWhiteSpace(value) ? (double?) null : double.Parse(value, CultureInfo.InvariantCulture);
+            return string.IsNullOrWhiteSpace(value) ? null : double.Parse(value, CultureInfo.InvariantCulture);
         }
     }
 }

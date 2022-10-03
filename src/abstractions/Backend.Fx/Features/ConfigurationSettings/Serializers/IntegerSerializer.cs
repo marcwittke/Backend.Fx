@@ -1,7 +1,7 @@
 using System.Globalization;
 using JetBrains.Annotations;
 
-namespace Backend.Fx.Features.ConfigurationSettings
+namespace Backend.Fx.Features.ConfigurationSettings.Serializers
 {
     [UsedImplicitly]
     public class IntegerSerializer : ISettingSerializer<int?>

@@ -2,7 +2,7 @@ using System;
 using System.Globalization;
 using JetBrains.Annotations;
 
-namespace Backend.Fx.Features.ConfigurationSettings
+namespace Backend.Fx.Features.ConfigurationSettings.Serializers
 {
     [UsedImplicitly]
     public class DateTimeSerializer : ISettingSerializer<DateTime?>
@@ -14,7 +14,7 @@ namespace Backend.Fx.Features.ConfigurationSettings
 
         public DateTime? Deserialize(string value)
         {
-            return string.IsNullOrWhiteSpace(value) ? (DateTime?) null : DateTime.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+            return string.IsNullOrWhiteSpace(value) ? null : DateTime.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
         }
     }
 }

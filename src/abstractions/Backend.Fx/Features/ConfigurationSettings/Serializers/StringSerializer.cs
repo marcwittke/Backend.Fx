@@ -1,6 +1,6 @@
 using JetBrains.Annotations;
 
-namespace Backend.Fx.Features.ConfigurationSettings
+namespace Backend.Fx.Features.ConfigurationSettings.Serializers
 {
     [UsedImplicitly]
     public class StringSerializer : ISettingSerializer<string>
