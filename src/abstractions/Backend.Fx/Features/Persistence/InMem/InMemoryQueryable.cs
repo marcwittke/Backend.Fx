@@ -7,16 +7,14 @@ using Backend.Fx.Domain;
 
 namespace Backend.Fx.Features.Persistence.InMem
 {
-    public class InMemoryAggregateQueryable<TAggregateRoot, TId> : IAggregateQueryable<TAggregateRoot, TId>
-        where TId : struct, IEquatable<TId>
-        where TAggregateRoot : IAggregateRoot<TId>
+    public class InMemoryQueryable<TAggregateRoot> : IQueryable<TAggregateRoot>
+        where TAggregateRoot : IAggregateRoot
     {
-        private readonly AggregateQueryable<TAggregateRoot, TId> _aggregateQueryable;
+        private readonly IQueryable<TAggregateRoot> _aggregateQueryable;
 
-        public InMemoryAggregateQueryable(IAggregateDictionaries aggregateDictionaries)
+        public InMemoryQueryable(IAggregateDictionaries aggregateDictionaries)
         {
-            _aggregateQueryable = new AggregateQueryable<TAggregateRoot, TId>(
-                aggregateDictionaries.Get<TAggregateRoot, TId>().AsQueryable().Select(kvp => kvp.Value));
+            _aggregateQueryable = aggregateDictionaries.GetQueryable<TAggregateRoot>();
         }
 
         public Type ElementType => _aggregateQueryable.ElementType;

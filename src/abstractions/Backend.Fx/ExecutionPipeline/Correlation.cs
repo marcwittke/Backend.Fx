@@ -19,7 +19,7 @@ namespace Backend.Fx.ExecutionPipeline
         public void Resume(Guid correlationId)
         {
             Id = correlationId;
-            Logger.LogInformation("Resuming correlation {@Correlation}", this);
+            Logger.LogInformation("Resuming correlation {Correlation}", Id);
         }
     }
 }

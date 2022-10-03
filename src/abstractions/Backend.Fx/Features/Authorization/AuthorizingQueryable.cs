@@ -4,21 +4,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Backend.Fx.Domain;
-using Backend.Fx.Features.Persistence;
 
 namespace Backend.Fx.Features.Authorization
 {
     /// <summary>
     /// Applies the authorization policy expression to the queryable via decoration
     /// </summary>
-    internal class AuthorizingQueryable<TAggregateRoot, TId> : IAggregateQueryable<TAggregateRoot, TId>
-        where TAggregateRoot : IAggregateRoot<TId> 
-        where TId : struct, IEquatable<TId>
+    internal class AuthorizingQueryable<TAggregateRoot> : IQueryable<TAggregateRoot>
+        where TAggregateRoot : IAggregateRoot
     {
-        private readonly IAuthorizationPolicy<TAggregateRoot, TId> _authorizationPolicy;
-        private readonly IAggregateQueryable<TAggregateRoot, TId> _aggregateQueryable;
+        private readonly IAuthorizationPolicy<TAggregateRoot> _authorizationPolicy;
+        private readonly IQueryable<TAggregateRoot> _aggregateQueryable;
 
-        public AuthorizingQueryable(IAuthorizationPolicy<TAggregateRoot, TId> authorizationPolicy, IAggregateQueryable<TAggregateRoot, TId> aggregateQueryable)
+        public AuthorizingQueryable(IAuthorizationPolicy<TAggregateRoot> authorizationPolicy, IQueryable<TAggregateRoot> aggregateQueryable)
         {
             _authorizationPolicy = authorizationPolicy;
             _aggregateQueryable = aggregateQueryable;

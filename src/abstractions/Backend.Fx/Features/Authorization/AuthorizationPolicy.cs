@@ -6,8 +6,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Backend.Fx.Features.Authorization
 {
-    public abstract class AuthorizationPolicy<TAggregateRoot, TId> : IAuthorizationPolicy<TAggregateRoot, TId>
-        where TAggregateRoot : IAggregateRoot<TId> where TId : struct, IEquatable<TId>
+    public abstract class AuthorizationPolicy<TAggregateRoot, TId> : IAuthorizationPolicy<TAggregateRoot>
+        where TAggregateRoot : IAggregateRoot
     {
         private static readonly ILogger Logger = Log.Create<AuthorizationPolicy<TAggregateRoot, TId>>();
         
@@ -25,7 +25,7 @@ namespace Backend.Fx.Features.Authorization
         public virtual bool CanModify(TAggregateRoot t)
         {
             var canModify = CanCreate(t);
-            Logger.LogTrace("CanModify({AggregateRootTypeName}[{Id}]): {CanModify}", t.GetType().Name, t.Id, canModify);
+            Logger.LogTrace("CanModify({@Aggregate}): {CanModify}", t, canModify);
             return canModify;
         }
 
@@ -33,7 +33,7 @@ namespace Backend.Fx.Features.Authorization
         public virtual bool CanDelete(TAggregateRoot t)
         {
             var canDelete = CanModify(t);
-            Logger.LogTrace("CanDelete({AggregateRootTypeName}[{Id}]): {CanDelete}", t.GetType().Name, t.Id, canDelete);
+            Logger.LogTrace("CanDelete({@Aggregate}): {CanDelete}", t, canDelete);
             return canDelete;
         }
     }

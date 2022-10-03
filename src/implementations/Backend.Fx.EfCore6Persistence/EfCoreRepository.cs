@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Domain;
@@ -15,9 +16,9 @@ public class EfCoreRepository<TAggregateRoot, TId> : IRepository<TAggregateRoot,
 
 {
     private readonly DbContext _dbContext;
-    private readonly IAggregateQueryable<TAggregateRoot, TId> _queryable;
+    private readonly IQueryable<TAggregateRoot> _queryable;
 
-    public EfCoreRepository(DbContext dbContext, IAggregateQueryable<TAggregateRoot, TId> queryable)
+    public EfCoreRepository(DbContext dbContext, IQueryable<TAggregateRoot> queryable)
     {
         _dbContext = dbContext;
         _queryable = queryable;

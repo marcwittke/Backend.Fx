@@ -32,15 +32,15 @@ namespace Backend.Fx.Features.Authorization
         private static void RegisterAuthorizingDecorators(ICompositionRoot compositionRoot)
         {
             Logger.LogDebug("Registering authorization decorators");
-            compositionRoot.RegisterDecorator(ServiceDescriptor.Scoped(typeof(IAggregateQueryable<,>),
-                typeof(AuthorizingQueryable<,>)));
+            compositionRoot.RegisterDecorator(ServiceDescriptor.Scoped(typeof(IQueryable<>),
+                typeof(AuthorizingQueryable<>)));
             compositionRoot.RegisterDecorator(ServiceDescriptor.Scoped(typeof(IRepository<,>),
                 typeof(AuthorizingRepository<,>)));
         }
 
         private void RegisterAuthorizationPolicies(ICompositionRoot compositionRoot)
         {
-            Logger.LogDebug("Registering authorization services from {Assemblies}", _assembliesForLogging);
+            Logger.LogDebug("Registering authorization services from {Assemblies}", _assemblies);
 
             var aggregateRootTypes = _assemblies
                 .SelectMany(ass => ass.GetTypes())
@@ -49,14 +49,8 @@ namespace Backend.Fx.Features.Authorization
 
             foreach (var aggregateRootType in aggregateRootTypes)
             {
-                var idType = aggregateRootType
-                    .GetInterfaces()
-                    .Where(inf => inf.IsGenericType)
-                    .Single(inf => inf.GetGenericTypeDefinition() == typeof(IAggregateRoot<>))
-                    .GenericTypeArguments[0];
-
                 var authorizationPolicyInterfaceType =
-                    typeof(IAuthorizationPolicy<,>).MakeGenericType(aggregateRootType, idType);
+                    typeof(IAuthorizationPolicy<>).MakeGenericType(aggregateRootType);
                 var authorizationPolicyTypes = _assemblies
                     .GetImplementingTypes(authorizationPolicyInterfaceType)
                     .ToArray();
@@ -64,7 +58,7 @@ namespace Backend.Fx.Features.Authorization
                 if (authorizationPolicyTypes.Length == 0)
                 {
                     Logger.LogWarning(
-                        "No authorization policies for {AggregateRootTyp} found", aggregateRootType.Name);
+                        "No authorization policies for {AggregateRootType} found", aggregateRootType);
                     return;
                 }
 
@@ -77,8 +71,8 @@ namespace Backend.Fx.Features.Authorization
 
                 Logger.LogInformation(
                     "Registering scoped authorization service {ServiceType} with implementation {ImplementationType}",
-                    authorizationPolicyInterfaceType.Name,
-                    authorizationPolicyTypes[0].Name);
+                    authorizationPolicyInterfaceType,
+                    authorizationPolicyTypes[0]);
                 compositionRoot.Register(ServiceDescriptor.Scoped(authorizationPolicyInterfaceType, authorizationPolicyTypes[0]));
             }
         }

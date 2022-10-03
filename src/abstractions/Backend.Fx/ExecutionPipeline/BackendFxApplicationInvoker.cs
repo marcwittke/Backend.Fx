@@ -30,7 +30,7 @@ namespace Backend.Fx.ExecutionPipeline
         public async Task InvokeAsync(Func<IServiceProvider, Task> awaitableAsyncAction, IIdentity identity = null)
         {
             identity ??= new AnonymousIdentity();
-            Logger.LogInformation("Invoking action as {@Identity}", identity);
+            Logger.LogInformation("Invoking action as {Identity}", identity.Name);
             using IServiceScope serviceScope = BeginScope(identity);
             using IDisposable durationLogger = UseDurationLogger(serviceScope);
             var operation = serviceScope.ServiceProvider.GetRequiredService<IOperation>();

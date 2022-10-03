@@ -6,7 +6,7 @@ using JetBrains.Annotations;
 namespace Backend.Fx.Tests.DummyServices;
 
 [UsedImplicitly]
-public class DummyAuthorizationPolicy : IAuthorizationPolicy<DummyAggregate, int>
+public class DummyAuthorizationPolicy : IAuthorizationPolicy<DummyAggregate>
 {
     private readonly IDummyAuthorizationPolicySpy _spy;
 
@@ -34,5 +34,5 @@ public class DummyAuthorizationPolicy : IAuthorizationPolicy<DummyAggregate, int
     }
 }
 
-public interface IDummyAuthorizationPolicySpy : IAuthorizationPolicy<DummyAggregate, int>
+public interface IDummyAuthorizationPolicySpy : IAuthorizationPolicy<DummyAggregate>
 { }

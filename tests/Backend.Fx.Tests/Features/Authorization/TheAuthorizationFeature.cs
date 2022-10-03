@@ -216,15 +216,15 @@ public class TheAuthorizationFeature : TestWithLogging
 
     private async Task ConfigureAndBootApplication()
     {
-        _sut.EnableFeature(new PersistenceFeature(new InMemoryPersistenceModule()));
+        _sut.EnableFeature(new PersistenceFeature(new InMemoryPersistenceModule<int>()));
         _sut.EnableFeature(new AuthorizationFeature());
         await _sut.BootAsync();
     }
 
     private void FillStore()
     {
-        var inMemoryDatabase = _sut.CompositionRoot.ServiceProvider.GetRequiredService<InMemoryDatabase>();
-        var dummyAggregateStore = inMemoryDatabase.GetInMemoryStores().Get<DummyAggregate, int>();
+        var inMemoryDatabase = _sut.CompositionRoot.ServiceProvider.GetRequiredService<InMemoryDatabase<int>>();
+        var dummyAggregateStore = inMemoryDatabase.GetInMemoryStores().For<DummyAggregate>();
         dummyAggregateStore.Add(1, new DummyAggregate(1, "one"));
         dummyAggregateStore.Add(2, new DummyAggregate(2, "two"));
         dummyAggregateStore.Add(3, new DummyAggregate(3, "three"));

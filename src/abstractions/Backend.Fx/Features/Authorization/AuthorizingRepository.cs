@@ -16,10 +16,10 @@ namespace Backend.Fx.Features.Authorization
         where TAggregateRoot : IAggregateRoot<TId> 
         where TId : struct, IEquatable<TId>
     {
-        private readonly IAuthorizationPolicy<TAggregateRoot, TId> _authorizationPolicy;
+        private readonly IAuthorizationPolicy<TAggregateRoot> _authorizationPolicy;
         private readonly IRepository<TAggregateRoot, TId> _repository;
 
-        public AuthorizingRepository(IAuthorizationPolicy<TAggregateRoot, TId> authorizationPolicy, IRepository<TAggregateRoot, TId> repository)
+        public AuthorizingRepository(IAuthorizationPolicy<TAggregateRoot> authorizationPolicy, IRepository<TAggregateRoot, TId> repository)
         {
             _authorizationPolicy = authorizationPolicy;
             _repository = repository;

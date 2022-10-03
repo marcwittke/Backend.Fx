@@ -41,7 +41,7 @@ public class ThePersistenceFeatureWithMultiTenancy : TestWithLogging
     [Fact]
     public async Task IsolatesTenantsDataFromEachOther()
     {
-        _sut.EnableFeature(new PersistenceFeature(new InMemoryPersistenceModule()));
+        _sut.EnableFeature(new PersistenceFeature(new InMemoryPersistenceModule<int>()));
         await _sut.BootAsync();
 
         DummyTenantIdSelector.TenantId = 100;

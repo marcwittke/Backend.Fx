@@ -12,7 +12,7 @@ namespace Backend.Fx.TestUtil
 
         protected TestWithLogging(ITestOutputHelper output)
         {
-            var loggerConfiguration = new LoggerConfiguration().MinimumLevel.Debug().WriteTo.TestOutput(output);
+            var loggerConfiguration = new LoggerConfiguration().MinimumLevel.Verbose().WriteTo.TestOutput(output);
             Logger = loggerConfiguration.CreateLogger();
             _disposableLogger = Logging.Log.InitAsyncLocal(new SerilogLoggerFactory(Logger));
         }

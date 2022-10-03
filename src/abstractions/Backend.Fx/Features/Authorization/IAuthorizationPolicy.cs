@@ -10,9 +10,8 @@ namespace Backend.Fx.Features.Authorization
     /// so that the repository never allows reading or writing of an aggregate without permissions. 
     /// </summary>
     [PublicAPI]
-    public interface IAuthorizationPolicy<TAggregateRoot, TId> 
-        where TAggregateRoot : IAggregateRoot<TId>
-        where TId : struct, IEquatable<TId>
+    public interface IAuthorizationPolicy<TAggregateRoot> 
+        where TAggregateRoot : IAggregateRoot
     {
         /// <summary>
         /// Express a filter for repository queryable

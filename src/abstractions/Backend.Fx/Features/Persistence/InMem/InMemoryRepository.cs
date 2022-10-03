@@ -14,14 +14,16 @@ namespace Backend.Fx.Features.Persistence.InMem
         where TAggregateRoot : class, IAggregateRoot<TId>
         where TId : struct, IEquatable<TId>
     {
-        private readonly IAggregateQueryable<TAggregateRoot, TId> _aggregateQueryable;
+        private readonly IQueryable<TAggregateRoot> _aggregateQueryable;
 
         public InMemoryRepository(
-            IAggregateDictionaries aggregateDictionaries,
-            IAggregateQueryable<TAggregateRoot, TId> aggregateQueryable)
+            IAggregateDictionaries<TId> aggregateDictionaries,
+            IQueryable<TAggregateRoot> aggregateQueryable)
         {
+            // we could get the queryable directly from the store, but that would prevent the DI from decorating
+            // the queryable, as it is done e.g. in case of Authorization 
             _aggregateQueryable = aggregateQueryable;
-            Store = aggregateDictionaries.Get<TAggregateRoot, TId>();
+            Store = aggregateDictionaries.For<TAggregateRoot>();
         }
 
         public virtual IAggregateDictionary<TAggregateRoot, TId> Store { get; }

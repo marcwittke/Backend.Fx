@@ -1,20 +1,21 @@
+using System;
 using System.Collections.Concurrent;
 using Backend.Fx.Features.MultiTenancy;
 
 namespace Backend.Fx.Features.Persistence.InMem
 {
-    public class InMemoryDatabase
+    public class InMemoryDatabase<TId> where TId : struct, IEquatable<TId>
     {
-        private readonly ConcurrentDictionary<TenantId, IAggregateDictionaries> _inMemoryStores = new();
+        private readonly ConcurrentDictionary<TenantId, IAggregateDictionaries<TId>> _inMemoryStores = new();
 
-        public IAggregateDictionaries GetInMemoryStores()
+        public IAggregateDictionaries<TId> GetInMemoryStores()
         {
-            return _inMemoryStores.GetOrAdd(new TenantId(null), _ => new AggregateDictionaries());
+            return _inMemoryStores.GetOrAdd(new TenantId(null), _ => new AggregateDictionaries<TId>());
         }
         
-        public IAggregateDictionaries GetInMemoryStoresOfTenant(TenantId tenantId)
+        public IAggregateDictionaries<TId> GetInMemoryStoresOfTenant(TenantId tenantId)
         {
-            return _inMemoryStores.GetOrAdd(tenantId, _ => new AggregateDictionaries());
+            return _inMemoryStores.GetOrAdd(tenantId, _ => new AggregateDictionaries<TId>());
         }
     }
 }

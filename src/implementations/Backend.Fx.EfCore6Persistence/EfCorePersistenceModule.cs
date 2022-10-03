@@ -1,4 +1,5 @@
 using System.Data;
+using System.Linq;
 using Backend.Fx.DependencyInjection;
 using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.Features.Persistence;
@@ -31,8 +32,7 @@ public class EfCorePersistenceModule<TDbContext> : AdoNetPersistenceModule
             ServiceDescriptor.Scoped<DbContext, TDbContext>());
 
         compositionRoot.Register(
-            ServiceDescriptor.Scoped(typeof(IAggregateQueryable<,>),
-                typeof(EfCoreAggregateQueryable<,>)));
+            ServiceDescriptor.Scoped(typeof(IQueryable<>), typeof(EfCoreQueryable<>)));
 
         compositionRoot.Register(
             ServiceDescriptor.Scoped(typeof(IRepository<,>), typeof(EfCoreRepository<,>)));

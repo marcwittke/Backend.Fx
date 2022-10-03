@@ -8,9 +8,10 @@ namespace Backend.Fx.Tests.Features.ConfigurationSettings;
 
 public class TheSerializers
 {
-    [Theory]
-    public void CanSerializeAnnualDate(AnnualDate data)
+    [Fact]
+    public void CanSerializeAnnualDate()
     {
+        var data = new AnnualDate(10,20);
         var sut = new AnnualDateSerializer();
         CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de");
         var serialized = sut.Serialize(data);

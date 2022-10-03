@@ -30,7 +30,7 @@ public class ThePersistenceFeature : TestWithLogging
     public async Task WaitsForDatabaseAvailabilityOnBoot()
     {
         var fake = A.Fake<IDatabaseAvailabilityAwaiter>();
-        _sut.EnableFeature(new PersistenceFeature(new InMemoryPersistenceModule(), databaseAvailabilityAwaiter: fake));
+        _sut.EnableFeature(new PersistenceFeature(new InMemoryPersistenceModule<int>(), databaseAvailabilityAwaiter: fake));
         await _sut.BootAsync();
 
         A.CallTo(() => fake.WaitForDatabase(A<CancellationToken>._)).MustHaveHappenedOnceExactly();
@@ -40,7 +40,7 @@ public class ThePersistenceFeature : TestWithLogging
     public async Task BootstrapsDatabaseOnBoot()
     {
         var fake = A.Fake<IDatabaseBootstrapper>();
-        _sut.EnableFeature(new PersistenceFeature(new InMemoryPersistenceModule(), databaseBootstrapper: fake));
+        _sut.EnableFeature(new PersistenceFeature(new InMemoryPersistenceModule<int>(), databaseBootstrapper: fake));
         await _sut.BootAsync();
 
         A.CallTo(() => fake.EnsureDatabaseExistenceAsync(A<CancellationToken>._)).MustHaveHappenedOnceExactly();
@@ -49,7 +49,7 @@ public class ThePersistenceFeature : TestWithLogging
     [Fact]
     public async Task FlushesOnOperationCompletion()
     {
-        _sut.EnableFeature(new PersistenceFeature(new InMemoryPersistenceModule()));
+        _sut.EnableFeature(new PersistenceFeature(new InMemoryPersistenceModule<int>()));
         _sut.EnableFeature(_dummyServicesFeature);
         
         ICanFlushSpy canFlushSpy = A.Fake<ICanFlushSpy>();
@@ -67,7 +67,7 @@ public class ThePersistenceFeature : TestWithLogging
     public async Task FlushesOnRaisingDomainEvents()
     {
         _sut.EnableFeature(new DomainEventsFeature());
-        _sut.EnableFeature(new PersistenceFeature(new InMemoryPersistenceModule()));
+        _sut.EnableFeature(new PersistenceFeature(new InMemoryPersistenceModule<int>()));
         _sut.EnableFeature(_dummyServicesFeature);
         
         var canFlushSpy = A.Fake<ICanFlushSpy>();
@@ -84,7 +84,7 @@ public class ThePersistenceFeature : TestWithLogging
     [Fact]
     public async Task DoesNotFlushOnInvocationError()
     {
-        _sut.EnableFeature(new PersistenceFeature(new InMemoryPersistenceModule()));
+        _sut.EnableFeature(new PersistenceFeature(new InMemoryPersistenceModule<long>()));
         _sut.EnableFeature(_dummyServicesFeature);
         
         ICanFlushSpy canFlushSpy = A.Fake<ICanFlushSpy>();
@@ -102,7 +102,7 @@ public class ThePersistenceFeature : TestWithLogging
     [Fact]
     public async Task ProvidesRepositories()
     {
-        _sut.EnableFeature(new PersistenceFeature(new InMemoryPersistenceModule()));
+        _sut.EnableFeature(new PersistenceFeature(new InMemoryPersistenceModule<int>()));
         await _sut.BootAsync();
 
         await _sut.Invoker.InvokeAsync(async sp =>
