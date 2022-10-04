@@ -23,15 +23,15 @@ namespace Backend.Fx.Features.Persistence.AdoNet
             // by letting the container create the connection we can be sure, that only one connection per scope is used, and disposing is done accordingly
             compositionRoot.Register(ServiceDescriptor.Scoped(_ => _dbConnectionFactory.Create()));
 
+            // keeping a reference to the current transaction 
             compositionRoot.Register(ServiceDescriptor.Scoped<ICurrentTHolder<IDbTransaction>, CurrentDbTransactionHolder>());
+            
             // wrapping the operation:
             //   invoke   -> connection.open  -> transaction.begin ---+
             //                                                        |
             //                                                        v
             //                                                      operation
             //                                                        |
-            //                                                        v
-            //                                                      flush
             //                                                        |
             // end invoke <- connection.close <- transaction.commit <-+ 
             compositionRoot.RegisterDecorator(ServiceDescriptor.Scoped<IOperation, DbTransactionOperationDecorator>());

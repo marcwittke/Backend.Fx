@@ -56,9 +56,13 @@ namespace Backend.Fx.Features.Persistence
         {
             var idArray = ids as TId[] ?? ids.ToArray();
             var resolved = new TAggregateRoot[idArray.Length];
-            for (var i = 0; i < idArray.Length; i++)
+            using (var builder = NotFoundException.UseBuilder())
             {
-                resolved[i] = await repository.GetAsync(idArray[i], cancellationToken).ConfigureAwait(false);
+                for (var i = 0; i < idArray.Length; i++)
+                {
+                    resolved[i] = await repository.FindAsync(idArray[i], cancellationToken).ConfigureAwait(false);
+                    builder.AddNotFoundWhenNull(idArray[i], resolved[i]);
+                }
             }
 
             return resolved;

@@ -1,8 +1,10 @@
 using System.Linq;
 using System.Threading.Tasks;
+using Backend.Fx.DependencyInjection;
 using Backend.Fx.Features.DataGeneration;
 using Backend.Fx.Logging;
 using Backend.Fx.MicrosoftDependencyInjection;
+using Backend.Fx.SimpleInjectorDependencyInjection;
 using Backend.Fx.Tests.DummyServices;
 using Backend.Fx.TestUtil;
 using FakeItEasy;
@@ -12,15 +14,31 @@ using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Features.DataGeneration;
 
-public class TheDataGenerationFeature : TestWithLogging
+public class TheDataGenerationFeatureWithSimpleInjector : TheDataGenerationFeature
+{
+    public TheDataGenerationFeatureWithSimpleInjector(ITestOutputHelper output) 
+        : base(new SimpleInjectorCompositionRoot(), output)
+    {
+    }
+}
+
+public class TheDataGenerationFeatureWithMicrosoftDI : TheDataGenerationFeature
+{
+    public TheDataGenerationFeatureWithMicrosoftDI(ITestOutputHelper output) 
+        : base(new MicrosoftCompositionRoot(), output)
+    {
+    }
+}
+
+public abstract class TheDataGenerationFeature : TestWithLogging
 {
     private readonly IBackendFxApplication _sut;
     private readonly IExceptionLogger _exceptionLogger = A.Fake<IExceptionLogger>();
     private readonly DummyServicesFeature _dummyServicesFeature = new();
 
-    public TheDataGenerationFeature(ITestOutputHelper output) : base(output)
+    protected TheDataGenerationFeature(ICompositionRoot compositionRoot, ITestOutputHelper output) : base(output)
     {
-        _sut = new BackendFxApplication(new MicrosoftCompositionRoot(), _exceptionLogger, GetType().Assembly);
+        _sut = new BackendFxApplication(compositionRoot, _exceptionLogger, GetType().Assembly);
     }
 
     [Fact]
@@ -28,7 +46,7 @@ public class TheDataGenerationFeature : TestWithLogging
     {
         _sut.EnableFeature(new DataGenerationFeature());
         _sut.EnableFeature(_dummyServicesFeature);
-        
+
         await _sut.BootAsync();
         var dataGenerationContext = _sut.CompositionRoot.ServiceProvider.GetRequiredService<IDataGenerationContext>();
         Assert.IsType<DataGenerationContext>(dataGenerationContext);
@@ -43,7 +61,7 @@ public class TheDataGenerationFeature : TestWithLogging
     {
         _sut.EnableFeature(new DataGenerationFeature(allowDemoDataGeneration: false));
         _sut.EnableFeature(_dummyServicesFeature);
-        
+
         await _sut.BootAsync();
         var dataGenerationContext = _sut.CompositionRoot.ServiceProvider.GetRequiredService<IDataGenerationContext>();
         var dataGeneratorTypes = await dataGenerationContext.GetDataGeneratorTypesAsync(_sut.Invoker);
@@ -57,13 +75,14 @@ public class TheDataGenerationFeature : TestWithLogging
     {
         _sut.EnableFeature(new DataGenerationFeature(allowDemoDataGeneration));
         _sut.EnableFeature(_dummyServicesFeature);
-       
+
         await _sut.BootAsync();
 
         Assert.Equal(1, _dummyServicesFeature.Spies.DummyProductiveDataGeneratorSpy.InvocationCount);
-        Assert.Equal(allowDemoDataGeneration ? 1 : 0, _dummyServicesFeature.Spies.DummyDemoDataGeneratorSpy.InvocationCount);
+        Assert.Equal(allowDemoDataGeneration ? 1 : 0,
+            _dummyServicesFeature.Spies.DummyDemoDataGeneratorSpy.InvocationCount);
     }
-    
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -71,11 +90,11 @@ public class TheDataGenerationFeature : TestWithLogging
     {
         _dummyServicesFeature.Spies.DummyDemoDataGeneratorSpy.ShouldRun = false;
         _dummyServicesFeature.Spies.DummyProductiveDataGeneratorSpy.ShouldRun = false;
-        
+
         _sut.EnableFeature(new DataGenerationFeature(allowDemoDataGeneration));
         _sut.EnableFeature(_dummyServicesFeature);
         await _sut.BootAsync();
-        
+
         Assert.Equal(0, _dummyServicesFeature.Spies.DummyDemoDataGeneratorSpy.InvocationCount);
         Assert.Equal(0, _dummyServicesFeature.Spies.DummyProductiveDataGeneratorSpy.InvocationCount);
     }

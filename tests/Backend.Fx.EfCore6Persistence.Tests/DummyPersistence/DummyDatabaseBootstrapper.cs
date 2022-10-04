@@ -1,5 +1,7 @@
+using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
+using Backend.Fx.Features.MultiTenancy;
 using Backend.Fx.Features.Persistence;
 using Backend.Fx.Features.Persistence.AdoNet;
 
@@ -22,8 +24,10 @@ public class DummyDatabaseBootstrapper : IDatabaseBootstrapper
 
     public async Task EnsureDatabaseExistenceAsync(CancellationToken cancellationToken)
     {
-        using var dbConnection = _dbConnectionFactory.Create();
-        await using var dbContext = new DummyDbContext(_dbContextOptionsFactory.GetDbContextOptions(dbConnection));
+        using IDbConnection dbConnection = _dbConnectionFactory.Create();
+        await using var dbContext = new DummyDbContext(
+            new CurrentTenantIdHolder(),
+            _dbContextOptionsFactory.GetDbContextOptions(dbConnection));
         await dbContext.Database.EnsureCreatedAsync(cancellationToken);
     }
 }

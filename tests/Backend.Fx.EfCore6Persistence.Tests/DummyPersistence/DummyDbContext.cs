@@ -1,11 +1,14 @@
 using Backend.Fx.EfCore6Persistence.Tests.DummyAggregates;
+using Backend.Fx.Features.MultiTenancy;
+using Backend.Fx.Util;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Fx.EfCore6Persistence.Tests.DummyPersistence;
 
-public class DummyDbContext : DbContext
+public class DummyDbContext : MultiTenancyDbContext
 {
-    public DummyDbContext(DbContextOptions<DummyDbContext> options) : base(options)
+    public DummyDbContext( ICurrentTHolder<TenantId> tenantIdHolder, DbContextOptions<DummyDbContext> options)
+        : base(tenantIdHolder, options)
     {
     }
 
@@ -17,5 +20,6 @@ public class DummyDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(DummyDbContext).Assembly);
+        base.OnModelCreating(modelBuilder);
     }
 }

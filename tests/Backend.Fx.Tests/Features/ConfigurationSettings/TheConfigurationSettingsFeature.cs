@@ -3,10 +3,12 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Backend.Fx.DependencyInjection;
 using Backend.Fx.Features.ConfigurationSettings;
 using Backend.Fx.Features.ConfigurationSettings.InMem;
 using Backend.Fx.Logging;
 using Backend.Fx.MicrosoftDependencyInjection;
+using Backend.Fx.SimpleInjectorDependencyInjection;
 using Backend.Fx.TestUtil;
 using FakeItEasy;
 using JetBrains.Annotations;
@@ -17,14 +19,32 @@ using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Features.ConfigurationSettings;
 
-public class TheConfigurationSettingsFeature : TestWithLogging
+[UsedImplicitly]
+public class TheConfigurationSettingsFeatureWithSimpleInjector : TheConfigurationSettingsFeature
+{
+    public TheConfigurationSettingsFeatureWithSimpleInjector(ITestOutputHelper output)
+        : base(new SimpleInjectorCompositionRoot(), output)
+    {
+    }
+}
+
+[UsedImplicitly]
+public class TheConfigurationSettingsFeatureWithMicrosoftDI : TheConfigurationSettingsFeature
+{
+    public TheConfigurationSettingsFeatureWithMicrosoftDI(ITestOutputHelper output)
+        : base(new MicrosoftCompositionRoot(), output)
+    {
+    }
+}
+
+public abstract class TheConfigurationSettingsFeature : TestWithLogging
 {
     private readonly IBackendFxApplication _sut;
     private readonly IExceptionLogger _exceptionLogger = A.Fake<IExceptionLogger>();
 
-    public TheConfigurationSettingsFeature(ITestOutputHelper output) : base(output)
+    protected TheConfigurationSettingsFeature(ICompositionRoot compositionRoot, ITestOutputHelper output) : base(output)
     {
-        _sut = new BackendFxApplication(new MicrosoftCompositionRoot(), _exceptionLogger, GetType().Assembly);
+        _sut = new BackendFxApplication(compositionRoot, _exceptionLogger, GetType().Assembly);
         _sut.EnableFeature(new ConfigurationSettingsFeature<TestSettingsRepository>());
     }
 

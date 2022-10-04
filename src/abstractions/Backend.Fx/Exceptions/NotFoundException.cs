@@ -20,8 +20,18 @@ namespace Backend.Fx.Exceptions
             EntityName = entityName;
             Id = id;
         }
+
+        /// <summary>
+        /// Used to build a <see cref="NotFoundException"/> with multiple possible error messages. The builder will throw on disposal
+        /// when at least one error was added. Using the AddIf methods is quite comfortable when there are several criteria to be validated
+        /// before executing a business case. 
+        /// </summary>
+        public static IExceptionBuilder UseBuilder()
+        {
+            return new ExceptionBuilder<NotFoundException>();
+        }
     }
-    
+
     public class NotFoundException<TEntity> : NotFoundException
     {
         public NotFoundException(object id)

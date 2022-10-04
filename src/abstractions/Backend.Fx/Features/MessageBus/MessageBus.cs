@@ -43,6 +43,12 @@ namespace Backend.Fx.Features.MessageBus
             var serializer = _compositionRoot.ServiceProvider.GetRequiredService<IIntegrationEventMessageSerializer>();
             SerializedMessage serializedMessage =
                 await serializer.SerializeAsync(integrationEvent).ConfigureAwait(false);
+            
+            if (MessageLogger.IsEnabled(LogLevel.Debug))
+            {
+                MessageLogger.LogDebug("Sending {EventTypeName} payload: {Payload}", serializedMessage.EventTypeName, Encoding.UTF8.GetString(serializedMessage.MessagePayload));
+            }
+            
             await PublishMessageAsync(serializedMessage).ConfigureAwait(false);
         }
 
@@ -63,7 +69,7 @@ namespace Backend.Fx.Features.MessageBus
 
             if (MessageLogger.IsEnabled(LogLevel.Debug))
             {
-                MessageLogger.LogDebug("{EventTypeName} payload: {Payload}", serializedMessage.EventTypeName, Encoding.UTF8.GetString(serializedMessage.MessagePayload));
+                MessageLogger.LogDebug("Received {EventTypeName} payload: {Payload}", serializedMessage.EventTypeName, Encoding.UTF8.GetString(serializedMessage.MessagePayload));
             }
 
             await _invoker.InvokeAsync(async sp =>
@@ -80,17 +86,8 @@ namespace Backend.Fx.Features.MessageBus
                     Debug.Assert(handleAsyncMethod != null, nameof(handleAsyncMethod) + " != null");
                     sp.GetRequiredService<ICurrentTHolder<Correlation>>().Current.Resume(integrationEvent.CorrelationId);
 
-                    try
-                    {
-                        object task = handleAsyncMethod.Invoke(handler, new object[] { integrationEvent });
-                        await ((Task)task).ConfigureAwait(false);
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.LogError(ex, "what");
-                    }
-
-                        
+                    var task = (Task)handleAsyncMethod.Invoke(handler, new object[] { integrationEvent });
+                    await task.ConfigureAwait(false);
                 }
                 
             }, new SystemIdentity()).ConfigureAwait(false);

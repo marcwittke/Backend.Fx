@@ -1,30 +1,52 @@
 using System;
 using System.Threading.Tasks;
+using Backend.Fx.DependencyInjection;
 using Backend.Fx.Exceptions;
 using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.Features.Authorization;
 using Backend.Fx.Features.Persistence;
 using Backend.Fx.Features.Persistence.InMem;
 using Backend.Fx.Logging;
+using Backend.Fx.MicrosoftDependencyInjection;
 using Backend.Fx.SimpleInjectorDependencyInjection;
 using Backend.Fx.Tests.DummyServices;
 using Backend.Fx.TestUtil;
 using FakeItEasy;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Backend.Fx.Tests.Features.Authorization;
 
-public class TheAuthorizationFeature : TestWithLogging
+[UsedImplicitly]
+public class TheAuthorizationFeatureWithSimpleInjector : TheAuthorizationFeature
+{
+    public TheAuthorizationFeatureWithSimpleInjector(ITestOutputHelper output) 
+        : base(new SimpleInjectorCompositionRoot(), output)
+    {
+    }
+}
+
+// failing: Microsoft's DI does not support decoration of open generic types. See https://github.com/khellang/Scrutor/issues/39 for more info
+// [UsedImplicitly]
+// public class TheAuthorizationFeatureWithMicrosoftDI : TheAuthorizationFeature
+// {
+//     public TheAuthorizationFeatureWithMicrosoftDI(ITestOutputHelper output) 
+//         : base(new MicrosoftCompositionRoot(), output)
+//     {
+//     }
+// }
+
+public abstract class TheAuthorizationFeature : TestWithLogging
 {
     private readonly IBackendFxApplication _sut;
     private readonly IExceptionLogger _exceptionLogger = A.Fake<IExceptionLogger>();
     private readonly DummyServicesFeature _dummyServicesFeature = new ();
 
-    public TheAuthorizationFeature(ITestOutputHelper output) : base(output)
+    protected TheAuthorizationFeature(ICompositionRoot compositionRoot, ITestOutputHelper output) : base(output)
     {
-        _sut = new BackendFxApplication(new SimpleInjectorCompositionRoot(), _exceptionLogger, GetType().Assembly);
+        _sut = new BackendFxApplication(compositionRoot, _exceptionLogger, GetType().Assembly);
         _sut.EnableFeature(_dummyServicesFeature);
     }
 
@@ -97,7 +119,7 @@ public class TheAuthorizationFeature : TestWithLogging
                     await repository.GetAsync(i));
             }
 
-            await Assert.ThrowsAsync<NotFoundException<DummyAggregate>>(async () =>
+            await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await repository.ResolveAsync(new[] { 1, 2, 3, 4 }));
         }, new AnonymousIdentity());
     }
