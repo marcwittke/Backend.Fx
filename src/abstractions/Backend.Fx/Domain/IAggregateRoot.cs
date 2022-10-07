@@ -11,7 +11,7 @@ namespace Backend.Fx.Domain
     /// The root of an aggregate, identified by an id of type <see cref="TId"/>.
     /// </summary>
     public interface IAggregateRoot<out TId> : IAggregateRoot
-        where TId : struct, IEquatable<TId>
+        where TId : IEquatable<TId>
     {
         public TId Id { get; }
     }

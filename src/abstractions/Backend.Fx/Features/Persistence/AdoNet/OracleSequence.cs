@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Backend.Fx.Features.Persistence.AdoNet
 {
-    public abstract class OracleSequence<TId> : ISequence<TId> where TId : struct
+    public abstract class OracleSequence<TId> : ISequence<TId> 
     {
         private static readonly ILogger Logger = Log.Create<OracleSequence<TId>>();
         private readonly IDbConnectionFactory _dbConnectionFactory;

@@ -14,7 +14,8 @@ namespace Backend.Fx.Features.Persistence
     /// See https://en.wikipedia.org/wiki/Domain-driven_design#Building_blocks
     /// </summary>
     [PublicAPI]
-    public interface IRepository<TAggregateRoot, in TId> where TAggregateRoot : IAggregateRoot<TId> where TId : struct, IEquatable<TId>
+    public interface IRepository<TAggregateRoot, in TId> where TAggregateRoot : IAggregateRoot<TId> 
+        where TId : IEquatable<TId>
     {
         /// <summary>
         /// Throws a <see cref="NotFoundException{TAggregateRoot}"/> when nothing matches the given id
@@ -52,7 +53,7 @@ namespace Backend.Fx.Features.Persistence
             IEnumerable<TId> ids,
             CancellationToken cancellationToken = default)
             where TAggregateRoot : IAggregateRoot<TId>
-            where TId : struct, IEquatable<TId>
+            where TId : IEquatable<TId>
         {
             var idArray = ids as TId[] ?? ids.ToArray();
             var resolved = new TAggregateRoot[idArray.Length];

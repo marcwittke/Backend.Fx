@@ -12,7 +12,7 @@ namespace Backend.Fx.EfCore6Persistence;
 
 public class EfCoreRepository<TAggregateRoot, TId> : IRepository<TAggregateRoot, TId>
     where TAggregateRoot : class, IAggregateRoot<TId>
-    where TId : struct, IEquatable<TId>
+    where TId : IEquatable<TId>
 
 {
     private readonly DbContext _dbContext;

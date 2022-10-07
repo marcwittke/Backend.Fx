@@ -1,10 +1,10 @@
 ﻿namespace Backend.Fx.Features.IdGeneration
 {
-    public interface IEntityIdGenerator<out TId> : IIdGenerator<TId> where TId : struct
+    public interface IEntityIdGenerator<out TId> : IIdGenerator<TId> 
     {
     }
     
-    public class EntityIdGenerator<TId> : IEntityIdGenerator<TId> where TId : struct
+    public class EntityIdGenerator<TId> : IEntityIdGenerator<TId> 
     {
         private readonly IIdGenerator<TId> _idGenerator;
 

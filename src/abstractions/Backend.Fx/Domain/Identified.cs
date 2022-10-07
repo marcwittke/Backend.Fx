@@ -7,7 +7,6 @@ namespace Backend.Fx.Domain
     [PublicAPI]
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
     public abstract class Identified<TId> : IEquatable<Identified<TId>>
-        where TId : struct
     {
         public TId Id { get; init; }
 
@@ -29,33 +28,32 @@ namespace Backend.Fx.Domain
 
         public bool Equals(Identified<TId> other)
         {
-            if (other == null || other.GetType() != GetType())
-            {
-                return false;
-            }
-
-            return Id.Equals(other.Id);
+            return other != null && Id.Equals(other.Id);
         }
-
+        
         public override bool Equals(object obj)
         {
             var other = obj as Identified<TId>;
-            return other != null && Equals(other);
+            return other != null && Id.Equals(other.Id);
         }
-
+        
         public override int GetHashCode()
         {
             return Id.GetHashCode();
         }
-
-        public static bool operator ==(Identified<TId> x, Identified<TId> y)
+        
+        public static bool operator ==(Identified<TId> left, Identified<TId> right)
         {
-            return Equals(x?.Id, y?.Id);
+            if (ReferenceEquals(left, null) && ReferenceEquals(right, null)) return true;
+            if (ReferenceEquals(left, null) || ReferenceEquals(right, null)) return false;
+            
+            return ReferenceEquals(left, right) || right.Id.Equals(left.Id);
+
         }
-
-        public static bool operator !=(Identified<TId> x, Identified<TId> y)
+        
+        public static bool operator !=(Identified<TId> left, Identified<TId> right)
         {
-            return !(x == y);
+            return !(left == right);
         }
     }
 }

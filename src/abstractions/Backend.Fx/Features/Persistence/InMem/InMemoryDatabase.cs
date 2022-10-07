@@ -4,7 +4,7 @@ using Backend.Fx.Features.MultiTenancy;
 
 namespace Backend.Fx.Features.Persistence.InMem
 {
-    public class InMemoryDatabase<TId> where TId : struct, IEquatable<TId>
+    public class InMemoryDatabase<TId> where TId : IEquatable<TId>
     {
         private readonly ConcurrentDictionary<TenantId, IAggregateDictionaries<TId>> _inMemoryStores = new();
 

@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Backend.Fx.Features.IdGeneration
 {
     public class IdGenerationModule<TId, TIdGenerator> : IModule 
-        where TId : struct
         where TIdGenerator : class, IEntityIdGenerator<TId> 
     {
         private readonly TIdGenerator _entityIdGenerator;

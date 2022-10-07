@@ -8,7 +8,6 @@ namespace Backend.Fx.Features.IdGeneration
     /// <typeparam name="TId"></typeparam>
     [PublicAPI]
     public class IdGenerationFeature<TId, TIdGenerator> : Feature 
-        where TId : struct
         where TIdGenerator : class, IEntityIdGenerator<TId> 
     {
         private readonly TIdGenerator _entityIdGenerator;
@@ -30,7 +29,6 @@ namespace Backend.Fx.Features.IdGeneration
     /// <typeparam name="TId"></typeparam>
     [PublicAPI]
     public class IdGenerationFeature<TId> : Feature 
-        where TId : struct
     {
         private readonly IEntityIdGenerator<TId> _entityIdGenerator;
 

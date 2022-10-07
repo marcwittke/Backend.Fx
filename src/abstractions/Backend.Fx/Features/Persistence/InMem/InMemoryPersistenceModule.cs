@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Backend.Fx.Features.Persistence.InMem
 {
-    public class InMemoryPersistenceModule<TId> : PersistenceModule where TId : struct, IEquatable<TId>
+    public class InMemoryPersistenceModule<TId> : PersistenceModule where TId : IEquatable<TId>
     {
         protected override void RegisterInfrastructure(ICompositionRoot compositionRoot)
         {
@@ -35,7 +35,7 @@ namespace Backend.Fx.Features.Persistence.InMem
         public override IModule MultiTenancyModule => new InMemoryMultiTenancyPersistenceModule<TId>();
     }
 
-    public class InMemoryMultiTenancyPersistenceModule<TId> : IModule where TId : struct, IEquatable<TId>
+    public class InMemoryMultiTenancyPersistenceModule<TId> : IModule where TId : IEquatable<TId>
     {
         public void Register(ICompositionRoot compositionRoot)
         {

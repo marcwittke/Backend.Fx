@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace Backend.Fx.Features.Persistence.AdoNet
 {
     [PublicAPI]
-    public abstract class MsSqlSequence<TId> : ISequence<TId> where TId : struct
+    public abstract class MsSqlSequence<TId> : ISequence<TId> 
     {
         private static readonly ILogger Logger = Log.Create<MsSqlSequence<TId>>();
         private readonly IDbConnectionFactory _dbConnectionFactory;

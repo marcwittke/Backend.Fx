@@ -14,13 +14,13 @@ namespace Backend.Fx.Features.Persistence.InMem
     }
     
     public interface IAggregateDictionaries<TId> : IAggregateDictionaries
-        where TId : struct, IEquatable<TId>
+        where TId : IEquatable<TId>
     {
         AggregateDictionary<TAggregateRoot, TId> For<TAggregateRoot>()
             where TAggregateRoot : IAggregateRoot<TId>;
     }
 
-    public class AggregateDictionaries<TId> : IAggregateDictionaries<TId> where TId : struct, IEquatable<TId>
+    public class AggregateDictionaries<TId> : IAggregateDictionaries<TId> where TId : IEquatable<TId>
     {
         private readonly ConcurrentDictionary<Type, object> _aggregateDictionaries = new();
 

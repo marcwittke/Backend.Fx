@@ -14,7 +14,7 @@ namespace Backend.Fx.Features.Authorization
     /// </summary>
     internal class AuthorizingRepository<TAggregateRoot, TId> : IRepository<TAggregateRoot, TId>
         where TAggregateRoot : IAggregateRoot<TId> 
-        where TId : struct, IEquatable<TId>
+        where TId : IEquatable<TId>
     {
         private readonly IAuthorizationPolicy<TAggregateRoot> _authorizationPolicy;
         private readonly IRepository<TAggregateRoot, TId> _repository;

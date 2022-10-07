@@ -12,7 +12,7 @@ namespace Backend.Fx.Features.Persistence.InMem
     [PublicAPI]
     public class InMemoryRepository<TAggregateRoot, TId> : IRepository<TAggregateRoot, TId>
         where TAggregateRoot : class, IAggregateRoot<TId>
-        where TId : struct, IEquatable<TId>
+        where TId : IEquatable<TId>
     {
         private readonly IQueryable<TAggregateRoot> _aggregateQueryable;
 

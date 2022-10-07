@@ -4,12 +4,12 @@ using Backend.Fx.Util;
 
 namespace Backend.Fx.Features.Persistence.InMem
 {
-    public interface IInMemoryDatabaseAccessor<TId> where TId : struct, IEquatable<TId>
+    public interface IInMemoryDatabaseAccessor<TId> where TId : IEquatable<TId>
     {
         IAggregateDictionaries<TId> GetAggregateDictionaries();
     }
     
-    public class InMemoryDatabaseAccessor<TId> : IInMemoryDatabaseAccessor<TId> where TId : struct, IEquatable<TId>
+    public class InMemoryDatabaseAccessor<TId> : IInMemoryDatabaseAccessor<TId> where TId : IEquatable<TId>
     {
         private readonly InMemoryDatabase<TId> _inMemoryDatabase;
 
@@ -24,7 +24,7 @@ namespace Backend.Fx.Features.Persistence.InMem
         }
     }
     
-    public class MultiTenancyInMemoryDatabaseAccessor<TId> : IInMemoryDatabaseAccessor<TId> where TId : struct, IEquatable<TId>
+    public class MultiTenancyInMemoryDatabaseAccessor<TId> : IInMemoryDatabaseAccessor<TId> where TId : IEquatable<TId>
     {
         private readonly InMemoryDatabase<TId> _inMemoryDatabase;
         private readonly ICurrentTHolder<TenantId> _tenantIdHolder;

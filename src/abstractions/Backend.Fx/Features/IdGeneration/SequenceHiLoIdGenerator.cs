@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Backend.Fx.Features.IdGeneration
 {
-    public abstract class SequenceHiLoIdGenerator<TId> : HiLoIdGenerator<TId> where TId : struct
+    public abstract class SequenceHiLoIdGenerator<TId> : HiLoIdGenerator<TId>
     {
         private readonly ISequence<TId> _sequence;
 

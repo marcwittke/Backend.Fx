@@ -7,13 +7,13 @@ using JetBrains.Annotations;
 namespace Backend.Fx.Features.Persistence.InMem
 {
     public interface IAggregateDictionary<TAggregateRoot, TId> : IDictionary<TId, TAggregateRoot> where TAggregateRoot : IAggregateRoot<TId>
-        where TId : struct, IEquatable<TId>
+        where TId : IEquatable<TId>
     { }
 
     [UsedImplicitly]
     public class AggregateDictionary<TAggregateRoot, TId> : IAggregateDictionary<TAggregateRoot, TId> 
         where TAggregateRoot : IAggregateRoot<TId>
-        where TId : struct, IEquatable<TId>
+        where TId : IEquatable<TId>
     {
         private readonly IDictionary<TId, TAggregateRoot> _dictionary = new Dictionary<TId, TAggregateRoot>();
 

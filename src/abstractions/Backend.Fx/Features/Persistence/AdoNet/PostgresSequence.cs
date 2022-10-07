@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Backend.Fx.Features.Persistence.AdoNet
 {
-    public abstract class PostgresSequence<TId> : ISequence<TId> where TId : struct
+    public abstract class PostgresSequence<TId> : ISequence<TId> 
     {
         private static readonly ILogger Logger = Log.Create<PostgresSequence<TId>>();
         private readonly IDbConnectionFactory _dbConnectionFactory;
