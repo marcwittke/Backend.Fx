@@ -51,6 +51,7 @@ partial class Build : NukeBuild
                            .DependsOn(Restore)
                            .Executes(() =>
                            {
+                               Serilog.Log.Information("Version {Version}", GitVersion?.SemVer ?? "no version!");
                                DotNetBuild(s => s
                                                 .SetProjectFile(Solution)
                                                 .SetConfiguration(Configuration)
