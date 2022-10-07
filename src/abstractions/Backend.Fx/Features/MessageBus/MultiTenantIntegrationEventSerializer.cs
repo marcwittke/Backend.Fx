@@ -27,14 +27,14 @@ namespace Backend.Fx.Features.MessageBus
 
         public async Task<IIntegrationEvent> DeserializeAsync(SerializedMessage serializedMessage)
         {
-            var integrationEvent = await _messageSerializer.DeserializeAsync(serializedMessage).ConfigureAwait(false);
+            IIntegrationEvent integrationEvent = await _messageSerializer.DeserializeAsync(serializedMessage).ConfigureAwait(false);
             
             if (!integrationEvent.Properties.TryGetValue(TenantIdPropertyKey, out var tenantIdString))
             {
                 throw new UnprocessableException("Received an integration event message without TenantId property");
             }
             
-            if (!int.TryParse(tenantIdString, out int tenantId))
+            if (!int.TryParse(tenantIdString, out var tenantId))
             {
                 throw new UnprocessableException(
                     $"Received an integration event message with an invalid TenantId property value: {tenantIdString}");

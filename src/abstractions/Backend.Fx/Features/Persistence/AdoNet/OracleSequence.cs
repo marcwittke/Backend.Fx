@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Backend.Fx.Features.Persistence.AdoNet
 {
-    [PublicAPI]
     public abstract class OracleSequence<TId> : ISequence<TId> where TId : struct
     {
         private static readonly ILogger Logger = Log.Create<OracleSequence<TId>>();
@@ -67,10 +66,9 @@ namespace Backend.Fx.Features.Persistence.AdoNet
             using IDbConnection dbConnection = _dbConnectionFactory.Create();
             dbConnection.Open();
 
-            TId nextValue;
             using IDbCommand command = dbConnection.CreateCommand();
             command.CommandText = $"SELECT {SchemaPrefix}{SequenceName}.NEXTVAL FROM dual";
-            nextValue = ConvertNextValueFromSequence(command.ExecuteScalar());
+            TId nextValue = ConvertNextValueFromSequence(command.ExecuteScalar());
             Logger.LogDebug("Oracle sequence {SchemaPrefix}.{SequenceName} served {NextValue} as next value",
                 SchemaPrefix,
                 SequenceName,
@@ -84,6 +82,7 @@ namespace Backend.Fx.Features.Persistence.AdoNet
         protected abstract TId ConvertNextValueFromSequence(object valueFromSequence);
     }
     
+    [PublicAPI]
     public abstract class OracleIntSequence : OracleSequence<int>
     {
         protected OracleIntSequence(IDbConnectionFactory dbConnectionFactory, int startWith = 1) 
@@ -97,6 +96,7 @@ namespace Backend.Fx.Features.Persistence.AdoNet
         }
     }
     
+    [PublicAPI]
     public abstract class OracleLongSequence : OracleSequence<long>
     {
         protected OracleLongSequence(IDbConnectionFactory dbConnectionFactory, int startWith = 1) 

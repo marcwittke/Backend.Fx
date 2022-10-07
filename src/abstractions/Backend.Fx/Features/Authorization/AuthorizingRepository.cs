@@ -58,7 +58,7 @@ namespace Backend.Fx.Features.Authorization
             }
             else
             {
-                throw new ForbiddenException($"You are not allowed to delete this record");
+                throw new ForbiddenException("You are not allowed to delete this record");
             }
         }
 
@@ -70,7 +70,7 @@ namespace Backend.Fx.Features.Authorization
             }
             else
             {
-                throw new ForbiddenException($"You are not allowed to create such a record");
+                throw new ForbiddenException("You are not allowed to create such a record");
             }
         }
 
@@ -78,7 +78,7 @@ namespace Backend.Fx.Features.Authorization
         {
             if (aggregateRoots.Any(ar => !_authorizationPolicy.CanCreate(ar)))
             {
-                throw new ForbiddenException($"You are not allowed to create such a record");
+                throw new ForbiddenException("You are not allowed to create such a record");
             }
             
             await _repository.AddRangeAsync(aggregateRoots, cancellationToken).ConfigureAwait(false);

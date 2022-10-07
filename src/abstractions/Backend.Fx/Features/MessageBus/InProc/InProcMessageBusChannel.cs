@@ -18,7 +18,7 @@ namespace Backend.Fx.Features.MessageBus.InProc
 
         public async Task FinishHandlingAllMessagesAsync()
         {
-            while (_messageHandlingTasks.TryTake(out var messageHandlingTask))
+            while (_messageHandlingTasks.TryTake(out Task messageHandlingTask))
             {
                 await messageHandlingTask.ConfigureAwait(false);
             }
@@ -26,7 +26,7 @@ namespace Backend.Fx.Features.MessageBus.InProc
         
         internal class MessageReceivedEventArgs
         {
-            public SerializedMessage SerializedMessage { get; set; }
+            public SerializedMessage SerializedMessage { get; init; }
         }
 
         public async ValueTask DisposeAsync()

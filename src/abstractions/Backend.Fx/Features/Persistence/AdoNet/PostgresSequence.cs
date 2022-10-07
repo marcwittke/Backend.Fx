@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Backend.Fx.Features.Persistence.AdoNet
 {
-    [PublicAPI]
     public abstract class PostgresSequence<TId> : ISequence<TId> where TId : struct
     {
         private static readonly ILogger Logger = Log.Create<PostgresSequence<TId>>();
@@ -58,10 +57,9 @@ namespace Backend.Fx.Features.Persistence.AdoNet
             using IDbConnection dbConnection = _dbConnectionFactory.Create();
             dbConnection.Open();
 
-            TId nextValue;
             using IDbCommand command = dbConnection.CreateCommand();
             command.CommandText = $"SELECT nextval('{SchemaName}.{SequenceName}');";
-            nextValue = ConvertNextValueFromSequence(command.ExecuteScalar());
+            TId nextValue = ConvertNextValueFromSequence(command.ExecuteScalar());
             Logger.LogDebug("{SchemaName}.{SequenceName} served {2} as next value", SchemaName, SequenceName, nextValue);
 
             return nextValue;
@@ -72,6 +70,7 @@ namespace Backend.Fx.Features.Persistence.AdoNet
         protected abstract TId ConvertNextValueFromSequence(object valueFromSequence);
     }
     
+    [PublicAPI]
     public abstract class PostgresIntSequence : PostgresSequence<int>
     {
         protected PostgresIntSequence(IDbConnectionFactory dbConnectionFactory, int startWith = 1) 
@@ -85,6 +84,7 @@ namespace Backend.Fx.Features.Persistence.AdoNet
         }
     }
     
+    [PublicAPI]
     public abstract class PostgresLongSequence : PostgresSequence<long>
     {
         protected PostgresLongSequence(IDbConnectionFactory dbConnectionFactory, int startWith = 1) 

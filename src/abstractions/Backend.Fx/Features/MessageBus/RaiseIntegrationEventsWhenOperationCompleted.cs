@@ -1,5 +1,5 @@
+using System.Threading.Tasks;
 using Backend.Fx.ExecutionPipeline;
-using Backend.Fx.Util;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -19,20 +19,20 @@ namespace Backend.Fx.Features.MessageBus
             _operation = operation;
         }
 
-        public void Begin(IServiceScope serviceScope)
+        public Task BeginAsync(IServiceScope serviceScope)
         {
-            _operation.Begin(serviceScope);
+            return _operation.BeginAsync(serviceScope);
         }
 
-        public void Complete()
+        public async Task CompleteAsync()
         {
-            _operation.Complete();
-            AsyncHelper.RunSync(() => _messageBusScope.RaiseEventsAsync());
+            await _operation.CompleteAsync().ConfigureAwait(false);
+            await _messageBusScope.RaiseEventsAsync().ConfigureAwait(false);
         }
 
-        public void Cancel()
+        public Task CancelAsync()
         {
-            _operation.Cancel();
+            return _operation.CancelAsync();
         }
     }
 }

@@ -45,7 +45,7 @@ namespace Backend.Fx.DependencyInjection
 
         public virtual void RegisterModules(params IModule[] modules)
         {
-            foreach (var module in modules)
+            foreach (IModule module in modules)
             {
                 Logger.LogInformation("Registering {@Module}", module);
                 module.Register(this);

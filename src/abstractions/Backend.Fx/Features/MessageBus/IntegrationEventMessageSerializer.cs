@@ -47,12 +47,17 @@ namespace Backend.Fx.Features.MessageBus
         public async Task<IIntegrationEvent> DeserializeAsync(SerializedMessage serializedMessage)
         {
             using var memoryStream = new MemoryStream(serializedMessage.MessagePayload, false);
-            Type returnType = _typeMap[serializedMessage.EventTypeName];
-            var integrationEvent = (IIntegrationEvent)await JsonSerializer
-                .DeserializeAsync(memoryStream, returnType, SerializerOptions)
-                .ConfigureAwait(false);
+            if (_typeMap.TryGetValue(serializedMessage.EventTypeName, out Type returnType))
+            {
+                var integrationEvent = (IIntegrationEvent)await JsonSerializer
+                    .DeserializeAsync(memoryStream, returnType, SerializerOptions)
+                    .ConfigureAwait(false);
 
-            return integrationEvent;
+                return integrationEvent;
+            }
+
+            throw new InvalidOperationException(
+                $"The message type {serializedMessage.EventTypeName} is not in the list of supported types to deserialize ({string.Join(",", _typeMap.Keys)}) ");
         }
     }
 }

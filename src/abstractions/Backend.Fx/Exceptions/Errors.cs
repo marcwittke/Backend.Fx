@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using JetBrains.Annotations;
 
 namespace Backend.Fx.Exceptions
@@ -10,7 +12,9 @@ namespace Backend.Fx.Exceptions
     public class Errors : IReadOnlyDictionary<string, string[]>
     {
         private const string GenericErrorKey = "";
-        private readonly IDictionary<string, List<string>> _dictionaryImplementation = new Dictionary<string, List<string>>();
+
+        private readonly IDictionary<string, List<string>> _dictionaryImplementation =
+            new Dictionary<string, List<string>>();
 
         public bool ContainsKey(string key)
         {
@@ -75,10 +79,11 @@ namespace Backend.Fx.Exceptions
 
             return this;
         }
-        
+
         public IEnumerator<KeyValuePair<string, string[]>> GetEnumerator()
         {
-            return _dictionaryImplementation.Select(kvp => new KeyValuePair<string, string[]>(kvp.Key, kvp.Value.ToArray())).GetEnumerator();
+            return _dictionaryImplementation
+                .Select(kvp => new KeyValuePair<string, string[]>(kvp.Key, kvp.Value.ToArray())).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -98,7 +103,7 @@ namespace Backend.Fx.Exceptions
             foreach (var keyValuePair in this)
             {
                 b.Append("  ");
-                b.Append(string.IsNullOrEmpty(keyValuePair.Key) ? "(generic)": keyValuePair.Key);
+                b.Append(string.IsNullOrEmpty(keyValuePair.Key) ? "(generic)" : keyValuePair.Key);
                 b.AppendLine();
                 for (var index = 0; index < keyValuePair.Value.Length; index++)
                 {
@@ -113,5 +118,29 @@ namespace Backend.Fx.Exceptions
 
             return b.ToString();
         }
+
+        public SerializableError[] ToSerializableErrors() =>
+            this.Select(kvp => new SerializableError
+            {
+                Key = kvp.Key == GenericErrorKey ? "_error" : kvp.Key,
+                Errors = kvp.Value,
+            }).ToArray();
+
+        public string ToJsonString(JsonSerializerOptions options = null)
+        {
+            options ??= new JsonSerializerOptions { WriteIndented = true };
+            return JsonSerializer.Serialize(ToSerializableErrors(), options);
+        }
+    }
+
+
+    [PublicAPI]
+    public class SerializableError
+    {
+        [JsonPropertyName("key")]
+        public string Key { get; set; }
+        
+        [JsonPropertyName("errors")]
+        public string[] Errors { get; set; }
     }
 }

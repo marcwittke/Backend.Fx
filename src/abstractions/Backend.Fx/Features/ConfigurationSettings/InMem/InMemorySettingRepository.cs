@@ -21,7 +21,7 @@ namespace Backend.Fx.Features.ConfigurationSettings.InMem
 
         public void WriteSerializedValue(string category, string key, string serializedValue)
         {
-            var categorizedValues = SettingsStore.GetOrAdd(category, s => new Dictionary<string, string>());
+            var categorizedValues = SettingsStore.GetOrAdd(category, _ => new Dictionary<string, string>());
             categorizedValues[key] = serializedValue;
         }
     }

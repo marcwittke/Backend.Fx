@@ -15,12 +15,10 @@ namespace Backend.Fx.Features.Authorization
     {
         private static readonly ILogger Logger = Log.Create<AuthorizationModule>();
         private readonly Assembly[] _assemblies;
-        private readonly string _assembliesForLogging;
-
+        
         public AuthorizationModule(Assembly[] assemblies)
         {
             _assemblies = assemblies;
-            _assembliesForLogging = string.Join(",", _assemblies.Select(ass => ass.GetName().Name));
         }
 
         public void Register(ICompositionRoot compositionRoot)
@@ -40,6 +38,7 @@ namespace Backend.Fx.Features.Authorization
 
         private void RegisterAuthorizationPolicies(ICompositionRoot compositionRoot)
         {
+            // ReSharper disable once CoVariantArrayConversion
             Logger.LogDebug("Registering authorization services from {Assemblies}", _assemblies);
 
             var aggregateRootTypes = _assemblies
@@ -47,9 +46,9 @@ namespace Backend.Fx.Features.Authorization
                 .Where(t => t.IsImplementationOfOpenGenericInterface(typeof(IAggregateRoot<>)))
                 .ToArray();
 
-            foreach (var aggregateRootType in aggregateRootTypes)
+            foreach (Type aggregateRootType in aggregateRootTypes)
             {
-                var authorizationPolicyInterfaceType =
+                Type authorizationPolicyInterfaceType =
                     typeof(IAuthorizationPolicy<>).MakeGenericType(aggregateRootType);
                 var authorizationPolicyTypes = _assemblies
                     .GetImplementingTypes(authorizationPolicyInterfaceType)

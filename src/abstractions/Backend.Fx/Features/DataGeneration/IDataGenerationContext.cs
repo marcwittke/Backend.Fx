@@ -37,13 +37,13 @@ namespace Backend.Fx.Features.DataGeneration
         public async Task GenerateDataAsync(IBackendFxApplicationInvoker invoker, IEnumerable<Type> dataGeneratorTypes,
             CancellationToken cancellationToken = default)
         {
-            foreach (var dataGeneratorType in dataGeneratorTypes)
+            foreach (Type dataGeneratorType in dataGeneratorTypes)
             {
-                await invoker.InvokeAsync(async sp =>
+                await invoker.InvokeAsync(async (sp, ct) =>
                 {
-                    var dataGenerator = sp.GetServices<IDataGenerator>().Single(dgt => dgt.GetType() == dataGeneratorType);
-                    await dataGenerator.GenerateAsync(cancellationToken).ConfigureAwait(false);
-                }, new SystemIdentity()).ConfigureAwait(false);
+                    IDataGenerator dataGenerator = sp.GetServices<IDataGenerator>().Single(dgt => dgt.GetType() == dataGeneratorType);
+                    await dataGenerator.GenerateAsync(ct).ConfigureAwait(false);
+                }, new SystemIdentity(), cancellationToken).ConfigureAwait(false);
             }
         }
     }

@@ -1,24 +1,40 @@
 ﻿using System.Threading.Tasks;
 using Backend.Fx.Features.MessageBus;
 using Backend.Fx.Logging;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
 
 namespace Backend.Fx.RabbitMq
 {
+    [PublicAPI]
+    public class RabbitMqOptions
+    {
+        public string Hostname { get; set; }
+        public int Port { get; set; } = 5672;
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public int RetryCount { get; set; } = 1;
+        public string ExchangeName { get; set; }
+        public string ReceiveQueueName  { get; set; }
+    }
+    
     public class RabbitMqMessageBus : MessageBus
     {
         private static readonly ILogger Logger = Log.Create<RabbitMqMessageBus>();
         private readonly RabbitMqChannel _channel;
 
-        public RabbitMqMessageBus(
-            IConnectionFactory connectionFactory,
-            int retryCount,
-            string exchangeName,
-            string receiveQueueName)
+        public RabbitMqMessageBus(RabbitMqOptions options)
         {
-            _channel = new RabbitMqChannel(connectionFactory, exchangeName, receiveQueueName, retryCount);
+            var connectionFactory = new ConnectionFactory
+            {
+                HostName = options.Hostname,
+                Port = options.Port,
+                UserName = options.Username,
+                Password = options.Password,
+                UseBackgroundThreadsForIO = true
+            };
+            _channel = new RabbitMqChannel(connectionFactory, options.ExchangeName, options.ReceiveQueueName, options.RetryCount, ProcessAsync);
         }
 
         public override void Connect()
@@ -26,7 +42,6 @@ namespace Backend.Fx.RabbitMq
             Logger.LogInformation("Opening a channel to RabbitMQ...");
             if (_channel.EnsureOpen())
             {
-                _channel.MessageReceived += ChannelOnMessageReceived;
                 Logger.LogInformation("Channel to RabbitMQ opened");
             }
         }
@@ -45,20 +60,6 @@ namespace Backend.Fx.RabbitMq
             return Task.CompletedTask;
         }
 
-        private async void ChannelOnMessageReceived(object sender, BasicDeliverEventArgs args)
-        {
-            Logger.LogDebug("RabbitMQ message with routing key {RoutingKey} received", args.RoutingKey);
-            try
-            {
-                await ProcessAsync(new SerializedMessage(args.RoutingKey, args.Body));
-                _channel.Acknowledge(args.DeliveryTag);
-            }
-            catch
-            {
-                _channel.NAcknowledge(args.DeliveryTag);
-                throw;
-            }
-        }
 
         protected override void Dispose(bool disposing)
         {
@@ -66,7 +67,6 @@ namespace Backend.Fx.RabbitMq
                 if (_channel != null)
                 {
                     Logger.LogInformation("Closing RabbitMQ channel...");
-                    _channel.MessageReceived -= ChannelOnMessageReceived;
                     _channel.Dispose();
                     Logger.LogInformation("RabbitMQ channel closed");
                 }

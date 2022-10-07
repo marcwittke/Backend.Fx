@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Features.MessageBus;
 
@@ -19,7 +20,7 @@ public class DummyIntegrationEventHandler : IIntegrationEventHandler<DummyIntegr
     }
 
 
-    public Task HandleAsync(DummyIntegrationEvent integrationEvent)
+    public Task HandleAsync(DummyIntegrationEvent integrationEvent, CancellationToken cancellationToken = default)
     {
         return _spy.HandleAsync(integrationEvent);
     }

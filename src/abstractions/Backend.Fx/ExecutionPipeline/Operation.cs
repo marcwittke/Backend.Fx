@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Backend.Fx.Logging;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,11 +15,11 @@ namespace Backend.Fx.ExecutionPipeline
     [PublicAPI]
     public interface IOperation
     {
-        void Begin(IServiceScope serviceScope);
+        Task BeginAsync(IServiceScope serviceScope);
         
-        void Complete();
+        Task CompleteAsync();
 
-        void Cancel();
+        Task CancelAsync();
     }
 
     
@@ -35,7 +36,7 @@ namespace Backend.Fx.ExecutionPipeline
             _instanceId = operationCounter.Count();
         }
         
-        public void Begin(IServiceScope serviceScope)
+        public Task BeginAsync(IServiceScope serviceScope)
         {
             if (_isActive != null)
             {
@@ -44,9 +45,10 @@ namespace Backend.Fx.ExecutionPipeline
 
             _lifetimeLogger = Logger.LogDebugDuration($"Beginning operation #{_instanceId}", $"Terminating operation #{_instanceId}");
             _isActive = true;
+            return Task.CompletedTask;
         }
 
-        public void Complete()
+        public Task CompleteAsync()
         {
             Logger.LogInformation("Completing operation #{OperationId}", _instanceId);
             if (_isActive != true)
@@ -57,14 +59,16 @@ namespace Backend.Fx.ExecutionPipeline
             _isActive = false;
             _lifetimeLogger?.Dispose();
             _lifetimeLogger = null;
+            return Task.CompletedTask;
         }
 
-        public void Cancel()
+        public Task CancelAsync()
         {
             Logger.LogInformation("Canceling operation #{OperationId}", _instanceId);
             _isActive = false;
             _lifetimeLogger?.Dispose();
             _lifetimeLogger = null;
+            return Task.CompletedTask;
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Reflection;
 using Backend.Fx.DependencyInjection;
@@ -30,9 +31,9 @@ namespace Backend.Fx.Features.DomainEvents
         
         private void RegisterDomainEventHandlers(ICompositionRoot compositionRoot)
         {
-            foreach (var domainEventType in _assemblies.GetImplementingTypes(typeof(IDomainEvent)))
+            foreach (Type domainEventType in _assemblies.GetImplementingTypes(typeof(IDomainEvent)))
             {
-                var handlerTypeForThisDomainEventType = typeof(IDomainEventHandler<>).MakeGenericType(domainEventType);
+                Type handlerTypeForThisDomainEventType = typeof(IDomainEventHandler<>).MakeGenericType(domainEventType);
 
                 var serviceDescriptors = _assemblies
                     .GetImplementingTypes(handlerTypeForThisDomainEventType)

@@ -1,9 +1,11 @@
 using Backend.Fx.Logging;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using NodaTime;
 
 namespace Backend.Fx.Hacking
 {
+    [PublicAPI]
     public class AdjustableClock : IClock
     {
         private static readonly ILogger Logger = Log.Create<AdjustableClock>();
@@ -26,7 +28,7 @@ namespace Backend.Fx.Hacking
 
         public Instant Advance(Duration duration)
         {
-            _overriddenUtcNow = _overriddenUtcNow ?? _clockImplementation.GetCurrentInstant();
+            _overriddenUtcNow ??= _clockImplementation.GetCurrentInstant();
             Logger.LogTrace("Advancing clock by {TimeSpan}", duration);
             _overriddenUtcNow = _overriddenUtcNow.Value.Plus(duration);
             return _overriddenUtcNow.Value;

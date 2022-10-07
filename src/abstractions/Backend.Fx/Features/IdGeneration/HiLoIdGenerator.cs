@@ -1,5 +1,6 @@
 using System.Threading;
 using Backend.Fx.Logging;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 namespace Backend.Fx.Features.IdGeneration
@@ -27,6 +28,7 @@ namespace Backend.Fx.Features.IdGeneration
         protected abstract TId BlockSize { get; }
     }
     
+    [PublicAPI]
     public abstract class HiLoIntIdGenerator : HiLoIdGenerator<int>
     {
         private static readonly ILogger Logger = Log.Create<HiLoIntIdGenerator>();
@@ -59,6 +61,7 @@ namespace Backend.Fx.Features.IdGeneration
         }
     }
     
+    [PublicAPI]
     public abstract class HiLoLongIdGenerator : HiLoIdGenerator<long>
     {
         private static readonly ILogger Logger = Log.Create<HiLoLongIdGenerator>();

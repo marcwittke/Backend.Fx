@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using System.Threading.Tasks;
 using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.Logging;
 using Backend.Fx.Util;
@@ -13,7 +14,7 @@ namespace Backend.Fx.Features.Persistence.AdoNet
     /// Enriches the operation to use a database transaction during lifetime. The transaction gets started, before IOperation.Begin()
     /// is being called and gets committed after IOperation.Complete() is being called.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public class DbTransactionOperationDecorator : IOperation
     {
         private static readonly ILogger Logger = Log.Create<DbTransactionOperationDecorator>();
@@ -33,7 +34,7 @@ namespace Backend.Fx.Features.Persistence.AdoNet
         }
 
 
-        public virtual void Begin(IServiceScope serviceScope)
+        public virtual async Task BeginAsync(IServiceScope serviceScope)
         {
             if (_state != TxState.NotStarted)
             {
@@ -51,12 +52,12 @@ namespace Backend.Fx.Features.Persistence.AdoNet
             _currentTransactionHolder.ReplaceCurrent(_dbConnection.BeginTransaction(_isolationLevel));
             _transactionLifetimeLogger = Logger.LogDebugDuration("Transaction open", "Transaction terminated");
             _state = TxState.Active;
-            _operation.Begin(serviceScope);
+            await _operation.BeginAsync(serviceScope).ConfigureAwait(false);
         }
 
-        public void Complete()
+        public async Task CompleteAsync()
         {
-            _operation.Complete();
+            await _operation.CompleteAsync().ConfigureAwait(false);
 
             if (_state != TxState.Active)
             {
@@ -78,7 +79,7 @@ namespace Backend.Fx.Features.Persistence.AdoNet
             _state = TxState.Committed;
         }
 
-        public void Cancel()
+        public async Task CancelAsync()
         {
             Logger.LogDebug("rolling back transaction");
             if (_state != TxState.Active)
@@ -86,7 +87,7 @@ namespace Backend.Fx.Features.Persistence.AdoNet
                 throw new InvalidOperationException($"Cannot roll back a transaction that is {_state}");
             }
             
-            _operation.Cancel();
+            await _operation.CancelAsync().ConfigureAwait(false);
 
             _currentTransactionHolder.Current.Rollback();
             _currentTransactionHolder.Current.Dispose();

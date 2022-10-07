@@ -1,3 +1,4 @@
+using System.Security.Principal;
 using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.TestUtil;
 using Xunit;
@@ -23,6 +24,14 @@ public class TheAnonymousIdentity : TestWithLogging
     {
         var sut = new AnonymousIdentity();
         Assert.False(sut.IsAuthenticated);
+    }
+    
+    [Fact]
+    public void IsDetectedAsAnonymousIdentity()
+    {
+        IIdentity sut = new AnonymousIdentity();
+        Assert.True(sut.IsAnonymous());
+        Assert.False(sut.IsSystem());
     }
     
     [Fact]

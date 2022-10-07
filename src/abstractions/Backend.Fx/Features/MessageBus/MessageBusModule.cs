@@ -49,7 +49,7 @@ namespace Backend.Fx.Features.MessageBus
 
         public void SubscribeToAllEvents()
         {
-            foreach (var eventType in _eventTypesToSubscribe)
+            foreach (Type eventType in _eventTypesToSubscribe)
             {
                 _messageBus.Subscribe(eventType);
             }
@@ -57,9 +57,9 @@ namespace Backend.Fx.Features.MessageBus
 
         private void RegisterIntegrationEventHandlers(ICompositionRoot compositionRoot)
         {
-            foreach (var integrationEventType in _application.Assemblies.GetImplementingTypes(typeof(IIntegrationEvent)))
+            foreach (Type integrationEventType in _application.Assemblies.GetImplementingTypes(typeof(IIntegrationEvent)))
             {
-                var handlerTypeForThisIntegrationEventType =
+                Type handlerTypeForThisIntegrationEventType =
                     typeof(IIntegrationEventHandler<>).MakeGenericType(integrationEventType);
 
                 var serviceDescriptors = _application.Assemblies

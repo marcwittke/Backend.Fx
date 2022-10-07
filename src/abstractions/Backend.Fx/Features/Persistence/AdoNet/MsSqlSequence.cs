@@ -66,6 +66,7 @@ namespace Backend.Fx.Features.Persistence.AdoNet
         protected abstract TId ConvertNextValueFromSequence(object valueFromSequence);
     }
     
+    [PublicAPI]
     public abstract class MsSqlIntSequence : MsSqlSequence<int>
     {
         protected MsSqlIntSequence(IDbConnectionFactory dbConnectionFactory, int startWith = 1) 
@@ -79,6 +80,7 @@ namespace Backend.Fx.Features.Persistence.AdoNet
         }
     }
     
+    [PublicAPI]
     public abstract class MsSqlLongSequence : MsSqlSequence<long>
     {
         protected MsSqlLongSequence(IDbConnectionFactory dbConnectionFactory, int startWith = 1) 

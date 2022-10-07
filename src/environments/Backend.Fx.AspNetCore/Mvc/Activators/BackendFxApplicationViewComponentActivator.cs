@@ -4,38 +4,27 @@ using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc.ViewComponents;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
 
-namespace Backend.Fx.AspNetCore.Mvc.Activators
+namespace Backend.Fx.AspNetCore.Mvc.Activators;
+
+[PublicAPI]
+public class BackendFxApplicationViewComponentActivator : IViewComponentActivator
 {
-    [PublicAPI]
-    public class BackendFxApplicationViewComponentActivator : IViewComponentActivator
+    private static readonly ILogger Logger = Log.Create<BackendFxApplicationViewComponentActivator>();
+    private readonly IBackendFxApplication _application;
+
+    public BackendFxApplicationViewComponentActivator(IBackendFxApplication application)
     {
-        private static readonly ILogger Logger = Log.Create<BackendFxApplicationViewComponentActivator>();
+        _application = application;
+    }
         
-        public object Create(ViewComponentContext context)
-        {
-            var requestedViewComponentType = context.ViewComponentDescriptor.TypeInfo.AsType();
-            
-            return context.ViewContext.HttpContext.TryGetServiceProvider(out var sp) 
-                ? CreateInstanceUsingServiceProvider(sp, requestedViewComponentType)
-                : CreateInstanceUsingSystemActivator(requestedViewComponentType);
-        }
-
-        private static object CreateInstanceUsingServiceProvider(object sp, Type requestedViewComponentType)
-        {
-            Logger.LogDebug("Providing {ViewComponentName} using {ServiceProvider}", requestedViewComponentType.Name, sp.GetType().Name);
-            return ((IServiceProvider)sp).GetRequiredService(requestedViewComponentType);
-        }
-
-        private static object CreateInstanceUsingSystemActivator(Type requestedViewComponentType)
-        {
-            Logger.LogDebug("Providing {ViewComponentName} using {ServiceProvider}", requestedViewComponentType.Name, nameof(Activator));
-            return Activator.CreateInstance(requestedViewComponentType);
-        }
+    public object Create(ViewComponentContext context)
+    {
+        Type requestedViewComponentType = context.ViewComponentDescriptor.TypeInfo.AsType();
+        return _application.CompositionRoot.ServiceProvider.GetRequiredService(requestedViewComponentType);
+    }
         
-        public void Release(ViewComponentContext context, object viewComponent)
-        {
-        }
+    public void Release(ViewComponentContext context, object viewComponent)
+    {
     }
 }

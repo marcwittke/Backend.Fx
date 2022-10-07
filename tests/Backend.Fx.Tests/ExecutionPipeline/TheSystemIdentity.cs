@@ -1,3 +1,4 @@
+using System.Security.Principal;
 using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.TestUtil;
 using Xunit;
@@ -23,6 +24,14 @@ public class TheSystemIdentity : TestWithLogging
     {
         var sut = new SystemIdentity();
         Assert.True(sut.IsAuthenticated);
+    }
+    
+    [Fact]
+    public void IsDetectedAsSystemIdentity()
+    {
+        IIdentity sut = new SystemIdentity();
+        Assert.True(sut.IsSystem());
+        Assert.False(sut.IsAnonymous());
     }
     
     [Fact]

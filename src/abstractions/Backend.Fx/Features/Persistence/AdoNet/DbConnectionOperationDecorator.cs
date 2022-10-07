@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using System.Threading.Tasks;
 using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.Logging;
 using JetBrains.Annotations;
@@ -22,25 +23,25 @@ namespace Backend.Fx.Features.Persistence.AdoNet
             _operation = operation;
         }
 
-        public void Begin(IServiceScope serviceScope)
+        public async Task BeginAsync(IServiceScope serviceScope)
         {
             Logger.LogDebug("Opening database connection");
             _dbConnection.Open();
             _connectionLifetimeLogger = Logger.LogDebugDuration("Database connection open", "Database connection closed");
-            _operation.Begin(serviceScope);
+            await _operation.BeginAsync(serviceScope).ConfigureAwait(false);
         }
 
-        public void Complete()
+        public async Task CompleteAsync()
         {
-            _operation.Complete();
+            await _operation.CompleteAsync().ConfigureAwait(false);
             Logger.LogDebug("Closing database connection");
             _dbConnection.Close();
             _connectionLifetimeLogger?.Dispose();
         }
 
-        public void Cancel()
+        public async Task CancelAsync()
         {
-            _operation.Cancel();
+            await _operation.CancelAsync().ConfigureAwait(false);
             Logger.LogDebug("Closing database connection");
             _dbConnection.Close();
             _connectionLifetimeLogger?.Dispose();

@@ -37,7 +37,7 @@ namespace Backend.Fx.Domain
             unchecked
             {
                 var hash = 17;
-                foreach (object obj in GetEqualityComponents())
+                foreach (var obj in GetEqualityComponents())
                 {
                     hash = hash * 23 + (obj != null ? obj.GetHashCode() : 0);
                 }

@@ -24,12 +24,12 @@ namespace Backend.Fx.Features.Jobs
         {
             await application
                 .Invoker
-                .InvokeAsync(async sp =>
+                .InvokeAsync(async (sp, ct) =>
                         await sp
                             .GetRequiredService<TJob>()
-                            .RunAsync(cancellationToken)
+                            .RunAsync(ct)
                             .ConfigureAwait(false)
-                    , identity)
+                    , identity, cancellationToken)
                 .ConfigureAwait(false);
         }
     }

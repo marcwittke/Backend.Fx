@@ -6,7 +6,7 @@ using JetBrains.Annotations;
 namespace Backend.Fx.Features.Authorization
 {
     /// <summary>
-    /// Implements permissions on aggregate level. The respective instance is applied when creating an <see cref="IRepository{T}"/>,
+    /// Implements permissions on aggregate level. The respective instance is applied when creating an <see cref="Backend.Fx.Features.Persistence.IRepository{T, TId}"/>,
     /// so that the repository never allows reading or writing of an aggregate without permissions. 
     /// </summary>
     [PublicAPI]

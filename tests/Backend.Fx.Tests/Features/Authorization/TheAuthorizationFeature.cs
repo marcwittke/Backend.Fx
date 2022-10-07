@@ -7,7 +7,6 @@ using Backend.Fx.Features.Authorization;
 using Backend.Fx.Features.Persistence;
 using Backend.Fx.Features.Persistence.InMem;
 using Backend.Fx.Logging;
-using Backend.Fx.MicrosoftDependencyInjection;
 using Backend.Fx.SimpleInjectorDependencyInjection;
 using Backend.Fx.Tests.DummyServices;
 using Backend.Fx.TestUtil;
@@ -66,7 +65,7 @@ public abstract class TheAuthorizationFeature : TestWithLogging
         A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.HasAccessExpression)
             .Returns(agg => true);
 
-        await _sut.Invoker.InvokeAsync(async sp =>
+        await _sut.Invoker.InvokeAsync(async sp=>
         {
             var repository = sp.GetRequiredService<IRepository<DummyAggregate, int>>();
             var aggregates = await repository.GetAllAsync();
@@ -101,7 +100,7 @@ public abstract class TheAuthorizationFeature : TestWithLogging
         A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.HasAccessExpression)
             .Returns(agg => false);
 
-        await _sut.Invoker.InvokeAsync(async sp =>
+        await _sut.Invoker.InvokeAsync(async sp=>
         {
             var repository = sp.GetRequiredService<IRepository<DummyAggregate, int>>();
             var aggregates = await repository.GetAllAsync();
@@ -134,7 +133,7 @@ public abstract class TheAuthorizationFeature : TestWithLogging
         A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.HasAccessExpression).Returns(agg => true);
         A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.CanCreate(A<DummyAggregate>._)).Returns(true);
 
-        await _sut.Invoker.InvokeAsync(async sp =>
+        await _sut.Invoker.InvokeAsync(async sp=>
         {
             var repository = sp.GetRequiredService<IRepository<DummyAggregate, int>>();
             await repository.AddAsync(new DummyAggregate(1000, "thousand"));
@@ -145,7 +144,7 @@ public abstract class TheAuthorizationFeature : TestWithLogging
             });
         }, new AnonymousIdentity());
 
-        await _sut.Invoker.InvokeAsync(async sp =>
+        await _sut.Invoker.InvokeAsync(async sp=>
         {
             var repository = sp.GetRequiredService<IRepository<DummyAggregate, int>>();
             var unused1 = await repository.GetAsync(1000);
@@ -165,7 +164,7 @@ public abstract class TheAuthorizationFeature : TestWithLogging
         A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.CanCreate(A<DummyAggregate>._)).Returns(true);
         A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.CanDelete(A<DummyAggregate>._)).Returns(true);
 
-        await _sut.Invoker.InvokeAsync(async sp =>
+        await _sut.Invoker.InvokeAsync(async sp=>
         {
             var repository = sp.GetRequiredService<IRepository<DummyAggregate, int>>();
             await repository.AddAsync(new DummyAggregate(1000, "thousand"));

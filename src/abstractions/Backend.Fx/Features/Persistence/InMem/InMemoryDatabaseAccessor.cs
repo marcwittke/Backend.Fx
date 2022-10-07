@@ -29,7 +29,8 @@ namespace Backend.Fx.Features.Persistence.InMem
         private readonly InMemoryDatabase<TId> _inMemoryDatabase;
         private readonly ICurrentTHolder<TenantId> _tenantIdHolder;
 
-        public MultiTenancyInMemoryDatabaseAccessor(InMemoryDatabase<TId> inMemoryDatabase, ICurrentTHolder<TenantId> tenantIdHolder, IInMemoryDatabaseAccessor<TId> inMemoryDatabaseAccessorUnused)
+        // ReSharper disable once UnusedParameter.Local
+        public MultiTenancyInMemoryDatabaseAccessor(InMemoryDatabase<TId> inMemoryDatabase, ICurrentTHolder<TenantId> tenantIdHolder, IInMemoryDatabaseAccessor<TId> unused)
         {
             _inMemoryDatabase = inMemoryDatabase;
             _tenantIdHolder = tenantIdHolder;

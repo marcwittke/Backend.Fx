@@ -1,5 +1,6 @@
 using System;
 using System.Security.Principal;
+using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Logging;
 
@@ -16,16 +17,20 @@ namespace Backend.Fx.ExecutionPipeline
             _invoker = invoker;
         }
 
-        public async Task InvokeAsync(Func<IServiceProvider, Task> awaitableAsyncAction, IIdentity identity)
+        public async Task InvokeAsync(Func<IServiceProvider, CancellationToken, Task> awaitableAsyncAction,
+            IIdentity identity, CancellationToken cancellationToken = default)
         {
             try
             {
-                await _invoker.InvokeAsync(awaitableAsyncAction, identity).ConfigureAwait(false);
+                await _invoker.InvokeAsync(awaitableAsyncAction, identity, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 _exceptionLogger.LogException(ex);
             }
         }
+        
+        public Task InvokeAsync(Func<IServiceProvider, Task> awaitableAsyncAction, IIdentity identity = null)
+            => InvokeAsync((sp, _) => awaitableAsyncAction.Invoke(sp), identity);
     }
 }

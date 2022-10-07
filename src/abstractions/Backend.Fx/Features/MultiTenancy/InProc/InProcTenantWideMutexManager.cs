@@ -23,8 +23,8 @@ namespace Backend.Fx.Features.MultiTenancy.InProc
 
             lock (this)
             {
-                var subDictionary = _mutexes.GetOrAdd(tenantId.Value, i => new ConcurrentDictionary<string, Mutex>());
-                var mutex = subDictionary.GetOrAdd(key, _ => new Mutex());
+                var subDictionary = _mutexes.GetOrAdd(tenantId.Value, _ => new ConcurrentDictionary<string, Mutex>());
+                Mutex mutex = subDictionary.GetOrAdd(key, _ => new Mutex());
                 if (mutex.WaitOne(300))
                 {
                     tenantWideMutex = new InProcTenantWideMutex(() => mutex.ReleaseMutex());

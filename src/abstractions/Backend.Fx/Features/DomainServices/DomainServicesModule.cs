@@ -40,7 +40,7 @@ namespace Backend.Fx.Features.DomainServices
                         .Select(service => new ServiceDescriptor(service, type, ServiceLifetime.Scoped)));
 
 
-            foreach (var serviceDescriptor in serviceDescriptors)
+            foreach (ServiceDescriptor serviceDescriptor in serviceDescriptors)
             {
                 Logger.LogDebug("Registering scoped service {ServiceType} with implementation {ImplementationType}",
                     serviceDescriptor.ServiceType.Name,

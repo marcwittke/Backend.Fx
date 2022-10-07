@@ -86,7 +86,7 @@ namespace Backend.Fx.Features.Persistence.InMem
         public async Task AddRangeAsync(TAggregateRoot[] aggregateRoots,
             CancellationToken cancellationToken = default)
         {
-            foreach (var aggregateRoot in aggregateRoots)
+            foreach (TAggregateRoot aggregateRoot in aggregateRoots)
             {
                 await AddAsync(aggregateRoot, cancellationToken).ConfigureAwait(false);
             }

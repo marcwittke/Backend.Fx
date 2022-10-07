@@ -51,11 +51,11 @@ namespace Backend.Fx.Exceptions
             string innerException = InnerException != null
                                         ? " ---> "
                                           + InnerException
-                                          + System.Environment.NewLine
+                                          + Environment.NewLine
                                           + "   End of inner exception stack trace"
                                         : null;
 
-            return string.Join(System.Environment.NewLine,
+            return string.Join(Environment.NewLine,
                                new[] {message, Errors.ToString(), innerException, StackTrace}.Where(s => s != null));
         }
         

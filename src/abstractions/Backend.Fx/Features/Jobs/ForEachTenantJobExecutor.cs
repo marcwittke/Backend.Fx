@@ -3,14 +3,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.Features.MultiTenancy;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Backend.Fx.Features.Jobs
 {
+    [UsedImplicitly]
     public class ForEachTenantJobExecutor : IJobExecutor
     {
         private readonly ITenantEnumerator _tenantEnumerator;
-        
+
         public ForEachTenantJobExecutor(
             ITenantEnumerator tenantEnumerator,
             IJobExecutor _)
@@ -26,10 +28,16 @@ namespace Backend.Fx.Features.Jobs
         {
             var tenantWideMutexManager =
                 application.CompositionRoot.ServiceProvider.GetRequiredService<ITenantWideMutexManager>();
-            
-            await new ForEachTenantIdInvoker(_tenantEnumerator.GetActiveTenantIds(), tenantWideMutexManager, typeof(TJob).FullName, application.Invoker).InvokeAsync(
-                async sp => await sp.GetRequiredService<TJob>().RunAsync(cancellationToken).ConfigureAwait(false),
-                identity ?? new SystemIdentity()).ConfigureAwait(false);
+
+            await new ForEachTenantIdInvoker(
+                    _tenantEnumerator.GetActiveTenantIds(),
+                    tenantWideMutexManager,
+                    typeof(TJob).FullName, application.Invoker)
+                .InvokeAsync(
+                    async (sp, ct) => await sp.GetRequiredService<TJob>().RunAsync(ct).ConfigureAwait(false),
+                    identity ?? new SystemIdentity(),
+                    cancellationToken)
+                .ConfigureAwait(false);
         }
     }
 }

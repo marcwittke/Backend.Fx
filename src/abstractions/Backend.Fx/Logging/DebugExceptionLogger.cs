@@ -12,7 +12,7 @@ namespace Backend.Fx.Logging
         {
             if (exception is ClientException cex)
             {
-                Debug.WriteLine(cex + System.Environment.NewLine + cex.Errors);
+                Debug.WriteLine(cex + Environment.NewLine + cex.Errors);
             }
             else
             {

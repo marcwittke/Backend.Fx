@@ -29,7 +29,7 @@ public class TheExceptionLoggingAndHandlingInvoker : TestWithLogging
     [Fact]
     public void SwallowsExceptions()
     {
-        _sut.InvokeAsync(sp => Task.CompletedTask);
-        _sut.InvokeAsync(sp => throw new DivideByZeroException());
+        _sut.InvokeAsync(_ => Task.CompletedTask);
+        _sut.InvokeAsync(_ => throw new DivideByZeroException());
     }
 }

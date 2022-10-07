@@ -1,7 +1,6 @@
 using System;
 using Nuke.Common;
 using Nuke.Common.CI;
-using Nuke.Common.Execution;
 using Nuke.Common.Git;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
@@ -12,7 +11,7 @@ using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 [ShutdownDotNetAfterServerBuild]
-class Build : NukeBuild
+partial class Build : NukeBuild
 {
     public static int Main() => Execute<Build>(x => x.Publish);
 
@@ -62,14 +61,16 @@ class Build : NukeBuild
                            });
 
     Target Test => _ => _
-                        .DependsOn(Compile)
+                        .DependsOn(Compile, StartDependencies)
                         .Executes(() =>
                         {
                             DotNetTest(s => s
                                             .SetProjectFile(Solution)
                                             .SetConfiguration(Configuration)
                                             .EnableNoRestore());
-                        });
+                        })
+                        .ProceedAfterFailure()
+                        .Triggers(StopDependencies);
 
     Target Pack => _ => _
                         .DependsOn(Test)

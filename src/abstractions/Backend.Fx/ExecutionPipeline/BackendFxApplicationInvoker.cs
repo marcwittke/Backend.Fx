@@ -1,7 +1,7 @@
 using System;
 using System.Security.Principal;
+using System.Threading;
 using System.Threading.Tasks;
-using Backend.Fx.DependencyInjection;
 using Backend.Fx.Logging;
 using Backend.Fx.Util;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,23 +11,45 @@ namespace Backend.Fx.ExecutionPipeline
 {
     public interface IBackendFxApplicationInvoker
     {
+        /// <summary>
+        /// Run a delegate through the full execution pipeline, having its separate injection scope 
+        /// </summary>
         /// <param name="awaitableAsyncAction">The async action to be invoked by the application</param>
         /// <param name="identity">The acting identity</param>
-        Task InvokeAsync(Func<IServiceProvider, Task> awaitableAsyncAction, IIdentity identity = null);
+        /// <param name="cancellationToken">Pass an existing cancellation token (e.g. HttpContext.RequestAborted) to
+        /// enable cancellation of the async invocation.</param>
+        /// <returns>The <see cref="Task"/> representing the async invocation.</returns>
+        Task InvokeAsync(
+            Func<IServiceProvider, CancellationToken, Task> awaitableAsyncAction, 
+            IIdentity identity = null, 
+            CancellationToken cancellationToken = default);
+        
+        /// <summary>
+        /// Run a delegate through the full execution pipeline, having its separate injection scope 
+        /// </summary>
+        /// <param name="awaitableAsyncAction">The async action to be invoked by the application</param>
+        /// <param name="identity">The acting identity</param>
+        /// <returns>The <see cref="Task"/> representing the async invocation.</returns>
+        Task InvokeAsync(
+            Func<IServiceProvider, Task> awaitableAsyncAction, 
+            IIdentity identity = null);
     }
 
 
     internal class BackendFxApplicationInvoker : IBackendFxApplicationInvoker
     {
-        private readonly ICompositionRoot _compositionRoot;
+        private readonly IBackendFxApplication _application;
         private static readonly ILogger Logger = Log.Create<BackendFxApplicationInvoker>();
 
-        public BackendFxApplicationInvoker(ICompositionRoot compositionRoot)
+        public BackendFxApplicationInvoker(IBackendFxApplication application)
         {
-            _compositionRoot = compositionRoot;
+            _application = application;
         }
 
-        public async Task InvokeAsync(Func<IServiceProvider, Task> awaitableAsyncAction, IIdentity identity = null)
+        public async Task InvokeAsync(
+            Func<IServiceProvider, CancellationToken, Task> awaitableAsyncAction, 
+            IIdentity identity = null, 
+            CancellationToken cancellationToken = default)
         {
             identity ??= new AnonymousIdentity();
             Logger.LogInformation("Invoking action as {Identity}", identity.Name);
@@ -36,21 +58,24 @@ namespace Backend.Fx.ExecutionPipeline
             var operation = serviceScope.ServiceProvider.GetRequiredService<IOperation>();
             try
             {
-                operation.Begin(serviceScope);
-                await awaitableAsyncAction.Invoke(serviceScope.ServiceProvider).ConfigureAwait(false);
-                operation.Complete();
+                await operation.BeginAsync(serviceScope).ConfigureAwait(false);
+                await awaitableAsyncAction.Invoke(serviceScope.ServiceProvider, cancellationToken).ConfigureAwait(false);
+                await operation.CompleteAsync().ConfigureAwait(false);
             }
             catch
             {
-                operation.Cancel();
+                await operation.CancelAsync().ConfigureAwait(false);
                 throw;
             }
         }
 
+        public Task InvokeAsync(Func<IServiceProvider, Task> awaitableAsyncAction, IIdentity identity = null)
+            => InvokeAsync((sp, _) => awaitableAsyncAction.Invoke(sp), identity); 
+
 
         private IServiceScope BeginScope(IIdentity identity)
         {
-            IServiceScope serviceScope = _compositionRoot.BeginScope();
+            IServiceScope serviceScope = _application.CompositionRoot.BeginScope();
 
             identity ??= new AnonymousIdentity();
             serviceScope.ServiceProvider.GetRequiredService<ICurrentTHolder<IIdentity>>().ReplaceCurrent(identity);

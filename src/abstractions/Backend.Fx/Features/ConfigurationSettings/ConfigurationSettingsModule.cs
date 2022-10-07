@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using Backend.Fx.DependencyInjection;
 using Backend.Fx.Util;
@@ -25,7 +26,7 @@ namespace Backend.Fx.Features.ConfigurationSettings
             compositionRoot.Register(
                 ServiceDescriptor.Scoped<ISettingRepository, TSettingRepository>());
 
-            foreach (var settingsCategoryType in _assemblies.GetImplementingTypes<SettingsCategory>())
+            foreach (Type settingsCategoryType in _assemblies.GetImplementingTypes<SettingsCategory>())
             {
                 compositionRoot.Register(ServiceDescriptor.Scoped(settingsCategoryType, settingsCategoryType));    
             }

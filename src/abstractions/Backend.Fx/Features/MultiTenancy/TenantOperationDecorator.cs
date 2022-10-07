@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.Util;
 using JetBrains.Annotations;
@@ -14,23 +15,23 @@ namespace Backend.Fx.Features.MultiTenancy
         {
             _operation = operation;
         }
-        public void Begin(IServiceScope serviceScope)
+        public async Task BeginAsync(IServiceScope serviceScope)
         {
             var currentTenantIdSelector = serviceScope.ServiceProvider.GetRequiredService<ICurrentTenantIdSelector>();
-            var currentTenantId = currentTenantIdSelector.GetCurrentTenantId();
+            TenantId currentTenantId = currentTenantIdSelector.GetCurrentTenantId();
             var tenantIdHolder = serviceScope.ServiceProvider.GetRequiredService<ICurrentTHolder<TenantId>>();
             tenantIdHolder.ReplaceCurrent(currentTenantId);
-            _operation.Begin(serviceScope);
+            await _operation.BeginAsync(serviceScope).ConfigureAwait(false);
         }
 
-        public void Complete()
+        public Task CompleteAsync()
         {
-            _operation.Complete();
+            return _operation.CompleteAsync();
         }
 
-        public void Cancel()
+        public Task CancelAsync()
         {
-            _operation.Cancel();
+            return _operation.CancelAsync();
         }
     }
 }

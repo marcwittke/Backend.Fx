@@ -16,7 +16,7 @@ namespace Backend.Fx.Features.IdGeneration.InMem
         {
             lock (this)
             {
-                int nextValue = _currentValue;
+                var nextValue = _currentValue;
                 _currentValue += Increment;
                 return nextValue;
             }

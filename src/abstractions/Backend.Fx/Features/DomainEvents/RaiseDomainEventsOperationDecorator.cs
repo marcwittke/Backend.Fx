@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Backend.Fx.ExecutionPipeline;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,20 +19,20 @@ namespace Backend.Fx.Features.DomainEvents
             _operation = operation;
         }
 
-        public void Begin(IServiceScope serviceScope)
+        public Task BeginAsync(IServiceScope serviceScope)
         {
-            _operation.Begin(serviceScope);
+            return _operation.BeginAsync(serviceScope);
         }
 
-        public void Complete()
+        public Task CompleteAsync()
         {
             _domainEventAggregator.RaiseEvents();
-            _operation.Complete();
+            return _operation.CompleteAsync();
         }
 
-        public void Cancel()
+        public Task CancelAsync()
         {
-            _operation.Cancel();
+            return _operation.CancelAsync();
         }
     }
 }

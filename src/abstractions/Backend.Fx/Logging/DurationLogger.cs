@@ -49,6 +49,7 @@ namespace Backend.Fx.Logging
         }
     }
 
+    [PublicAPI]
     public static class DurationLoggerEx
     {
         public static IDisposable LogInformationDuration(this ILogger logger, string activity)

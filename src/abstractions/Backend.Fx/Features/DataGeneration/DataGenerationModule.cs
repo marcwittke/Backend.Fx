@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Reflection;
 using Backend.Fx.DependencyInjection;
@@ -19,7 +20,7 @@ namespace Backend.Fx.Features.DataGeneration
 
         public void Register(ICompositionRoot compositionRoot)
         {
-            var serviceType = _allowDemoDataGeneration
+            Type serviceType = _allowDemoDataGeneration
                 ? typeof(IDataGenerator)
                 : typeof(IProductiveDataGenerator);
 

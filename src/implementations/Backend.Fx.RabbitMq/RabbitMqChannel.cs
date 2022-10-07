@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using Backend.Fx.Features.MessageBus;
 using Backend.Fx.Logging;
 using Microsoft.Extensions.Logging;
@@ -18,6 +19,7 @@ namespace Backend.Fx.RabbitMq
         private readonly IConnectionFactory _connectionFactory;
         private readonly string _queueName;
         private readonly int _retryCount;
+        private readonly Func<SerializedMessage, Task> _handleMessage;
         private readonly HashSet<string> _subscribedEventNames = new HashSet<string>();
         private readonly object _syncRoot = new object();
 
@@ -26,15 +28,18 @@ namespace Backend.Fx.RabbitMq
         private bool _isDisposed;
         private IModel _channel;
 
-        public RabbitMqChannel(IConnectionFactory connectionFactory,
+        public RabbitMqChannel(
+            IConnectionFactory connectionFactory,
             string exchangeName,
             string queueName,
-            int retryCount)
+            int retryCount,
+            Func<SerializedMessage, Task> handleMessage)
         {
             _connectionFactory = connectionFactory;
             _exchangeName = exchangeName;
             _queueName = queueName;
             _retryCount = retryCount;
+            _handleMessage = handleMessage;
         }
 
         public void Dispose()
@@ -55,11 +60,7 @@ namespace Backend.Fx.RabbitMq
 
         private void EnsureClosed()
         {
-            if (_consumer != null)
-            {
-                _consumer.Received -= OnMessageReceived;
-                _consumer = null;
-            }
+            _consumer = null;
 
             if (_channel != null)
             {
@@ -92,8 +93,6 @@ namespace Backend.Fx.RabbitMq
             return Open();
         }
 
-        public event EventHandler<BasicDeliverEventArgs> MessageReceived;
-
         private bool Open()
         {
             lock (_syncRoot)
@@ -123,7 +122,25 @@ namespace Backend.Fx.RabbitMq
                     _channel.ExchangeDeclare(_exchangeName, "direct");
                     _channel.QueueDeclare(_queueName, true, false, false, null);
                     _consumer = new EventingBasicConsumer(_channel);
-                    _consumer.Received += OnMessageReceived;
+                    _consumer.Received += (sender, args) =>
+                    {
+                        Logger.LogDebug("RabbitMQ message with routing key {RoutingKey} received", args.RoutingKey);
+                        if (_subscribedEventNames.Contains(args.RoutingKey))
+                        {
+                            try
+                            {
+
+                                Task.Run(() => _handleMessage(new SerializedMessage(args.RoutingKey, args.Body)));
+                                Acknowledge(args.DeliveryTag);
+
+                            }
+                            catch
+                            {
+                                NAcknowledge(args.DeliveryTag);
+                                throw;
+                            }
+                        }
+                    };
                     _channel.BasicConsume(_queueName, false, _consumer);
                     _channel.CallbackException += OnCallbackException;
 
@@ -157,16 +174,10 @@ namespace Backend.Fx.RabbitMq
 
         public void Subscribe(string messageName)
         {
+            Logger.LogDebug("Subscribing to {MessageName}", messageName);
             EnsureOpen();
             _channel.QueueBind(_queueName, _exchangeName, messageName);
             _subscribedEventNames.Add(messageName);
-        }
-
-        public void Unsubscribe(string eventName)
-        {
-            EnsureOpen();
-            _channel.QueueUnbind(_queueName, _exchangeName, eventName);
-            _subscribedEventNames.Remove(eventName);
         }
 
         public void Acknowledge(ulong deliveryTag)
@@ -203,11 +214,6 @@ namespace Backend.Fx.RabbitMq
 
             Logger.LogWarning("A RabbitMQ connection is shut down with reason {@Reason}", reason);
             Open();
-        }
-
-        private void OnMessageReceived(object sender, BasicDeliverEventArgs basicDeliverEventArgs)
-        {
-            MessageReceived?.Invoke(this, basicDeliverEventArgs);
         }
 
         private void DoResilient(Action action)

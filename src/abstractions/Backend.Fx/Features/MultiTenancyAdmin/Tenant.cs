@@ -7,6 +7,7 @@ namespace Backend.Fx.Features.MultiTenancyAdmin
     /// <summary>
     /// Represents a tenant in the application
     /// </summary>
+    [PublicAPI]
     public class Tenant
     {
         [UsedImplicitly]

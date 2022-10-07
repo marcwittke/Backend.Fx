@@ -13,7 +13,7 @@ namespace Backend.Fx.Features.ConfigurationSettings.Serializers
 
         public int? Deserialize(string value)
         {
-            return string.IsNullOrWhiteSpace(value) ? (int?) null : int.Parse(value, CultureInfo.InvariantCulture);
+            return string.IsNullOrWhiteSpace(value) ? null : int.Parse(value, CultureInfo.InvariantCulture);
         }
     }
 }

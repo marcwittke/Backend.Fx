@@ -5,49 +5,33 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
 
-namespace Backend.Fx.AspNetCore.Mvc.Activators
+namespace Backend.Fx.AspNetCore.Mvc.Activators;
+
+[PublicAPI]
+public class BackendFxApplicationControllerActivator : IControllerActivator
 {
-    /// <summary>
-    /// This controller activator relies on an <see cref="IServiceProvider"/> set before in the
-    /// http context items dictionary. If non is to be found, the controller is activated
-    /// using the default <see cref="System.Activator"/> (without providing any ctor arguments).
-    /// </summary>
-    [PublicAPI]
-    public class BackendFxApplicationControllerActivator : IControllerActivator
+    private readonly IBackendFxApplication _application;
+    private static readonly ILogger Logger = Log.Create<BackendFxApplicationControllerActivator>();
+
+    public BackendFxApplicationControllerActivator(IBackendFxApplication application)
     {
-        private static readonly ILogger Logger = Log.Create<BackendFxApplicationControllerActivator>();
+        _application = application;
+    }
+        
+    public virtual object Create(ControllerContext c)
+    {
+        Type requestedControllerType = c.ActionDescriptor.ControllerTypeInfo.AsType();
+        return _application.CompositionRoot.ServiceProvider.GetRequiredService(requestedControllerType);
+    }
 
-        public virtual object Create(ControllerContext c)
+    public virtual void Release(ControllerContext c, object controller)
+    {
+        Logger.LogTrace("Releasing {ControllerTypeName}", controller.GetType().Name);
+        if (controller is IDisposable disposable)
         {
-            var requestedControllerType = c.ActionDescriptor.ControllerTypeInfo.AsType();
-            
-            return c.HttpContext.TryGetServiceProvider(out var ip) 
-                ? CreateInstanceUsingServiceProvider(ip, requestedControllerType)
-                : CreateInstanceUsingSystemActivator(requestedControllerType);
-        }
-
-        private static object CreateInstanceUsingServiceProvider(object sp, Type requestedControllerType)
-        {
-            Logger.LogDebug("Providing {ControllerTypeName} using {ServiceProvider}", requestedControllerType.Name, sp.GetType().Name);
-            return ((IServiceProvider)sp).GetRequiredService(requestedControllerType);
-        }
-
-        private static object CreateInstanceUsingSystemActivator(Type requestedControllerType)
-        {
-            Logger.LogDebug("Providing {ControllerTypeName} using {Activator}", requestedControllerType.Name, nameof(Activator));
-            return Activator.CreateInstance(requestedControllerType);
-        }
-
-        public virtual void Release(ControllerContext c, object controller)
-        {
-            Logger.LogTrace("Releasing {ControllerTypeName}", controller.GetType().Name);
-            if (controller is IDisposable disposable)
-            {
-                Logger.LogDebug("Disposing {ControllerTypeName}", controller.GetType().Name);
-                disposable.Dispose();
-            }
+            Logger.LogDebug("Disposing {ControllerTypeName}", controller.GetType().Name);
+            disposable.Dispose();
         }
     }
 }

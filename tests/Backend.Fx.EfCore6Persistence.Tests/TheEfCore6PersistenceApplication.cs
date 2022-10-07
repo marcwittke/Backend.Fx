@@ -1,6 +1,4 @@
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Backend.Fx.EfCore6Persistence.Tests.DummyAggregates;
@@ -13,10 +11,10 @@ using Backend.Fx.Features.MultiTenancyAdmin;
 using Backend.Fx.Features.MultiTenancyAdmin.InMem;
 using Backend.Fx.Features.Persistence;
 using Backend.Fx.Logging;
-using Backend.Fx.MicrosoftDependencyInjection;
 using Backend.Fx.SimpleInjectorDependencyInjection;
 using Backend.Fx.TestUtil;
 using FakeItEasy;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -41,7 +39,7 @@ public class TheEfCore6PersistenceApplication : TestWithLogging
         _tenantRepository.SaveTenant(new Tenant(1, "t1", "tenant 1", false));
         _tenantRepository.SaveTenant(new Tenant(2, "t2", "tenant 2", true));
         
-        _sut = new MultiTenancyBackendFxApplication<Gaga>(
+        _sut = new MultiTenancyBackendFxApplication<StaticTenantIdSelector>(
             new SimpleInjectorCompositionRoot(), 
             _exceptionLogger,
             new DirectTenantEnumerator(_tenantRepository),
@@ -315,12 +313,14 @@ public class TheEfCore6PersistenceApplication : TestWithLogging
         var rightSerialized = JsonSerializer.Serialize(right);
         Assert.Equal(leftSerialized, rightSerialized);
     }
-}
 
-public class Gaga : ICurrentTenantIdSelector
-{
-    public TenantId GetCurrentTenantId()
+    [UsedImplicitly]
+    private class StaticTenantIdSelector : ICurrentTenantIdSelector
     {
-        return new TenantId(42);
+        public TenantId GetCurrentTenantId()
+        {
+            return new TenantId(42);
+        }
     }
 }
+

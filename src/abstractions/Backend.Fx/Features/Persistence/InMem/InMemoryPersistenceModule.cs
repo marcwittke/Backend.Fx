@@ -17,7 +17,7 @@ namespace Backend.Fx.Features.Persistence.InMem
 
             // we use the scoped accessor to get the aggregate dictionaries. This will be decorated in case
             // of Multi Tenancy to switch the tenant store (we provide it as generic and non generic version, too)
-            compositionRoot.Register(ServiceDescriptor.Scoped<IAggregateDictionaries<TId>>(sp =>
+            compositionRoot.Register(ServiceDescriptor.Scoped(sp =>
                 sp.GetRequiredService<IInMemoryDatabaseAccessor<TId>>().GetAggregateDictionaries()));
             compositionRoot.Register(ServiceDescriptor.Scoped<IAggregateDictionaries>(sp =>
                 sp.GetRequiredService<IInMemoryDatabaseAccessor<TId>>().GetAggregateDictionaries()));

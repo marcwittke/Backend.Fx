@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 namespace Backend.Fx.ExecutionPipeline
 {
     [PublicAPI]
-    public struct SystemIdentity : IIdentity
+    public readonly struct SystemIdentity : IIdentity
     {
         public string Name => "SYSTEM";
 

@@ -12,7 +12,7 @@ namespace Backend.Fx.Features.ConfigurationSettings.Serializers
 
         public bool? Deserialize(string value)
         {
-            return string.IsNullOrWhiteSpace(value) ? (bool?) null : bool.Parse(value);
+            return string.IsNullOrWhiteSpace(value) ? null : bool.Parse(value);
         }
     }
 }

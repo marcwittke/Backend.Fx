@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Principal;
+using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.Util;
@@ -27,19 +28,20 @@ namespace Backend.Fx.Features.MultiTenancy
             _invoker = invoker;
         }
 
-        public async Task InvokeAsync(Func<IServiceProvider, Task> awaitableAsyncAction, IIdentity identity)
+        public async Task InvokeAsync(Func<IServiceProvider, CancellationToken, Task> awaitableAsyncAction,
+            IIdentity identity, CancellationToken cancellationToken = default)
         {
-            foreach (var tenantId in _tenantIds)
+            foreach (TenantId tenantId in _tenantIds)
             {
-                if (_tenantWideMutexManager.TryAcquire(tenantId, _mutexKey, out var mutex))
+                if (_tenantWideMutexManager.TryAcquire(tenantId, _mutexKey, out ITenantWideMutex mutex))
                 {
                     try
                     {
-                        await _invoker.InvokeAsync(sp =>
+                        await _invoker.InvokeAsync((sp, ct) =>
                         {
                             sp.GetRequiredService<ICurrentTHolder<TenantId>>().ReplaceCurrent(tenantId);
-                            return awaitableAsyncAction(sp);
-                        }, identity).ConfigureAwait(false);
+                            return awaitableAsyncAction(sp, ct);
+                        }, identity, cancellationToken).ConfigureAwait(false);
                     }
                     finally
                     {
@@ -48,5 +50,8 @@ namespace Backend.Fx.Features.MultiTenancy
                 }
             }
         }
+        
+        public Task InvokeAsync(Func<IServiceProvider, Task> awaitableAsyncAction, IIdentity identity = null)
+            => InvokeAsync((sp, _) => awaitableAsyncAction.Invoke(sp), identity);
     }
 }

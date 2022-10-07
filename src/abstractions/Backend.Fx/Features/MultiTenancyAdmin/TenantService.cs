@@ -47,7 +47,7 @@ namespace Backend.Fx.Features.MultiTenancyAdmin
             }
 
             if (_tenantRepository.GetTenants()
-                .Any(t => t.Name != null && t.Name.ToLowerInvariant() == name.ToLowerInvariant()))
+                .Any(t => t.Name != null && string.Equals(t.Name, name)))
             {
                 throw new ArgumentException($"There is already a tenant named {name}");
             }
@@ -94,7 +94,7 @@ namespace Backend.Fx.Features.MultiTenancyAdmin
 
         public Tenant UpdateTenant(int tenantId, string name, string description, string configuration)
         {
-            var tenant = _tenantRepository.GetTenant(tenantId);
+            Tenant tenant = _tenantRepository.GetTenant(tenantId);
             tenant.Name = name;
             tenant.Description = description;
             tenant.Configuration = configuration;

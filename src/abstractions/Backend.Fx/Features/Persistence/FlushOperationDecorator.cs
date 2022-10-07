@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.Logging;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,21 +18,21 @@ namespace Backend.Fx.Features.Persistence
             _canFlush = canFlush;
         }
 
-        public void Begin(IServiceScope serviceScope)
+        public Task BeginAsync(IServiceScope serviceScope)
         {
-            _operationImplementation.Begin(serviceScope);
+            return _operationImplementation.BeginAsync(serviceScope);
         }
 
-        public void Complete()
+        public async Task CompleteAsync()
         {
             Logger.LogDebug("Flushing before completion of operation");
             _canFlush.Flush();
-            _operationImplementation.Complete();
+            await _operationImplementation.CompleteAsync().ConfigureAwait(false);
         }
 
-        public void Cancel()
+        public Task CancelAsync()
         {
-            _operationImplementation.Cancel();
+            return _operationImplementation.CancelAsync();
         }
     }
 }

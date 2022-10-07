@@ -80,11 +80,12 @@ public abstract class TheBackendFxApplication : TestWithLogging
     public async Task DoesNotWaitForBootWhenBooted()
     {
         await _sut.BootAsync();
-        Assert.True(_sut.WaitForBoot(0));
+        
+        await _sut.WaitForBootAsync();
     }
 
     [Fact]
-    public void CanWaitForBoot()
+    public async Task CanWaitForBoot()
     {
         const int delayMillisecondsOnBoot = 300;
         _sut.EnableFeature(new SlowBootingFeature(delayMillisecondsOnBoot));
@@ -92,7 +93,7 @@ public abstract class TheBackendFxApplication : TestWithLogging
         Assert.False(booting.IsCompleted);
         var sw = new Stopwatch();
         sw.Start();
-        Assert.True(_sut.WaitForBoot((int)(delayMillisecondsOnBoot * 1.1)));
+        await _sut.WaitForBootAsync();
         Assert.True(booting.IsCompleted);
         Assert.True(sw.ElapsedMilliseconds >= delayMillisecondsOnBoot * 0.95);
     }
@@ -164,18 +165,18 @@ public abstract class TheBackendFxApplication : TestWithLogging
 
         await _sut.Invoker.InvokeAsync(_ =>
         {
-            A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.Begin(A<IServiceScope>._))
+            A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.BeginAsync(A<IServiceScope>._))
                 .MustHaveHappenedOnceExactly();
-            A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.Complete()).MustNotHaveHappened();
-            A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.Cancel()).MustNotHaveHappened();
+            A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.CompleteAsync()).MustNotHaveHappened();
+            A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.CancelAsync()).MustNotHaveHappened();
 
             return Task.CompletedTask;
         });
 
-        A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.Begin(A<IServiceScope>._))
+        A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.BeginAsync(A<IServiceScope>._))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.Complete()).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.Cancel()).MustNotHaveHappened();
+        A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.CompleteAsync()).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.CancelAsync()).MustNotHaveHappened();
     }
 
     [Fact]
@@ -183,10 +184,9 @@ public abstract class TheBackendFxApplication : TestWithLogging
     {
         await _sut.BootAsync();
 
-        await Assert.ThrowsAsync<InvalidOperationException>(async () => await _sut.Invoker.InvokeAsync(sp =>
+        await Assert.ThrowsAsync<InvalidOperationException>(async () => await _sut.Invoker.InvokeAsync(async sp =>
         {
-            sp.GetRequiredService<IOperation>().Begin(sp.CreateScope());
-            return Task.CompletedTask;
+            await sp.GetRequiredService<IOperation>().BeginAsync(sp.CreateScope());
         }));
     }
     
@@ -197,7 +197,7 @@ public abstract class TheBackendFxApplication : TestWithLogging
 
         await Assert.ThrowsAsync<InvalidOperationException>(async () => await _sut.Invoker.InvokeAsync(sp =>
         {
-            sp.GetRequiredService<IOperation>().Complete();
+            sp.GetRequiredService<IOperation>().CompleteAsync();
             return Task.CompletedTask;
         }));
     }
@@ -209,18 +209,18 @@ public abstract class TheBackendFxApplication : TestWithLogging
 
         await Assert.ThrowsAsync<DivideByZeroException>(async () => await _sut.Invoker.InvokeAsync(_ =>
         {
-            A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.Begin(A<IServiceScope>._))
+            A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.BeginAsync(A<IServiceScope>._))
                 .MustHaveHappenedOnceExactly();
-            A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.Complete()).MustNotHaveHappened();
-            A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.Cancel()).MustNotHaveHappened();
+            A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.CompleteAsync()).MustNotHaveHappened();
+            A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.CancelAsync()).MustNotHaveHappened();
 
             throw new DivideByZeroException();
         }));
 
-        A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.Begin(A<IServiceScope>._))
+        A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.BeginAsync(A<IServiceScope>._))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.Complete()).MustNotHaveHappened();
-        A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.Cancel()).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.CompleteAsync()).MustNotHaveHappened();
+        A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.CancelAsync()).MustHaveHappenedOnceExactly();
     }
 
     protected override void Dispose(bool disposing)
