@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Backend.Fx.Features.DomainEvents;
 
 namespace Backend.Fx.Tests.DummyServices;
@@ -11,9 +12,10 @@ public class DummyDomainEventHandler : IDomainEventHandler<DummyDomainEvent>
         _spy = spy;
     }
 
-    public void Handle(DummyDomainEvent domainEvent)
+    public Task HandleAsync(DummyDomainEvent domainEvent)
     {
         _spy.Handle(domainEvent);
+        return Task.CompletedTask;
     }
 }
 

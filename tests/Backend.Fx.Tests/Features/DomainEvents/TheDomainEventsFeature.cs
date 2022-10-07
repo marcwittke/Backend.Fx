@@ -47,7 +47,7 @@ public class TheDomainEventsFeature : TestWithLogging
         await _sut.Invoker.InvokeAsync(sp =>
         {
             var domainEventHandler = sp.GetRequiredService<IDomainEventHandler<DummyDomainEvent>>();
-            domainEventHandler.Handle(dummyDomainEvent);
+            domainEventHandler.HandleAsync(dummyDomainEvent);
             return Task.CompletedTask;
         }, new AnonymousIdentity());
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Threading.Tasks;
 using Backend.Fx.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -10,16 +11,16 @@ namespace Backend.Fx.Features.DomainEvents
     {
         private class HandleAction
         {
-            public HandleAction(string domainEventName, string handlerTypeName, Action action)
+            public HandleAction(string domainEventName, string handlerTypeName, Func<Task> asyncAction)
             {
                 DomainEventName = domainEventName;
                 HandlerTypeName = handlerTypeName;
-                Action = action;
+                AsyncAction = asyncAction;
             }
 
             public string DomainEventName { get; }
             public string HandlerTypeName { get; }
-            public Action Action { get; }
+            public Func<Task> AsyncAction { get; }
         }
 
         private static readonly ILogger Logger = Log.Create<DomainEventAggregator>();
@@ -44,7 +45,7 @@ namespace Backend.Fx.Features.DomainEvents
                 var handleAction = new HandleAction(
                     typeof(TDomainEvent).Name,
                     injectedHandler.GetType().Name,
-                    () => injectedHandler.Handle(domainEvent));
+                    async () => await injectedHandler.HandleAsync(domainEvent).ConfigureAwait(false));
 
                 _handleActions.Enqueue(handleAction);
                 Logger.LogDebug(
@@ -54,13 +55,14 @@ namespace Backend.Fx.Features.DomainEvents
             }
         }
 
-        public void RaiseEvents()
+        public async Task RaiseEventsAsync()
         {
             while (_handleActions.TryDequeue(out HandleAction handleAction))
             {
                 try
                 {
-                    handleAction.Action.Invoke();
+                    var task = handleAction.AsyncAction.Invoke();
+                    await task.ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {

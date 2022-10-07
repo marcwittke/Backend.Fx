@@ -24,10 +24,10 @@ namespace Backend.Fx.Features.DomainEvents
             return _operation.BeginAsync(serviceScope);
         }
 
-        public Task CompleteAsync()
+        public async Task CompleteAsync()
         {
-            _domainEventAggregator.RaiseEvents();
-            return _operation.CompleteAsync();
+            await _domainEventAggregator.RaiseEventsAsync().ConfigureAwait(false);
+            await _operation.CompleteAsync().ConfigureAwait(false);
         }
 
         public Task CancelAsync()

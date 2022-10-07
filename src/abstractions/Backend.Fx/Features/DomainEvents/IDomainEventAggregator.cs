@@ -1,4 +1,6 @@
-﻿namespace Backend.Fx.Features.DomainEvents
+﻿using System.Threading.Tasks;
+
+namespace Backend.Fx.Features.DomainEvents
 {
     public interface IDomainEventAggregatorScope
     {
@@ -11,6 +13,6 @@
     /// </summary>
     public interface IDomainEventAggregator
     {
-        void RaiseEvents();
+        Task RaiseEventsAsync();
     }
 }
