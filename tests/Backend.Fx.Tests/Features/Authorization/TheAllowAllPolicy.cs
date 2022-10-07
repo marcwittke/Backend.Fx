@@ -17,7 +17,7 @@ public class TheAllowAllPolicy
         public int Id { get; }
     }
     
-    private class AllowAllSut : AllowAll<Agg, int> {}
+    private class AllowAllSut : AllowAll<Agg> {}
 
     [Fact]
     public void AllowsRead()

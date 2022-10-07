@@ -4,9 +4,8 @@ using Backend.Fx.Domain;
 
 namespace Backend.Fx.Features.Authorization
 {
-    public class AllowAll<TAggregateRoot, TId> : AuthorizationPolicy<TAggregateRoot, TId> 
-        where TAggregateRoot : IAggregateRoot<TId> 
-        where TId : struct, IEquatable<TId>
+    public class AllowAll<TAggregateRoot> : AuthorizationPolicy<TAggregateRoot> 
+        where TAggregateRoot : IAggregateRoot
     {
         public override Expression<Func<TAggregateRoot, bool>> HasAccessExpression
         {

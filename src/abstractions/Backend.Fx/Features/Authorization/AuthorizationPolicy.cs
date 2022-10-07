@@ -6,10 +6,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Backend.Fx.Features.Authorization
 {
-    public abstract class AuthorizationPolicy<TAggregateRoot, TId> : IAuthorizationPolicy<TAggregateRoot>
+    public abstract class AuthorizationPolicy<TAggregateRoot> : IAuthorizationPolicy<TAggregateRoot>
         where TAggregateRoot : IAggregateRoot
     {
-        private static readonly ILogger Logger = Log.Create<AuthorizationPolicy<TAggregateRoot, TId>>();
+        private static readonly ILogger Logger = Log.Create<AuthorizationPolicy<TAggregateRoot>>();
         
         /// <inheritdoc />>
         public abstract Expression<Func<TAggregateRoot, bool>> HasAccessExpression { get; }
@@ -20,7 +20,7 @@ namespace Backend.Fx.Features.Authorization
         /// <summary>
         /// Implement a guard that might disallow modifying an existing aggregate.
         /// This overload is called directly before saving modification of an instance, so that you can use the instance's state for deciding.
-        /// This default implementation forwards to <see cref="AuthorizationPolicy{TAggregateRoot, TId}.CanCreate"/>
+        /// This default implementation forwards to <see cref="AuthorizationPolicy{TAggregateRoot}.CanCreate"/>
         /// </summary>
         public virtual bool CanModify(TAggregateRoot t)
         {
