@@ -23,6 +23,8 @@ partial class Build
                                               .EnableForce());
                              }
 
+                             DockerPull(x => x.SetName(RabbitMqImageName).EnableQuiet());
+                             
                              DockerRun(x => x
                                            .SetImage(RabbitMqImageName)
                                            .SetName(RabbitMqContainerName)
