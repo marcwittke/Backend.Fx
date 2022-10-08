@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Reflection;
 using Backend.Fx.DependencyInjection;
 using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.Features.Persistence;
@@ -13,20 +15,25 @@ namespace Backend.Fx.EfCore6Persistence;
 
 [PublicAPI]
 public class EfCorePersistenceModule<TDbContext> : AdoNetPersistenceModule
-    where TDbContext : DbContext
+    where TDbContext : DbContext 
 {
     private readonly IDbContextOptionsFactory<TDbContext> _dbContextOptionsFactory;
+    private readonly IEnumerable<Assembly> _assemblies;
 
     public EfCorePersistenceModule(
         IDbConnectionFactory dbConnectionFactory,
-        IDbContextOptionsFactory<TDbContext> dbContextOptionsFactory)
+        IDbContextOptionsFactory<TDbContext> dbContextOptionsFactory,
+        params Assembly[] assemblies)
         : base(dbConnectionFactory)
     {
         _dbContextOptionsFactory = dbContextOptionsFactory;
+        _assemblies = assemblies;
     }
 
-    protected override void RegisterImplementationSpecificServices(ICompositionRoot compositionRoot)
+    public override void Register(ICompositionRoot compositionRoot)
     {
+        base.Register(compositionRoot);
+    
         compositionRoot.Register(
             ServiceDescriptor.Scoped(sp =>
                 _dbContextOptionsFactory.GetDbContextOptions(sp.GetRequiredService<IDbConnection>())));
@@ -37,14 +44,19 @@ public class EfCorePersistenceModule<TDbContext> : AdoNetPersistenceModule
         compositionRoot.Register(
             ServiceDescriptor.Scoped(typeof(IQueryable<>), typeof(EfCoreQueryable<>)));
 
-        compositionRoot.Register(
-            ServiceDescriptor.Scoped(typeof(IRepository<,>), typeof(EfCoreRepository<,>)));
-
         compositionRoot.RegisterDecorator(
             ServiceDescriptor.Scoped<ICanFlush, EfFlush>());
 
         compositionRoot.RegisterDecorator(
             ServiceDescriptor.Scoped<IOperation, DbContextTransactionOperationDecorator>());
+
+        RegisterRepositories(compositionRoot, _assemblies);
+    }
+
+    protected virtual void RegisterRepositories(ICompositionRoot compositionRoot, IEnumerable<Assembly> assemblies)
+    {
+        compositionRoot.Register(
+            ServiceDescriptor.Scoped(typeof(IRepository<,>), typeof(EfCoreRepository<,>)));
     }
 }
 
@@ -59,8 +71,9 @@ public class EfCoreMultiTenancyPersistenceModule<TDbContext> : EfCorePersistence
 {
     public EfCoreMultiTenancyPersistenceModule(
         IDbConnectionFactory dbConnectionFactory,
-        IDbContextOptionsFactory<TDbContext> dbContextOptionsFactory)
-        : base(dbConnectionFactory, dbContextOptionsFactory)
+        IDbContextOptionsFactory<TDbContext> dbContextOptionsFactory,
+        params Assembly[] assemblies)
+        : base(dbConnectionFactory, dbContextOptionsFactory, assemblies)
     {
     }
 
@@ -69,7 +82,7 @@ public class EfCoreMultiTenancyPersistenceModule<TDbContext> : EfCorePersistence
     /// when enabling the feature with multi tenancy
     /// </summary>
     public override IModule MultiTenancyModule => new NullModule();
-    
+
     private class NullModule : IModule
     {
         public void Register(ICompositionRoot compositionRoot)

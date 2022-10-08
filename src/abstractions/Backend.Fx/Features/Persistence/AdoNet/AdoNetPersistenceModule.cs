@@ -15,8 +15,10 @@ namespace Backend.Fx.Features.Persistence.AdoNet
             _dbConnectionFactory = dbConnectionFactory;
         }
 
-        protected override void RegisterInfrastructure(ICompositionRoot compositionRoot)
+        public override void Register(ICompositionRoot compositionRoot)
         {
+            base.Register(compositionRoot);
+            
             // the DbConnectionFactory is registered as a singleton
             compositionRoot.Register(ServiceDescriptor.Singleton(_dbConnectionFactory));
 

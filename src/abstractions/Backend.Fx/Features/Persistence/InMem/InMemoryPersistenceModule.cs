@@ -7,8 +7,10 @@ namespace Backend.Fx.Features.Persistence.InMem
 {
     public class InMemoryPersistenceModule<TId> : PersistenceModule where TId : IEquatable<TId>
     {
-        protected override void RegisterInfrastructure(ICompositionRoot compositionRoot)
+        public override void Register(ICompositionRoot compositionRoot)
         {
+            base.Register(compositionRoot);
+            
             // a singleton database
             compositionRoot.Register(ServiceDescriptor.Singleton<InMemoryDatabase<TId>, InMemoryDatabase<TId>>());
 
@@ -24,10 +26,7 @@ namespace Backend.Fx.Features.Persistence.InMem
 
             compositionRoot.Register(
                 ServiceDescriptor.Scoped(typeof(IQueryable<>),typeof(InMemoryQueryable<>)));
-        }
-
-        protected override void RegisterImplementationSpecificServices(ICompositionRoot compositionRoot)
-        {
+            
             compositionRoot.Register(
                 ServiceDescriptor.Scoped(typeof(IRepository<,>), typeof(InMemoryRepository<,>)));
         }
