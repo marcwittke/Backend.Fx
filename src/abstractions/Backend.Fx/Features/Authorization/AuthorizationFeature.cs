@@ -13,8 +13,8 @@ namespace Backend.Fx.Features.Authorization
     /// just appear invisible, while a denied write throws a <see cref="ForbiddenException"/>.
     /// Note that this feature implicitly depends on the persistence feature, more specific on a persistence
     /// implementation that provides <see cref="IQueryable{TAggregateRoot}"/>s to the repository. 
-    /// While implementing policies, you can start by deriving from <see cref="DenyAll{TAggregateRoot, TId}"/> or
-    /// <see cref="AllowAll{TAggregateRoot, TId}"/>.
+    /// While implementing policies, you can start by deriving from <see cref="DenyAll{TAggregateRoot}"/> or
+    /// <see cref="AllowAll{TAggregateRoot}"/>.
     /// </summary>
     [PublicAPI]
     public class AuthorizationFeature : Feature

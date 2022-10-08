@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.ExecutionPipeline;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,21 +20,21 @@ public class OperationSpy : IOperation
         _operation = operation;
     }
 
-    public async Task BeginAsync(IServiceScope serviceScope)
+    public async Task BeginAsync(IServiceScope serviceScope, CancellationToken cancellationToken = default)
     {
         await _operationSpy.BeginAsync(serviceScope);
         await _operation.BeginAsync(serviceScope);
     }
 
-    public async Task CompleteAsync()
+    public async Task CompleteAsync(CancellationToken cancellationToken = default)
     {
-        await _operationSpy.CompleteAsync();
-        await _operation.CompleteAsync();
+        await _operationSpy.CompleteAsync(cancellationToken);
+        await _operation.CompleteAsync(cancellationToken);
     }
 
-    public async Task CancelAsync()
+    public async Task CancelAsync(CancellationToken cancellationToken = default)
     {
-        await _operationSpy.CancelAsync();
-        await _operation.CancelAsync();
+        await _operationSpy.CancelAsync(cancellationToken);
+        await _operation.CancelAsync(cancellationToken);
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.Logging;
@@ -23,25 +24,25 @@ namespace Backend.Fx.Features.Persistence.AdoNet
             _operation = operation;
         }
 
-        public async Task BeginAsync(IServiceScope serviceScope)
+        public async Task BeginAsync(IServiceScope serviceScope, CancellationToken cancellationToken = default)
         {
             Logger.LogDebug("Opening database connection");
             _dbConnection.Open();
             _connectionLifetimeLogger = Logger.LogDebugDuration("Database connection open", "Database connection closed");
-            await _operation.BeginAsync(serviceScope).ConfigureAwait(false);
+            await _operation.BeginAsync(serviceScope, cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task CompleteAsync()
+        public async Task CompleteAsync(CancellationToken cancellationToken = default)
         {
-            await _operation.CompleteAsync().ConfigureAwait(false);
+            await _operation.CompleteAsync(cancellationToken).ConfigureAwait(false);
             Logger.LogDebug("Closing database connection");
             _dbConnection.Close();
             _connectionLifetimeLogger?.Dispose();
         }
 
-        public async Task CancelAsync()
+        public async Task CancelAsync(CancellationToken cancellationToken = default)
         {
-            await _operation.CancelAsync().ConfigureAwait(false);
+            await _operation.CancelAsync(cancellationToken).ConfigureAwait(false);
             Logger.LogDebug("Closing database connection");
             _dbConnection.Close();
             _connectionLifetimeLogger?.Dispose();

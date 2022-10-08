@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
+using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Logging;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,23 +12,9 @@ namespace Backend.Fx.Features.DomainEvents
 {
     public class DomainEventAggregator : IDomainEventAggregator, IDomainEventAggregatorScope
     {
-        private class HandleAction
-        {
-            public HandleAction(string domainEventName, string handlerTypeName, Func<Task> asyncAction)
-            {
-                DomainEventName = domainEventName;
-                HandlerTypeName = handlerTypeName;
-                AsyncAction = asyncAction;
-            }
-
-            public string DomainEventName { get; }
-            public string HandlerTypeName { get; }
-            public Func<Task> AsyncAction { get; }
-        }
-
         private static readonly ILogger Logger = Log.Create<DomainEventAggregator>();
         private readonly IServiceProvider _serviceProvider;
-        private readonly ConcurrentQueue<HandleAction> _handleActions = new();
+        private readonly ConcurrentQueue<IDomainEvent> _domainEvents = new();
 
         public DomainEventAggregator(IServiceProvider serviceProvider)
         {
@@ -40,37 +29,35 @@ namespace Backend.Fx.Features.DomainEvents
         /// <param name="domainEvent"></param>
         public void PublishDomainEvent<TDomainEvent>(TDomainEvent domainEvent) where TDomainEvent : IDomainEvent
         {
-            foreach (var injectedHandler in _serviceProvider.GetServices<IDomainEventHandler<TDomainEvent>>())
-            {
-                var handleAction = new HandleAction(
-                    typeof(TDomainEvent).Name,
-                    injectedHandler.GetType().Name,
-                    async () => await injectedHandler.HandleAsync(domainEvent).ConfigureAwait(false));
-
-                _handleActions.Enqueue(handleAction);
-                Logger.LogDebug(
-                    "Invocation of {HandlerTypeName} for domain event {DomainEvent} registered. It will be executed on completion of operation",
-                    injectedHandler.GetType().Name,
-                    domainEvent);
-            }
+            Logger.LogDebug(
+                "Domain event {DomainEvent} registered. It will be raised on completion of operation",
+                typeof(TDomainEvent).Name);
+            _domainEvents.Enqueue(domainEvent);
         }
 
-        public async Task RaiseEventsAsync()
+        public async Task RaiseEventsAsync(CancellationToken cancellationToken)
         {
-            while (_handleActions.TryDequeue(out HandleAction handleAction))
+            while (_domainEvents.TryDequeue(out IDomainEvent domainEvent))
             {
-                try
+                Type eventType = domainEvent.GetType();
+                var handlerType = typeof(IDomainEventHandler<>).MakeGenericType(eventType);
+                foreach (object injectedHandler in _serviceProvider.GetServices(handlerType))
                 {
-                    var task = handleAction.AsyncAction.Invoke();
-                    await task.ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogError(ex,
-                        "Handling of {DomainEvent} by {HandlerTypeName} failed",
-                        handleAction.DomainEventName,
-                        handleAction.HandlerTypeName);
-                    throw;
+                    try
+                    {
+                        MethodInfo handleMethod = handlerType.GetMethod("HandleAsync");
+                        Debug.Assert(handleMethod != null, nameof(handleMethod) + " != null");
+                        var task = (Task)handleMethod.Invoke(injectedHandler, new object[] { domainEvent, cancellationToken });
+                        await task.ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogError(ex,
+                            "Handling of {DomainEvent} by {HandlerTypeName} failed",
+                            eventType.Name,
+                            handlerType.Name);
+                        throw;
+                    }
                 }
             }
         }

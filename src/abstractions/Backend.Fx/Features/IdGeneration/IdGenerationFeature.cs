@@ -6,6 +6,7 @@ namespace Backend.Fx.Features.IdGeneration
     /// use this feature type, when you want your non generic type of <see cref="IEntityIdGenerator{TId}"/> to be injected
     /// </summary>
     /// <typeparam name="TId"></typeparam>
+    /// <typeparam name="TIdGenerator"></typeparam>
     [PublicAPI]
     public class IdGenerationFeature<TId, TIdGenerator> : Feature 
         where TIdGenerator : class, IEntityIdGenerator<TId> 

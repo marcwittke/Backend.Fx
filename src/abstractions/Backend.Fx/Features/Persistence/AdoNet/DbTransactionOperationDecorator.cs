@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.Logging;
@@ -34,7 +35,7 @@ namespace Backend.Fx.Features.Persistence.AdoNet
         }
 
 
-        public virtual async Task BeginAsync(IServiceScope serviceScope)
+        public virtual async Task BeginAsync(IServiceScope serviceScope, CancellationToken cancellationToken = default)
         {
             if (_state != TxState.NotStarted)
             {
@@ -52,12 +53,12 @@ namespace Backend.Fx.Features.Persistence.AdoNet
             _currentTransactionHolder.ReplaceCurrent(_dbConnection.BeginTransaction(_isolationLevel));
             _transactionLifetimeLogger = Logger.LogDebugDuration("Transaction open", "Transaction terminated");
             _state = TxState.Active;
-            await _operation.BeginAsync(serviceScope).ConfigureAwait(false);
+            await _operation.BeginAsync(serviceScope, cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task CompleteAsync()
+        public async Task CompleteAsync(CancellationToken cancellationToken = default)
         {
-            await _operation.CompleteAsync().ConfigureAwait(false);
+            await _operation.CompleteAsync(cancellationToken).ConfigureAwait(false);
 
             if (_state != TxState.Active)
             {
@@ -79,7 +80,7 @@ namespace Backend.Fx.Features.Persistence.AdoNet
             _state = TxState.Committed;
         }
 
-        public async Task CancelAsync()
+        public async Task CancelAsync(CancellationToken cancellationToken = default)
         {
             Logger.LogDebug("rolling back transaction");
             if (_state != TxState.Active)
@@ -87,7 +88,7 @@ namespace Backend.Fx.Features.Persistence.AdoNet
                 throw new InvalidOperationException($"Cannot roll back a transaction that is {_state}");
             }
             
-            await _operation.CancelAsync().ConfigureAwait(false);
+            await _operation.CancelAsync(cancellationToken).ConfigureAwait(false);
 
             _currentTransactionHolder.Current.Rollback();
             _currentTransactionHolder.Current.Dispose();

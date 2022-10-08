@@ -80,7 +80,7 @@ public abstract class TheBackendFxApplication : TestWithLogging
     public async Task DoesNotWaitForBootWhenBooted()
     {
         await _sut.BootAsync();
-        
+
         await _sut.WaitForBootAsync();
     }
 
@@ -165,18 +165,23 @@ public abstract class TheBackendFxApplication : TestWithLogging
 
         await _sut.Invoker.InvokeAsync(_ =>
         {
-            A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.BeginAsync(A<IServiceScope>._))
+            A.CallTo(() =>
+                    _dummyServicesFeature.Spies.OperationSpy.BeginAsync(A<IServiceScope>._, A<CancellationToken>._))
                 .MustHaveHappenedOnceExactly();
-            A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.CompleteAsync()).MustNotHaveHappened();
-            A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.CancelAsync()).MustNotHaveHappened();
+            A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.CompleteAsync(A<CancellationToken>._))
+                .MustNotHaveHappened();
+            A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.CancelAsync(A<CancellationToken>._))
+                .MustNotHaveHappened();
 
             return Task.CompletedTask;
         });
 
-        A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.BeginAsync(A<IServiceScope>._))
+        A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.BeginAsync(A<IServiceScope>._, A<CancellationToken>._))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.CompleteAsync()).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.CancelAsync()).MustNotHaveHappened();
+        A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.CompleteAsync(A<CancellationToken>._))
+            .MustHaveHappenedOnceExactly();
+        A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.CancelAsync(A<CancellationToken>._))
+            .MustNotHaveHappened();
     }
 
     [Fact]
@@ -189,7 +194,7 @@ public abstract class TheBackendFxApplication : TestWithLogging
             await sp.GetRequiredService<IOperation>().BeginAsync(sp.CreateScope());
         }));
     }
-    
+
     [Fact]
     public async Task DoesNotAllowToCompleteOperationTwice()
     {
@@ -209,18 +214,23 @@ public abstract class TheBackendFxApplication : TestWithLogging
 
         await Assert.ThrowsAsync<DivideByZeroException>(async () => await _sut.Invoker.InvokeAsync(_ =>
         {
-            A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.BeginAsync(A<IServiceScope>._))
+            A.CallTo(() =>
+                    _dummyServicesFeature.Spies.OperationSpy.BeginAsync(A<IServiceScope>._, A<CancellationToken>._))
                 .MustHaveHappenedOnceExactly();
-            A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.CompleteAsync()).MustNotHaveHappened();
-            A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.CancelAsync()).MustNotHaveHappened();
+            A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.CompleteAsync(A<CancellationToken>._))
+                .MustNotHaveHappened();
+            A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.CancelAsync(A<CancellationToken>._))
+                .MustNotHaveHappened();
 
             throw new DivideByZeroException();
         }));
 
-        A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.BeginAsync(A<IServiceScope>._))
+        A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.BeginAsync(A<IServiceScope>._, A<CancellationToken>._))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.CompleteAsync()).MustNotHaveHappened();
-        A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.CancelAsync()).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.CompleteAsync(A<CancellationToken>._))
+            .MustNotHaveHappened();
+        A.CallTo(() => _dummyServicesFeature.Spies.OperationSpy.CancelAsync(A<CancellationToken>._))
+            .MustHaveHappenedOnceExactly();
     }
 
     protected override void Dispose(bool disposing)

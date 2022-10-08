@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.Logging;
@@ -18,21 +19,21 @@ namespace Backend.Fx.Features.Persistence
             _canFlush = canFlush;
         }
 
-        public Task BeginAsync(IServiceScope serviceScope)
+        public Task BeginAsync(IServiceScope serviceScope, CancellationToken cancellationToken = default)
         {
-            return _operationImplementation.BeginAsync(serviceScope);
+            return _operationImplementation.BeginAsync(serviceScope, cancellationToken);
         }
 
-        public async Task CompleteAsync()
+        public async Task CompleteAsync(CancellationToken cancellationToken = default)
         {
             Logger.LogDebug("Flushing before completion of operation");
             _canFlush.Flush();
-            await _operationImplementation.CompleteAsync().ConfigureAwait(false);
+            await _operationImplementation.CompleteAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public Task CancelAsync()
+        public Task CancelAsync(CancellationToken cancellationToken = default)
         {
-            return _operationImplementation.CancelAsync();
+            return _operationImplementation.CancelAsync(cancellationToken);
         }
     }
 }

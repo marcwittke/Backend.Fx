@@ -58,13 +58,13 @@ namespace Backend.Fx.ExecutionPipeline
             var operation = serviceScope.ServiceProvider.GetRequiredService<IOperation>();
             try
             {
-                await operation.BeginAsync(serviceScope).ConfigureAwait(false);
+                await operation.BeginAsync(serviceScope, cancellationToken).ConfigureAwait(false);
                 await awaitableAsyncAction.Invoke(serviceScope.ServiceProvider, cancellationToken).ConfigureAwait(false);
-                await operation.CompleteAsync().ConfigureAwait(false);
+                await operation.CompleteAsync(cancellationToken).ConfigureAwait(false);
             }
             catch
             {
-                await operation.CancelAsync().ConfigureAwait(false);
+                await operation.CancelAsync(cancellationToken).ConfigureAwait(false);
                 throw;
             }
         }

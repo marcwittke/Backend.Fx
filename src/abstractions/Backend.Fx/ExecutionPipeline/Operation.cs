@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Logging;
 using JetBrains.Annotations;
@@ -15,11 +16,11 @@ namespace Backend.Fx.ExecutionPipeline
     [PublicAPI]
     public interface IOperation
     {
-        Task BeginAsync(IServiceScope serviceScope);
+        Task BeginAsync(IServiceScope serviceScope, CancellationToken cancellationToken = default);
         
-        Task CompleteAsync();
+        Task CompleteAsync(CancellationToken cancellationToken = default);
 
-        Task CancelAsync();
+        Task CancelAsync(CancellationToken cancellationToken = default);
     }
 
     
@@ -36,7 +37,7 @@ namespace Backend.Fx.ExecutionPipeline
             _instanceId = operationCounter.Count();
         }
         
-        public Task BeginAsync(IServiceScope serviceScope)
+        public Task BeginAsync(IServiceScope serviceScope, CancellationToken cancellationToken = default)
         {
             if (_isActive != null)
             {
@@ -48,7 +49,7 @@ namespace Backend.Fx.ExecutionPipeline
             return Task.CompletedTask;
         }
 
-        public Task CompleteAsync()
+        public Task CompleteAsync(CancellationToken cancellationToken = default)
         {
             Logger.LogInformation("Completing operation #{OperationId}", _instanceId);
             if (_isActive != true)
@@ -62,7 +63,7 @@ namespace Backend.Fx.ExecutionPipeline
             return Task.CompletedTask;
         }
 
-        public Task CancelAsync()
+        public Task CancelAsync(CancellationToken cancellationToken = default)
         {
             Logger.LogInformation("Canceling operation #{OperationId}", _instanceId);
             _isActive = false;

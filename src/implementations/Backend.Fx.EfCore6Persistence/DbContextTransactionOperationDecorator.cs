@@ -1,5 +1,6 @@
 using System.Data;
 using System.Data.Common;
+using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.Util;
@@ -24,19 +25,19 @@ public class DbContextTransactionOperationDecorator : IOperation
         _operation = operation;
     }
 
-    public async Task BeginAsync(IServiceScope scope)
+    public async Task BeginAsync(IServiceScope scope, CancellationToken cancellationToken = default)
     {
         await _operation.BeginAsync(scope).ConfigureAwait(false);
         await _dbContext.Database.UseTransactionAsync((DbTransaction)_dbTransactionHolder.Current).ConfigureAwait(false);
     }
 
-    public Task CompleteAsync()
+    public Task CompleteAsync(CancellationToken cancellationToken = default)
     {
-        return _operation.CompleteAsync();
+        return _operation.CompleteAsync(cancellationToken);
     }
 
-    public Task CancelAsync()
+    public Task CancelAsync(CancellationToken cancellationToken = default)
     {
-        return _operation.CancelAsync();
+        return _operation.CancelAsync(cancellationToken);
     }
 }

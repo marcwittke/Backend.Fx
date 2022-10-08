@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Features.DomainEvents;
 using Backend.Fx.Logging;
@@ -18,11 +19,11 @@ namespace Backend.Fx.Features.Persistence
             _domainEventAggregator = domainEventAggregator;
         }
 
-        public async Task RaiseEventsAsync()
+        public async Task RaiseEventsAsync(CancellationToken cancellationToken = default)
         {
             Logger.LogDebug("Flushing before raising domain events");
             _canFlush.Flush();
-            await _domainEventAggregator.RaiseEventsAsync().ConfigureAwait(false);
+            await _domainEventAggregator.RaiseEventsAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

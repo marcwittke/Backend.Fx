@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.ExecutionPipeline;
 using JetBrains.Annotations;
@@ -19,20 +20,20 @@ namespace Backend.Fx.Features.DomainEvents
             _operation = operation;
         }
 
-        public Task BeginAsync(IServiceScope serviceScope)
+        public Task BeginAsync(IServiceScope serviceScope, CancellationToken cancellationToken = default)
         {
-            return _operation.BeginAsync(serviceScope);
+            return _operation.BeginAsync(serviceScope, cancellationToken);
         }
 
-        public async Task CompleteAsync()
+        public async Task CompleteAsync(CancellationToken cancellationToken = default)
         {
-            await _domainEventAggregator.RaiseEventsAsync().ConfigureAwait(false);
-            await _operation.CompleteAsync().ConfigureAwait(false);
+            await _domainEventAggregator.RaiseEventsAsync(cancellationToken).ConfigureAwait(false);
+            await _operation.CompleteAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public Task CancelAsync()
+        public Task CancelAsync(CancellationToken cancellationToken = default)
         {
-            return _operation.CancelAsync();
+            return _operation.CancelAsync(cancellationToken);
         }
     }
 }

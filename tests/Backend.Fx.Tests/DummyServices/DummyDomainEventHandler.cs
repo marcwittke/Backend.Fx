@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Features.DomainEvents;
 
@@ -12,7 +13,7 @@ public class DummyDomainEventHandler : IDomainEventHandler<DummyDomainEvent>
         _spy = spy;
     }
 
-    public Task HandleAsync(DummyDomainEvent domainEvent)
+    public Task HandleAsync(DummyDomainEvent domainEvent, CancellationToken cancellationToken = default)
     {
         _spy.Handle(domainEvent);
         return Task.CompletedTask;
