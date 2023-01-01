@@ -21,7 +21,7 @@ namespace Backend.Fx.Util
     [PublicAPI]
     public abstract class CurrentTHolder<T> : ICurrentTHolder<T>
     {
-        private static readonly ILogger Logger = Log.Create<CurrentTHolder<T>>();
+        private readonly ILogger _logger = Log.Create<CurrentTHolder<T>>();
         private T _current;
 
         protected CurrentTHolder()
@@ -38,9 +38,9 @@ namespace Backend.Fx.Util
             {
                 if (_current == null)
                 {
-                    Logger.LogDebug("Providing initial {HeldTypeName} instance", typeof(T).Name);
+                    _logger.LogDebug("Providing initial {HeldTypeName} instance", typeof(T).Name);
                     _current = ProvideInstance();
-                    Logger.LogDebug("Initial instance of {HeldTypeName} is: {HeldInstanceDescription}", typeof(T).Name, Describe(_current));
+                    _logger.LogDebug("Initial instance of {HeldTypeName} is: {HeldInstanceDescription}", typeof(T).Name, Describe(_current));
                 }
 
                 return _current;
@@ -51,7 +51,7 @@ namespace Backend.Fx.Util
         {
             if (Equals(_current, newCurrentInstance)) return;
 
-            Logger.LogDebug(
+            _logger.LogDebug(
                 "Replacing current instance of {HeldTypename} ({HeldInstanceDescription}) with another instance ({NewInstanceDescription})",
                 typeof(T).Name,
                 Describe(Current),

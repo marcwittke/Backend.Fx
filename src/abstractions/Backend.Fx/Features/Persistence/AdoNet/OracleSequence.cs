@@ -9,7 +9,7 @@ namespace Backend.Fx.Features.Persistence.AdoNet
 {
     public abstract class OracleSequence<TId> : ISequence<TId> 
     {
-        private static readonly ILogger Logger = Log.Create<OracleSequence<TId>>();
+        private readonly ILogger _logger = Log.Create<OracleSequence<TId>>();
         private readonly IDbConnectionFactory _dbConnectionFactory;
         private readonly int _startWith;
 
@@ -34,7 +34,7 @@ namespace Backend.Fx.Features.Persistence.AdoNet
 
         public void EnsureSequence()
         {
-            Logger.LogInformation("Ensuring existence of oracle sequence {SchemaPrefix}.{SequenceName}", SchemaPrefix, SequenceName);
+            _logger.LogInformation("Ensuring existence of oracle sequence {SchemaPrefix}.{SequenceName}", SchemaPrefix, SequenceName);
 
             using IDbConnection dbConnection = _dbConnectionFactory.Create();
             dbConnection.Open();
@@ -47,17 +47,17 @@ namespace Backend.Fx.Features.Persistence.AdoNet
 
             if (sequenceExists)
             {
-                Logger.LogInformation("Oracle sequence {SchemaPrefix}.{SequenceName} exists", SchemaPrefix, SequenceName);
+                _logger.LogInformation("Oracle sequence {SchemaPrefix}.{SequenceName} exists", SchemaPrefix, SequenceName);
             }
             else
             {
-                Logger.LogInformation("Oracle sequence {SchemaPrefix}.{SequenceName} does not exist yet and will be created now",
+                _logger.LogInformation("Oracle sequence {SchemaPrefix}.{SequenceName} does not exist yet and will be created now",
                     SchemaPrefix,
                     SequenceName);
                 using IDbCommand cmd = dbConnection.CreateCommand();
                 cmd.CommandText = $"CREATE SEQUENCE {SchemaPrefix}{SequenceName} START WITH {_startWith} INCREMENT BY {Increment}";
                 cmd.ExecuteNonQuery();
-                Logger.LogInformation("Oracle sequence {SchemaPrefix}.{SequenceName} created", SchemaPrefix, SequenceName);
+                _logger.LogInformation("Oracle sequence {SchemaPrefix}.{SequenceName} created", SchemaPrefix, SequenceName);
             }
         }
 
@@ -69,7 +69,7 @@ namespace Backend.Fx.Features.Persistence.AdoNet
             using IDbCommand command = dbConnection.CreateCommand();
             command.CommandText = $"SELECT {SchemaPrefix}{SequenceName}.NEXTVAL FROM dual";
             TId nextValue = ConvertNextValueFromSequence(command.ExecuteScalar());
-            Logger.LogDebug("Oracle sequence {SchemaPrefix}.{SequenceName} served {NextValue} as next value",
+            _logger.LogDebug("Oracle sequence {SchemaPrefix}.{SequenceName} served {NextValue} as next value",
                 SchemaPrefix,
                 SequenceName,
                 nextValue);

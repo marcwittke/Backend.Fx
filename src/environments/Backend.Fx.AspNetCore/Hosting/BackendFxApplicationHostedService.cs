@@ -17,7 +17,7 @@ namespace Backend.Fx.AspNetCore.Hosting
     [PublicAPI]
     public class BackendFxApplicationHostedService : IBackendFxApplicationHostedService
     {
-        private static readonly ILogger Logger = Log.Create<BackendFxApplicationHostedService>();
+        private readonly ILogger _logger = Log.Create<BackendFxApplicationHostedService>();
 
         public BackendFxApplicationHostedService(IBackendFxApplication application)
         {
@@ -28,7 +28,7 @@ namespace Backend.Fx.AspNetCore.Hosting
 
         public virtual async Task StartAsync(CancellationToken ct)
         {
-            using (Logger.LogInformationDuration("Application starting..."))
+            using (_logger.LogInformationDuration("Application starting..."))
             {
                 try
                 {
@@ -36,7 +36,7 @@ namespace Backend.Fx.AspNetCore.Hosting
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogCritical(ex, "Application could not be started");
+                    _logger.LogCritical(ex, "Application could not be started");
                     throw;
                 }
             }
@@ -44,7 +44,7 @@ namespace Backend.Fx.AspNetCore.Hosting
 
         public virtual Task StopAsync(CancellationToken cancellationToken)
         {
-            using (Logger.LogInformationDuration("Application stopping..."))
+            using (_logger.LogInformationDuration("Application stopping..."))
             {
                 Application.Dispose();
                 return Task.CompletedTask;

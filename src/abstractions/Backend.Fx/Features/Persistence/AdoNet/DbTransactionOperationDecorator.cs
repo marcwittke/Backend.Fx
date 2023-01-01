@@ -18,7 +18,7 @@ namespace Backend.Fx.Features.Persistence.AdoNet
     [PublicAPI]
     public class DbTransactionOperationDecorator : IOperation
     {
-        private static readonly ILogger Logger = Log.Create<DbTransactionOperationDecorator>();
+        private readonly ILogger _logger = Log.Create<DbTransactionOperationDecorator>();
         private readonly IDbConnection _dbConnection;
         private readonly ICurrentTHolder<IDbTransaction> _currentTransactionHolder;
         private readonly IOperation _operation;
@@ -45,13 +45,13 @@ namespace Backend.Fx.Features.Persistence.AdoNet
             _shouldHandleConnectionState = ShouldHandleConnectionState();
             if (_shouldHandleConnectionState)
             {
-                Logger.LogDebug("Opening connection");
+                _logger.LogDebug("Opening connection");
                 _dbConnection.Open();
             }
 
-            Logger.LogDebug("Beginning transaction");
+            _logger.LogDebug("Beginning transaction");
             _currentTransactionHolder.ReplaceCurrent(_dbConnection.BeginTransaction(_isolationLevel));
-            _transactionLifetimeLogger = Logger.LogDebugDuration("Transaction open", "Transaction terminated");
+            _transactionLifetimeLogger = _logger.LogDebugDuration("Transaction open", "Transaction terminated");
             _state = TxState.Active;
             await _operation.BeginAsync(serviceScope, cancellationToken).ConfigureAwait(false);
         }
@@ -65,7 +65,7 @@ namespace Backend.Fx.Features.Persistence.AdoNet
                 throw new InvalidOperationException($"A transaction cannot be committed when it is {_state}.");
             }
 
-            Logger.LogDebug("Committing transaction");
+            _logger.LogDebug("Committing transaction");
             _currentTransactionHolder.Current.Commit();
             _currentTransactionHolder.Current.Dispose();
             _currentTransactionHolder.ReplaceCurrent(null);
@@ -73,7 +73,7 @@ namespace Backend.Fx.Features.Persistence.AdoNet
             _transactionLifetimeLogger = null;
             if (_shouldHandleConnectionState)
             {
-                Logger.LogDebug("Closing connection");
+                _logger.LogDebug("Closing connection");
                 _dbConnection.Close();
             }
 
@@ -82,7 +82,7 @@ namespace Backend.Fx.Features.Persistence.AdoNet
 
         public async Task CancelAsync(CancellationToken cancellationToken = default)
         {
-            Logger.LogDebug("rolling back transaction");
+            _logger.LogDebug("rolling back transaction");
             if (_state != TxState.Active)
             {
                 throw new InvalidOperationException($"Cannot roll back a transaction that is {_state}");

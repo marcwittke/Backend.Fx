@@ -12,7 +12,7 @@ namespace Backend.Fx.Features.DomainEvents
 {
     public class DomainEventAggregator : IDomainEventAggregator, IDomainEventAggregatorScope
     {
-        private static readonly ILogger Logger = Log.Create<DomainEventAggregator>();
+        private readonly ILogger _logger = Log.Create<DomainEventAggregator>();
         private readonly IServiceProvider _serviceProvider;
         private readonly ConcurrentQueue<IDomainEvent> _domainEvents = new();
 
@@ -29,7 +29,7 @@ namespace Backend.Fx.Features.DomainEvents
         /// <param name="domainEvent"></param>
         public void PublishDomainEvent<TDomainEvent>(TDomainEvent domainEvent) where TDomainEvent : IDomainEvent
         {
-            Logger.LogDebug(
+            _logger.LogDebug(
                 "Domain event {DomainEvent} registered. It will be raised on completion of operation",
                 typeof(TDomainEvent).Name);
             _domainEvents.Enqueue(domainEvent);
@@ -52,7 +52,7 @@ namespace Backend.Fx.Features.DomainEvents
                     }
                     catch (Exception ex)
                     {
-                        Logger.LogError(ex,
+                        _logger.LogError(ex,
                             "Handling of {DomainEvent} by {HandlerTypeName} failed",
                             eventType.Name,
                             handlerType.Name);

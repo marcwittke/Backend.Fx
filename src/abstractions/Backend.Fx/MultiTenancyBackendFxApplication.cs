@@ -12,15 +12,7 @@ namespace Backend.Fx
     [PublicAPI]
     public class MultiTenancyBackendFxApplication<TCurrentTenantIdSelector> : BackendFxApplication where TCurrentTenantIdSelector : class, ICurrentTenantIdSelector
     {
-        private static readonly ILogger Logger = Log.Create<MultiTenancyBackendFxApplication<TCurrentTenantIdSelector>>();
-        
-        public MultiTenancyBackendFxApplication(
-            ICompositionRoot compositionRoot,
-            ITenantEnumerator tenantEnumerator,
-            params Assembly[] assemblies)
-            : this(compositionRoot, new ExceptionLogger(Logger), tenantEnumerator, new InProcTenantWideMutexManager(), assemblies)
-        {
-        }
+        private readonly ILogger _logger = Log.Create<MultiTenancyBackendFxApplication<TCurrentTenantIdSelector>>();
         
         public MultiTenancyBackendFxApplication(
             ICompositionRoot compositionRoot,

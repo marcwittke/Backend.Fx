@@ -61,19 +61,9 @@ namespace Backend.Fx
     [PublicAPI]
     public class BackendFxApplication : IBackendFxApplication
     {
-        private static readonly ILogger Logger = Log.Create<BackendFxApplication>();
+        private readonly ILogger _logger = Log.Create<BackendFxApplication>();
         private readonly List<Feature> _features = new();
         private readonly Lazy<Task> _bootAction;
-
-        /// <summary>
-        /// Initializes the application's runtime instance
-        /// </summary>
-        /// <param name="compositionRoot">The composition root of the dependency injection framework</param>
-        /// <param name="assemblies"></param>
-        public BackendFxApplication(ICompositionRoot compositionRoot, params Assembly[] assemblies)
-            : this(compositionRoot, new ExceptionLogger(Logger), assemblies)
-        {
-        }
 
         /// <summary>
         /// Initializes the application's runtime instance
@@ -86,7 +76,7 @@ namespace Backend.Fx
         {
             assemblies ??= Array.Empty<Assembly>();
 
-            Logger.LogInformation(
+            _logger.LogInformation(
                 "Initializing application with {CompositionRoot} providing services from [{Assemblies}]",
                 compositionRoot.GetType().GetDetailedTypeName(),
                 string.Join(", ", assemblies.Select(ass => ass.GetName().Name)));
@@ -102,7 +92,7 @@ namespace Backend.Fx
 
             _bootAction = new Lazy<Task>(async () =>
             {
-                Logger.LogInformation("Booting application");
+                _logger.LogInformation("Booting application");
                 CompositionRoot.Verify();
 
                 foreach (Feature feature in _features)
@@ -167,7 +157,7 @@ namespace Backend.Fx
 
         public void Dispose()
         {
-            Logger.LogInformation("Application shut down initialized");
+            _logger.LogInformation("Application shut down initialized");
             foreach (Feature feature in _features)
             {
                 feature.Dispose();

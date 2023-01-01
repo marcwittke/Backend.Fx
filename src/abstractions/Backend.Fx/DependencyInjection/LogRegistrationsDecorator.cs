@@ -10,7 +10,7 @@ namespace Backend.Fx.DependencyInjection
 {
     public class LogRegistrationsDecorator : ICompositionRoot
     {
-        private static readonly ILogger Logger = Log.Create<CompositionRoot>();
+        private readonly ILogger _logger = Log.Create<CompositionRoot>();
         private readonly ICompositionRoot _compositionRoot;
 
         public LogRegistrationsDecorator(ICompositionRoot compositionRoot)
@@ -51,15 +51,15 @@ namespace Backend.Fx.DependencyInjection
             LogAddCollectionRegistration(serviceDescriptors);
             if (serviceDescriptors.GroupBy(sd => sd.ServiceType).Count() > 1)
             {
-                Logger.LogError("Attempt to register a collection of services for different service types");
+                _logger.LogError("Attempt to register a collection of services for different service types");
             }
             _compositionRoot.RegisterCollection(serviceDescriptors);
         }
 
-        private static void LogAddCollectionRegistration(IEnumerable<ServiceDescriptor> serviceDescriptors)
+        private void LogAddCollectionRegistration(IEnumerable<ServiceDescriptor> serviceDescriptors)
         {
             serviceDescriptors = serviceDescriptors as ServiceDescriptor[] ?? serviceDescriptors.ToArray();
-            Logger.LogDebug("{Verb} {Lifetime} {RegistrationType} for {ServiceType}: {ImplementationType}",
+            _logger.LogDebug("{Verb} {Lifetime} {RegistrationType} for {ServiceType}: {ImplementationType}",
                 "Adding",
                 serviceDescriptors.First().Lifetime.ToString().ToLowerInvariant(),
                 "collection registration",
@@ -75,9 +75,9 @@ namespace Backend.Fx.DependencyInjection
         public IServiceProvider ServiceProvider => _compositionRoot.ServiceProvider;
 
 
-        private static void LogDetails(string verb, string registrationType, ServiceDescriptor serviceDescriptor)
+        private void LogDetails(string verb, string registrationType, ServiceDescriptor serviceDescriptor)
         {
-            Logger.LogDebug("{Verb} {Lifetime} {RegistrationType} for {ServiceType}: {ImplementationType}",
+            _logger.LogDebug("{Verb} {Lifetime} {RegistrationType} for {ServiceType}: {ImplementationType}",
                 verb,
                 serviceDescriptor.Lifetime.ToString().ToLowerInvariant(),
                 registrationType,

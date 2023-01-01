@@ -31,14 +31,14 @@ namespace Backend.Fx.Features.IdGeneration
     [PublicAPI]
     public abstract class HiLoIntIdGenerator : HiLoIdGenerator<int>
     {
-        private static readonly ILogger Logger = Log.Create<HiLoIntIdGenerator>();
+        private readonly ILogger _logger = Log.Create<HiLoIntIdGenerator>();
         private int _highId = -1;
         private int _lowId = -1;
         private readonly bool _isTraceEnabled;
 
         protected HiLoIntIdGenerator()
         {
-            _isTraceEnabled = Logger.IsEnabled(LogLevel.Trace);
+            _isTraceEnabled = _logger.IsEnabled(LogLevel.Trace);
         }
 
 
@@ -56,7 +56,7 @@ namespace Backend.Fx.Features.IdGeneration
         {
             var nextId = _lowId;
             Interlocked.Increment(ref _lowId);
-            if (_isTraceEnabled) Logger.LogTrace("Providing id {NextId}", nextId);
+            if (_isTraceEnabled) _logger.LogTrace("Providing id {NextId}", nextId);
             return nextId;
         }
     }
@@ -64,14 +64,14 @@ namespace Backend.Fx.Features.IdGeneration
     [PublicAPI]
     public abstract class HiLoLongIdGenerator : HiLoIdGenerator<long>
     {
-        private static readonly ILogger Logger = Log.Create<HiLoLongIdGenerator>();
+        private readonly ILogger _logger = Log.Create<HiLoLongIdGenerator>();
         private long _highId = -1;
         private long _lowId = -1;
         private readonly bool _isTraceEnabled;
 
         protected HiLoLongIdGenerator()
         {
-            _isTraceEnabled = Logger.IsEnabled(LogLevel.Trace);
+            _isTraceEnabled = _logger.IsEnabled(LogLevel.Trace);
         }
 
 
@@ -89,7 +89,7 @@ namespace Backend.Fx.Features.IdGeneration
         {
             var nextId = _lowId;
             Interlocked.Increment(ref _lowId);
-            if (_isTraceEnabled) Logger.LogTrace("Providing id {NextId}", nextId);
+            if (_isTraceEnabled) _logger.LogTrace("Providing id {NextId}", nextId);
             return nextId;
         }
     }

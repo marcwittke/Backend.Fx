@@ -37,7 +37,7 @@ namespace Backend.Fx.DependencyInjection
     [PublicAPI]
     public abstract class CompositionRoot : ICompositionRoot
     {
-        private static readonly ILogger Logger = Log.Create<CompositionRoot>();
+        private readonly ILogger _logger = Log.Create<CompositionRoot>();
         
         public abstract IServiceProvider ServiceProvider { get; }
         
@@ -47,7 +47,7 @@ namespace Backend.Fx.DependencyInjection
         {
             foreach (IModule module in modules)
             {
-                Logger.LogInformation("Registering {@Module}", module);
+                _logger.LogInformation("Registering {@Module}", module);
                 module.Register(this);
             }
         }

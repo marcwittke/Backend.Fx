@@ -9,7 +9,7 @@ namespace Backend.Fx.Features.Persistence
 {
     public class FlushOperationDecorator : IOperation
     {
-        private static readonly ILogger Logger = Log.Create<FlushOperationDecorator>();
+        private readonly ILogger _logger = Log.Create<FlushOperationDecorator>();
         private readonly IOperation _operationImplementation;
         private readonly ICanFlush _canFlush;
 
@@ -26,7 +26,7 @@ namespace Backend.Fx.Features.Persistence
 
         public async Task CompleteAsync(CancellationToken cancellationToken = default)
         {
-            Logger.LogDebug("Flushing before completion of operation");
+            _logger.LogDebug("Flushing before completion of operation");
             _canFlush.Flush();
             await _operationImplementation.CompleteAsync(cancellationToken).ConfigureAwait(false);
         }

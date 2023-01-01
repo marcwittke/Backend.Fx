@@ -19,7 +19,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
     [PublicAPI]
     public class SimpleInjectorCompositionRoot : CompositionRoot
     {
-        private static readonly ILogger Logger = Log.Create<SimpleInjectorCompositionRoot>();
+        private readonly ILogger _logger = Log.Create<SimpleInjectorCompositionRoot>();
         private readonly IList<ServiceDescriptor> _services = new List<ServiceDescriptor>();
         private readonly IList<ServiceDescriptor> _decorators = new List<ServiceDescriptor>();
         private readonly IList<ServiceDescriptor[]> _serviceCollections = new List<ServiceDescriptor[]>();
@@ -36,7 +36,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
             ILifestyleSelectionBehavior lifestyleBehavior,
             ScopedLifestyle scopedLifestyle)
         {
-            Logger.LogInformation("Initializing SimpleInjector");
+            _logger.LogInformation("Initializing SimpleInjector");
             ScopedLifestyle = scopedLifestyle;
 
             Container.Options.LifestyleSelectionBehavior = lifestyleBehavior;
@@ -99,7 +99,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
         {
             FillContainer();
 
-            Logger.LogInformation("Verifying container");
+            _logger.LogInformation("Verifying container");
             Container.Verify(VerificationOption.VerifyAndDiagnose);
         }
 
@@ -124,7 +124,7 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
 
         private void FillContainer()
         {
-            Logger.LogInformation("Registering services with container");
+            _logger.LogInformation("Registering services with container");
             foreach (var serviceDescriptor in _services)
             {
                 if (serviceDescriptor.ImplementationType != null)

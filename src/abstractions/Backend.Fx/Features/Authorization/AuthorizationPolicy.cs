@@ -9,7 +9,7 @@ namespace Backend.Fx.Features.Authorization
     public abstract class AuthorizationPolicy<TAggregateRoot> : IAuthorizationPolicy<TAggregateRoot>
         where TAggregateRoot : IAggregateRoot
     {
-        private static readonly ILogger Logger = Log.Create<AuthorizationPolicy<TAggregateRoot>>();
+        private readonly ILogger _logger = Log.Create<AuthorizationPolicy<TAggregateRoot>>();
         
         /// <inheritdoc />>
         public abstract Expression<Func<TAggregateRoot, bool>> HasAccessExpression { get; }
@@ -25,7 +25,7 @@ namespace Backend.Fx.Features.Authorization
         public virtual bool CanModify(TAggregateRoot t)
         {
             var canModify = CanCreate(t);
-            Logger.LogTrace("CanModify({@Aggregate}): {CanModify}", t, canModify);
+            _logger.LogTrace("CanModify({@Aggregate}): {CanModify}", t, canModify);
             return canModify;
         }
 
@@ -33,7 +33,7 @@ namespace Backend.Fx.Features.Authorization
         public virtual bool CanDelete(TAggregateRoot t)
         {
             var canDelete = CanModify(t);
-            Logger.LogTrace("CanDelete({@Aggregate}): {CanDelete}", t, canDelete);
+            _logger.LogTrace("CanDelete({@Aggregate}): {CanDelete}", t, canDelete);
             return canDelete;
         }
     }

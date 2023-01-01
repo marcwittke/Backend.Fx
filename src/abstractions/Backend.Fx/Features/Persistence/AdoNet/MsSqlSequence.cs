@@ -10,7 +10,7 @@ namespace Backend.Fx.Features.Persistence.AdoNet
     [PublicAPI]
     public abstract class MsSqlSequence<TId> : ISequence<TId> 
     {
-        private static readonly ILogger Logger = Log.Create<MsSqlSequence<TId>>();
+        private readonly ILogger _logger = Log.Create<MsSqlSequence<TId>>();
         private readonly IDbConnectionFactory _dbConnectionFactory;
         private readonly int _startWith;
 
@@ -25,7 +25,7 @@ namespace Backend.Fx.Features.Persistence.AdoNet
 
         public void EnsureSequence()
         {
-            Logger.LogInformation("Ensuring existence of mssql sequence {SchemaName}.{SequenceName}", SchemaName, SequenceName);
+            _logger.LogInformation("Ensuring existence of mssql sequence {SchemaName}.{SequenceName}", SchemaName, SequenceName);
             using IDbConnection dbConnection = _dbConnectionFactory.Create();
             dbConnection.Open();
             bool sequenceExists;
@@ -37,15 +37,15 @@ namespace Backend.Fx.Features.Persistence.AdoNet
 
             if (sequenceExists)
             {
-                Logger.LogInformation("Sequence {SchemaName}.{SequenceName} exists", SchemaName, SequenceName);
+                _logger.LogInformation("Sequence {SchemaName}.{SequenceName} exists", SchemaName, SequenceName);
             }
             else
             {
-                Logger.LogInformation("Sequence {SchemaName}.{SequenceName} does not exist yet and will be created now", SchemaName, SequenceName);
+                _logger.LogInformation("Sequence {SchemaName}.{SequenceName} does not exist yet and will be created now", SchemaName, SequenceName);
                 using IDbCommand cmd = dbConnection.CreateCommand();
                 cmd.CommandText = $"CREATE SEQUENCE [{SchemaName}].[{SequenceName}] START WITH {_startWith} INCREMENT BY {Increment}";
                 cmd.ExecuteNonQuery();
-                Logger.LogInformation("Sequence {SchemaName}.{SequenceName} created", SchemaName, SequenceName);
+                _logger.LogInformation("Sequence {SchemaName}.{SequenceName} created", SchemaName, SequenceName);
             }
         }
 
@@ -56,7 +56,7 @@ namespace Backend.Fx.Features.Persistence.AdoNet
             using IDbCommand selectNextValCommand = dbConnection.CreateCommand();
             selectNextValCommand.CommandText = $"SELECT next value FOR {SchemaName}.{SequenceName}";
             TId nextValue = ConvertNextValueFromSequence(selectNextValCommand.ExecuteScalar());
-            Logger.LogDebug("{SchemaName}.{SequenceName} served {NextValue} as next value", SchemaName, SequenceName, nextValue);
+            _logger.LogDebug("{SchemaName}.{SequenceName} served {NextValue} as next value", SchemaName, SequenceName, nextValue);
 
             return nextValue;
         }

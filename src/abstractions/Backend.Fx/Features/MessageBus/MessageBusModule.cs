@@ -12,7 +12,7 @@ namespace Backend.Fx.Features.MessageBus
 {
     internal class MessageBusModule : IModule
     {
-        private static readonly ILogger Logger = Log.Create<MessageBusModule>();
+        private readonly ILogger _logger = Log.Create<MessageBusModule>();
         private readonly IMessageBus _messageBus;
         private readonly IBackendFxApplication _application;
         private readonly List<Type> _eventTypesToSubscribe = new();
@@ -70,7 +70,7 @@ namespace Backend.Fx.Features.MessageBus
 
                 if (serviceDescriptors.Any())
                 {
-                    Logger.LogInformation("Registering {Count} handlers for {IntegrationEventType}", 
+                    _logger.LogInformation("Registering {Count} handlers for {IntegrationEventType}", 
                         serviceDescriptors.Length,
                         integrationEventType);
                     compositionRoot.RegisterCollection(serviceDescriptors);
@@ -78,7 +78,7 @@ namespace Backend.Fx.Features.MessageBus
                 }
                 else
                 {
-                    Logger.LogInformation("No handlers for {IntegrationEventType} found", integrationEventType);
+                    _logger.LogInformation("No handlers for {IntegrationEventType} found", integrationEventType);
                 }
             }
         }

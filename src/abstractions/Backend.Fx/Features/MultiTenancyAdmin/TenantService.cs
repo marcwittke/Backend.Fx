@@ -28,7 +28,7 @@ namespace Backend.Fx.Features.MultiTenancyAdmin
 
     public class TenantService : ITenantService
     {
-        private static readonly ILogger Logger = Log.Create<TenantService>();
+        private readonly ILogger _logger = Log.Create<TenantService>();
         private readonly ITenantRepository _tenantRepository;
 
         public TenantService(ITenantRepository tenantRepository)
@@ -39,7 +39,7 @@ namespace Backend.Fx.Features.MultiTenancyAdmin
         public Tenant CreateTenant(string name, string description, bool isDemonstrationTenant,
             string configuration = null)
         {
-            Logger.LogInformation("Creating tenant: {Name}", name);
+            _logger.LogInformation("Creating tenant: {Name}", name);
 
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -60,7 +60,7 @@ namespace Backend.Fx.Features.MultiTenancyAdmin
 
         public void ActivateTenant(int tenantId)
         {
-            Logger.LogInformation("Activating tenant: {TenantId}", tenantId);
+            _logger.LogInformation("Activating tenant: {TenantId}", tenantId);
             Tenant tenant = _tenantRepository.GetTenant(tenantId);
             tenant.IsActive = true;
             _tenantRepository.SaveTenant(tenant);
@@ -68,7 +68,7 @@ namespace Backend.Fx.Features.MultiTenancyAdmin
 
         public void DeactivateTenant(int tenantId)
         {
-            Logger.LogInformation("Deactivating tenant: {TenantId}", tenantId);
+            _logger.LogInformation("Deactivating tenant: {TenantId}", tenantId);
             Tenant tenant = _tenantRepository.GetTenant(tenantId);
             tenant.IsActive = false;
             _tenantRepository.SaveTenant(tenant);
@@ -76,7 +76,7 @@ namespace Backend.Fx.Features.MultiTenancyAdmin
 
         public void DeleteTenant(int tenantId)
         {
-            Logger.LogInformation("Deleting tenant: {TenantId}", tenantId);
+            _logger.LogInformation("Deleting tenant: {TenantId}", tenantId);
             Tenant tenant = _tenantRepository.GetTenant(tenantId);
             if (tenant.IsActive)
             {
@@ -105,7 +105,7 @@ namespace Backend.Fx.Features.MultiTenancyAdmin
         public Tenant[] GetTenants()
         {
             var tenants = _tenantRepository.GetTenants();
-            Logger.LogTrace("TenantIds: {TenantIds}", string.Join(",", tenants.Select(t => t.ToString())));
+            _logger.LogTrace("TenantIds: {TenantIds}", string.Join(",", tenants.Select(t => t.ToString())));
             return tenants;
         }
 
@@ -115,7 +115,7 @@ namespace Backend.Fx.Features.MultiTenancyAdmin
                 .GetTenants()
                 .Where(t => t.IsActive)
                 .ToArray();
-            Logger.LogTrace("Active TenantIds: {TenantIds}", string.Join(",", activeTenants.Select(t => t.ToString())));
+            _logger.LogTrace("Active TenantIds: {TenantIds}", string.Join(",", activeTenants.Select(t => t.ToString())));
             return activeTenants;
         }
 
@@ -125,7 +125,7 @@ namespace Backend.Fx.Features.MultiTenancyAdmin
                 .GetTenants()
                 .Where(t => t.IsActive && t.IsDemoTenant)
                 .ToArray();
-            Logger.LogTrace("Active Demonstration TenantIds: {TenantIds}",
+            _logger.LogTrace("Active Demonstration TenantIds: {TenantIds}",
                 string.Join(",", activeDemonstrationTenants.Select(t => t.ToString())));
             return activeDemonstrationTenants;
         }
@@ -136,7 +136,7 @@ namespace Backend.Fx.Features.MultiTenancyAdmin
                 .GetTenants()
                 .Where(t => t.IsActive && !t.IsDemoTenant)
                 .ToArray();
-            Logger.LogTrace("Active Production TenantIds: {TenantIds}",
+            _logger.LogTrace("Active Production TenantIds: {TenantIds}",
                 string.Join(",", activeProductionTenants.Select(t => t.ToString())));
             return activeProductionTenants;
         }

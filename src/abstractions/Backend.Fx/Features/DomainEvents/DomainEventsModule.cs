@@ -12,7 +12,7 @@ namespace Backend.Fx.Features.DomainEvents
 {
     internal class DomainEventsModule : IModule
     {
-        private static readonly ILogger Logger = Log.Create<DomainEventsModule>();
+        private readonly ILogger _logger = Log.Create<DomainEventsModule>();
         private readonly Assembly[] _assemblies;
         
         public DomainEventsModule(params Assembly[] assemblies)
@@ -46,7 +46,7 @@ namespace Backend.Fx.Features.DomainEvents
                 }
                 else
                 {
-                    Logger.LogInformation("No handlers for {DomainEventType} found", domainEventType);
+                    _logger.LogInformation("No handlers for {DomainEventType} found", domainEventType);
                 }
             }
         }

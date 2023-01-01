@@ -27,7 +27,7 @@ namespace Backend.Fx.ExecutionPipeline
     [UsedImplicitly]
     internal sealed class Operation : IOperation
     {
-        private static readonly ILogger Logger = Log.Create<Operation>();
+        private readonly ILogger _logger = Log.Create<Operation>();
         private readonly int _instanceId;
         private bool? _isActive;
         private IDisposable _lifetimeLogger;
@@ -44,14 +44,14 @@ namespace Backend.Fx.ExecutionPipeline
                 throw new InvalidOperationException($"Cannot begin an operation that is {(_isActive.Value ? "active" : "terminated")}");
             }
 
-            _lifetimeLogger = Logger.LogDebugDuration($"Beginning operation #{_instanceId}", $"Terminating operation #{_instanceId}");
+            _lifetimeLogger = _logger.LogDebugDuration($"Beginning operation #{_instanceId}", $"Terminating operation #{_instanceId}");
             _isActive = true;
             return Task.CompletedTask;
         }
 
         public Task CompleteAsync(CancellationToken cancellationToken = default)
         {
-            Logger.LogInformation("Completing operation #{OperationId}", _instanceId);
+            _logger.LogInformation("Completing operation #{OperationId}", _instanceId);
             if (_isActive != true)
             {
                 throw new InvalidOperationException($"Cannot complete an operation that is {(_isActive == false ? "terminated" : "not active")}");
@@ -65,7 +65,7 @@ namespace Backend.Fx.ExecutionPipeline
 
         public Task CancelAsync(CancellationToken cancellationToken = default)
         {
-            Logger.LogInformation("Canceling operation #{OperationId}", _instanceId);
+            _logger.LogInformation("Canceling operation #{OperationId}", _instanceId);
             _isActive = false;
             _lifetimeLogger?.Dispose();
             _lifetimeLogger = null;

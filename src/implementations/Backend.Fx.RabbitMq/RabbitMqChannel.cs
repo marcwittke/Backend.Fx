@@ -14,7 +14,7 @@ namespace Backend.Fx.RabbitMq
 {
     public class RabbitMqChannel : IDisposable
     {
-        private static readonly ILogger Logger = Log.Create<RabbitMqChannel>();
+        private readonly ILogger _logger = Log.Create<RabbitMqChannel>();
         private readonly string _exchangeName;
         private readonly IConnectionFactory _connectionFactory;
         private readonly string _queueName;
@@ -54,7 +54,7 @@ namespace Backend.Fx.RabbitMq
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, "Closing RabbitMQ channel failed");
+                _logger.LogError(ex, "Closing RabbitMQ channel failed");
             }
         }
 
@@ -99,12 +99,12 @@ namespace Backend.Fx.RabbitMq
             {
                 EnsureClosed();
 
-                Logger.LogInformation("RabbitMQ Client is trying to connect");
+                _logger.LogInformation("RabbitMQ Client is trying to connect");
                 Policy.Handle<SocketException>()
                     .Or<BrokerUnreachableException>()
                     .WaitAndRetry(_retryCount,
                         retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
-                        (ex, time) => { Logger.LogWarning(ex, "Connection not ready"); }
+                        (ex, time) => { _logger.LogWarning(ex, "Connection not ready"); }
                     )
                     .Execute(() => { _connection = _connectionFactory.CreateConnection(); });
 
@@ -114,7 +114,7 @@ namespace Backend.Fx.RabbitMq
                     _connection.CallbackException += OnCallbackException;
                     _connection.ConnectionBlocked += OnConnectionBlocked;
 
-                    Logger.LogInformation(
+                    _logger.LogInformation(
                         "Acquired a connection to RabbitMQ host {HostName} and is subscribed to failure events",
                         _connection.Endpoint.HostName);
 
@@ -124,7 +124,7 @@ namespace Backend.Fx.RabbitMq
                     _consumer = new EventingBasicConsumer(_channel);
                     _consumer.Received += (sender, args) =>
                     {
-                        Logger.LogDebug("RabbitMQ message with routing key {RoutingKey} received", args.RoutingKey);
+                        _logger.LogDebug("RabbitMQ message with routing key {RoutingKey} received", args.RoutingKey);
                         if (_subscribedEventNames.Contains(args.RoutingKey))
                         {
                             try
@@ -146,7 +146,7 @@ namespace Backend.Fx.RabbitMq
 
                     foreach (var subscribedEventName in _subscribedEventNames)
                     {
-                        Logger.LogInformation(
+                        _logger.LogInformation(
                             "Binding messages on exchange {ExchangeName} with routing key {RoutingKey} to queue {QueueName}",
                             _exchangeName,
                             subscribedEventName,
@@ -157,7 +157,7 @@ namespace Backend.Fx.RabbitMq
                     return true;
                 }
 
-                Logger.LogError("RabbitMQ connection could not be created and opened");
+                _logger.LogError("RabbitMQ connection could not be created and opened");
                 return false;
             }
         }
@@ -174,7 +174,7 @@ namespace Backend.Fx.RabbitMq
 
         public void Subscribe(string messageName)
         {
-            Logger.LogDebug("Subscribing to {MessageName}", messageName);
+            _logger.LogDebug("Subscribing to {MessageName}", messageName);
             EnsureOpen();
             _channel.QueueBind(_queueName, _exchangeName, messageName);
             _subscribedEventNames.Add(messageName);
@@ -182,13 +182,13 @@ namespace Backend.Fx.RabbitMq
 
         public void Acknowledge(ulong deliveryTag)
         {
-            Logger.LogDebug("Acknowledging {DeliveryTag}", deliveryTag);
+            _logger.LogDebug("Acknowledging {DeliveryTag}", deliveryTag);
             DoResilient(() => _channel.BasicAck(deliveryTag, false));
         }
 
         public void NAcknowledge(ulong deliveryTag)
         {
-            Logger.LogDebug("NAcknowledging {DeliveryTag}", deliveryTag);
+            _logger.LogDebug("NAcknowledging {DeliveryTag}", deliveryTag);
             DoResilient(() => _channel.BasicNack(deliveryTag, false, false));
         }
 
@@ -196,7 +196,7 @@ namespace Backend.Fx.RabbitMq
         {
             if (_isDisposed) return;
 
-            Logger.LogWarning(e.Exception, "A RabbitMQ connection threw an exception");
+            _logger.LogWarning(e.Exception, "A RabbitMQ connection threw an exception");
             Open();
         }
 
@@ -204,7 +204,7 @@ namespace Backend.Fx.RabbitMq
         {
             if (_isDisposed) return;
 
-            Logger.LogWarning("A RabbitMQ connection is blocked with reason {Reason}", e.Reason);
+            _logger.LogWarning("A RabbitMQ connection is blocked with reason {Reason}", e.Reason);
             Open();
         }
 
@@ -212,7 +212,7 @@ namespace Backend.Fx.RabbitMq
         {
             if (_isDisposed) return;
 
-            Logger.LogWarning("A RabbitMQ connection is shut down with reason {@Reason}", reason);
+            _logger.LogWarning("A RabbitMQ connection is shut down with reason {@Reason}", reason);
             Open();
         }
 
@@ -222,7 +222,7 @@ namespace Backend.Fx.RabbitMq
                 .Or<SocketException>()
                 .WaitAndRetry(_retryCount,
                     retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
-                    (ex, time) => { Logger.LogWarning(ex, "Connection not ready"); })
+                    (ex, time) => { _logger.LogWarning(ex, "Connection not ready"); })
                 .Execute(action);
         }
     }

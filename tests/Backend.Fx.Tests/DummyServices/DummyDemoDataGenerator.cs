@@ -11,7 +11,7 @@ namespace Backend.Fx.Tests.DummyServices;
 public class DummyDemoDataGenerator : DataGenerator, IDemoDataGenerator
 {
     private readonly DummyDemoDataGeneratorSpy _spy;
-    private static readonly ILogger Logger = Log.Create<DummyDemoDataGenerator>();
+    private readonly ILogger _logger = Log.Create<DummyDemoDataGenerator>();
     private static readonly AsyncLocal<IDemoDataGenerator> Spy = new();
 
     public DummyDemoDataGenerator(DummyDemoDataGeneratorSpy spy)
@@ -23,9 +23,9 @@ public class DummyDemoDataGenerator : DataGenerator, IDemoDataGenerator
 
     protected override Task GenerateCoreAsync(CancellationToken cancellationToken)
     {
-        if (Logger.IsEnabled(LogLevel.Debug))
+        if (_logger.IsEnabled(LogLevel.Debug))
         {
-            Logger.LogDebug("Invocation {Invocations} of DummyDemoDataGenerator happens",
+            _logger.LogDebug("Invocation {Invocations} of DummyDemoDataGenerator happens",
                 Interlocked.Increment(ref _spy.InvocationCount));
         }
         else

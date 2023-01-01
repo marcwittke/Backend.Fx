@@ -9,7 +9,7 @@ namespace Backend.Fx.EfCore6Persistence
     public class EfFlush : ICanFlush
     {
         private readonly ICanFlush _canFlush;
-        private static readonly ILogger Logger = Log.Create<EfFlush>();
+        private readonly ILogger _logger = Log.Create<EfFlush>();
         
         public DbContext DbContext { get; }
 
@@ -17,7 +17,7 @@ namespace Backend.Fx.EfCore6Persistence
         {
             _canFlush = canFlush;
             DbContext = dbContext;
-            Logger.LogInformation("Disabling change tracking on {DbContextTypeName} instance", dbContext.GetType().Name);
+            _logger.LogInformation("Disabling change tracking on {DbContextTypeName} instance", dbContext.GetType().Name);
             DbContext.ChangeTracker.AutoDetectChangesEnabled = false;
         }
 
@@ -30,7 +30,7 @@ namespace Backend.Fx.EfCore6Persistence
 
         private void DetectChanges()
         {
-            using (Logger.LogDebugDuration("Detecting changes"))
+            using (_logger.LogDebugDuration("Detecting changes"))
             {
                 DbContext.ChangeTracker.DetectChanges();
             }
@@ -39,7 +39,7 @@ namespace Backend.Fx.EfCore6Persistence
         
         private void SaveChanges()
         {
-            using (Logger.LogDebugDuration("Saving changes"))
+            using (_logger.LogDebugDuration("Saving changes"))
             {
                 try
                 {

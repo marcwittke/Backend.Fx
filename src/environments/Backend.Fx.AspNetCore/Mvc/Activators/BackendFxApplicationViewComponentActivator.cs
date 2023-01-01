@@ -10,7 +10,7 @@ namespace Backend.Fx.AspNetCore.Mvc.Activators;
 [PublicAPI]
 public class BackendFxApplicationViewComponentActivator : IViewComponentActivator
 {
-    private static readonly ILogger Logger = Log.Create<BackendFxApplicationViewComponentActivator>();
+    private readonly ILogger _logger = Log.Create<BackendFxApplicationViewComponentActivator>();
     private readonly IBackendFxApplication _application;
 
     public BackendFxApplicationViewComponentActivator(IBackendFxApplication application)

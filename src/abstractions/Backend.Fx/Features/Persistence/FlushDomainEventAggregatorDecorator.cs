@@ -8,7 +8,7 @@ namespace Backend.Fx.Features.Persistence
 {
     public class FlushDomainEventAggregatorDecorator : IDomainEventAggregator
     {
-        private static readonly ILogger Logger = Log.Create<FlushDomainEventAggregatorDecorator>();
+        private readonly ILogger _logger = Log.Create<FlushDomainEventAggregatorDecorator>();
         
         private readonly ICanFlush _canFlush;
         private readonly IDomainEventAggregator _domainEventAggregator;
@@ -21,7 +21,7 @@ namespace Backend.Fx.Features.Persistence
 
         public async Task RaiseEventsAsync(CancellationToken cancellationToken = default)
         {
-            Logger.LogDebug("Flushing before raising domain events");
+            _logger.LogDebug("Flushing before raising domain events");
             _canFlush.Flush();
             await _domainEventAggregator.RaiseEventsAsync(cancellationToken).ConfigureAwait(false);
         }

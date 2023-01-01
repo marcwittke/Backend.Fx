@@ -30,8 +30,8 @@ namespace Backend.Fx.Features.MessageBus
 
     public abstract class MessageBus : IMessageBus
     {
-        private static readonly ILogger Logger = Log.Create<MessageBus>();
-        private static readonly ILogger MessageLogger = Log.Create(typeof(MessageBus).FullName + ".Messages");
+        private readonly ILogger _logger = Log.Create<MessageBus>();
+        private readonly ILogger _messageLogger = Log.Create(typeof(MessageBus).FullName + ".Messages");
         private readonly CancellationToken _cancellationToken;
 
         private IBackendFxApplicationInvoker _invoker;
@@ -47,9 +47,9 @@ namespace Backend.Fx.Features.MessageBus
             SerializedMessage serializedMessage =
                 await serializer.SerializeAsync(integrationEvent).ConfigureAwait(false);
             
-            if (MessageLogger.IsEnabled(LogLevel.Debug))
+            if (_messageLogger.IsEnabled(LogLevel.Debug))
             {
-                MessageLogger.LogDebug("Sending {EventTypeName} payload: {Payload}", serializedMessage.EventTypeName, Encoding.UTF8.GetString(serializedMessage.MessagePayload));
+                _messageLogger.LogDebug("Sending {EventTypeName} payload: {Payload}", serializedMessage.EventTypeName, Encoding.UTF8.GetString(serializedMessage.MessagePayload));
             }
             
             await PublishMessageAsync(serializedMessage).ConfigureAwait(false);
@@ -68,11 +68,11 @@ namespace Backend.Fx.Features.MessageBus
 
         protected async Task ProcessAsync(SerializedMessage serializedMessage)
         {
-            Logger.LogInformation("Processing a {EventTypeName} message", serializedMessage.EventTypeName);
+            _logger.LogInformation("Processing a {EventTypeName} message", serializedMessage.EventTypeName);
 
-            if (MessageLogger.IsEnabled(LogLevel.Debug))
+            if (_messageLogger.IsEnabled(LogLevel.Debug))
             {
-                MessageLogger.LogDebug("Received {EventTypeName} payload: {Payload}", serializedMessage.EventTypeName, Encoding.UTF8.GetString(serializedMessage.MessagePayload));
+                _messageLogger.LogDebug("Received {EventTypeName} payload: {Payload}", serializedMessage.EventTypeName, Encoding.UTF8.GetString(serializedMessage.MessagePayload));
             }
 
             await _invoker.InvokeAsync(async (sp, ct) =>

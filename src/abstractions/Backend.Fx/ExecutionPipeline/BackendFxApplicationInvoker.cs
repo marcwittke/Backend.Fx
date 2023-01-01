@@ -39,7 +39,7 @@ namespace Backend.Fx.ExecutionPipeline
     internal class BackendFxApplicationInvoker : IBackendFxApplicationInvoker
     {
         private readonly IBackendFxApplication _application;
-        private static readonly ILogger Logger = Log.Create<BackendFxApplicationInvoker>();
+        private readonly ILogger _logger = Log.Create<BackendFxApplicationInvoker>();
 
         public BackendFxApplicationInvoker(IBackendFxApplication application)
         {
@@ -52,7 +52,7 @@ namespace Backend.Fx.ExecutionPipeline
             CancellationToken cancellationToken = default)
         {
             identity ??= new AnonymousIdentity();
-            Logger.LogInformation("Invoking action as {Identity}", identity.Name);
+            _logger.LogInformation("Invoking action as {Identity}", identity.Name);
             using IServiceScope serviceScope = BeginScope(identity);
             using IDisposable durationLogger = UseDurationLogger(serviceScope);
             var operation = serviceScope.ServiceProvider.GetRequiredService<IOperation>();
@@ -84,11 +84,11 @@ namespace Backend.Fx.ExecutionPipeline
         }
 
 
-        private static IDisposable UseDurationLogger(IServiceScope serviceScope)
+        private IDisposable UseDurationLogger(IServiceScope serviceScope)
         {
             IIdentity identity = serviceScope.ServiceProvider.GetRequiredService<ICurrentTHolder<IIdentity>>().Current;
             Correlation correlation = serviceScope.ServiceProvider.GetRequiredService<ICurrentTHolder<Correlation>>().Current;
-            return Logger.LogInformationDuration(
+            return _logger.LogInformationDuration(
                 $"Starting invocation (correlation [{correlation.Id}]) for {identity.Name}",
                 $"Ended invocation (correlation [{correlation.Id}]) for {identity.Name}");
         }

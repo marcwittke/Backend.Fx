@@ -13,7 +13,7 @@ namespace Backend.Fx.Features.Persistence.AdoNet
     [UsedImplicitly]
     public class DbConnectionOperationDecorator : IOperation
     {
-        private static readonly ILogger Logger = Log.Create<DbConnectionOperationDecorator>();
+        private readonly ILogger _logger = Log.Create<DbConnectionOperationDecorator>();
         private IDisposable _connectionLifetimeLogger;
         private readonly IOperation _operation;
         private readonly IDbConnection _dbConnection;
@@ -26,16 +26,16 @@ namespace Backend.Fx.Features.Persistence.AdoNet
 
         public async Task BeginAsync(IServiceScope serviceScope, CancellationToken cancellationToken = default)
         {
-            Logger.LogDebug("Opening database connection");
+            _logger.LogDebug("Opening database connection");
             _dbConnection.Open();
-            _connectionLifetimeLogger = Logger.LogDebugDuration("Database connection open", "Database connection closed");
+            _connectionLifetimeLogger = _logger.LogDebugDuration("Database connection open", "Database connection closed");
             await _operation.BeginAsync(serviceScope, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task CompleteAsync(CancellationToken cancellationToken = default)
         {
             await _operation.CompleteAsync(cancellationToken).ConfigureAwait(false);
-            Logger.LogDebug("Closing database connection");
+            _logger.LogDebug("Closing database connection");
             _dbConnection.Close();
             _connectionLifetimeLogger?.Dispose();
         }
@@ -43,7 +43,7 @@ namespace Backend.Fx.Features.Persistence.AdoNet
         public async Task CancelAsync(CancellationToken cancellationToken = default)
         {
             await _operation.CancelAsync(cancellationToken).ConfigureAwait(false);
-            Logger.LogDebug("Closing database connection");
+            _logger.LogDebug("Closing database connection");
             _dbConnection.Close();
             _connectionLifetimeLogger?.Dispose();
             

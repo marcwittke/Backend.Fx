@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Backend.Fx.Features.MultiTenancy;
 using Backend.Fx.Features.MultiTenancyAdmin;
 using Backend.Fx.Features.MultiTenancyAdmin.InMem;
+using Backend.Fx.Logging;
 using Backend.Fx.MicrosoftDependencyInjection;
 using Backend.Fx.TestUtil;
 using JetBrains.Annotations;
@@ -19,6 +20,7 @@ public class TheMultiTenancyAdminFeature : TestWithLogging
     {
         _sut = new MultiTenancyBackendFxApplication<DummyTenantIdSelector>(
             new MicrosoftCompositionRoot(),
+            new ExceptionLogger(Log.Create<TheMultiTenancyAdminFeature>()),
             new DirectTenantEnumerator(_tenantRepository));
     }
 

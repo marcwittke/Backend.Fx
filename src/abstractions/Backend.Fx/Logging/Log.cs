@@ -47,8 +47,7 @@ namespace Backend.Fx.Logging
             return LoggerFactory.CreateLogger(category);
         }
 
-        public static ILoggerFactory LoggerFactory { get; }
-            = new MaybeAsyncLocalLoggerFactory();
+        public static ILoggerFactory LoggerFactory { get; } = new MaybeAsyncLocalLoggerFactory();
 
         private class MaybeAsyncLocalLoggerFactory : ILoggerFactory
         {
@@ -58,8 +57,7 @@ namespace Backend.Fx.Logging
 
             public ILogger CreateLogger(string categoryName)
             {
-                return (AsyncLocalLoggerFactory.Value ?? _loggerFactory)
-                    .CreateLogger(categoryName);
+                return (AsyncLocalLoggerFactory.Value ?? _loggerFactory).CreateLogger(categoryName);
             }
 
             public void AddProvider(ILoggerProvider provider)

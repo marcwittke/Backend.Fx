@@ -9,7 +9,7 @@ namespace Backend.Fx.Logging
     [PublicAPI]
     public class ExceptionLoggers : ICollection<IExceptionLogger>, IExceptionLogger
     {
-        private static readonly ILogger Logger = Log.Create<ExceptionLoggers>();
+        private readonly ILogger _logger = Log.Create<ExceptionLoggers>();
         private readonly ICollection<IExceptionLogger> _collectionImplementation = new List<IExceptionLogger>();
 
         public ExceptionLoggers()
@@ -34,7 +34,7 @@ namespace Backend.Fx.Logging
                 }
                 catch (Exception ex2)
                 {
-                    Logger.LogError(ex,
+                    _logger.LogError(ex,
                         "{ExceptionLoggerTypeName} failed to log the {ExceptionTypeName} with message {ExceptionMessage}",
                         exceptionLogger.GetType().Name,
                         ex2.GetType(),

@@ -19,7 +19,7 @@ namespace Backend.Fx.AspNetCore.ErrorHandling;
 public class JsonErrorHandlingMiddleware : ErrorHandlingMiddleware
 {
     private readonly bool _showInternalServerErrorDetails;
-    private static readonly ILogger Logger = Log.Create<JsonErrorHandlingMiddleware>();
+    private readonly ILogger _logger = Log.Create<JsonErrorHandlingMiddleware>();
 
     private static readonly JsonSerializerOptions SerializerOptions =
         new JsonSerializerOptions { WriteIndented = true }.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
@@ -43,7 +43,7 @@ public class JsonErrorHandlingMiddleware : ErrorHandlingMiddleware
     {
         if (context.Response.HasStarted)
         {
-            Logger.LogWarning("exception cannot be handled correctly, because the response has already started");
+            _logger.LogWarning("exception cannot be handled correctly, because the response has already started");
             return;
         }
 
@@ -62,7 +62,7 @@ public class JsonErrorHandlingMiddleware : ErrorHandlingMiddleware
     {
         if (context.Response.HasStarted)
         {
-            Logger.LogWarning("exception cannot be handled correctly, because the response has already started");
+            _logger.LogWarning("exception cannot be handled correctly, because the response has already started");
             return;
         }
 

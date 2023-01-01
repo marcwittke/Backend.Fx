@@ -10,7 +10,7 @@ namespace Backend.Fx.Features.DomainServices
 {
     internal class DomainServicesModule : IModule
     {
-        private static readonly ILogger Logger = Log.Create<DomainServicesModule>();
+        private readonly ILogger _logger = Log.Create<DomainServicesModule>();
         private readonly Assembly[] _assemblies;
         private readonly string _assembliesForLogging;
 
@@ -27,7 +27,7 @@ namespace Backend.Fx.Features.DomainServices
 
         private void RegisterDomainAndApplicationServices(ICompositionRoot container)
         {
-            Logger.LogDebug("Registering domain and application services from {Assemblies}", _assembliesForLogging);
+            _logger.LogDebug("Registering domain and application services from {Assemblies}", _assembliesForLogging);
 
             var serviceDescriptors = _assemblies.GetImplementingTypes(typeof(IDomainService))
                 .Concat(_assemblies.GetImplementingTypes(typeof(IApplicationService)))
@@ -42,7 +42,7 @@ namespace Backend.Fx.Features.DomainServices
 
             foreach (ServiceDescriptor serviceDescriptor in serviceDescriptors)
             {
-                Logger.LogDebug("Registering scoped service {ServiceType} with implementation {ImplementationType}",
+                _logger.LogDebug("Registering scoped service {ServiceType} with implementation {ImplementationType}",
                     serviceDescriptor.ServiceType.Name,
                     serviceDescriptor.ImplementationType.Name);
                 container.Register(serviceDescriptor);

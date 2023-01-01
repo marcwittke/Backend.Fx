@@ -11,7 +11,7 @@ namespace Backend.Fx.Tests.DummyServices;
 public class DummyProductiveDataGenerator : DataGenerator, IProductiveDataGenerator
 {
     private readonly DummyProductiveDataGeneratorSpy _spy;
-    private static readonly ILogger Logger = Log.Create<DummyProductiveDataGenerator>();
+    private readonly ILogger _logger = Log.Create<DummyProductiveDataGenerator>();
     
     public DummyProductiveDataGenerator(DummyProductiveDataGeneratorSpy spy)
     {
@@ -22,9 +22,9 @@ public class DummyProductiveDataGenerator : DataGenerator, IProductiveDataGenera
     
     protected override Task GenerateCoreAsync(CancellationToken cancellationToken)
     {
-        if (Logger.IsEnabled(LogLevel.Debug))
+        if (_logger.IsEnabled(LogLevel.Debug))
         {
-            Logger.LogDebug("Invocation {Invocations} of DummyProductiveDataGenerator happens",
+            _logger.LogDebug("Invocation {Invocations} of DummyProductiveDataGenerator happens",
                 Interlocked.Increment(ref _spy.InvocationCount));
         }
         else

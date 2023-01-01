@@ -28,7 +28,7 @@ namespace Backend.Fx.Features.DataGeneration
     [PublicAPI]
     public abstract class DataGenerator : IDataGenerator
     {
-        private static readonly ILogger Logger = Log.Create<DataGenerator>();
+        private readonly ILogger _logger = Log.Create<DataGenerator>();
 
         /// <summary>
         /// simple way of ordering the execution of DataGenerators. Priority 0 will be executed first.
@@ -40,12 +40,12 @@ namespace Backend.Fx.Features.DataGeneration
             if (ShouldRun())
             {
                 Initialize();
-                Logger.LogInformation("{DataGeneratorTypeName} is now generating initial data", GetType().FullName);
+                _logger.LogInformation("{DataGeneratorTypeName} is now generating initial data", GetType().FullName);
                 await GenerateCoreAsync(cancellationToken).ConfigureAwait(false);
             }
             else
             {
-                Logger.LogInformation("No need to run {DataGeneratorTypeName}", GetType().FullName);
+                _logger.LogInformation("No need to run {DataGeneratorTypeName}", GetType().FullName);
             }
         }
 

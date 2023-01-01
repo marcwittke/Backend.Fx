@@ -13,7 +13,7 @@ namespace Backend.Fx.Features.Authorization
 {
     internal class AuthorizationModule : IModule
     {
-        private static readonly ILogger Logger = Log.Create<AuthorizationModule>();
+        private readonly ILogger _logger = Log.Create<AuthorizationModule>();
         private readonly Assembly[] _assemblies;
         
         public AuthorizationModule(Assembly[] assemblies)
@@ -27,9 +27,9 @@ namespace Backend.Fx.Features.Authorization
             RegisterAuthorizationPolicies(compositionRoot);
         }
 
-        private static void RegisterAuthorizingDecorators(ICompositionRoot compositionRoot)
+        private void RegisterAuthorizingDecorators(ICompositionRoot compositionRoot)
         {
-            Logger.LogDebug("Registering authorization decorators");
+            _logger.LogDebug("Registering authorization decorators");
             compositionRoot.RegisterDecorator(ServiceDescriptor.Scoped(typeof(IQueryable<>),
                 typeof(AuthorizingQueryable<>)));
             compositionRoot.RegisterDecorator(ServiceDescriptor.Scoped(typeof(IRepository<,>),
@@ -39,7 +39,7 @@ namespace Backend.Fx.Features.Authorization
         private void RegisterAuthorizationPolicies(ICompositionRoot compositionRoot)
         {
             // ReSharper disable once CoVariantArrayConversion
-            Logger.LogDebug("Registering authorization services from {Assemblies}", _assemblies);
+            _logger.LogDebug("Registering authorization services from {Assemblies}", _assemblies);
 
             var aggregateRootTypes = _assemblies
                 .SelectMany(ass => ass.GetTypes())
@@ -56,7 +56,7 @@ namespace Backend.Fx.Features.Authorization
 
                 if (authorizationPolicyTypes.Length == 0)
                 {
-                    Logger.LogWarning(
+                    _logger.LogWarning(
                         "No authorization policies for {AggregateRootType} found", aggregateRootType);
                     return;
                 }
@@ -68,7 +68,7 @@ namespace Backend.Fx.Features.Authorization
                         $"[{string.Join(", ", authorizationPolicyTypes.Select(t => t.Name))}]");
                 }
 
-                Logger.LogInformation(
+                _logger.LogInformation(
                     "Registering scoped authorization service {ServiceType} with implementation {ImplementationType}",
                     authorizationPolicyInterfaceType,
                     authorizationPolicyTypes[0]);

@@ -12,14 +12,14 @@ namespace Backend.Fx.ExecutionPipeline
     [PublicAPI]
     public sealed class Correlation
     {
-        private static readonly ILogger Logger = Log.Create<Correlation>();
+        private readonly ILogger _logger = Log.Create<Correlation>();
 
         public Guid Id { get; private set; } = Guid.NewGuid();
 
         public void Resume(Guid correlationId)
         {
             Id = correlationId;
-            Logger.LogInformation("Resuming correlation {Correlation}", Id);
+            _logger.LogInformation("Resuming correlation {Correlation}", Id);
         }
     }
 }

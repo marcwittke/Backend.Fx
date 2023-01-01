@@ -21,7 +21,7 @@ namespace Backend.Fx.RabbitMq
     
     public class RabbitMqMessageBus : MessageBus
     {
-        private static readonly ILogger Logger = Log.Create<RabbitMqMessageBus>();
+        private readonly ILogger _logger = Log.Create<RabbitMqMessageBus>();
         private readonly RabbitMqChannel _channel;
 
         public RabbitMqMessageBus(RabbitMqOptions options)
@@ -39,16 +39,16 @@ namespace Backend.Fx.RabbitMq
 
         public override void Connect()
         {
-            Logger.LogInformation("Opening a channel to RabbitMQ...");
+            _logger.LogInformation("Opening a channel to RabbitMQ...");
             if (_channel.EnsureOpen())
             {
-                Logger.LogInformation("Channel to RabbitMQ opened");
+                _logger.LogInformation("Channel to RabbitMQ opened");
             }
         }
         
         protected override void SubscribeToEventMessage(string eventTypeName)
         {
-            Logger.LogInformation("Subscribing to messages of {EventTypeName}", eventTypeName);
+            _logger.LogInformation("Subscribing to messages of {EventTypeName}", eventTypeName);
             _channel.EnsureOpen();
             _channel.Subscribe(eventTypeName);
         }
@@ -66,9 +66,9 @@ namespace Backend.Fx.RabbitMq
             if (disposing)
                 if (_channel != null)
                 {
-                    Logger.LogInformation("Closing RabbitMQ channel...");
+                    _logger.LogInformation("Closing RabbitMQ channel...");
                     _channel.Dispose();
-                    Logger.LogInformation("RabbitMQ channel closed");
+                    _logger.LogInformation("RabbitMQ channel closed");
                 }
 
             base.Dispose(disposing);

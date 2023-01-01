@@ -12,7 +12,7 @@ namespace Backend.Fx.AspNetCore.Mvc.Activators;
 public class BackendFxApplicationControllerActivator : IControllerActivator
 {
     private readonly IBackendFxApplication _application;
-    private static readonly ILogger Logger = Log.Create<BackendFxApplicationControllerActivator>();
+    private readonly ILogger _logger = Log.Create<BackendFxApplicationControllerActivator>();
 
     public BackendFxApplicationControllerActivator(IBackendFxApplication application)
     {
@@ -27,10 +27,10 @@ public class BackendFxApplicationControllerActivator : IControllerActivator
 
     public virtual void Release(ControllerContext c, object controller)
     {
-        Logger.LogTrace("Releasing {ControllerTypeName}", controller.GetType().Name);
+        _logger.LogTrace("Releasing {ControllerTypeName}", controller.GetType().Name);
         if (controller is IDisposable disposable)
         {
-            Logger.LogDebug("Disposing {ControllerTypeName}", controller.GetType().Name);
+            _logger.LogDebug("Disposing {ControllerTypeName}", controller.GetType().Name);
             disposable.Dispose();
         }
     }

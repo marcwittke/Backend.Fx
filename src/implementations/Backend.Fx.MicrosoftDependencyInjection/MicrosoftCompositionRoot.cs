@@ -12,14 +12,14 @@ namespace Backend.Fx.MicrosoftDependencyInjection
 {
     public class MicrosoftCompositionRoot : CompositionRoot
     {
-        private static readonly ILogger Logger = Log.Create<MicrosoftCompositionRoot>();
+        private readonly ILogger _logger = Log.Create<MicrosoftCompositionRoot>();
         private readonly Lazy<IServiceProvider> _serviceProvider;
 
         public MicrosoftCompositionRoot()
         {
             _serviceProvider = new Lazy<IServiceProvider>(() =>
             {
-                Logger.LogInformation("Building Microsoft ServiceProvider");
+                _logger.LogInformation("Building Microsoft ServiceProvider");
                 return ServiceCollection.BuildServiceProvider(
                     new ServiceProviderOptions
                     {
@@ -55,7 +55,7 @@ namespace Backend.Fx.MicrosoftDependencyInjection
             }
             else
             {
-                Logger.LogDebug("{Verb} {Lifetime} {RegistrationType} for {ServiceType}: {ImplementationType}",
+                _logger.LogDebug("{Verb} {Lifetime} {RegistrationType} for {ServiceType}: {ImplementationType}",
                     "Replacing",
                     serviceDescriptor.Lifetime.ToString().ToLowerInvariant(),
                     "registration",
@@ -79,7 +79,7 @@ namespace Backend.Fx.MicrosoftDependencyInjection
             }
             else
             {
-                Logger.LogWarning("Skipping registration of decorator {DecoratorTypeName} because the service type to decorate ({ServiceType}) is not registered",
+                _logger.LogWarning("Skipping registration of decorator {DecoratorTypeName} because the service type to decorate ({ServiceType}) is not registered",
                     serviceDescriptor.GetImplementationTypeDescription(),
                     serviceDescriptor.ServiceType.Name);
             }
@@ -91,7 +91,7 @@ namespace Backend.Fx.MicrosoftDependencyInjection
 
             if (serviceDescriptorArray.Length == 0)
             {
-                Logger.LogWarning("Skipping registration of empty collection");
+                _logger.LogWarning("Skipping registration of empty collection");
                 return;
             }
 
