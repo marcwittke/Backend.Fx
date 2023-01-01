@@ -51,12 +51,11 @@ public class JsonErrorHandlingMiddleware : ErrorHandlingMiddleware
         // revealing) information in the exception message.
         Errors errors = exception.HasErrors()
             ? exception.Errors
-            : new Errors().Add($"HTTP{httpStatusCode}: {message}");
+            : new Errors($"HTTP{httpStatusCode}: {message}");
 
         context.Response.StatusCode = httpStatusCode;
-        string serializedErrors = SerializeErrors(errors);
         context.Response.ContentType = "application/json; charset=utf-8";
-        await context.Response.WriteAsync(serializedErrors);
+        await context.Response.WriteAsync(new ErrorResponse(errors).ToJsonString());
     }
 
     protected override async Task HandleServerError(HttpContext context, Exception exception)
@@ -73,10 +72,5 @@ public class JsonErrorHandlingMiddleware : ErrorHandlingMiddleware
             : JsonSerializer.Serialize(new { message = "An internal error occured" }, SerializerOptions);
         context.Response.ContentType = "application/json; charset=utf-8";
         await context.Response.WriteAsync(responseContent);
-    }
-
-    protected virtual string SerializeErrors(Errors errors)
-    {
-        return errors.ToJsonString(SerializerOptions);
     }
 }

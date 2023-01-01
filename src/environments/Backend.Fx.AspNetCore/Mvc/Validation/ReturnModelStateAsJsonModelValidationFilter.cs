@@ -1,4 +1,5 @@
-﻿using Backend.Fx.Exceptions;
+﻿using Backend.Fx.AspNetCore.ErrorHandling;
+using Backend.Fx.Exceptions;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -7,7 +8,7 @@ namespace Backend.Fx.AspNetCore.Mvc.Validation;
 
 /// <summary>
 /// Returns HTTP 400 "Bad Request" when model validation failed. In addition, the bad model state is converted
-/// into an array of <see cref="Exceptions.SerializableError"/>s that is returned as JSON body, if the request
+/// into an <see cref="ErrorResponse"/>s that is returned as JSON body, if the request
 /// stated that it accepts JSON as response type content.
 /// </summary>
 [PublicAPI]
@@ -24,7 +25,7 @@ public class ReturnModelStateAsJsonModelValidationFilter : ModelValidationFilter
 
     protected virtual IActionResult CreateResult(Errors errors)
     {
-        return new JsonResult(errors.ToSerializableErrors());
+        return new JsonResult(new ErrorResponse(errors));
     }
 
     public override void OnActionExecuted(ActionExecutedContext context)
