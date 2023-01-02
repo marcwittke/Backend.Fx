@@ -1,10 +1,10 @@
 using System;
 using System.Security.Principal;
-using Backend.Fx.BuildingBlocks;
-using Backend.Fx.Environment.DateAndTime;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.Exceptions;
-using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.ExecutionPipeline;
+using Backend.Fx.Util;
+using NodaTime;
 
 namespace Backend.Fx.AspNetCore.Tests.SampleApp.Domain
 {
@@ -17,7 +17,7 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp.Domain
 
         public class CalculationResult
         {
-            public CalculationResult(DateTime timestamp, string executor, double result, int tenantId)
+            public CalculationResult(Instant timestamp, string executor, double result, int tenantId)
             {
                 Timestamp = timestamp;
                 Executor = executor;
@@ -25,7 +25,7 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp.Domain
                 TenantId = tenantId;
             }
 
-            public DateTime Timestamp { get; }
+            public Instant Timestamp { get; }
             public string Executor { get; }
             public double Result { get; }
             public int TenantId { get; }
@@ -47,17 +47,17 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp.Domain
 
         public ICalculationService.CalculationResult Add(double arg1, double arg2)
         {
-            return new(_clock.UtcNow, _identityHolder.Current.Name, arg1 + arg2, _tenantIdHolder.Current.Value);
+            return new(_clock.GetCurrentInstant(), _identityHolder.Current.Name, arg1 + arg2, _tenantIdHolder.Current.Value);
         }
 
         public ICalculationService.CalculationResult Subtract(double arg1, double arg2)
         {
-            return new(_clock.UtcNow, _identityHolder.Current.Name, arg1 - arg2, _tenantIdHolder.Current.Value);
+            return new(_clock.GetCurrentInstant(), _identityHolder.Current.Name, arg1 - arg2, _tenantIdHolder.Current.Value);
         }
 
         public ICalculationService.CalculationResult Multiply(double arg1, double arg2)
         {
-            return new(_clock.UtcNow, _identityHolder.Current.Name, arg1 * arg2, _tenantIdHolder.Current.Value);
+            return new(_clock.GetCurrentInstant(), _identityHolder.Current.Name, arg1 * arg2, _tenantIdHolder.Current.Value);
         }
 
         public ICalculationService.CalculationResult Divide(double arg1, double arg2)
@@ -69,7 +69,7 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp.Domain
             }
             
             
-            return new(_clock.UtcNow, _identityHolder.Current.Name, arg1 / arg2, _tenantIdHolder.Current.Value);
+            return new(_clock.GetCurrentInstant(), _identityHolder.Current.Name, arg1 / arg2, _tenantIdHolder.Current.Value);
         }
     }
 }

@@ -1,5 +1,8 @@
-﻿namespace Backend.Fx.Exceptions
+﻿using JetBrains.Annotations;
+
+namespace Backend.Fx.Exceptions
 {
+    [PublicAPI]
     public class NotFoundException : ClientException
     {
         public string EntityName { get; }
@@ -17,8 +20,18 @@
             EntityName = entityName;
             Id = id;
         }
+
+        /// <summary>
+        /// Used to build a <see cref="NotFoundException"/> with multiple possible error messages. The builder will throw on disposal
+        /// when at least one error was added. Using the AddIf methods is quite comfortable when there are several criteria to be validated
+        /// before executing a business case. 
+        /// </summary>
+        public new static IExceptionBuilder UseBuilder()
+        {
+            return new ExceptionBuilder<NotFoundException>();
+        }
     }
-    
+
     public class NotFoundException<TEntity> : NotFoundException
     {
         public NotFoundException(object id)

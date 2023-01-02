@@ -1,0 +1,40 @@
+﻿using System;
+using System.Linq.Expressions;
+using Backend.Fx.Domain;
+using Backend.Fx.Logging;
+using Microsoft.Extensions.Logging;
+
+namespace Backend.Fx.Features.Authorization
+{
+    public abstract class AuthorizationPolicy<TAggregateRoot> : IAuthorizationPolicy<TAggregateRoot>
+        where TAggregateRoot : IAggregateRoot
+    {
+        private readonly ILogger _logger = Log.Create<AuthorizationPolicy<TAggregateRoot>>();
+        
+        /// <inheritdoc />>
+        public abstract Expression<Func<TAggregateRoot, bool>> HasAccessExpression { get; }
+
+        /// <inheritdoc />>
+        public abstract bool CanCreate(TAggregateRoot t);
+
+        /// <summary>
+        /// Implement a guard that might disallow modifying an existing aggregate.
+        /// This overload is called directly before saving modification of an instance, so that you can use the instance's state for deciding.
+        /// This default implementation forwards to <see cref="AuthorizationPolicy{TAggregateRoot}.CanCreate"/>
+        /// </summary>
+        public virtual bool CanModify(TAggregateRoot t)
+        {
+            var canModify = CanCreate(t);
+            _logger.LogTrace("CanModify({@Aggregate}): {CanModify}", t, canModify);
+            return canModify;
+        }
+
+        /// <inheritdoc />>
+        public virtual bool CanDelete(TAggregateRoot t)
+        {
+            var canDelete = CanModify(t);
+            _logger.LogTrace("CanDelete({@Aggregate}): {CanDelete}", t, canDelete);
+            return canDelete;
+        }
+    }
+}

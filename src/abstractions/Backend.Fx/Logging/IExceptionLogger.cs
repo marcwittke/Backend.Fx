@@ -11,9 +11,9 @@ namespace Backend.Fx.Logging
 
     public class ExceptionLogger : IExceptionLogger
     {
-        private readonly Microsoft.Extensions.Logging.ILogger _logger;
+        private readonly ILogger _logger;
 
-        public ExceptionLogger(Microsoft.Extensions.Logging.ILogger logger)
+        public ExceptionLogger(ILogger logger)
         {
             _logger = logger;
         }

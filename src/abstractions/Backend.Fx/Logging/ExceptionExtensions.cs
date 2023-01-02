@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.Logging
 {
+    [PublicAPI]
     [DebuggerStepThrough]
     public static class ExceptionExtensions
     {
@@ -23,7 +25,7 @@ namespace Backend.Fx.Logging
             Func<TSource, TSource> nextItem,
             Func<TSource, bool> canContinue) where TSource : Exception
         {
-            for (var current = source; canContinue(current); current = nextItem(current))
+            for (TSource current = source; canContinue(current); current = nextItem(current))
             {
                 yield return current;
             }

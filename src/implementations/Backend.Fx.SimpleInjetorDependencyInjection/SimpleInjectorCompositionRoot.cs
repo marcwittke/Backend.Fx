@@ -1,11 +1,10 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
+using System.Linq;
+using Backend.Fx.DependencyInjection;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.DependencyInjection;
-using Backend.Fx.Patterns.EventAggregation.Domain;
-using Backend.Fx.SimpleInjectorDependencyInjection.Modules;
+using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SimpleInjector;
 using SimpleInjector.Advanced;
@@ -17,112 +16,100 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
     /// <summary>
     ///     Provides a reusable composition root assuming Simple Injector as container
     /// </summary>
-    public class SimpleInjectorCompositionRoot : ICompositionRoot
+    [PublicAPI]
+    public class SimpleInjectorCompositionRoot : CompositionRoot
     {
-        private static readonly ILogger Logger = Log.Create<SimpleInjectorCompositionRoot>();
+        private readonly ILogger _logger = Log.Create<SimpleInjectorCompositionRoot>();
+        private readonly IList<ServiceDescriptor> _services = new List<ServiceDescriptor>();
+        private readonly IList<ServiceDescriptor> _decorators = new List<ServiceDescriptor>();
+        private readonly IList<ServiceDescriptor[]> _serviceCollections = new List<ServiceDescriptor[]>();
 
-        private int _scopeSequenceNumber = 1;
         /// <summary>
         /// This constructor creates a composition root that prefers scoped lifestyle
         /// </summary>
-        public SimpleInjectorCompositionRoot() 
+        public SimpleInjectorCompositionRoot()
             : this(new ScopedLifestyleBehavior(), new AsyncScopedLifestyle())
-        {}
-
-        public SimpleInjectorCompositionRoot(ILifestyleSelectionBehavior lifestyleBehavior, ScopedLifestyle scopedLifestyle)
         {
-            Logger.LogInformation("Initializing SimpleInjector");
-            ScopedLifestyle = scopedLifestyle;
-            Container.Options.LifestyleSelectionBehavior = lifestyleBehavior;
-            Container.Options.DefaultScopedLifestyle = ScopedLifestyle;
-            InfrastructureModule = new SimpleInjectorInfrastructureModule(Container);
-            InstanceProvider = new SimpleInjectorInstanceProvider(Container);
-            
-            // SimpleInjector 5 needs this to resolve controllers
-            Container.Options.ResolveUnregisteredConcreteTypes = true;
         }
+
+        public SimpleInjectorCompositionRoot(
+            ILifestyleSelectionBehavior lifestyleBehavior,
+            ScopedLifestyle scopedLifestyle)
+        {
+            _logger.LogInformation("Initializing SimpleInjector");
+            ScopedLifestyle = scopedLifestyle;
+
+            Container.Options.LifestyleSelectionBehavior = lifestyleBehavior;
+            Container.Options.DefaultScopedLifestyle = scopedLifestyle;
+
+            // required to support extension method IServiceProvider.CreateScope() 
+            Container.RegisterInstance<IServiceScopeFactory>(new SimpleInjectorServiceScopeFactory(Container));
+        }
+
+        public ScopedLifestyle ScopedLifestyle { get; }
 
         public Container Container { get; } = new Container();
 
-        internal ScopedLifestyle ScopedLifestyle { get; }
-
-        public void RegisterModules(params IModule[] modules)
-        {
-            foreach (var module in modules)
-            {
-                Logger.LogInformation("Registering {Module}", module.GetType().Name);
-                module.Register(this);
-            }
-        }
-
         #region ICompositionRoot implementation
 
-        public void Verify()
+        public override void Register(ServiceDescriptor serviceDescriptor)
         {
-            Logger.LogInformation("container is being verified");
-            try
+            if (Container.IsLocked)
             {
-                Container.Verify(VerificationOption.VerifyAndDiagnose);
+                throw new InvalidOperationException("Container has been built and cannot be changed any more.");
             }
-            catch (Exception ex)
+
+            foreach (var descriptor in _services.Where(sd => sd.ServiceType == serviceDescriptor.ServiceType).ToArray())
             {
-                Logger.LogWarning(ex, "container configuration invalid");
-                throw;
+                _services.Remove(descriptor);
             }
+
+            _services.Add(serviceDescriptor);
         }
 
-
-        public object GetInstance(Type serviceType)
+        public override void RegisterDecorator(ServiceDescriptor serviceDescriptor)
         {
-            return Container.GetInstance(serviceType);
+            if (Container.IsLocked)
+            {
+                throw new InvalidOperationException("Container has been built and cannot be changed any more.");
+            }
+
+            _decorators.Add(serviceDescriptor);
         }
 
-        public IEnumerable GetInstances(Type serviceType)
+        public override void RegisterCollection(IEnumerable<ServiceDescriptor> serviceDescriptors)
         {
-            return Container.GetAllInstances(serviceType);
+            if (Container.IsLocked)
+            {
+                throw new InvalidOperationException("Container has been built and cannot be changed any more.");
+            }
+
+            var serviceDescriptorArray = serviceDescriptors as ServiceDescriptor[] ?? serviceDescriptors.ToArray();
+
+            if (serviceDescriptorArray.Select(sd => sd.ServiceType).Distinct().Count() > 1)
+            {
+                throw new InvalidOperationException(
+                    "To register a collection of services they must implement the same service type");
+            }
+
+            _serviceCollections.Add(serviceDescriptorArray);
         }
 
-        public T GetInstance<T>() where T : class
+        public override void Verify()
         {
-            return Container.GetInstance<T>();
+            FillContainer();
+
+            _logger.LogInformation("Verifying container");
+            Container.Verify(VerificationOption.VerifyAndDiagnose);
         }
-
-        public IEnumerable<T> GetInstances<T>() where T : class
-        {
-            return Container.GetAllInstances<T>();
-        }
-        
-        /// <inheritdoc />
-        public IInjectionScope BeginScope()
-        {
-            return new SimpleInjectorInjectionScope(Interlocked.Increment(ref _scopeSequenceNumber), AsyncScopedLifestyle.BeginScope(Container));
-        }
-
-        public IInstanceProvider InstanceProvider { get; }
-
-        public IInfrastructureModule InfrastructureModule { get; }
-
-        public Scope GetCurrentScope()
-        {
-            return ScopedLifestyle.GetCurrentScope(Container);
-        }
-        #endregion
-
-        #region IEventHandlerProvider implementation
 
         /// <inheritdoc />
-        public IEnumerable<IDomainEventHandler<TDomainEvent>> GetAllEventHandlers<TDomainEvent>() where TDomainEvent : IDomainEvent
+        public override IServiceScope BeginScope()
         {
-            return Container.GetAllInstances<IDomainEventHandler<TDomainEvent>>();
+            return Container.CreateScope();
         }
-        #endregion
 
-        #region IDisposable implementation
-        public void Dispose()
-        {
-            Container?.Dispose();
-        }
-        #endregion
+        public override IServiceProvider ServiceProvider => Container;
 
         /// <summary>
         ///     A behavior that defaults to scoped life style for injected instances
@@ -134,5 +121,78 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
                 return Lifestyle.Scoped;
             }
         }
+
+        private void FillContainer()
+        {
+            _logger.LogInformation("Registering services with container");
+            foreach (var serviceDescriptor in _services)
+            {
+                if (serviceDescriptor.ImplementationType != null)
+                {
+                    Container.Register(
+                        serviceDescriptor.ServiceType,
+                        serviceDescriptor.ImplementationType,
+                        serviceDescriptor.Lifetime.MapLifestyle());
+                }
+                else if (serviceDescriptor.ImplementationFactory != null)
+                {
+                    Container.Register(
+                        serviceDescriptor.ServiceType,
+                        () => serviceDescriptor.ImplementationFactory(Container),
+                        serviceDescriptor.Lifetime.MapLifestyle());
+                }
+                else if (serviceDescriptor.ImplementationInstance != null &&
+                         serviceDescriptor.Lifetime == ServiceLifetime.Singleton)
+                {
+                    Container.RegisterInstance(serviceDescriptor.ServiceType,
+                        serviceDescriptor.ImplementationInstance);
+                }
+                else
+                {
+                    throw new InvalidOperationException("Bad service descriptor");
+                }
+            }
+
+            foreach (var serviceDescriptor in _decorators)
+            {
+                if (serviceDescriptor.ImplementationType != null)
+                {
+                    Container.RegisterDecorator(
+                        serviceDescriptor.ServiceType,
+                        serviceDescriptor.ImplementationType,
+                        serviceDescriptor.Lifetime.MapLifestyle());
+                }
+                else
+                {
+                    throw new InvalidOperationException("Can only register decorators by type");
+                }
+            }
+
+            foreach (var serviceDescriptors in _serviceCollections)
+            {
+                foreach (var serviceDescriptor in serviceDescriptors)
+                {
+                    Container.Collection.Append(
+                        serviceDescriptor.ServiceType,
+                        serviceDescriptor.ImplementationType ??
+                        throw new ArgumentException("You must provide an implementationType when registering a collection", nameof(serviceDescriptor)),
+                        serviceDescriptor.Lifetime.MapLifestyle());
+                }
+            }
+        }
+
+        #endregion
+
+        #region IDisposable implementation
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Container.Dispose();
+            }
+        }
+
+        #endregion
     }
 }

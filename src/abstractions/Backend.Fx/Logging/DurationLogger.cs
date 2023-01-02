@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Diagnostics;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 namespace Backend.Fx.Logging
 {
+    [PublicAPI]
     [DebuggerStepThrough]
     public class DurationLogger : IDisposable
     {
         private readonly string _endMessage;
         private readonly Action<string> _logAction;
 
-        private readonly Stopwatch _stopwatch = new Stopwatch();
+        private readonly Stopwatch _stopwatch = new();
 
         public DurationLogger(Action<string> logAction, string activity)
             : this(logAction, activity, activity)
@@ -47,34 +49,35 @@ namespace Backend.Fx.Logging
         }
     }
 
+    [PublicAPI]
     public static class DurationLoggerEx
     {
-        public static IDisposable LogInformationDuration(this Microsoft.Extensions.Logging.ILogger logger, string activity)
+        public static IDisposable LogInformationDuration(this ILogger logger, string activity)
         {
             return new DurationLogger(s => logger.LogInformation(s), activity);
         }
 
-        public static IDisposable LogInformationDuration(this Microsoft.Extensions.Logging.ILogger logger, string beginMessage, string endMessage)
+        public static IDisposable LogInformationDuration(this ILogger logger, string beginMessage, string endMessage)
         {
             return new DurationLogger(s => logger.LogInformation(s), beginMessage, endMessage);
         }
         
-        public static IDisposable LogDebugDuration(this Microsoft.Extensions.Logging.ILogger logger, string activity)
+        public static IDisposable LogDebugDuration(this ILogger logger, string activity)
         {
             return new DurationLogger(s => logger.LogDebug(s), activity);
         }
 
-        public static IDisposable LogDebugDuration(this Microsoft.Extensions.Logging.ILogger logger, string beginMessage, string endMessage)
+        public static IDisposable LogDebugDuration(this ILogger logger, string beginMessage, string endMessage)
         {
             return new DurationLogger(s => logger.LogDebug(s), beginMessage, endMessage);
         }
         
-        public static IDisposable LogTraceDuration(this Microsoft.Extensions.Logging.ILogger logger, string activity)
+        public static IDisposable LogTraceDuration(this ILogger logger, string activity)
         {
             return new DurationLogger(s => logger.LogTrace(s), activity);
         }
 
-        public static IDisposable LogTraceDuration(this Microsoft.Extensions.Logging.ILogger logger, string beginMessage, string endMessage)
+        public static IDisposable LogTraceDuration(this ILogger logger, string beginMessage, string endMessage)
         {
             return new DurationLogger(s => logger.LogTrace(s), beginMessage, endMessage);
         }

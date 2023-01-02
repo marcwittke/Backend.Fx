@@ -2,14 +2,43 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.Exceptions
 {
+    /// <summary>
+    /// A structure to collect general or key related errors on a <see cref="ClientException"/>
+    /// </summary>
+    [PublicAPI]
     public class Errors : IReadOnlyDictionary<string, string[]>
     {
-        private const string GenericErrorKey = "";
-        private readonly IDictionary<string, List<string>> _dictionaryImplementation = new Dictionary<string, List<string>>();
+        public const string GenericErrorKey = "";
 
+        private readonly IDictionary<string, List<string>> _dictionaryImplementation =
+            new Dictionary<string, List<string>>();
+
+        public Errors()
+        { }
+
+        public Errors(IDictionary<string, string[]> dictionary) : this(null, dictionary)
+        { }
+        
+        public Errors(string genericError, IDictionary<string, string[]> dictionary = null)
+        {
+            if (genericError != null)
+            {
+                Add(genericError);
+            }
+            
+            if (dictionary != null)
+            {
+                foreach (var kvp in dictionary)
+                {
+                    Add(kvp.Key, kvp.Value);
+                }
+            }
+        }
+        
         public bool ContainsKey(string key)
         {
             return _dictionaryImplementation.ContainsKey(key);
@@ -36,19 +65,19 @@ namespace Backend.Fx.Exceptions
             get { return _dictionaryImplementation.Values.Select(errors => errors.ToArray()); }
         }
 
-        public Errors Add(string errorMessage)
+        internal Errors Add(string errorMessage)
         {
             Add(GenericErrorKey, errorMessage);
             return this;
         }
 
-        public Errors Add(IEnumerable<string> errorMessages)
+        internal Errors Add(IEnumerable<string> errorMessages)
         {
             Add(GenericErrorKey, errorMessages);
             return this;
         }
 
-        public Errors Add(string key, IEnumerable<string> errorMessages)
+        internal Errors Add(string key, IEnumerable<string> errorMessages)
         {
             if (!_dictionaryImplementation.ContainsKey(key))
             {
@@ -62,7 +91,7 @@ namespace Backend.Fx.Exceptions
             return this;
         }
 
-        public Errors Add(string key, string error)
+        internal Errors Add(string key, string error)
         {
             if (!_dictionaryImplementation.ContainsKey(key))
             {
@@ -73,10 +102,11 @@ namespace Backend.Fx.Exceptions
 
             return this;
         }
-        
+
         public IEnumerator<KeyValuePair<string, string[]>> GetEnumerator()
         {
-            return _dictionaryImplementation.Select(kvp => new KeyValuePair<string, string[]>(kvp.Key, kvp.Value.ToArray())).GetEnumerator();
+            return _dictionaryImplementation
+                .Select(kvp => new KeyValuePair<string, string[]>(kvp.Key, kvp.Value.ToArray())).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -96,7 +126,7 @@ namespace Backend.Fx.Exceptions
             foreach (var keyValuePair in this)
             {
                 b.Append("  ");
-                b.Append(string.IsNullOrEmpty(keyValuePair.Key) ? "(generic)": keyValuePair.Key);
+                b.Append(keyValuePair.Key == GenericErrorKey ? "(generic)": keyValuePair.Key);
                 b.AppendLine();
                 for (var index = 0; index < keyValuePair.Value.Length; index++)
                 {

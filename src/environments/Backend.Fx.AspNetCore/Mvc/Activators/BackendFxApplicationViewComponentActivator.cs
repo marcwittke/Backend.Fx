@@ -1,39 +1,30 @@
 ﻿using System;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.DependencyInjection;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc.ViewComponents;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
 
-namespace Backend.Fx.AspNetCore.Mvc.Activators
+namespace Backend.Fx.AspNetCore.Mvc.Activators;
+
+[PublicAPI]
+public class BackendFxApplicationViewComponentActivator : IViewComponentActivator
 {
-    public class BackendFxApplicationViewComponentActivator : IViewComponentActivator
+    private readonly ILogger _logger = Log.Create<BackendFxApplicationViewComponentActivator>();
+    private readonly IBackendFxApplication _application;
+
+    public BackendFxApplicationViewComponentActivator(IBackendFxApplication application)
     {
-        private static readonly ILogger Logger = Log.Create<BackendFxApplicationViewComponentActivator>();
+        _application = application;
+    }
         
-        public object Create(ViewComponentContext context)
-        {
-            var requestedViewComponentType = context.ViewComponentDescriptor.TypeInfo.AsType();
-            
-            return context.ViewContext.HttpContext.TryGetInstanceProvider(out var ip) 
-                ? CreateInstanceUsingInstanceProvider(ip, requestedViewComponentType)
-                : CreateInstanceUsingSystemActivator(requestedViewComponentType);
-        }
-
-        private static object CreateInstanceUsingInstanceProvider(object ip, Type requestedViewComponentType)
-        {
-            Logger.LogDebug("Providing {ViewComponentName} using {InstanceProvider}", requestedViewComponentType.Name, ip.GetType().Name);
-            return ((IInstanceProvider)ip).GetInstance(requestedViewComponentType);
-        }
-
-        private static object CreateInstanceUsingSystemActivator(Type requestedViewComponentType)
-        {
-            Logger.LogDebug("Providing {ViewComponentName} using {InstanceProvider}", requestedViewComponentType.Name, nameof(Activator));
-            return Activator.CreateInstance(requestedViewComponentType);
-        }
+    public object Create(ViewComponentContext context)
+    {
+        Type requestedViewComponentType = context.ViewComponentDescriptor.TypeInfo.AsType();
+        return _application.CompositionRoot.ServiceProvider.GetRequiredService(requestedViewComponentType);
+    }
         
-        public void Release(ViewComponentContext context, object viewComponent)
-        {
-        }
+    public void Release(ViewComponentContext context, object viewComponent)
+    {
     }
 }

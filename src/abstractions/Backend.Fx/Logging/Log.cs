@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
-using Backend.Fx.Extensions;
+using Backend.Fx.Util;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -9,14 +10,14 @@ namespace Backend.Fx.Logging
     /// <summary>
     /// static class to keep an ILoggerFactory instance to use Microsoft.Extension.Logging without dependency injection
     /// </summary>
+    [PublicAPI]
     public static class Log
     {
-        private static Microsoft.Extensions.Logging.ILoggerFactory _loggerFactory = new NullLoggerFactory();
+        private static ILoggerFactory _loggerFactory = new NullLoggerFactory();
 
-        private static readonly AsyncLocal<Microsoft.Extensions.Logging.ILoggerFactory> AsyncLocalLoggerFactory =
-            new AsyncLocal<Microsoft.Extensions.Logging.ILoggerFactory>();
+        private static readonly AsyncLocal<ILoggerFactory> AsyncLocalLoggerFactory = new();
 
-        public static void Initialize(Microsoft.Extensions.Logging.ILoggerFactory loggerFactory)
+        public static void Initialize(ILoggerFactory loggerFactory)
         {
             _loggerFactory = loggerFactory;
         }
@@ -25,44 +26,43 @@ namespace Backend.Fx.Logging
         /// Override the global, static ILoggerFactory in this async local scope. This can be done per web request or per test run
         /// </summary>
         /// <param name="loggerFactory"></param>
-        public static IDisposable InitAsyncLocal(Microsoft.Extensions.Logging.ILoggerFactory loggerFactory)
+        public static IDisposable InitAsyncLocal(ILoggerFactory loggerFactory)
         {
             AsyncLocalLoggerFactory.Value = loggerFactory;
             return new DelegateDisposable(() => AsyncLocalLoggerFactory.Value = null);
         }
 
-        public static Microsoft.Extensions.Logging.ILogger Create<T>()
+        public static ILogger Create<T>()
         {
             return LoggerFactory.CreateLogger(typeof(T).FullName);
         }
 
-        public static Microsoft.Extensions.Logging.ILogger Create(Type t)
+        public static ILogger Create(Type t)
         {
             return LoggerFactory.CreateLogger(t.FullName);
         }
 
-        public static Microsoft.Extensions.Logging.ILogger Create(string category)
+        public static ILogger Create(string category)
         {
             return LoggerFactory.CreateLogger(category);
         }
 
-        public static Microsoft.Extensions.Logging.ILoggerFactory LoggerFactory { get; }
-            = new MaybeAsyncLocalLoggerFactory();
+        public static ILoggerFactory LoggerFactory { get; } = new MaybeAsyncLocalLoggerFactory();
 
-        private class MaybeAsyncLocalLoggerFactory : Microsoft.Extensions.Logging.ILoggerFactory
+        private class MaybeAsyncLocalLoggerFactory : ILoggerFactory
         {
             public void Dispose()
             {
             }
 
-            public Microsoft.Extensions.Logging.ILogger CreateLogger(string categoryName)
+            public ILogger CreateLogger(string categoryName)
             {
-                return (AsyncLocalLoggerFactory.Value ?? _loggerFactory)
-                    .CreateLogger(categoryName);
+                return (AsyncLocalLoggerFactory.Value ?? _loggerFactory).CreateLogger(categoryName);
             }
 
             public void AddProvider(ILoggerProvider provider)
             {
+                (AsyncLocalLoggerFactory.Value ?? _loggerFactory).AddProvider(provider);
             }
         }
     }

@@ -1,59 +1,60 @@
 ﻿using Backend.Fx.Exceptions;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
-namespace Backend.Fx.AspNetCore.Mvc.Validation
+namespace Backend.Fx.AspNetCore.Mvc.Validation;
+
+[PublicAPI]
+public class RedirectBackToGetActionModelValidationFilter : ModelValidationFilter
 {
-    public class RedirectBackToGetActionModelValidationFilter : ModelValidationFilter
+    private readonly IModelMetadataProvider _modelMetadataProvider;
+
+    public RedirectBackToGetActionModelValidationFilter(IModelMetadataProvider modelMetadataProvider)
     {
-        private readonly IModelMetadataProvider _modelMetadataProvider;
+        _modelMetadataProvider = modelMetadataProvider;
+    }
 
-        public RedirectBackToGetActionModelValidationFilter(IModelMetadataProvider modelMetadataProvider)
+    public override void OnActionExecuting(ActionExecutingContext context)
+    {
+        if (!context.ModelState.IsValid && AcceptsHtml(context))
         {
-            _modelMetadataProvider = modelMetadataProvider;
-        }
+            Errors errors = context.ModelState.ToErrorsDictionary();
+            LogErrors(context, context.Controller.ToString(), errors);
 
-        public override void OnActionExecuting(ActionExecutingContext context)
-        {
-            if (!context.ModelState.IsValid && AcceptsHtml(context))
+            // return the same view, using the posted model again
+            var viewData = new ViewDataDictionary(_modelMetadataProvider, context.ModelState);
+            BeforeRedirect(viewData);
+            context.Result = new ViewResult
             {
-                Errors errors = context.ModelState.ToErrorsDictionary();
-                LogErrors(context, context.Controller.ToString(), errors);
-
-                // return the same view, using the posted model again
-                var viewData = new ViewDataDictionary(_modelMetadataProvider, context.ModelState);
-                BeforeRedirect(viewData);
-                context.Result = new ViewResult
-                {
-                    ViewName = context.RouteData.Values["action"].ToString(),
-                    ViewData = viewData,
-                };
-            }
+                ViewName = context.RouteData.Values["action"].ToString(),
+                ViewData = viewData,
+            };
         }
+    }
 
-        public override void OnActionExecuted(ActionExecutedContext context)
+    public override void OnActionExecuted(ActionExecutedContext context)
+    {
+        if (context.Exception is ClientException cex && AcceptsHtml(context))
         {
-            if (context.Exception is ClientException cex && AcceptsHtml(context))
+            LogErrors(context, context.Controller.ToString(), cex.Errors);
+            context.ModelState.Add(cex.Errors);
+
+            // return the same view, using the posted model again
+            var viewData = new ViewDataDictionary(_modelMetadataProvider, context.ModelState);
+            BeforeRedirect(viewData);
+            context.Result = new ViewResult
             {
-                LogErrors(context, context.Controller.ToString(), cex.Errors);
-                context.ModelState.Add(cex.Errors);
-
-                // return the same view, using the posted model again
-                var viewData = new ViewDataDictionary(_modelMetadataProvider, context.ModelState);
-                BeforeRedirect(viewData);
-                context.Result = new ViewResult
-                {
-                    ViewName = context.RouteData.Values["action"].ToString(),
-                    ViewData = viewData,
-                };
-                context.ExceptionHandled = true;
-            }
+                ViewName = context.RouteData.Values["action"].ToString(),
+                ViewData = viewData,
+            };
+            context.ExceptionHandled = true;
         }
+    }
 
-        protected virtual void BeforeRedirect(ViewDataDictionary viewData)
-        {
-        }
+    protected virtual void BeforeRedirect(ViewDataDictionary viewData)
+    {
     }
 }

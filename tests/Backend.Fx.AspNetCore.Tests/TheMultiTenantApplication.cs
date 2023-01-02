@@ -2,7 +2,7 @@ using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Backend.Fx.AspNetCore.MultiTenancy;
 using Backend.Fx.RandomData;
-using Backend.Fx.Tests;
+using Backend.Fx.TestUtil;
 using Newtonsoft.Json;
 using Xunit;
 using Xunit.Abstractions;
@@ -15,7 +15,7 @@ namespace Backend.Fx.AspNetCore.Tests
         
         public TheMultiTenantApplication(ITestOutputHelper output) : base(output)
         {
-            _factory = new SampleAppWebApplicationFactory(base.Logger);
+            _factory = new SampleAppWebApplicationFactory(Logger);
         }
         
         [Fact]

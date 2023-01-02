@@ -1,7 +1,9 @@
 ﻿using System;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.Exceptions
 {
+    [PublicAPI]
     public interface IExceptionBuilder : IDisposable
     {
         void Add(string error);
@@ -11,9 +13,10 @@ namespace Backend.Fx.Exceptions
         void AddIf(string key, bool condition, string error);
     }
 
+    [PublicAPI]
     public class ExceptionBuilder<TEx> : IExceptionBuilder where TEx : ClientException, new()
     {
-        private readonly TEx _clientException = new TEx();
+        private readonly TEx _clientException = new();
 
         public void Add(string error)
         {
