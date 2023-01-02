@@ -174,7 +174,8 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection
                 {
                     Container.Collection.Append(
                         serviceDescriptor.ServiceType,
-                        serviceDescriptor.ImplementationType,
+                        serviceDescriptor.ImplementationType ??
+                        throw new ArgumentException("You must provide an implementationType when registering a collection", nameof(serviceDescriptor)),
                         serviceDescriptor.Lifetime.MapLifestyle());
                 }
             }

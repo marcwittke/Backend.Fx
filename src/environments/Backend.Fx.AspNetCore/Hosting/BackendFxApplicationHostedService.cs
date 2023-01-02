@@ -9,6 +9,7 @@ using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Backend.Fx.AspNetCore.Hosting
 {
+    [PublicAPI]
     public interface IBackendFxApplicationHostedService : IHostedService
     {
         IBackendFxApplication Application { get; }
