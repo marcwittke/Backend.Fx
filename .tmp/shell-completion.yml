@@ -7,15 +7,21 @@ Host:
 - AppVeyor
 - AzurePipelines
 - Bamboo
+- Bitbucket
 - Bitrise
-- Console
 - GitHubActions
 - GitLab
 - Jenkins
+- Rider
+- SpaceAutomation
 - TeamCity
-- Travis
+- Terminal
+- TravisCI
+- VisualStudio
+- VSCode
 NoLogo: 
 Plan: 
+Profile: 
 Root: 
 Skip:
 - Clean
