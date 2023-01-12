@@ -33,20 +33,23 @@ namespace Backend.Fx.Features.MultiTenancy
         {
             foreach (TenantId tenantId in _tenantIds)
             {
-                if (_tenantWideMutexManager.TryAcquire(tenantId, _mutexKey, out ITenantWideMutex mutex))
+                var mutex = await _tenantWideMutexManager.TryAcquireAsync(tenantId, _mutexKey, cancellationToken).ConfigureAwait(false);
+                if (mutex == null)
                 {
-                    try
+                    continue;
+                }
+                
+                try
+                {
+                    await _invoker.InvokeAsync((sp, ct) =>
                     {
-                        await _invoker.InvokeAsync((sp, ct) =>
-                        {
-                            sp.GetRequiredService<ICurrentTHolder<TenantId>>().ReplaceCurrent(tenantId);
-                            return awaitableAsyncAction(sp, ct);
-                        }, identity, cancellationToken).ConfigureAwait(false);
-                    }
-                    finally
-                    {
-                        mutex.Dispose();
-                    }
+                        sp.GetRequiredService<ICurrentTHolder<TenantId>>().ReplaceCurrent(tenantId);
+                        return awaitableAsyncAction(sp, ct);
+                    }, identity, cancellationToken).ConfigureAwait(false);
+                }
+                finally
+                {
+                    mutex.Dispose();
                 }
             }
         }

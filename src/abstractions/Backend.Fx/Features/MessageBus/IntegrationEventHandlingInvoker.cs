@@ -7,11 +7,11 @@ using Backend.Fx.ExecutionPipeline;
 namespace Backend.Fx.Features.MessageBus
 {
     /// <summary>
-    /// Ensures events to be handled sequentially
+    /// Ensures integration events to be handled sequentially
     /// </summary>
     public class IntegrationEventHandlingInvoker : IBackendFxApplicationInvoker
     {
-        private readonly object _syncLock = new();
+        private readonly SemaphoreSlim _semaphore = new(1);
         private readonly IBackendFxApplicationInvoker _invoker;
 
         public IntegrationEventHandlingInvoker(IBackendFxApplicationInvoker invoker)
@@ -23,7 +23,7 @@ namespace Backend.Fx.Features.MessageBus
         public async Task InvokeAsync(Func<IServiceProvider, CancellationToken, Task> awaitableAsyncAction,
             IIdentity identity, CancellationToken cancellationToken = default)
         {
-            Monitor.Enter(_syncLock);
+            await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 await _invoker
@@ -32,7 +32,7 @@ namespace Backend.Fx.Features.MessageBus
             }
             finally
             {
-                Monitor.Exit(_syncLock);
+                _semaphore.Release();
             }
         }
 

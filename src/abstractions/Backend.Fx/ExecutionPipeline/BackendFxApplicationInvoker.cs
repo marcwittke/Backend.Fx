@@ -20,10 +20,10 @@ namespace Backend.Fx.ExecutionPipeline
         /// enable cancellation of the async invocation.</param>
         /// <returns>The <see cref="Task"/> representing the async invocation.</returns>
         Task InvokeAsync(
-            Func<IServiceProvider, CancellationToken, Task> awaitableAsyncAction, 
-            IIdentity identity = null, 
+            Func<IServiceProvider, CancellationToken, Task> awaitableAsyncAction,
+            IIdentity identity = null,
             CancellationToken cancellationToken = default);
-        
+
         /// <summary>
         /// Run a delegate through the full execution pipeline, having its separate injection scope 
         /// </summary>
@@ -31,7 +31,7 @@ namespace Backend.Fx.ExecutionPipeline
         /// <param name="identity">The acting identity</param>
         /// <returns>The <see cref="Task"/> representing the async invocation.</returns>
         Task InvokeAsync(
-            Func<IServiceProvider, Task> awaitableAsyncAction, 
+            Func<IServiceProvider, Task> awaitableAsyncAction,
             IIdentity identity = null);
     }
 
@@ -46,33 +46,36 @@ namespace Backend.Fx.ExecutionPipeline
             _application = application;
         }
 
-        public async Task InvokeAsync(
-            Func<IServiceProvider, CancellationToken, Task> awaitableAsyncAction, 
-            IIdentity identity = null, 
+        public Task InvokeAsync(
+            Func<IServiceProvider, CancellationToken, Task> awaitableAsyncAction,
+            IIdentity identity = null,
             CancellationToken cancellationToken = default)
         {
-            identity ??= new AnonymousIdentity();
-            _logger.LogInformation("Invoking action as {Identity}", identity.Name);
-            using IServiceScope serviceScope = BeginScope(identity);
-            using IDisposable durationLogger = UseDurationLogger(serviceScope);
-            var operation = serviceScope.ServiceProvider.GetRequiredService<IOperation>();
-            try
+            return Task.Run(async () =>
             {
-                await operation.BeginAsync(serviceScope, cancellationToken).ConfigureAwait(false);
-                await awaitableAsyncAction.Invoke(serviceScope.ServiceProvider, cancellationToken).ConfigureAwait(false);
-                await operation.CompleteAsync(cancellationToken).ConfigureAwait(false);
-            }
-            catch
-            {
-                await operation.CancelAsync(cancellationToken).ConfigureAwait(false);
-                throw;
-            }
+                identity ??= new AnonymousIdentity();
+                _logger.LogInformation("Invoking action as {Identity}", identity.Name);
+                using IServiceScope serviceScope = BeginScope(identity);
+                using IDisposable durationLogger = UseDurationLogger(serviceScope);
+                var operation = serviceScope.ServiceProvider.GetRequiredService<IOperation>();
+
+                try
+                {
+                    await operation.BeginAsync(serviceScope, cancellationToken).ConfigureAwait(false);
+                    await awaitableAsyncAction.Invoke(serviceScope.ServiceProvider, cancellationToken).ConfigureAwait(false);
+                    await operation.CompleteAsync(cancellationToken).ConfigureAwait(false);
+                }
+                catch
+                {
+                    await operation.CancelAsync(cancellationToken).ConfigureAwait(false);
+                    throw;
+                }
+            }, cancellationToken);
         }
 
         public Task InvokeAsync(Func<IServiceProvider, Task> awaitableAsyncAction, IIdentity identity = null)
-            => InvokeAsync((sp, _) => awaitableAsyncAction.Invoke(sp), identity); 
-
-
+            => InvokeAsync((sp, _) => awaitableAsyncAction.Invoke(sp), identity);
+        
         private IServiceScope BeginScope(IIdentity identity)
         {
             IServiceScope serviceScope = _application.CompositionRoot.BeginScope();
@@ -82,8 +85,7 @@ namespace Backend.Fx.ExecutionPipeline
 
             return serviceScope;
         }
-
-
+        
         private IDisposable UseDurationLogger(IServiceScope serviceScope)
         {
             IIdentity identity = serviceScope.ServiceProvider.GetRequiredService<ICurrentTHolder<IIdentity>>().Current;

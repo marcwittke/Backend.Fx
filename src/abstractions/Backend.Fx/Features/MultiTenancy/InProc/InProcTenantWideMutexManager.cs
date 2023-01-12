@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using JetBrains.Annotations;
 
 namespace Backend.Fx.Features.MultiTenancy.InProc
@@ -12,28 +14,30 @@ namespace Backend.Fx.Features.MultiTenancy.InProc
     /// </summary>
     public class InProcTenantWideMutexManager : ITenantWideMutexManager
     {
-        private readonly ConcurrentDictionary<int, ConcurrentDictionary<string, Mutex>> _mutexes = new();
+        private readonly ConcurrentDictionary<TenantId, ConcurrentDictionary<string, SemaphoreSlim>> _semaphoresByTenantId = new();
 
-        public bool TryAcquire(TenantId tenantId, string key, out ITenantWideMutex tenantWideMutex)
+        public async Task<ITenantWideMutex> TryAcquireAsync(TenantId tenantId, string key, CancellationToken cancellationToken)
         {
             if (!tenantId.HasValue)
             {
                 throw new InvalidOperationException("Cannot acquire a tenant wide lock for tenant NULL");
             }
 
-            lock (this)
-            {
-                var subDictionary = _mutexes.GetOrAdd(tenantId.Value, _ => new ConcurrentDictionary<string, Mutex>());
-                Mutex mutex = subDictionary.GetOrAdd(key, _ => new Mutex());
-                if (mutex.WaitOne(300))
-                {
-                    tenantWideMutex = new InProcTenantWideMutex(() => mutex.ReleaseMutex());
-                    return true;
-                }
 
-                tenantWideMutex = null;
-                return false;
+            var subDictionary = _semaphoresByTenantId.GetOrAdd(
+                tenantId,
+                _ => new ConcurrentDictionary<string, SemaphoreSlim>(new[] { new KeyValuePair<string, SemaphoreSlim>(key, new SemaphoreSlim(1)) }));
+            
+            var semaphore = subDictionary.GetOrAdd(
+                key, 
+                _ => new SemaphoreSlim(1));
+            
+            if (await semaphore.WaitAsync(300, cancellationToken).ConfigureAwait(false))
+            {
+                return new InProcTenantWideMutex(() => semaphore.Release());
             }
+
+            return null;
         }
 
         private class InProcTenantWideMutex : ITenantWideMutex
