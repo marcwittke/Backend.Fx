@@ -42,7 +42,10 @@ namespace Backend.Fx.Patterns.EventAggregation.Integration
 
         public void SetTenantId(TenantId tenantId)
         {
-            TenantId = (int) tenantId;
+            if (tenantId.HasValue && tenantId.Value > 0)
+            {
+                TenantId = (int)tenantId;
+            }
         }
     }
 }

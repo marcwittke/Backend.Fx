@@ -80,37 +80,42 @@ namespace Backend.Fx.Patterns.DataGeneration
                 foreach (TenantId prodTenantId in prodTenantIds)
                 {
                     DataGenerationContext.SeedDataForTenant(prodTenantId, false);
-                    _application.MessageBus.Publish(new DataGenerated(prodTenantId.Value));
+                    var dataGenerated = new DataGenerated();
+                    dataGenerated.SetTenantId(prodTenantId);
+                    _application.MessageBus.Publish(dataGenerated);
                 }
 
                 var demoTenantIds = _tenantIdProvider.GetActiveDemonstrationTenantIds();
                 foreach (TenantId demoTenantId in demoTenantIds)
                 {
                     DataGenerationContext.SeedDataForTenant(demoTenantId, true);
-                    _application.MessageBus.Publish(new DataGenerated(demoTenantId.Value));
+                    var dataGenerated = new DataGenerated();
+                    dataGenerated.SetTenantId(demoTenantId);
+                    _application.MessageBus.Publish(dataGenerated);
                 }
             }
         }
 
         private void EnableDataGenerationForNewTenants()
         {
-            _application.MessageBus.Subscribe(new DelegateIntegrationMessageHandler<TenantActivated>(tenantCreated =>
+            _application.MessageBus.Subscribe(new DelegateIntegrationMessageHandler<TenantActivated>(tenantActivated =>
             {
                 Logger.LogInformation(
                     "Seeding data for recently activated tenant (with demo data: {IsDemoTenant}) {TenantId}",
-                    tenantCreated.IsDemoTenant,
-                    tenantCreated.TenantId);
+                    tenantActivated.IsDemoTenant,
+                    tenantActivated.TenantId);
                 try
                 {
-                    DataGenerationContext.SeedDataForTenant(new TenantId(tenantCreated.TenantId),
-                        tenantCreated.IsDemoTenant);
+                    DataGenerationContext.SeedDataForTenant(
+                        new TenantId(tenantActivated.TenantId),
+                        tenantActivated.IsDemoTenant);
                 }
                 catch (Exception ex)
                 {
                     Logger.LogError(ex,
                         "Seeding data for recently activated tenant (with demo data: {IsDemoTenant}) {TenantId} failed",
-                        tenantCreated.IsDemoTenant,
-                        tenantCreated.TenantId);
+                        tenantActivated.IsDemoTenant,
+                        tenantActivated.TenantId);
                 }
             }));
         }
