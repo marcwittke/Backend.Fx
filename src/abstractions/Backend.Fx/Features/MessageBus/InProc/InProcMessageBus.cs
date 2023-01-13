@@ -15,7 +15,13 @@ namespace Backend.Fx.Features.MessageBus.InProc
 
         public override void Connect()
         {
-            _channel.MessageReceived += ChannelOnMessageReceived;
+            _channel.Connect(async msg =>
+            {
+                if (_subscribedEventTypeNames.Contains(msg.EventTypeName))
+                {
+                    await ProcessAsync(msg).ConfigureAwait(false);
+                }    
+            });
         }
 
         protected override void SubscribeToEventMessage(string eventTypeName)
@@ -23,20 +29,9 @@ namespace Backend.Fx.Features.MessageBus.InProc
             _subscribedEventTypeNames.Add(eventTypeName);
         }
 
-        protected override Task PublishMessageAsync(SerializedMessage serializedMessage)
+        protected override async Task PublishMessageAsync(SerializedMessage serializedMessage)
         {
-            _channel.Publish(serializedMessage);
-            return Task.CompletedTask;
-        }
-
-        private async void ChannelOnMessageReceived(
-            object sender, 
-            InProcMessageBusChannel.MessageReceivedEventArgs eventArgs)
-        {
-            if (_subscribedEventTypeNames.Contains(eventArgs.SerializedMessage.EventTypeName))
-            {
-                await ProcessAsync(eventArgs.SerializedMessage).ConfigureAwait(false);
-            }
+            await _channel.PublishAsync(serializedMessage).ConfigureAwait(false);
         }
     }
 }

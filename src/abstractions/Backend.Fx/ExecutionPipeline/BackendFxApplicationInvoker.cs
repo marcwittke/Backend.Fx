@@ -46,36 +46,33 @@ namespace Backend.Fx.ExecutionPipeline
             _application = application;
         }
 
-        public Task InvokeAsync(
+        public async Task InvokeAsync(
             Func<IServiceProvider, CancellationToken, Task> awaitableAsyncAction,
             IIdentity identity = null,
             CancellationToken cancellationToken = default)
         {
-            return Task.Run(async () =>
-            {
-                identity ??= new AnonymousIdentity();
-                _logger.LogInformation("Invoking action as {Identity}", identity.Name);
-                using IServiceScope serviceScope = BeginScope(identity);
-                using IDisposable durationLogger = UseDurationLogger(serviceScope);
-                var operation = serviceScope.ServiceProvider.GetRequiredService<IOperation>();
+            identity ??= new AnonymousIdentity();
+            _logger.LogInformation("Invoking action as {Identity}", identity.Name);
+            using IServiceScope serviceScope = BeginScope(identity);
+            using IDisposable durationLogger = UseDurationLogger(serviceScope);
+            var operation = serviceScope.ServiceProvider.GetRequiredService<IOperation>();
 
-                try
-                {
-                    await operation.BeginAsync(serviceScope, cancellationToken).ConfigureAwait(false);
-                    await awaitableAsyncAction.Invoke(serviceScope.ServiceProvider, cancellationToken).ConfigureAwait(false);
-                    await operation.CompleteAsync(cancellationToken).ConfigureAwait(false);
-                }
-                catch
-                {
-                    await operation.CancelAsync(cancellationToken).ConfigureAwait(false);
-                    throw;
-                }
-            }, cancellationToken);
+            try
+            {
+                await operation.BeginAsync(serviceScope, cancellationToken).ConfigureAwait(false);
+                await awaitableAsyncAction.Invoke(serviceScope.ServiceProvider, cancellationToken).ConfigureAwait(false);
+                await operation.CompleteAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch
+            {
+                await operation.CancelAsync(cancellationToken).ConfigureAwait(false);
+                throw;
+            }
         }
 
         public Task InvokeAsync(Func<IServiceProvider, Task> awaitableAsyncAction, IIdentity identity = null)
             => InvokeAsync((sp, _) => awaitableAsyncAction.Invoke(sp), identity);
-        
+
         private IServiceScope BeginScope(IIdentity identity)
         {
             IServiceScope serviceScope = _application.CompositionRoot.BeginScope();
@@ -85,7 +82,7 @@ namespace Backend.Fx.ExecutionPipeline
 
             return serviceScope;
         }
-        
+
         private IDisposable UseDurationLogger(IServiceScope serviceScope)
         {
             IIdentity identity = serviceScope.ServiceProvider.GetRequiredService<ICurrentTHolder<IIdentity>>().Current;

@@ -33,7 +33,6 @@ public class DummyServicesModule : IModule
     public DummyDemoDataGeneratorSpy DummyDemoDataGeneratorSpy { get; } = new();
     public DummyProductiveDataGeneratorSpy DummyProductiveDataGeneratorSpy { get; } = new();
     
-    public IDummyAuthorizationPolicySpy DummyAuthorizationPolicySpy { get; } = A.Fake<IDummyAuthorizationPolicySpy>();
     public IDummyDomainEventHandlerSpy DummyDomainEventHandlerSpy { get; } = A.Fake<IDummyDomainEventHandlerSpy>();
     public IDummyJobSpy DummyJobSpy { get; } = A.Fake<IDummyJobSpy>();
     public IOperationSpy OperationSpy { get; } = A.Fake<IOperationSpy>();
@@ -49,7 +48,6 @@ public class DummyServicesModule : IModule
         compositionRoot.Register(ServiceDescriptor.Singleton(DummyProductiveDataGeneratorSpy));
         compositionRoot.Register(ServiceDescriptor.Singleton(DummyDomainEventHandlerSpy));
         compositionRoot.Register(ServiceDescriptor.Singleton(DummyJobSpy));
-        compositionRoot.Register(ServiceDescriptor.Singleton(DummyAuthorizationPolicySpy));
         compositionRoot.Register(ServiceDescriptor.Singleton(OperationSpy));
         compositionRoot.Register(ServiceDescriptor.Singleton(DummyIntegrationEventHandlerSpy));
         compositionRoot.RegisterDecorator(ServiceDescriptor.Scoped<IOperation, OperationSpy>());
@@ -57,7 +55,6 @@ public class DummyServicesModule : IModule
 
     public void ResetSpies()
     {
-        Fake.ClearRecordedCalls(DummyAuthorizationPolicySpy);
         Fake.ClearRecordedCalls(DummyDomainEventHandlerSpy);
         Fake.ClearRecordedCalls(DummyJobSpy);
         Fake.ClearRecordedCalls(OperationSpy);

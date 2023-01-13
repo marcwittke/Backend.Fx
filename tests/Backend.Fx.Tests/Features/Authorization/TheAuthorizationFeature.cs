@@ -21,7 +21,7 @@ namespace Backend.Fx.Tests.Features.Authorization;
 [UsedImplicitly]
 public class TheAuthorizationFeatureWithSimpleInjector : TheAuthorizationFeature
 {
-    public TheAuthorizationFeatureWithSimpleInjector(ITestOutputHelper output) 
+    public TheAuthorizationFeatureWithSimpleInjector(ITestOutputHelper output)
         : base(new SimpleInjectorCompositionRoot(), output)
     {
     }
@@ -37,35 +37,43 @@ public class TheAuthorizationFeatureWithSimpleInjector : TheAuthorizationFeature
 //     }
 // }
 
-public abstract class TheAuthorizationFeature : TestWithLogging
+public abstract class TheAuthorizationFeature : TestWithLogging, IAsyncLifetime
 {
     private readonly IBackendFxApplication _sut;
     private readonly IExceptionLogger _exceptionLogger = A.Fake<IExceptionLogger>();
-    private readonly DummyServicesFeature _dummyServicesFeature = new ();
+    private readonly MockFeature _mockFeature = new();
+    private readonly IAuthorizationPolicy<DummyAggregate> _policyMock;
 
     protected TheAuthorizationFeature(ICompositionRoot compositionRoot, ITestOutputHelper output) : base(output)
     {
         _sut = new BackendFxApplication(compositionRoot, _exceptionLogger, GetType().Assembly);
-        _sut.EnableFeature(_dummyServicesFeature);
+        _sut.EnableFeature(_mockFeature);
+        _sut.EnableFeature(new PersistenceFeature(new InMemoryPersistenceModule<int>()));
+        _sut.EnableFeature(new AuthorizationFeature());
+
+        _policyMock = _mockFeature.AddMock<IAuthorizationPolicy<DummyAggregate>>();
+    }
+
+    public async Task InitializeAsync()
+    {
+        await _sut.BootAsync();
     }
 
     [Fact]
     public void CanNotEnableFeatureWithoutPersistence()
     {
-        Assert.Throws<InvalidOperationException>(() => _sut.EnableFeature(new AuthorizationFeature()));
+        var sutWithoutPersistence = new BackendFxApplication(new SimpleInjectorCompositionRoot(), _exceptionLogger, GetType().Assembly);
+        Assert.Throws<InvalidOperationException>(() => sutWithoutPersistence.EnableFeature(new AuthorizationFeature()));
     }
 
     [Fact]
     public async Task CanAllowRead()
     {
-        await ConfigureAndBootApplication();
-
         FillStore();
 
-        A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.HasAccessExpression)
-            .Returns(agg => true);
+        A.CallTo(() => _policyMock.HasAccessExpression).Returns(agg => true);
 
-        await _sut.Invoker.InvokeAsync(async sp=>
+        await _sut.Invoker.InvokeAsync(async sp =>
         {
             var repository = sp.GetRequiredService<IRepository<DummyAggregate, int>>();
             var aggregates = await repository.GetAllAsync();
@@ -93,14 +101,11 @@ public abstract class TheAuthorizationFeature : TestWithLogging
     [Fact]
     public async Task CanDenyRead()
     {
-        await ConfigureAndBootApplication();
-
         FillStore();
 
-        A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.HasAccessExpression)
-            .Returns(agg => false);
+        A.CallTo(() => _policyMock.HasAccessExpression).Returns(agg => false);
 
-        await _sut.Invoker.InvokeAsync(async sp=>
+        await _sut.Invoker.InvokeAsync(async sp =>
         {
             var repository = sp.GetRequiredService<IRepository<DummyAggregate, int>>();
             var aggregates = await repository.GetAllAsync();
@@ -126,14 +131,12 @@ public abstract class TheAuthorizationFeature : TestWithLogging
     [Fact]
     public async Task CanAllowCreate()
     {
-        await ConfigureAndBootApplication();
-
         FillStore();
 
-        A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.HasAccessExpression).Returns(agg => true);
-        A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.CanCreate(A<DummyAggregate>._)).Returns(true);
+        A.CallTo(() => _policyMock.HasAccessExpression).Returns(agg => true);
+        A.CallTo(() => _policyMock.CanCreate(A<DummyAggregate>._)).Returns(true);
 
-        await _sut.Invoker.InvokeAsync(async sp=>
+        await _sut.Invoker.InvokeAsync(async sp =>
         {
             var repository = sp.GetRequiredService<IRepository<DummyAggregate, int>>();
             await repository.AddAsync(new DummyAggregate(1000, "thousand"));
@@ -144,7 +147,7 @@ public abstract class TheAuthorizationFeature : TestWithLogging
             });
         }, new AnonymousIdentity());
 
-        await _sut.Invoker.InvokeAsync(async sp=>
+        await _sut.Invoker.InvokeAsync(async sp =>
         {
             var repository = sp.GetRequiredService<IRepository<DummyAggregate, int>>();
             var unused1 = await repository.GetAsync(1000);
@@ -156,15 +159,13 @@ public abstract class TheAuthorizationFeature : TestWithLogging
     [Fact]
     public async Task CanAllowDelete()
     {
-        await ConfigureAndBootApplication();
-
         FillStore();
 
-        A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.HasAccessExpression).Returns(agg => true);
-        A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.CanCreate(A<DummyAggregate>._)).Returns(true);
-        A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.CanDelete(A<DummyAggregate>._)).Returns(true);
+        A.CallTo(() => _policyMock.HasAccessExpression).Returns(agg => true);
+        A.CallTo(() => _policyMock.CanCreate(A<DummyAggregate>._)).Returns(true);
+        A.CallTo(() => _policyMock.CanDelete(A<DummyAggregate>._)).Returns(true);
 
-        await _sut.Invoker.InvokeAsync(async sp=>
+        await _sut.Invoker.InvokeAsync(async sp =>
         {
             var repository = sp.GetRequiredService<IRepository<DummyAggregate, int>>();
             await repository.AddAsync(new DummyAggregate(1000, "thousand"));
@@ -188,12 +189,10 @@ public abstract class TheAuthorizationFeature : TestWithLogging
     [Fact]
     public async Task CanDenyCreate()
     {
-        await ConfigureAndBootApplication();
-
         FillStore();
 
-        A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.HasAccessExpression).Returns(agg => true);
-        A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.CanCreate(A<DummyAggregate>._)).Returns(false);
+        A.CallTo(() => _policyMock.HasAccessExpression).Returns(agg => true);
+        A.CallTo(() => _policyMock.CanCreate(A<DummyAggregate>._)).Returns(false);
 
         await _sut.Invoker.InvokeAsync(async sp =>
         {
@@ -213,13 +212,11 @@ public abstract class TheAuthorizationFeature : TestWithLogging
     [Fact]
     public async Task CanDenyDelete()
     {
-        await ConfigureAndBootApplication();
-
         FillStore();
 
-        A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.HasAccessExpression).Returns(agg => true);
-        A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.CanCreate(A<DummyAggregate>._)).Returns(true);
-        A.CallTo(() => _dummyServicesFeature.Spies.DummyAuthorizationPolicySpy.CanDelete(A<DummyAggregate>._)).Returns(false);
+        A.CallTo(() => _policyMock.HasAccessExpression).Returns(agg => true);
+        A.CallTo(() => _policyMock.CanCreate(A<DummyAggregate>._)).Returns(true);
+        A.CallTo(() => _policyMock.CanDelete(A<DummyAggregate>._)).Returns(false);
 
         await _sut.Invoker.InvokeAsync(async sp =>
         {
@@ -235,13 +232,6 @@ public abstract class TheAuthorizationFeature : TestWithLogging
         }, new AnonymousIdentity());
     }
 
-    private async Task ConfigureAndBootApplication()
-    {
-        _sut.EnableFeature(new PersistenceFeature(new InMemoryPersistenceModule<int>()));
-        _sut.EnableFeature(new AuthorizationFeature());
-        await _sut.BootAsync();
-    }
-
     private void FillStore()
     {
         var inMemoryDatabase = _sut.CompositionRoot.ServiceProvider.GetRequiredService<InMemoryDatabase<int>>();
@@ -250,5 +240,11 @@ public abstract class TheAuthorizationFeature : TestWithLogging
         dummyAggregateStore.Add(2, new DummyAggregate(2, "two"));
         dummyAggregateStore.Add(3, new DummyAggregate(3, "three"));
         dummyAggregateStore.Add(4, new DummyAggregate(4, "four"));
+    }
+
+    public Task DisposeAsync()
+
+    {
+        return Task.CompletedTask;
     }
 }

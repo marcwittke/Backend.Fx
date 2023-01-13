@@ -26,26 +26,27 @@ public class TheInProcMessageBusChannel :TestWithLogging
         var sut = new InProcMessageBusChannel();
 
         // note that app1 does not scan any assemblies for handlers
-        var app1 = new BackendFxApplication(new SimpleInjectorCompositionRoot(), _exceptionLogger);
-        var bus1 = new InProcMessageBus(sut);
-        app1.EnableFeature(new MessageBusFeature(bus1));
-        await app1.BootAsync();
+        var sendingApp = new BackendFxApplication(new SimpleInjectorCompositionRoot(), _exceptionLogger);
+        var sendingBus = new InProcMessageBus(sut);
+        sendingApp.EnableFeature(new MessageBusFeature(sendingBus));
+        await sendingApp.BootAsync();
+        
         
         // app2 will find the DummyIntegrationEventHandler type and makes a subscription  
-        var app2 = new BackendFxApplication(new SimpleInjectorCompositionRoot(), _exceptionLogger, GetType().Assembly);
-        var spyInApp2 = A.Fake<IDummyIntegrationEventHandlerSpy>();
-        app2.CompositionRoot.Register(ServiceDescriptor.Singleton(spyInApp2));
-        var bus2 = new InProcMessageBus(sut);
-        app2.EnableFeature(new MessageBusFeature(bus2));
-        await app2.BootAsync();
+        var receivingApp = new BackendFxApplication(new SimpleInjectorCompositionRoot(), _exceptionLogger, GetType().Assembly);
+        var receivingAppSpy = A.Fake<IDummyIntegrationEventHandlerSpy>();
+        receivingApp.CompositionRoot.Register(ServiceDescriptor.Singleton(receivingAppSpy));
+        var receivingBus = new InProcMessageBus(sut);
+        receivingApp.EnableFeature(new MessageBusFeature(receivingBus));
+        await receivingApp.BootAsync();
         
-        await bus1.PublishAsync(new DummyIntegrationEvent());
+        await sendingBus.PublishAsync(new DummyIntegrationEvent());
 
         // the PublishAsync task awaits for completion of the publish operation, not the handling of the event.
         // instead we have to await the channel to finish its work:
         await sut.FinishHandlingAllMessagesAsync();
         
         A.CallTo(() => _exceptionLogger.LogException(A<Exception>._)).MustNotHaveHappened();
-        A.CallTo(() => spyInApp2.HandleAsync(A<DummyIntegrationEvent>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => receivingAppSpy.HandleAsync(A<DummyIntegrationEvent>._)).MustHaveHappenedOnceExactly();
     }
 }

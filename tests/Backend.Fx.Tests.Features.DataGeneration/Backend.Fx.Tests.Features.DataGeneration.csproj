@@ -1,9 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
-        <LangVersion>default</LangVersion>
         <Nullable>enable</Nullable>
+
+        <IsPackable>false</IsPackable>
     </PropertyGroup>
 
     <ItemGroup>
@@ -20,20 +21,16 @@
         <PackageReference Include="Serilog.Sinks.XUnit" Version="3.0.3" />
         <PackageReference Include="xunit" Version="2.4.1" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\abstractions\Backend.Fx\Backend.Fx.csproj" />
-        <ProjectReference Include="..\..\src\implementations\Backend.Fx.MicrosoftDependencyInjection\Backend.Fx.MicrosoftDependencyInjection.csproj" />
-        <ProjectReference Include="..\..\src\implementations\Backend.Fx.SimpleInjetorDependencyInjection\Backend.Fx.SimpleInjectorDependencyInjection.csproj" />
-        <ProjectReference Include="..\Backend.Fx.TestUtil\Backend.Fx.TestUtil.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Features\DataGeneration" />
+      <ProjectReference Include="..\..\src\abstractions\Backend.Fx\Backend.Fx.csproj" />
+      <ProjectReference Include="..\..\src\implementations\Backend.Fx.MicrosoftDependencyInjection\Backend.Fx.MicrosoftDependencyInjection.csproj" />
+      <ProjectReference Include="..\..\src\implementations\Backend.Fx.SimpleInjetorDependencyInjection\Backend.Fx.SimpleInjectorDependencyInjection.csproj" />
+      <ProjectReference Include="..\Backend.Fx.TestUtil\Backend.Fx.TestUtil.csproj" />
     </ItemGroup>
 
 </Project>

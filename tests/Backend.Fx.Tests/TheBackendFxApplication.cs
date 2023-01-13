@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,6 +33,7 @@ public abstract class TheBackendFxApplication : TestWithLogging
     private readonly IExceptionLogger _exceptionLogger = A.Fake<IExceptionLogger>();
     private readonly IEntityIdGenerator<int> _entityIdGenerator = A.Fake<IEntityIdGenerator<int>>();
     private readonly DummyServicesFeature _dummyServicesFeature = new();
+    private readonly MockFeature _mockFeature = new();
 
     protected TheBackendFxApplication(ICompositionRoot compositionRoot, ITestOutputHelper output) : base(output)
     {
@@ -42,6 +44,7 @@ public abstract class TheBackendFxApplication : TestWithLogging
         _sut.EnableFeature(new DomainServicesFeature());
         _sut.EnableFeature(new IdGenerationFeature<int>(_entityIdGenerator));
         _sut.EnableFeature(_dummyServicesFeature);
+        _sut.EnableFeature(_mockFeature);
     }
 
     [Fact]
@@ -107,6 +110,38 @@ public abstract class TheBackendFxApplication : TestWithLogging
             Assert.IsType<FrozenClock>(sp.GetRequiredService<IClock>());
             return Task.CompletedTask;
         }, new SystemIdentity());
+    }
+
+    [Fact]
+    public async Task CanRunParallelInvocations()
+    {
+        int delay = 333;
+        var fake = A.Fake<IDummyDomainService>();
+        A.CallTo(() => fake.SayHelloToDomain()).ReturnsLazily(() =>
+        {
+            Thread.Sleep(delay);
+            return "delayed";
+        });
+
+        _mockFeature.AddMock(fake);
+        await _sut.BootAsync();
+
+        var sw = new Stopwatch();
+        sw.Start();
+
+        var tasks = Enumerable
+            .Range(1, Environment.ProcessorCount - 1)
+            .Select(
+                _ => Task.Run(() => _sut.Invoker.InvokeAsync(sp =>
+                {
+                    sp.GetRequiredService<IDummyDomainService>().SayHelloToDomain();
+                    return Task.CompletedTask;
+                }, new SystemIdentity())));
+
+        await Task.WhenAll(tasks);
+        sw.Stop();
+
+        Assert.InRange(sw.ElapsedMilliseconds, delay, delay * 2);
     }
 
     [Fact]

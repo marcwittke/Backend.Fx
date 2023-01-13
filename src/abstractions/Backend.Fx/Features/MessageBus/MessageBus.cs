@@ -25,6 +25,7 @@ namespace Backend.Fx.Features.MessageBus
             where TIntegrationEvent : IIntegrationEvent;
 
         void Subscribe(Type eventType);
+        
         void Integrate(IBackendFxApplication application);
     }
 
