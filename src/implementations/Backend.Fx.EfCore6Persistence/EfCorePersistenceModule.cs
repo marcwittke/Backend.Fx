@@ -6,7 +6,6 @@ using Backend.Fx.DependencyInjection;
 using Backend.Fx.ExecutionPipeline;
 using Backend.Fx.Features.Persistence;
 using Backend.Fx.Features.Persistence.AdoNet;
-using Backend.Fx.Util;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -46,17 +45,12 @@ public class EfCorePersistenceModule<TDbContext> : AdoNetPersistenceModule
 
         compositionRoot.RegisterDecorator(
             ServiceDescriptor.Scoped<ICanFlush, EfFlush>());
+        
+        compositionRoot.RegisterDecorator(
+            ServiceDescriptor.Scoped<IUnitOfWork, EfUnitOfWork>());
 
         compositionRoot.RegisterDecorator(
             ServiceDescriptor.Scoped<IOperation, DbContextTransactionOperationDecorator>());
-
-        RegisterRepositories(compositionRoot, _assemblies);
-    }
-
-    protected virtual void RegisterRepositories(ICompositionRoot compositionRoot, IEnumerable<Assembly> assemblies)
-    {
-        compositionRoot.Register(
-            ServiceDescriptor.Scoped(typeof(IRepository<,>), typeof(EfCoreRepository<,>)));
     }
 }
 

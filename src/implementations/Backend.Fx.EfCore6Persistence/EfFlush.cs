@@ -17,8 +17,7 @@ namespace Backend.Fx.EfCore6Persistence
         {
             _canFlush = canFlush;
             DbContext = dbContext;
-            _logger.LogInformation("Disabling change tracking on {DbContextTypeName} instance", dbContext.GetType().Name);
-            DbContext.ChangeTracker.AutoDetectChangesEnabled = false;
+
         }
 
         public void Flush()

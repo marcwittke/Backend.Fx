@@ -13,7 +13,7 @@ namespace Backend.Fx.Features.Authorization
     /// Checks the authorization policy for write operations
     /// </summary>
     internal class AuthorizingRepository<TAggregateRoot, TId> : IRepository<TAggregateRoot, TId>
-        where TAggregateRoot : IAggregateRoot<TId> 
+        where TAggregateRoot : class, IAggregateRoot<TId> 
         where TId : IEquatable<TId>
     {
         private readonly IAuthorizationPolicy<TAggregateRoot> _authorizationPolicy;
@@ -65,6 +65,18 @@ namespace Backend.Fx.Features.Authorization
         public async Task AddAsync(TAggregateRoot aggregateRoot, CancellationToken cancellationToken = default)
         {
             if (_authorizationPolicy.CanCreate(aggregateRoot))
+            {
+                await _repository.AddAsync(aggregateRoot, cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                throw new ForbiddenException("You are not allowed to create such a record");
+            }
+        }
+
+        public async Task UpdateAsync(TAggregateRoot aggregateRoot, CancellationToken cancellationToken = default)
+        {
+            if (_authorizationPolicy.CanModify(aggregateRoot))
             {
                 await _repository.AddAsync(aggregateRoot, cancellationToken).ConfigureAwait(false);
             }

@@ -9,12 +9,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Fx.EfCore6Persistence;
 
-public class EfCoreQueryable<TAggregateRoot> : IQueryable<TAggregateRoot>
-    where TAggregateRoot : class, IAggregateRoot
+public class EfCoreQueryable<TAggregateRoot> : IQueryable<TAggregateRoot>  where TAggregateRoot : class, IAggregateRoot
 {
     private readonly IQueryable<TAggregateRoot> _dbSet;
     
-
     public EfCoreQueryable(DbContext dbContext)
     {
         _dbSet = dbContext.Set<TAggregateRoot>();

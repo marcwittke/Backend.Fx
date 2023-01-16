@@ -12,23 +12,23 @@ namespace Backend.Fx.Features.Persistence.InMem
             base.Register(compositionRoot);
             
             // a singleton database
-            compositionRoot.Register(ServiceDescriptor.Singleton<InMemoryDatabase<TId>, InMemoryDatabase<TId>>());
+            compositionRoot.Register(ServiceDescriptor.Singleton<InMemoryDatabase, InMemoryDatabase>());
 
             // a scoped accessor to get the aggregate dictionaries 
-            compositionRoot.Register(ServiceDescriptor.Scoped<IInMemoryDatabaseAccessor<TId>, InMemoryDatabaseAccessor<TId>>());
+            compositionRoot.Register(ServiceDescriptor.Scoped<IInMemoryDatabaseAccessor,InMemoryDatabaseAccessor>());
 
             // we use the scoped accessor to get the aggregate dictionaries. This will be decorated in case
             // of Multi Tenancy to switch the tenant store (we provide it as generic and non generic version, too)
             compositionRoot.Register(ServiceDescriptor.Scoped(sp =>
-                sp.GetRequiredService<IInMemoryDatabaseAccessor<TId>>().GetAggregateDictionaries()));
+                sp.GetRequiredService<IInMemoryDatabaseAccessor>().GetAggregateDictionaries()));
             compositionRoot.Register(ServiceDescriptor.Scoped<IAggregateDictionaries>(sp =>
-                sp.GetRequiredService<IInMemoryDatabaseAccessor<TId>>().GetAggregateDictionaries()));
+                sp.GetRequiredService<IInMemoryDatabaseAccessor>().GetAggregateDictionaries()));
 
             compositionRoot.Register(
-                ServiceDescriptor.Scoped(typeof(IQueryable<>),typeof(InMemoryQueryable<>)));
+                ServiceDescriptor.Scoped(typeof(IAggregateQueryable<,>),typeof(InMemoryQueryable<,>)));
             
             compositionRoot.Register(
-                ServiceDescriptor.Scoped(typeof(IRepository<,>), typeof(InMemoryRepository<,>)));
+                ServiceDescriptor.Scoped(typeof(IRepository<,>), typeof(Repository<,>)));
         }
 
         public override IModule MultiTenancyModule => new InMemoryMultiTenancyPersistenceModule<TId>();
@@ -41,7 +41,7 @@ namespace Backend.Fx.Features.Persistence.InMem
             // the MultiTenancyInMemoryDatabaseAccessor used the ICurrentTHolder<TenantId> to determine the respective
             // in memory collection specific to this tenant id
             compositionRoot.RegisterDecorator(ServiceDescriptor
-                .Scoped<IInMemoryDatabaseAccessor<TId>, MultiTenancyInMemoryDatabaseAccessor<TId>>());
+                .Scoped<IInMemoryDatabaseAccessor, MultiTenancyInMemoryDatabaseAccessor>());
         }
     }
 }

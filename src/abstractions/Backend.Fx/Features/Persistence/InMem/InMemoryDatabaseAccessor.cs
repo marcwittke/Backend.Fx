@@ -1,42 +1,41 @@
-using System;
 using Backend.Fx.Features.MultiTenancy;
 using Backend.Fx.Util;
 
 namespace Backend.Fx.Features.Persistence.InMem
 {
-    public interface IInMemoryDatabaseAccessor<TId> where TId : IEquatable<TId>
+    public interface IInMemoryDatabaseAccessor
     {
-        IAggregateDictionaries<TId> GetAggregateDictionaries();
+        IAggregateDictionaries GetAggregateDictionaries();
     }
     
-    public class InMemoryDatabaseAccessor<TId> : IInMemoryDatabaseAccessor<TId> where TId : IEquatable<TId>
+    public class InMemoryDatabaseAccessor : IInMemoryDatabaseAccessor
     {
-        private readonly InMemoryDatabase<TId> _inMemoryDatabase;
+        private readonly InMemoryDatabase _inMemoryDatabase;
 
-        public InMemoryDatabaseAccessor(InMemoryDatabase<TId> inMemoryDatabase)
+        public InMemoryDatabaseAccessor(InMemoryDatabase inMemoryDatabase)
         {
             _inMemoryDatabase = inMemoryDatabase;
         }
         
-        public IAggregateDictionaries<TId> GetAggregateDictionaries()
+        public IAggregateDictionaries GetAggregateDictionaries()
         {
             return _inMemoryDatabase.GetInMemoryStores();
         }
     }
     
-    public class MultiTenancyInMemoryDatabaseAccessor<TId> : IInMemoryDatabaseAccessor<TId> where TId : IEquatable<TId>
+    public class MultiTenancyInMemoryDatabaseAccessor : IInMemoryDatabaseAccessor
     {
-        private readonly InMemoryDatabase<TId> _inMemoryDatabase;
+        private readonly InMemoryDatabase _inMemoryDatabase;
         private readonly ICurrentTHolder<TenantId> _tenantIdHolder;
 
         // ReSharper disable once UnusedParameter.Local
-        public MultiTenancyInMemoryDatabaseAccessor(InMemoryDatabase<TId> inMemoryDatabase, ICurrentTHolder<TenantId> tenantIdHolder, IInMemoryDatabaseAccessor<TId> unused)
+        public MultiTenancyInMemoryDatabaseAccessor(InMemoryDatabase inMemoryDatabase, ICurrentTHolder<TenantId> tenantIdHolder, IInMemoryDatabaseAccessor unused)
         {
             _inMemoryDatabase = inMemoryDatabase;
             _tenantIdHolder = tenantIdHolder;
         }
         
-        public IAggregateDictionaries<TId> GetAggregateDictionaries()
+        public IAggregateDictionaries GetAggregateDictionaries()
         {
             return _inMemoryDatabase.GetInMemoryStoresOfTenant(_tenantIdHolder.Current);
         }

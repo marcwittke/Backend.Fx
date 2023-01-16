@@ -9,23 +9,19 @@ namespace Backend.Fx.Features.Persistence.InMem
 {
     public interface IAggregateDictionaries
     {
-        IQueryable<TAggregateRoot> GetQueryable<TAggregateRoot>()
-            where TAggregateRoot : IAggregateRoot;
+        IAggregateQueryable<TAggregateRoot, TId> GetQueryable<TAggregateRoot, TId>()
+            where TAggregateRoot : class, IAggregateRoot<TId>
+            where TId : IEquatable<TId>;
     }
     
-    public interface IAggregateDictionaries<TId> : IAggregateDictionaries
-        where TId : IEquatable<TId>
-    {
-        AggregateDictionary<TAggregateRoot, TId> For<TAggregateRoot>()
-            where TAggregateRoot : IAggregateRoot<TId>;
-    }
 
-    public class AggregateDictionaries<TId> : IAggregateDictionaries<TId> where TId : IEquatable<TId>
+    public class AggregateDictionaries : IAggregateDictionaries
     {
         private readonly ConcurrentDictionary<Type, object> _aggregateDictionaries = new();
 
-        public AggregateDictionary<TAggregateRoot, TId> For<TAggregateRoot>() 
+        public AggregateDictionary<TAggregateRoot, TId> For<TAggregateRoot, TId>() 
             where TAggregateRoot : IAggregateRoot<TId>
+            where TId : IEquatable<TId>
         {
             var store = (AggregateDictionary<TAggregateRoot, TId>)_aggregateDictionaries.GetOrAdd(
                 typeof(TAggregateRoot),
@@ -33,7 +29,9 @@ namespace Backend.Fx.Features.Persistence.InMem
             return store;
         }
 
-        public IQueryable<TAggregateRoot> GetQueryable<TAggregateRoot>() where TAggregateRoot : IAggregateRoot
+        public IAggregateQueryable<TAggregateRoot, TId> GetQueryable<TAggregateRoot, TId>()
+            where TAggregateRoot : class, IAggregateRoot<TId>
+            where TId : IEquatable<TId>
         {
             dynamic store = _aggregateDictionaries.GetOrAdd(
                 typeof(TAggregateRoot),
@@ -46,8 +44,6 @@ namespace Backend.Fx.Features.Persistence.InMem
                     return Activator.CreateInstance(aggregateDictionaryType);
                 });
             return Queryable.AsQueryable(store.Values);
-            
-            
         }
     }
 }

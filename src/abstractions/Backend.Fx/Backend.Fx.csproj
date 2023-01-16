@@ -36,5 +36,9 @@
     <PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
     <PackageReference Include="System.Text.Json" Version="5.0.0" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Remove="Features\Authorization\AuthorizingChangeTracker.cs" />
+  </ItemGroup>
 
 </Project>
