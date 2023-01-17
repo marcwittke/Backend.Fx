@@ -49,30 +49,21 @@ namespace Backend.Fx.Features.Persistence
         Task AddRangeAsync(TAggregateRoot[] aggregateRoots, CancellationToken cancellationToken = default);
     }
 
-    public class Repository<TAggregateRoot, TId> : IRepository<TAggregateRoot, TId>
+    public abstract class Repository<TAggregateRoot, TId> : IRepository<TAggregateRoot, TId>
         where TAggregateRoot : class, IAggregateRoot<TId>
         where TId : IEquatable<TId>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IAggregateQueryable<TAggregateRoot, TId> _queryable;
 
-        protected Repository(IUnitOfWork unitOfWork, IAggregateQueryable<TAggregateRoot, TId> queryable)
+        protected Repository(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _queryable = queryable;
         }
 
-        public async Task<TAggregateRoot> GetAsync(TId id, CancellationToken cancellationToken = default) =>
-            await _queryable.GetAsync(id, cancellationToken).ConfigureAwait(false);
-        
-        public async Task<TAggregateRoot> FindAsync(TId id, CancellationToken cancellationToken = default)=>
-            await _queryable.FindAsync(id, cancellationToken).ConfigureAwait(false);
-        
-        public async Task<TAggregateRoot[]> GetAllAsync(CancellationToken cancellationToken = default)=>
-            await _queryable.GetAllAsync(cancellationToken).ConfigureAwait(false);
-        
-        public async Task<bool> AnyAsync(CancellationToken cancellationToken = default)=>
-            await _queryable.AnyAsync(cancellationToken).ConfigureAwait(false);
+        public abstract Task<TAggregateRoot> GetAsync(TId id, CancellationToken cancellationToken = default);
+        public abstract Task<TAggregateRoot> FindAsync(TId id, CancellationToken cancellationToken = default);
+        public abstract Task<TAggregateRoot[]> GetAllAsync(CancellationToken cancellationToken = default);
+        public abstract Task<bool> AnyAsync(CancellationToken cancellationToken = default);
 
         public async Task<TAggregateRoot[]> ResolveAsync(IEnumerable<TId> ids, CancellationToken cancellationToken = default)
         {
@@ -99,5 +90,29 @@ namespace Backend.Fx.Features.Persistence
 
         public async Task AddRangeAsync(TAggregateRoot[] aggregateRoots, CancellationToken cancellationToken = default) =>
             await _unitOfWork.RegisterDirtyAsync(aggregateRoots.Cast<IAggregateRoot>().ToArray(), cancellationToken).ConfigureAwait(false);
+    }
+
+    public class QueryableRepository<TAggregateRoot, TId> : Repository<TAggregateRoot, TId>
+        where TAggregateRoot : class, IAggregateRoot<TId>
+        where TId : IEquatable<TId>
+    {
+        private readonly IAggregateQueryable<TAggregateRoot, TId> _aggregateQueryable;
+
+        public QueryableRepository(IAggregateQueryable<TAggregateRoot, TId> aggregateQueryable, IUnitOfWork unitOfWork) : base(unitOfWork)
+        {
+            _aggregateQueryable = aggregateQueryable;
+        }
+
+        public override async Task<TAggregateRoot> GetAsync(TId id, CancellationToken cancellationToken = default) =>
+            await _aggregateQueryable.GetAsync(id, cancellationToken).ConfigureAwait(false);
+        
+        public override async Task<TAggregateRoot> FindAsync(TId id, CancellationToken cancellationToken = default)=>
+            await _aggregateQueryable.FindAsync(id, cancellationToken).ConfigureAwait(false);
+        
+        public override async Task<TAggregateRoot[]> GetAllAsync(CancellationToken cancellationToken = default)=>
+            await _aggregateQueryable.GetAllAsync(cancellationToken).ConfigureAwait(false);
+        
+        public override async Task<bool> AnyAsync(CancellationToken cancellationToken = default)=>
+            await _aggregateQueryable.AnyAsync(cancellationToken).ConfigureAwait(false);
     }
 }

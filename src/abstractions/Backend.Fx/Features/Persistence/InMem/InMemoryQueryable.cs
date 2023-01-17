@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Backend.Fx.Domain;
@@ -20,7 +19,7 @@ namespace Backend.Fx.Features.Persistence.InMem
 
         public Task<TAggregateRoot> GetAsync(TId id, CancellationToken cancellationToken = default)
         {
-            return _aggregateQueryable.GetAsync(id, cancellationToken) ?? throw new NotFoundException<TAggregateRoot>(id));
+            return _aggregateQueryable.GetAsync(id, cancellationToken) ?? throw new NotFoundException<TAggregateRoot>(id);
         }
 
         public Task<TAggregateRoot> FindAsync(TId id, CancellationToken cancellationToken = default)

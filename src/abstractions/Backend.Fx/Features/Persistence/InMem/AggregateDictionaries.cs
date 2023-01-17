@@ -12,6 +12,10 @@ namespace Backend.Fx.Features.Persistence.InMem
         IAggregateQueryable<TAggregateRoot, TId> GetQueryable<TAggregateRoot, TId>()
             where TAggregateRoot : class, IAggregateRoot<TId>
             where TId : IEquatable<TId>;
+
+        public AggregateDictionary<TAggregateRoot, TId> For<TAggregateRoot, TId>()
+            where TAggregateRoot : IAggregateRoot<TId>
+            where TId : IEquatable<TId>;
     }
     
 
@@ -43,7 +47,7 @@ namespace Backend.Fx.Features.Persistence.InMem
                     Type aggregateDictionaryType = typeof(AggregateDictionary<,>).MakeGenericType(aggType, idType);
                     return Activator.CreateInstance(aggregateDictionaryType);
                 });
-            return Queryable.AsQueryable(store.Values);
+            return new InMemoryQueryable<TAggregateRoot, TId>(this);
         }
     }
 }

@@ -1,6 +1,10 @@
 using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Backend.Fx.DependencyInjection;
+using Backend.Fx.Domain;
+using Backend.Fx.Features.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Backend.Fx.Features.Persistence.InMem
@@ -28,7 +32,10 @@ namespace Backend.Fx.Features.Persistence.InMem
                 ServiceDescriptor.Scoped(typeof(IAggregateQueryable<,>),typeof(InMemoryQueryable<,>)));
             
             compositionRoot.Register(
-                ServiceDescriptor.Scoped(typeof(IRepository<,>), typeof(Repository<,>)));
+                ServiceDescriptor.Scoped(typeof(IRepository<,>), typeof(QueryableRepository<,>)));
+            
+            compositionRoot.Register(
+                ServiceDescriptor.Scoped<IUnitOfWork, FakeUnitOfWork>());
         }
 
         public override IModule MultiTenancyModule => new InMemoryMultiTenancyPersistenceModule<TId>();
@@ -43,5 +50,28 @@ namespace Backend.Fx.Features.Persistence.InMem
             compositionRoot.RegisterDecorator(ServiceDescriptor
                 .Scoped<IInMemoryDatabaseAccessor, MultiTenancyInMemoryDatabaseAccessor>());
         }
+    }
+}
+
+public class FakeUnitOfWork : IUnitOfWork
+{
+    public Task RegisterNewAsync(IAggregateRoot aggregateRoot, CancellationToken cancellation)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task RegisterDirtyAsync(IAggregateRoot aggregateRoot, CancellationToken cancellation)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task RegisterDeletedAsync(IAggregateRoot aggregateRoot, CancellationToken cancellation)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task RegisterDirtyAsync(IAggregateRoot[] aggregateRoots, CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
     }
 }

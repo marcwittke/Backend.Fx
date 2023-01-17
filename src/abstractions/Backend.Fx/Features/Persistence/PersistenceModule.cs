@@ -14,11 +14,8 @@ namespace Backend.Fx.Features.Persistence
             
             compositionRoot.RegisterDecorator(ServiceDescriptor.Scoped<IOperation, FlushOperationDecorator>());
             
-            compositionRoot.RegisterDecorator(ServiceDescriptor.Scoped(typeof(IRepository<,>), typeof(Repository<,>)));
-            
             // make sure we flush pending changes before raising pending domain events 
-            compositionRoot.RegisterDecorator(
-                ServiceDescriptor.Scoped<IDomainEventAggregator, FlushDomainEventAggregatorDecorator>());
+            compositionRoot.RegisterDecorator(ServiceDescriptor.Scoped<IDomainEventAggregator, FlushDomainEventAggregatorDecorator>());
         }
 
         public virtual IModule MultiTenancyModule => null;
