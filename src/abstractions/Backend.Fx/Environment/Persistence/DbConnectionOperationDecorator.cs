@@ -39,11 +39,11 @@ namespace Backend.Fx.Environment.Persistence
 
         public void Cancel()
         {
+            Operation.Cancel();
             Logger.LogDebug("Closing database connection");
             DbConnection.Close();
             _connectionLifetimeLogger?.Dispose();
             
-            Operation.Cancel();
             // note: we do not dispose the DbConnection here, because we did not instantiate it. Disposing is always up to the creator of
             // the instance, that is in this case the injection container.
         }
