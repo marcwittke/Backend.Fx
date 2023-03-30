@@ -58,8 +58,6 @@ namespace Backend.Fx.Environment.Persistence
                 throw new InvalidOperationException($"A transaction cannot be committed when it is {_state}.");
             }
 
-            _operation.Complete();
-
             Logger.LogDebug("Committing transaction");
             CurrentTransaction.Commit();
             CurrentTransaction.Dispose();
@@ -73,6 +71,7 @@ namespace Backend.Fx.Environment.Persistence
             }
 
             _state = TxState.Committed;
+            _operation.Complete();
         }
 
         public void Cancel()
@@ -83,8 +82,6 @@ namespace Backend.Fx.Environment.Persistence
                 throw new InvalidOperationException($"Cannot roll back a transaction that is {_state}");
             }
             
-            _operation.Cancel();
-
             CurrentTransaction.Rollback();
             CurrentTransaction.Dispose();
             CurrentTransaction = null;
@@ -97,6 +94,8 @@ namespace Backend.Fx.Environment.Persistence
             }
 
             _state = TxState.RolledBack;
+            
+            _operation.Cancel();
         }
         
         public void SetIsolationLevel(IsolationLevel isolationLevel)

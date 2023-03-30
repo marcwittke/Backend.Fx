@@ -24,29 +24,29 @@ namespace Backend.Fx.Patterns.DependencyInjection
         private static readonly ILogger Logger = Log.Create<Operation>();
         private static int _index;
         private readonly int _instanceId = _index++;
-        private bool? _isActive;
+        private OperationState _state = OperationState.Initial;
         private IDisposable _lifetimeLogger;
 
-        public virtual void Begin()
+        public void Begin()
         {
-            if (_isActive != null)
+            if (_state != OperationState.Initial)
             {
-                throw new InvalidOperationException($"Cannot begin an operation that is {(_isActive.Value ? "active" : "terminated")}");
+                throw new InvalidOperationException($"Cannot begin operation #{_instanceId} that is {_state}");
             }
 
             _lifetimeLogger = Logger.LogDebugDuration($"Beginning operation #{_instanceId}", $"Terminating operation #{_instanceId}");
-            _isActive = true;
+            _state = OperationState.Running;
         }
 
-        public virtual void Complete()
+        public void Complete()
         {
             Logger.LogInformation("Completing operation #{OperationId}", _instanceId);
-            if (_isActive != true)
+            if (_state != OperationState.Running)
             {
-                throw new InvalidOperationException($"Cannot begin an operation that is {(_isActive == false ? "terminated" : "not active")}");
+                throw new InvalidOperationException($"Cannot complete operation #{_instanceId} that is {_state}");
             }
             
-            _isActive = false;
+            _state = OperationState.Completed;
             _lifetimeLogger?.Dispose();
             _lifetimeLogger = null;
         }
@@ -54,13 +54,22 @@ namespace Backend.Fx.Patterns.DependencyInjection
         public void Cancel()
         {
             Logger.LogInformation("Canceling operation #{OperationId}", _instanceId);
-            if (_isActive != true)
+            if (_state != OperationState.Running)
             {
-                throw new InvalidOperationException($"Cannot cancel an operation that is {(_isActive == false ? "terminated" : "not active")}");
+                // do not throw in this case, it would just make things worse 
+                Logger.LogError("Cannot cancel operation #{OperationId} that is {State}", _instanceId, _state);
             }
-            _isActive = false;
+            _state = OperationState.Canceled;
             _lifetimeLogger?.Dispose();
             _lifetimeLogger = null;
+        }
+
+        private enum OperationState
+        {
+            Initial,
+            Running,
+            Completed,
+            Canceled
         }
     }
 }

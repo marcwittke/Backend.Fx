@@ -57,15 +57,15 @@ namespace Backend.Fx.Patterns.DependencyInjection
                         action.Invoke(injectionScope.InstanceProvider);
                         injectionScope.InstanceProvider.GetInstance<IDomainEventAggregator>().RaiseEvents();
                         operation.Complete();
+                        
+                        var messageBusScope = injectionScope.InstanceProvider.GetInstance<IMessageBusScope>();
+                        AsyncHelper.RunSync(() => messageBusScope.RaiseEvents());
                     }
                     catch
                     {
                         operation.Cancel();
                         throw;
                     }
-
-                    var messageBusScope = injectionScope.InstanceProvider.GetInstance<IMessageBusScope>();
-                    AsyncHelper.RunSync(() => messageBusScope.RaiseEvents());
                 }
             }
         }
@@ -81,17 +81,17 @@ namespace Backend.Fx.Patterns.DependencyInjection
                     try
                     {
                         operation.Begin();
-                        await awaitableAsyncAction.Invoke(injectionScope.InstanceProvider);
+                        await awaitableAsyncAction.Invoke(injectionScope.InstanceProvider).ConfigureAwait(false);
                         injectionScope.InstanceProvider.GetInstance<IDomainEventAggregator>().RaiseEvents();
                         operation.Complete();
+                        
+                        await injectionScope.InstanceProvider.GetInstance<IMessageBusScope>().RaiseEvents().ConfigureAwait(false);
                     }
                     catch
                     {
                         operation.Cancel();
                         throw;
                     }
-
-                    await injectionScope.InstanceProvider.GetInstance<IMessageBusScope>().RaiseEvents();
                 }
             }
         }
