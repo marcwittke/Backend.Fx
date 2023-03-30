@@ -31,10 +31,10 @@ namespace Backend.Fx.Environment.Persistence
 
         public void Complete()
         {
+            Operation.Complete();
             Logger.LogDebug("Closing database connection");
             DbConnection.Close();
             _connectionLifetimeLogger?.Dispose();
-            Operation.Complete();
         }
 
         public void Cancel()
