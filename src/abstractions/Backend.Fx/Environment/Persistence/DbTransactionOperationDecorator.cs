@@ -81,8 +81,16 @@ namespace Backend.Fx.Environment.Persistence
             {
                 throw new InvalidOperationException($"Cannot roll back a transaction that is {_state}");
             }
+
+            try
+            {
+                CurrentTransaction.Rollback();
+            }
+            catch (InvalidOperationException ioe)
+            {
+                Logger.LogError(ioe, "Failed to roll back transaction");                
+            }
             
-            CurrentTransaction.Rollback();
             CurrentTransaction.Dispose();
             CurrentTransaction = null;
 
