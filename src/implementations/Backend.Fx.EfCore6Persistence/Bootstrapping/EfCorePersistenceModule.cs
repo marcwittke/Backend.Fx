@@ -53,9 +53,9 @@ namespace Backend.Fx.EfCorePersistence.Bootstrapping
             compositionRoot.InfrastructureModule.RegisterScoped<DbContext, TDbContext>();
 
             // wrapping the operation: connection.open - transaction.begin - operation - (flush) - transaction.commit - connection.close
-            compositionRoot.InfrastructureModule.RegisterDecorator<IOperation, FlushOperationDecorator>();
             compositionRoot.InfrastructureModule.RegisterDecorator<IOperation, DbContextTransactionOperationDecorator>();
             compositionRoot.InfrastructureModule.RegisterDecorator<IOperation, DbConnectionOperationDecorator>();
+            compositionRoot.InfrastructureModule.RegisterDecorator<IOperation, FlushOperationDecorator>();
             
             // ensure everything dirty is flushed to the db before handling domain events  
             compositionRoot.InfrastructureModule.RegisterDecorator<IDomainEventAggregator, FlushDomainEventAggregatorDecorator>();
