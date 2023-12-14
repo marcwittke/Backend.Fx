@@ -45,7 +45,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
 
         [Obsolete("Use BootAsync()")]
         Task Boot(CancellationToken cancellationToken = default);
-        
+
         /// <summary>
         /// Initializes and starts the application (async)
         /// </summary>
@@ -65,22 +65,27 @@ namespace Backend.Fx.Patterns.DependencyInjection
         /// <param name="compositionRoot">The composition root of the dependency injection framework</param>
         /// <param name="messageBus">The message bus implementation used by this application instance</param>
         /// <param name="exceptionLogger"></param>
-        public BackendFxApplication(ICompositionRoot compositionRoot, IMessageBus messageBus, IExceptionLogger exceptionLogger)
+        public BackendFxApplication(
+            ICompositionRoot compositionRoot,
+            IMessageBus messageBus,
+            IExceptionLogger exceptionLogger)
         {
             var invoker = new BackendFxApplicationInvoker(compositionRoot);
             AsyncInvoker = new ExceptionLoggingAsyncInvoker(exceptionLogger, invoker);
             Invoker = new ExceptionLoggingInvoker(exceptionLogger, invoker);
             MessageBus = messageBus;
             MessageBus.ProvideInvoker(new SequentializingBackendFxApplicationInvoker(
-                                          new WaitForBootInvoker(this, 
-                                                                 new ExceptionLoggingAndHandlingInvoker(exceptionLogger, Invoker))));
+                new WaitForBootInvoker(this,
+                    new ExceptionLoggingAndHandlingInvoker(exceptionLogger, Invoker))));
             CompositionRoot = compositionRoot;
             CompositionRoot.InfrastructureModule.RegisterScoped<IClock, WallClock>();
-            CompositionRoot.InfrastructureModule.RegisterScoped<ICurrentTHolder<Correlation>, CurrentCorrelationHolder>();
+            CompositionRoot.InfrastructureModule
+                .RegisterScoped<ICurrentTHolder<Correlation>, CurrentCorrelationHolder>();
             CompositionRoot.InfrastructureModule.RegisterScoped<ICurrentTHolder<IIdentity>, CurrentIdentityHolder>();
             CompositionRoot.InfrastructureModule.RegisterScoped<ICurrentTHolder<TenantId>, CurrentTenantIdHolder>();
             CompositionRoot.InfrastructureModule.RegisterScoped<IOperation, Operation>();
-            CompositionRoot.InfrastructureModule.RegisterScoped<IDomainEventAggregator>(() => new DomainEventAggregator(compositionRoot));
+            CompositionRoot.InfrastructureModule.RegisterScoped<IDomainEventAggregator>(() =>
+                new DomainEventAggregator(compositionRoot));
             CompositionRoot.InfrastructureModule.RegisterScoped<IMessageBusScope>(
                 () => new MessageBusScope(
                     MessageBus,
@@ -97,7 +102,7 @@ namespace Backend.Fx.Patterns.DependencyInjection
         public IMessageBus MessageBus { get; }
 
         public Task Boot(CancellationToken cancellationToken = default) => BootAsync(cancellationToken);
-        
+
         public Task BootAsync(CancellationToken cancellationToken = default)
         {
             Logger.LogInformation("Booting application");
@@ -125,6 +130,85 @@ namespace Backend.Fx.Patterns.DependencyInjection
         {
             Dispose(true);
             GC.SuppressFinalize(this);
+        }
+    }
+
+
+    public class WithInvocation<TService> where TService : class
+    {
+        private readonly IBackendFxApplication _application;
+
+        public WithInvocation(IBackendFxApplication application)
+        {
+            _application = application;
+        }
+
+        /// <summary>
+        ///     Invokes an async action on <see cref="TService" />
+        /// </summary>
+        public async Task DoAsync(
+            Func<TService, Task> asyncAction,
+            IIdentity identity = null,
+            TenantId tenantId = null)
+        {
+            identity ??= new AnonymousIdentity();
+            await _application.AsyncInvoker.InvokeAsync(
+                sp => asyncAction(sp.GetInstance<TService>()),
+                identity,
+                tenantId ?? new TenantId(0));
+        }
+
+        /// <summary>
+        ///     Invokes a synchronous action on <see cref="TService" />
+        /// </summary>
+        public async Task DoAsync(
+            Action<TService> action,
+            IIdentity identity = null,
+            TenantId tenantId = null)
+        {
+            identity ??= new SystemIdentity();
+            await _application.AsyncInvoker.InvokeAsync(
+                sp =>
+                {
+                    action(sp.GetInstance<TService>());
+                    return Task.CompletedTask;
+                }, identity, tenantId ?? new TenantId(0));
+        }
+
+        /// <summary>
+        ///     Invokes an async function that returns <see cref="TResult" />on <see cref="TService" />
+        /// </summary>
+        public async Task<TResult> DoAsync<TResult>(
+            Func<TService, Task<TResult>> func,
+            IIdentity identity = null,
+            TenantId tenantId = null)
+        {
+            identity ??= new SystemIdentity();
+            TResult result = default!;
+            await _application.AsyncInvoker.InvokeAsync(
+                async sp => result = await func(sp.GetInstance<TService>()),
+                identity,
+                tenantId ?? new TenantId(0));
+            return result;
+        }
+
+        /// <summary>
+        ///     Invokes a synchronous function that returns <see cref="TResult" />on <see cref="TService" />
+        /// </summary>
+        public async Task<TResult> DoAsync<TResult>(
+            Func<TService, TResult> func,
+            IIdentity identity = null,
+            TenantId tenantId = null)
+        {
+            identity ??= new SystemIdentity();
+            TResult result = default!;
+            await _application.AsyncInvoker.InvokeAsync(
+                sp =>
+                {
+                    result = func(sp.GetInstance<TService>());
+                    return Task.CompletedTask;
+                }, identity, tenantId ?? new TenantId(0));
+            return result;
         }
     }
 }
