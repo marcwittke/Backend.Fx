@@ -2,15 +2,14 @@ using Backend.Fx.AspNetCore.Tests.SampleApp.Runtime;
 using Backend.Fx.Environment.MultiTenancy;
 using Backend.Fx.InMemoryPersistence;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.DependencyInjection;
 using Backend.Fx.Patterns.EventAggregation.Integration;
 
 namespace Backend.Fx.AspNetCore.Tests.SampleApp
 {
-    public class SampleApplicationHostedService : BackendFxApplicationHostedService
+    public class SampleApplicationHostedService : BackendFxApplicationHostedService<SampleApplication>
     {
         public  ITenantService TenantService { get; }
-        public override IBackendFxApplication Application { get; }
+        public override SampleApplication Application { get; }
 
         public SampleApplicationHostedService(IExceptionLogger exceptionLogger)
         {
