@@ -39,7 +39,7 @@ namespace Backend.Fx.AspNetCore.Tests
         {
             TestServer server = base.CreateServer(builder);
 
-            ITenantService tenantService = server.Services.GetRequiredService<SampleApplicationHostedService>().TenantService;
+            ITenantService tenantService = server.Services.GetRequiredService<ITenantService>();
             for (int i = 0; i < 100; i++)
             {
                 var x = tenantService.CreateTenant($"t{i:000}", $"Tenant {i:000}", false);

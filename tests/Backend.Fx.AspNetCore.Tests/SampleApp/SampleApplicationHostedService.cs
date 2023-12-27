@@ -1,21 +1,18 @@
 using Backend.Fx.AspNetCore.Tests.SampleApp.Runtime;
 using Backend.Fx.Environment.MultiTenancy;
-using Backend.Fx.InMemoryPersistence;
 using Backend.Fx.Logging;
-using Backend.Fx.Patterns.EventAggregation.Integration;
+using JetBrains.Annotations;
 
 namespace Backend.Fx.AspNetCore.Tests.SampleApp
 {
+    [UsedImplicitly]
     public class SampleApplicationHostedService : BackendFxApplicationHostedService<SampleApplication>
     {
-        public  ITenantService TenantService { get; }
         public override SampleApplication Application { get; }
 
-        public SampleApplicationHostedService(IExceptionLogger exceptionLogger)
+        public SampleApplicationHostedService(IExceptionLogger exceptionLogger, ITenantService tenantService)
         {
-            IMessageBus messageBus = new InMemoryMessageBus();
-            TenantService = new TenantService(messageBus, new InMemoryTenantRepository());
-            Application = new SampleApplication(TenantService.TenantIdProvider, exceptionLogger);
+            Application = new SampleApplication(tenantService.TenantIdProvider, exceptionLogger);
         }
     }
 }

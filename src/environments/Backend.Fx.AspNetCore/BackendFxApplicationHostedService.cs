@@ -58,7 +58,11 @@ namespace Backend.Fx.AspNetCore
             where TApplication : class, IBackendFxApplication
         {
             services.AddSingleton<THostedService>();
+            
+            // this registration ensures starting of the hosted service
             services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<THostedService>());
+
+            // this registration makes the application instance available as singleton
             services.AddSingleton(provider => provider.GetRequiredService<THostedService>().Application);
         }
     }

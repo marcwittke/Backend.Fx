@@ -4,8 +4,11 @@ using Backend.Fx.AspNetCore.Mvc;
 using Backend.Fx.AspNetCore.Mvc.Activators;
 using Backend.Fx.AspNetCore.Tests.SampleApp.Domain;
 using Backend.Fx.AspNetCore.Tests.SampleApp.Runtime;
+using Backend.Fx.Environment.MultiTenancy;
+using Backend.Fx.InMemoryPersistence;
 using Backend.Fx.Logging;
 using Backend.Fx.Patterns.DependencyInjection;
+using Backend.Fx.Patterns.EventAggregation.Integration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -38,6 +41,10 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp
             
             // integrate backend fx application as hosted service
             services.AddBackendFxApplication<SampleApplicationHostedService, SampleApplication>();
+            
+            services.AddSingleton<IMessageBus, InMemoryMessageBus>();
+            services.AddSingleton<ITenantRepository, InMemoryTenantRepository>();
+            services.AddSingleton<ITenantService, TenantService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -60,7 +67,7 @@ namespace Backend.Fx.AspNetCore.Tests.SampleApp
             
             app.Use(async (context, requestDelegate) =>
             {
-                IBackendFxApplication application = app.ApplicationServices.GetRequiredService<SampleApplicationHostedService>().Application;
+                IBackendFxApplication application = app.ApplicationServices.GetRequiredService<SampleApplication>();
                 application.WaitForBoot();
             
                 // set the instance provider for the controller activator
