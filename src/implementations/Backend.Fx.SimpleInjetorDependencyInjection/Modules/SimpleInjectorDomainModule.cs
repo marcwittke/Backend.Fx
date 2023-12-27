@@ -17,7 +17,6 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
     /// <summary>
     /// Wires all public domain services to be injected as scoped instances provided by the array of domain assemblies:
     /// - <see cref="IDomainService"/>s
-    /// - <see cref="IApplicationService"/>s
     /// - <see cref="IAggregateAuthorization{TAggregateRoot}"/>s
     /// - <see cref="IJob"/>s
     /// - <see cref="DataGenerator"/>s 
@@ -70,12 +69,10 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Modules
                 string.Join(",", _domainAssemblies.Select(ass => ass.GetName().Name)));
             var serviceRegistrations = container
                                        .GetTypesToRegister(typeof(IDomainService), _domainAssemblies)
-                                       .Concat(container.GetTypesToRegister(typeof(IApplicationService), _domainAssemblies))
                                        .SelectMany(type =>
                                                        type.GetTypeInfo()
                                                            .ImplementedInterfaces
                                                            .Where(i => typeof(IDomainService) != i
-                                                                       && typeof(IApplicationService) != i
                                                                        && (i.Namespace != null && i.Namespace.StartsWith("Backend")
                                                                            || _domainAssemblies.Contains(i.GetTypeInfo().Assembly)))
                                                            .Select(service => new

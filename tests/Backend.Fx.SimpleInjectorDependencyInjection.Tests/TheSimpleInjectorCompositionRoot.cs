@@ -48,11 +48,11 @@ namespace Backend.Fx.SimpleInjectorDependencyInjection.Tests
         }
 
         [Fact]
-        public void ProvidesAutoRegisteredApplicationServices()
+        public void DoesNotAutoRegisterApplicationServices()
         {
             using (_sut.BeginScope())
             {
-                Assert.IsType<AnApplicationService>(_sut.GetInstance<ITestApplicationService>());
+                Assert.Throws<ActivationException>(() => _sut.GetInstance<ITestApplicationService>());
             }
         }
 
